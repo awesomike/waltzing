@@ -13,4 +13,4 @@ languages = ["Waltzing"]
 [grammars.waltzing]
 repository = "https://github.com/awesomike/waltzing"
 path = "tree-sitter"
-rev = "2face341712d36cf06e5df00aeb147e5bb77ff5e"
+rev = "6d164fabc11dac103a3c53220371ae652994b278"
