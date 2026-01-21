@@ -1,0 +1,16 @@
+id = "waltzing"
+name = "Waltzing"
+version = "0.1.1"
+schema_version = 1
+authors = ["Michael <michael@leptin.app>"]
+description = "Waltzing template language support for Zed - type-safe Rust templates inspired by Scala's Twirl"
+repository = "https://github.com/awesomike/waltzing"
+
+[language_servers.waltzing-lsp]
+name = "Waltzing LSP"
+languages = ["Waltzing"]
+
+[grammars.waltzing]
+repository = "https://github.com/awesomike/waltzing"
+path = "tree-sitter"
+rev = "2face341712d36cf06e5df00aeb147e5bb77ff5e"

@@ -1,0 +1,24 @@
+name = "Waltzing"
+grammar = "waltzing"
+path_suffixes = ["wtz", "html.wtz", "css.wtz", "js.wtz"]
+line_comments = ["@* "]
+block_comment = ["@*", "*@"]
+tab_size = 4
+hard_tabs = false
+
+brackets = [
+  { start = "{", end = "}", close = true, newline = true },
+  { start = "[", end = "]", close = true, newline = false },
+  { start = "(", end = ")", close = true, newline = false },
+  { start = "<", end = ">", close = false, newline = false },
+  { start = "\"", end = "\"", close = true, newline = false, not_in = ["string"] },
+]
+
+word_characters = ["_"]
+
+# Auto-close pairs specific to Waltzing
+autoclose_before = ";:.,=}])> \n\t"
+
+# Increase bracket depth for template nesting
+increase_indent_pattern = "^\\s*(@if|@for|@match|@fn|<[a-zA-Z][^/>]*>)[^}]*$"
+decrease_indent_pattern = "^\\s*(}|<\\/[a-zA-Z])"

@@ -1,0 +1,3 @@
+tree-sitter/node_modules/
+extensions/zed/target/
+.DS_Store
