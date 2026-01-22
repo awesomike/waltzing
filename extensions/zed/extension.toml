@@ -2,7 +2,7 @@ id = "waltzing"
 name = "Waltzing"
 version = "0.1.1"
 schema_version = 1
-authors = ["Michael <michael@leptin.app>"]
+authors = ["Michael <michael@nandie.com>"]
 description = "Waltzing template language support for Zed - type-safe Rust templates inspired by Scala's Twirl"
 repository = "https://github.com/awesomike/waltzing"
 

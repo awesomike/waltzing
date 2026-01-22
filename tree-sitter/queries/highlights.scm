@@ -1,74 +1,30 @@
 ; Waltzing Template Highlights
 
-; Comments
-(template_comment) @comment
-(html_comment) @comment
-
-; Raw blocks
-(raw_block) @string.special
-
-; Keywords - only in proper syntactic contexts
-(use_statement "@use" @keyword)
-(import_statement "@import" @keyword)
-(struct_definition "@struct" @keyword)
-(enum_definition "@enum" @keyword)
-(function_definition "@fn" @keyword)
-(let_statement "@let" @keyword)
-(if_statement "@if" @keyword)
-(for_loop "@for" @keyword)
-(match_statement "@match" @keyword)
-(break_statement "@break" @keyword)
-(continue_statement "@continue" @keyword)
-(attribute_if_statement "@if" @keyword)
-(attribute_for_loop "@for" @keyword)
-(else_if_branch "else" @keyword)
-(else_if_branch "if" @keyword)
-(else_branch "else" @keyword)
+; Keywords
+"@use" @keyword.import
+"@import" @keyword.import
+"@struct" @keyword.type
+"@enum" @keyword.type
+"@func" @keyword.function
+"@if" @keyword.conditional
+"@for" @keyword.repeat
+"@match" @keyword.conditional
+"@break" @keyword.control
+"@continue" @keyword.control
+"@safe" @keyword.function
+"else" @keyword.conditional
+"if" @keyword.conditional
+"let" @keyword
 "in" @keyword
 "as" @keyword
 "mut" @keyword
-"safe" @keyword
-
-; Types
-(primitive_type) @type
-(struct_definition (identifier) @type)
-(enum_definition (identifier) @type)
-(generic_params (identifier) @type)
-(generic_type (rust_path) @type)
-
-; Functions
-(function_definition (identifier) @fn)
-(function_path) @fn
-(method_call (identifier) @fn)
-
-; Parameters
-(parameter (identifier) @variable)
-
-; Properties
-(struct_field (identifier) @property)
-(field_access (identifier) @property)
-(field_pattern (identifier) @property)
-
-; Constructors
-(enum_variant (identifier) @constructor)
-
-; Strings
-(string_literal) @string
-(char_literal) @string
-(attribute_value) @string
-
-; Numbers
-(integer_literal) @number
-(float_literal) @number
-
-; Booleans
-(boolean_literal) @boolean
 
 ; Operators
 (binary_operator) @operator
 (unary_operator) @operator
 "=>" @operator
 "=" @operator
+"::" @punctuation.delimiter
 
 ; Punctuation
 "{" @punctuation.bracket
@@ -77,36 +33,88 @@
 ")" @punctuation.bracket
 "[" @punctuation.bracket
 "]" @punctuation.bracket
+"<" @punctuation.bracket
+">" @punctuation.bracket
 "," @punctuation.delimiter
 ":" @punctuation.delimiter
 ";" @punctuation.delimiter
 
-; Tags
-(tag_name) @tag
-"<@" @tag
-"</@" @tag
+; Literals
+(string_literal) @string
+(char_literal) @character
+(number_literal) @number
+(integer_literal) @number
+(float_literal) @number
+(boolean_literal) @boolean
+(escape_sequence) @string.escape
 
-; Attributes
+; Types
+(primitive_type) @type.builtin
+(rust_type) @type
+(generic_params (identifier) @type)
+(generic_type (rust_path) @type)
+
+; Struct/Enum definitions
+(struct_definition (identifier) @type.definition)
+(enum_definition (identifier) @type.definition)
+(struct_field (identifier) @property)
+(enum_variant (identifier) @constructor)
+
+; Functions
+(function_definition (identifier) @function.definition)
+(parameter (identifier) @variable.parameter)
+
+; Function tags (component calls)
+(function_path) @function
+(self_closing_function_tag) @tag
+(container_function_tag) @tag
+"<@" @tag.delimiter
+"</@" @tag.delimiter
+
+; HTML elements
+(tag_name) @tag
+(html_element) @tag
 (attribute_name) @attribute
+(attribute_value) @string
+
+; Paths and identifiers
+(rust_path) @module
+(use_statement (rust_path) @module)
+(import_statement (string_literal) @string.special)
+
+; Expressions
+(simple_expression "@" @punctuation.special)
+(complex_expression "@" @punctuation.special)
+(expression_path (identifier) @variable)
+(field_access (identifier) @property)
+(method_call (identifier) @function.method)
+
+; Patterns
+(wildcard_pattern) @variable.builtin
+(identifier_pattern (identifier) @variable)
+(struct_pattern (rust_path) @type)
+(field_pattern (identifier) @property)
+
+; Control flow
+(if_statement) @conditional
+(for_loop) @repeat
+(match_statement) @conditional
+(match_arm) @conditional
+
+; Comments
+(template_comment) @comment
+(html_comment) @comment
+
+; Attributes (derive, etc.)
 (attribute_list) @attribute
 (attribute (identifier) @attribute)
 
-; Module paths
-(use_statement (rust_path) @type)
-(rust_path) @variable
+; Escape sequence
+(escape_at) @string.escape
 
-; Escape
-(escape_sequence) @escape
-(escape_at) @escape
+; Embedded languages
+(embedded_language) @embedded
+(language_name) @label
 
-; Embedded language names
-"json" @label
-"alpine" @label
-"js" @label
-"javascript" @label
-"css" @label
-"style" @label
-"html" @label
-
-; Variables (fallback)
-(identifier) @variable
+; Text content
+(text_content) @text
