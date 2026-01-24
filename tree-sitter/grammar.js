@@ -6,17 +6,27 @@
  *
  * VALIDATION RULES (enforced by the compiler, not this grammar):
  *
- * 1. Reserved variable names - Variables named `_wtz_buffer` or `_wtz_target`
- *    declared via `@let` are not allowed. This includes:
- *    - Direct @let declarations: @let _wtz_buffer = "value"
- *    - For loop iterators: @for _wtz_buffer in items
- *    - Tuple patterns: @for (a, _wtz_buffer) in items
- *    - If-let patterns: @if let Some(_wtz_buffer) = opt
- *    - Match arm patterns: @match status { Some(_wtz_buffer) => { ... } }
+ * 1. Reserved variable names - Variables named `__wtz_target` or `out` declared
+ *    via `@let` are not allowed. This includes:
+ *    - Direct @let declarations: @let out = "value"
+ *    - For loop iterators: @for out in items
+ *    - Tuple patterns: @for (a, out) in items
+ *    - If-let patterns: @if let Some(out) = opt
+ *    - Match arm patterns: @match status { Some(out) => { ... } }
+ *    Workaround: Use @(out) to reference a variable with that name.
  *
  * 2. Function name conflicts - If a function `foo` exists, you cannot also
  *    have `foo_to_stream` (and vice versa). This prevents conflicts with
  *    the auto-generated streaming functions.
+ *
+ * 3. Special keywords (NEW SYNTAX - recommended):
+ *    - @Out - Output target type (includes &mut): &mut _WtzTarget
+ *    - @out - Output reference (includes &mut): &mut __wtz_buffer or __wtz_target
+ *    - @render(T1, T2, ...) - Render callback type: impl Fn(T1, T2, ..., &mut _WtzTarget)
+ *
+ * 4. Special keywords (DEPRECATED - still supported):
+ *    - @Target - Compiler-injected type (resolves to _WtzTarget or _WtzWriter)
+ *    - @target - Compiler-injected variable (resolves to __wtz_buffer or __wtz_target)
  *
  * These rules apply only to @let template variables and @fn template functions,
  * not to CSS or JavaScript code.
@@ -231,7 +241,13 @@ module.exports = grammar({
 
     // Template expressions
     template_expression: ($) =>
-      choice($.simple_expression, $.complex_expression, $.safe_expression),
+      choice($.simple_expression, $.complex_expression, $.safe_expression, $.out_ref, $.target_ref),
+
+    // Compiler-injected output reference - resolves to &mut __wtz_buffer or __wtz_target
+    out_ref: ($) => seq("@", "out"),
+
+    // Compiler-injected target reference - DEPRECATED, use out_ref
+    target_ref: ($) => seq("@", "target"),
 
     // High-precedence token to match @identifier before @for/@if etc keywords
     simple_expression: ($) =>
@@ -378,7 +394,7 @@ module.exports = grammar({
     boolean_attribute: ($) => $.identifier,
 
     function_attribute_value: ($) =>
-      choice($.string_literal, seq("@", $.expression_path), $.unquoted_value),
+      choice($.string_literal, seq("@", $.expression_path), $.render_closure, $.unquoted_value),
 
     unquoted_value: ($) => /[^\s>=\/]+/,
 
@@ -441,9 +457,33 @@ module.exports = grammar({
         $.parenthesized_expression,
         $.array_literal,
         $.closure_expression,
+        $.render_closure,
+        $.statement_block,
+        $.template_block,
         // rust_path last as fallback for identifiers
         $.rust_path,
       ),
+
+    // Statement block - Rust statements in expression position
+    // The last expression is the value (like in Rust)
+    // Example: { let x = 1; x * 2 } evaluates to 2
+    statement_block: ($) =>
+      seq("{", repeat($.rust_statement), optional($.expression), "}"),
+
+    // Rust statement inside a statement block
+    rust_statement: ($) =>
+      seq(
+        choice(
+          seq("let", $.simple_pattern, optional(seq(":", $.rust_type)), "=", $.expression),
+          $.expression,
+        ),
+        ";",
+      ),
+
+    // Template block - explicit template content in expression position
+    // Use @{ ... } to create template content as an expression
+    // Example: @let html = @{ <div>Hello</div> }
+    template_block: ($) => seq("@", "{", repeat($.template_node), "}"),
 
     // If expression (returns a value): if cond { expr } else { expr }
     if_expression: ($) =>
@@ -549,6 +589,18 @@ module.exports = grammar({
         choice($.expression, $.content_block),
       ),
 
+    // Render closure - inline closure that writes to output target
+    // Generates: |params..., __wtz_target: &mut _WtzTarget| { template_content }
+    // Auto-threading: calling a @() variable automatically appends @out
+    render_closure: ($) =>
+      seq(
+        "@",
+        "(",
+        optional(seq($.parameter, repeat(seq(",", $.parameter)))),
+        ")",
+        $.content_block,
+      ),
+
     closure_params: ($) => seq($.identifier, repeat(seq(",", $.identifier))),
 
     argument_list: ($) =>
@@ -620,7 +672,38 @@ module.exports = grammar({
         $.tuple_type,
         $.array_type,
         $.slice_type,
+        $.closure_type,
+        $.render_type,
+        $.out_type,
+        $.target_type,
       ),
+
+    // Closure type: |[name: ]Type, ...| [-> ReturnType]
+    closure_type: ($) =>
+      seq(
+        "|",
+        optional(seq($.closure_param, repeat(seq(",", $.closure_param)))),
+        "|",
+        optional(seq("->", $.rust_type)),
+      ),
+
+    closure_param: ($) =>
+      seq(optional(seq($.identifier, ":")), $.rust_type),
+
+    // Compiler-injected render callback type - generates impl Fn(T1, T2, ..., &mut _WtzTarget)
+    // Full syntax: @render(T1, T2, ...)
+    // Shorthand: @() or @(T1, T2) - equivalent to @render()/@render(T1, T2)
+    render_type: ($) =>
+      choice(
+        seq("@", "render", "(", optional(seq($.rust_type, repeat(seq(",", $.rust_type)))), ")"),
+        seq("@", "(", optional(seq($.rust_type, repeat(seq(",", $.rust_type)))), ")"),
+      ),
+
+    // Compiler-injected output type - generates &mut _WtzTarget
+    out_type: ($) => seq("@", "Out"),
+
+    // Compiler-injected target type - DEPRECATED, use out_type
+    target_type: ($) => seq("@", "Target"),
 
     primitive_type: ($) =>
       choice(

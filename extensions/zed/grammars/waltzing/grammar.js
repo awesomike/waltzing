@@ -210,7 +210,10 @@ module.exports = grammar({
 
     // Template expressions
     template_expression: ($) =>
-      choice($.simple_expression, $.complex_expression, $.safe_expression),
+      choice($.simple_expression, $.complex_expression, $.safe_expression, $.target_ref),
+
+    // Compiler-injected target reference - resolves to __wtz_buffer or __wtz_target
+    target_ref: ($) => seq("@", "target"),
 
     // High-precedence token to match @identifier before @for/@if etc keywords
     simple_expression: ($) =>
@@ -599,7 +602,11 @@ module.exports = grammar({
         $.tuple_type,
         $.array_type,
         $.slice_type,
+        $.target_type,
       ),
+
+    // Compiler-injected target type - resolves to _WtzTarget or _WtzWriter
+    target_type: ($) => seq("@", "Target"),
 
     primitive_type: ($) =>
       choice(
