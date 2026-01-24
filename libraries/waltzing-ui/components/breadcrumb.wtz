@@ -1,0 +1,148 @@
+@*
+ * Breadcrumb component
+ * Navigation path indicator showing the current page location
+ *
+ * Usage:
+ *   @import ui/components/breadcrumb.wtz as breadcrumb
+ *
+ *   @let items = vec![
+ *       breadcrumb::Item { label: "Home".to_string(), href: Some("/".to_string()) },
+ *       breadcrumb::Item { label: "Products".to_string(), href: Some("/products".to_string()) },
+ *       breadcrumb::Item { label: "Widgets".to_string(), href: None },
+ *   ]
+ *   <@breadcrumb::apply items=&items />
+ *
+ *   @* Or build manually with components *@
+ *   <@breadcrumb::root>
+ *       <@breadcrumb::list>
+ *           <@breadcrumb::item><@breadcrumb::link href="/">Home</@></@>
+ *           <@breadcrumb::separator />
+ *           <@breadcrumb::item><@breadcrumb::page>Products</@></@>
+ *       </@>
+ *   </@>
+ *@
+
+@import lib/utils.wtz as utils
+
+@struct Item {
+    label: String,
+    href: Option<String>,
+}
+
+@* Root breadcrumb container *@
+@fn root(
+    class: Option<&str>,
+    content: @(),
+) {
+    <nav
+        aria-label="Breadcrumb"
+        class="@class.unwrap_or("")"
+    >
+        @content()
+    </nav>
+}
+
+@* Breadcrumb list container *@
+@fn list(
+    class: Option<&str>,
+    content: @(),
+) {
+    <ol class="@utils::cn(&["flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5", @class.unwrap_or("")])">
+        @content()
+    </ol>
+}
+
+@* Individual breadcrumb item wrapper *@
+@fn item(
+    class: Option<&str>,
+    content: @(),
+) {
+    <li class="@utils::cn(&["inline-flex items-center gap-1.5", @class.unwrap_or("")])">
+        @content()
+    </li>
+}
+
+@* Breadcrumb link (clickable item) *@
+@fn link(
+    href: &str,
+    class: Option<&str>,
+    content: @(),
+) {
+    <a
+        href="@href"
+        class="@utils::cn(&["transition-colors hover:text-foreground", @class.unwrap_or("")])"
+    >
+        @content()
+    </a>
+}
+
+@* Current page indicator (non-clickable, last item) *@
+@fn page(
+    class: Option<&str>,
+    content: @(),
+) {
+    <span
+        role="link"
+        aria-disabled="true"
+        aria-current="page"
+        class="@utils::cn(&["font-normal text-foreground", @class.unwrap_or("")])"
+    >
+        @content()
+    </span>
+}
+
+@* Separator between breadcrumb items (chevron icon) *@
+@fn separator(
+    class: Option<&str>,
+) {
+    <li
+        role="presentation"
+        aria-hidden="true"
+        class="@utils::cn(&["[&>svg]:size-3.5", @class.unwrap_or("")])"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"/>
+        </svg>
+    </li>
+}
+
+@* Ellipsis for collapsed breadcrumb items *@
+@fn ellipsis(
+    class: Option<&str>,
+) {
+    <span
+        role="presentation"
+        aria-hidden="true"
+        class="@utils::cn(&["flex h-9 w-9 items-center justify-center", @class.unwrap_or("")])"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
+            <circle cx="12" cy="12" r="1"/>
+            <circle cx="19" cy="12" r="1"/>
+            <circle cx="5" cy="12" r="1"/>
+        </svg>
+        <span class="sr-only">More</span>
+    </span>
+}
+
+@* High-level apply function that renders a list of items *@
+@fn apply(
+    items: &[Item],
+    class: Option<&str>,
+) {
+    <@root class=@class>
+        <@list class=None>
+            @for (i, item) in items.iter().enumerate() {
+                @if i > 0 {
+                    <@separator class=None />
+                }
+                <@item class=None>
+                    @if item.href.is_some() {
+                        <@link href=@item.href.as_ref().unwrap() class=None>@item.label</@>
+                    } @else {
+                        <@page class=None>@item.label</@>
+                    }
+                </@>
+            }
+        </@>
+    </@>
+}
