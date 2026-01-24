@@ -1,0 +1,190 @@
+@*
+ * Radio Group component
+ * Single selection from a list of options
+ *
+ * Usage:
+ *   @import ui/components/radio-group.wtz as radio
+ *
+ *   @let options = [
+ *       RadioOption { value: "a".into(), label: "Option A".into(), disabled: false },
+ *       RadioOption { value: "b".into(), label: "Option B".into(), disabled: false },
+ *   ]
+ *
+ *   <@radio::apply name="choice" options=@options selected=Some("a") ... />
+ *   <@radio::labeled label="Choose" name="choice" options=@options ... />
+ *   <@radio::horizontal name="choice" options=@options selected=None />
+ *   <@radio::simple name="size" options=&["Small", "Medium", "Large"] selected=None />
+ *@
+
+@import lib/utils.wtz as utils
+
+@struct RadioOption {
+    value: String,
+    label: String,
+    disabled: bool,
+}
+
+@fn apply(
+    name: &str,
+    options: &[RadioOption],
+    selected: Option<&str>,
+    disabled: bool,
+    required: bool,
+    orientation: Option<&str>,
+    class: Option<&str>,
+) {
+    @let radio_base = "aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+
+    @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+
+    @let orient = @orientation.unwrap_or("vertical")
+    @let container_cls = @if orient == "horizontal" {
+        "flex flex-wrap gap-4"
+    } else {
+        "grid gap-2"
+    }
+
+    <div
+        role="radiogroup"
+        class="@utils::cn(&[@container_cls, @class.unwrap_or("")])"
+        @if required { aria-required="true" }
+    >
+        @for opt in options {
+            @let is_checked = @selected == Some(opt.value.as_str())
+            @let is_disabled = @disabled || @opt.disabled
+            @let item_id = @format!("{}_{}", @name, @opt.value)
+
+            <div class="flex items-center space-x-2">
+                <input
+                    type="radio"
+                    id="@item_id"
+                    name="@name"
+                    value="@opt.value"
+                    class="@radio_base peer"
+                    @if is_checked { checked }
+                    @if is_disabled { disabled }
+                    @if required { required }
+                />
+                <label for="@item_id" class="@label_cls">
+                    @opt.label
+                </label>
+            </div>
+        }
+    </div>
+}
+
+@* Radio group with label *@
+@fn labeled(
+    label: &str,
+    name: &str,
+    options: &[RadioOption],
+    selected: Option<&str>,
+    disabled: bool,
+    required: bool,
+    orientation: Option<&str>,
+    error: Option<&str>,
+    class: Option<&str>,
+) {
+    @let error_cls = @if error.is_some() { "[&_input]:border-destructive" } else { "" }
+
+    <fieldset class="space-y-3">
+        <legend class="text-sm font-medium leading-none">
+            @label
+            @if required { <span class="text-destructive ml-0.5">*</span> }
+        </legend>
+        <@apply
+            name=@name
+            options=@options
+            selected=@selected
+            disabled=@disabled
+            required=@required
+            orientation=@orientation
+            class=Some(@utils::cn(&[@error_cls, @class.unwrap_or("")]))
+        />
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </fieldset>
+}
+
+@* Radio group with option descriptions *@
+@struct RadioOptionWithDescription {
+    value: String,
+    label: String,
+    description: String,
+    disabled: bool,
+}
+
+@fn with_descriptions(
+    name: &str,
+    options: &[RadioOptionWithDescription],
+    selected: Option<&str>,
+    disabled: bool,
+    required: bool,
+    class: Option<&str>,
+) {
+    @let radio_base = "aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+
+    @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+
+    <div
+        role="radiogroup"
+        class="@utils::cn(&["grid gap-4", @class.unwrap_or("")])"
+        @if required { aria-required="true" }
+    >
+        @for opt in options {
+            @let is_checked = @selected == Some(opt.value.as_str())
+            @let is_disabled = @disabled || @opt.disabled
+            @let item_id = @format!("{}_{}", @name, @opt.value)
+
+            <div class="flex items-start space-x-2">
+                <input
+                    type="radio"
+                    id="@item_id"
+                    name="@name"
+                    value="@opt.value"
+                    class="@radio_base peer mt-0.5"
+                    @if is_checked { checked }
+                    @if is_disabled { disabled }
+                    @if required { required }
+                />
+                <div class="grid gap-1.5 leading-none">
+                    <label for="@item_id" class="@label_cls">@opt.label</label>
+                    <p class="text-sm text-muted-foreground">@opt.description</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@* Simple radio group with string array options *@
+@fn simple(name: &str, options: &[&str], selected: Option<&str>) {
+    @let radio_options: Vec<RadioOption> = @options.iter().map(|o| RadioOption {
+        value: o.to_string(),
+        label: o.to_string(),
+        disabled: false,
+    }).collect()
+
+    <@apply
+        name=@name
+        options=@radio_options
+        selected=@selected
+        disabled=false
+        required=false
+        orientation=None
+        class=None
+    />
+}
+
+@* Horizontal radio group *@
+@fn horizontal(name: &str, options: &[RadioOption], selected: Option<&str>) {
+    <@apply
+        name=@name
+        options=@options
+        selected=@selected
+        disabled=false
+        required=false
+        orientation=Some("horizontal")
+        class=None
+    />
+}
