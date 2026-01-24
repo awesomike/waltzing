@@ -22,16 +22,22 @@
     class: Option<&str>,
 ) {
     @let base = "shrink-0 bg-border"
+    @let cls = @class.unwrap_or("")
 
     @let orientation_cls = @match orientation {
-        Orientation::Horizontal => "h-[1px] w-full",
-        Orientation::Vertical => "h-full w-[1px]",
+        Orientation::Horizontal => { "h-[1px] w-full" }
+        Orientation::Vertical => { "h-full w-[1px]" }
+    }
+
+    @let aria_orientation = @match orientation {
+        Orientation::Horizontal => { "horizontal" }
+        Orientation::Vertical => { "vertical" }
     }
 
     <div
         role="separator"
-        aria-orientation="@match orientation { Orientation::Horizontal => "horizontal", Orientation::Vertical => "vertical" }"
-        class="@utils::cn(&[@base, @orientation_cls, @class.unwrap_or("")])"
+        aria-orientation="@aria_orientation"
+        class="@utils::cn(&[@base, @orientation_cls, @cls])"
     ></div>
 }
 
