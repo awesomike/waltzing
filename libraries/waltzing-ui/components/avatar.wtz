@@ -35,6 +35,7 @@
     class: Option<&str>,
 ) {
     @let base = "relative flex shrink-0 overflow-hidden rounded-full"
+    @let cls = class.unwrap_or("")
 
     @let size_cls = @match size {
         Size::Sm => { "h-8 w-8" }
@@ -48,7 +49,11 @@
         Size::Lg => { "text-lg" }
     }
 
-    <span class="@utils::cn(&[@base, @size_cls, @class.unwrap_or("")])">
+    @let container_cls = utils::cn(&[base, size_cls, cls])
+    @let fallback_base = "flex h-full w-full items-center justify-center rounded-full bg-muted"
+    @let fallback_cls = utils::cn(&[fallback_base, fallback_text_size])
+
+    <span class="@container_cls">
         @if let Some(image_src) = src {
             <img
                 src="@image_src"
@@ -59,14 +64,14 @@
                 x-show="!failed"
             />
             <span
-                class="@utils::cn(&["flex h-full w-full items-center justify-center rounded-full bg-muted", @fallback_text_size])"
+                class="@fallback_cls"
                 x-show="failed"
                 x-cloak
             >
                 @fallback
             </span>
-        } @else {
-            <span class="@utils::cn(&["flex h-full w-full items-center justify-center rounded-full bg-muted", @fallback_text_size])">
+        } else {
+            <span class="@fallback_cls">
                 @fallback
             </span>
         }
