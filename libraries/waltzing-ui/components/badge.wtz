@@ -1,6 +1,17 @@
 @*
  * Badge component
  * Small status indicator or tag
+ *
+ * @example
+ * @import components/badge.wtz as badge
+ *
+ * <@badge::default>New</@>
+ * <@badge::secondary>Pending</@>
+ * <@badge::destructive>Error</@>
+ *
+ * <@badge::apply variant=badge::Variant::Outline class=Some("ml-2")>
+ *     Custom
+ * </@>
  *@
 
 @import lib/utils.wtz as utils
