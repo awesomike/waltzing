@@ -1,0 +1,181 @@
+@*
+ * Tooltip component
+ * Hover information popup for providing contextual hints
+ * Uses Alpine.js for show/hide behavior on hover and focus
+ *
+ * Usage:
+ *   @import ui/components/tooltip.wtz as tooltip
+ *
+ *   <@tooltip::apply
+ *       side=tooltip::Side::Top
+ *       text="This is helpful information"
+ *       trigger=@{ <button>Hover me</button> }
+ *   />
+ *
+ *   @* Or with rich content *@
+ *   <@tooltip::rich
+ *       side=tooltip::Side::Bottom
+ *       trigger=@{ <span>Info</span> }
+ *       content=@{ <strong>Bold</strong> tooltip content }
+ *   />
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Side {
+    Top,
+    Right,
+    Bottom,
+    Left,
+}
+
+@enum Align {
+    Start,
+    Center,
+    End,
+}
+
+@* Simple text tooltip *@
+@fn apply(
+    side: Side,
+    text: &str,
+    trigger: @(),
+) {
+    <@rich side=@side align=Align::Center trigger=@trigger>
+        @text
+    </@>
+}
+
+@* Rich content tooltip with alignment control *@
+@fn rich(
+    side: Side,
+    align: Align,
+    trigger: @(),
+    content: @(),
+) {
+    @let side_cls = @match side {
+        Side::Top => { "bottom-full mb-2" }
+        Side::Right => { "left-full ml-2" }
+        Side::Bottom => { "top-full mt-2" }
+        Side::Left => { "right-full mr-2" }
+    }
+
+    @let align_cls = @match align {
+        Align::Start => { "left-0" }
+        Align::Center => { "left-1/2 -translate-x-1/2" }
+        Align::End => { "right-0" }
+    }
+
+    @let arrow_side_cls = @match side {
+        Side::Top => { "top-full left-1/2 -translate-x-1/2 border-t-primary border-x-transparent border-b-transparent" }
+        Side::Right => { "right-full top-1/2 -translate-y-1/2 border-r-primary border-y-transparent border-l-transparent" }
+        Side::Bottom => { "bottom-full left-1/2 -translate-x-1/2 border-b-primary border-x-transparent border-t-transparent" }
+        Side::Left => { "left-full top-1/2 -translate-y-1/2 border-l-primary border-y-transparent border-r-transparent" }
+    }
+
+    <div class="relative inline-block" x-data="{ show: false }">
+        @* Trigger *@
+        <div
+            @mouseenter="show = true"
+            @mouseleave="show = false"
+            @focus="show = true"
+            @blur="show = false"
+            aria-describedby="tooltip"
+        >
+            @trigger()
+        </div>
+
+        @* Tooltip content *@
+        <div
+            x-show="show"
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="@utils::cn(&["absolute z-50 max-w-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm shadow-md pointer-events-none", @side_cls, @align_cls])"
+            style="display: none;"
+            role="tooltip"
+            id="tooltip"
+        >
+            @content()
+            @* Arrow *@
+            <span class="@utils::cn(&["absolute w-0 h-0 border-4", @arrow_side_cls])"></span>
+        </div>
+    </div>
+}
+
+@* Tooltip with delay before showing *@
+@fn delayed(
+    side: Side,
+    text: &str,
+    delay_ms: u32,
+    trigger: @(),
+) {
+    @let side_cls = @match side {
+        Side::Top => { "bottom-full mb-2" }
+        Side::Right => { "left-full ml-2" }
+        Side::Bottom => { "top-full mt-2" }
+        Side::Left => { "right-full mr-2" }
+    }
+
+    @let arrow_side_cls = @match side {
+        Side::Top => { "top-full left-1/2 -translate-x-1/2 border-t-primary border-x-transparent border-b-transparent" }
+        Side::Right => { "right-full top-1/2 -translate-y-1/2 border-r-primary border-y-transparent border-l-transparent" }
+        Side::Bottom => { "bottom-full left-1/2 -translate-x-1/2 border-b-primary border-x-transparent border-t-transparent" }
+        Side::Left => { "left-full top-1/2 -translate-y-1/2 border-l-primary border-y-transparent border-r-transparent" }
+    }
+
+    <div class="relative inline-block" x-data="{ show: false, timeout: null }">
+        @* Trigger *@
+        <div
+            @mouseenter="timeout = setTimeout(() => show = true, @delay_ms)"
+            @mouseleave="clearTimeout(timeout); show = false"
+            @focus="timeout = setTimeout(() => show = true, @delay_ms)"
+            @blur="clearTimeout(timeout); show = false"
+            aria-describedby="tooltip"
+        >
+            @trigger()
+        </div>
+
+        @* Tooltip content *@
+        <div
+            x-show="show"
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="@utils::cn(&["absolute z-50 max-w-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm shadow-md pointer-events-none left-1/2 -translate-x-1/2", @side_cls])"
+            style="display: none;"
+            role="tooltip"
+            id="tooltip"
+        >
+            @text
+            @* Arrow *@
+            <span class="@utils::cn(&["absolute w-0 h-0 border-4", @arrow_side_cls])"></span>
+        </div>
+    </div>
+}
+
+@* Shorthand for top tooltip *@
+@fn top(text: &str, trigger: @()) {
+    <@apply side=Side::Top text=@text trigger=@trigger />
+}
+
+@* Shorthand for bottom tooltip *@
+@fn bottom(text: &str, trigger: @()) {
+    <@apply side=Side::Bottom text=@text trigger=@trigger />
+}
+
+@* Shorthand for left tooltip *@
+@fn left(text: &str, trigger: @()) {
+    <@apply side=Side::Left text=@text trigger=@trigger />
+}
+
+@* Shorthand for right tooltip *@
+@fn right(text: &str, trigger: @()) {
+    <@apply side=Side::Right text=@text trigger=@trigger />
+}
