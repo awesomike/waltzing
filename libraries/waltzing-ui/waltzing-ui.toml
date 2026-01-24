@@ -13,6 +13,7 @@ plugins = ["@alpinejs/focus", "@alpinejs/collapse"]
 
 [components]
 alert = { path = "components/alert.wtz", deps = ["lib/utils"] }
+aspect-ratio = { path = "components/aspect-ratio.wtz", deps = ["lib/utils"] }
 avatar = { path = "components/avatar.wtz", deps = ["lib/utils"] }
 badge = { path = "components/badge.wtz", deps = ["lib/utils"] }
 breadcrumb = { path = "components/breadcrumb.wtz", deps = ["lib/utils"] }
