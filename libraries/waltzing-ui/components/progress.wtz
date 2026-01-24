@@ -1,0 +1,70 @@
+@*
+ * Progress component
+ * Visual indicator of progress or loading state
+ *
+ * Usage:
+ *   @import ui/components/progress.wtz as progress
+ *
+ *   <@progress::apply value=50 />
+ *   <@progress::apply value=75 max=100 class=Some("w-full") />
+ *   <@progress::indeterminate />
+ *@
+
+@import lib/utils.wtz as utils
+
+@* Main progress bar with determinate value *@
+@fn apply(
+    value: u32,
+    max: Option<u32>,
+    class: Option<&str>,
+) {
+    @let max_val = max.unwrap_or(100)
+    @let percentage = (value * 100) / @max_val
+    @let clamped = @if (percentage > 100) { 100 } @else { @percentage }
+
+    @let base = "relative h-2 w-full overflow-hidden rounded-full bg-primary/20"
+    @let indicator = "h-full bg-primary transition-all duration-300 ease-in-out"
+
+    <div
+        role="progressbar"
+        aria-valuenow="@value"
+        aria-valuemin="0"
+        aria-valuemax="@max_val"
+        class="@utils::cn(&[@base, @class.unwrap_or("")])"
+    >
+        <div class="@indicator" style="width: @(clamped)%"></div>
+    </div>
+}
+
+@* Indeterminate progress bar for unknown duration *@
+@fn indeterminate(class: Option<&str>) {
+    @let base = "relative h-2 w-full overflow-hidden rounded-full bg-primary/20"
+    @let indicator = "h-full w-1/3 bg-primary animate-progress-indeterminate"
+
+    <div
+        role="progressbar"
+        aria-busy="true"
+        class="@utils::cn(&[@base, @class.unwrap_or("")])"
+    >
+        <div class="@indicator"></div>
+    </div>
+}
+
+@* Progress bar with label showing percentage *@
+@fn with_label(
+    value: u32,
+    max: Option<u32>,
+    class: Option<&str>,
+) {
+    @let max_val = max.unwrap_or(100)
+    @let percentage = (value * 100) / @max_val
+    @let clamped = @if (percentage > 100) { 100 } @else { @percentage }
+
+    <div class="space-y-1">
+        <div class="flex justify-between text-sm">
+            <span class="text-muted-foreground">Progress</span>
+            <span class="font-medium">@(clamped)%</span>
+        </div>
+        <@apply value=@value max=Some(@max_val) class=@class />
+    </div>
+}
