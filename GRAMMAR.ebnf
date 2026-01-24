@@ -1,0 +1,356 @@
+(* Waltzing Template Language Grammar (EBNF) *)
+(* This grammar defines the syntax for .wtz template files *)
+
+(* Root rule - a template file *)
+template = { template_element } ;
+
+template_element = use_statement
+                 | import_statement
+                 | struct_definition
+                 | enum_definition
+                 | function_definition
+                 | template_node ;
+
+(* Rust imports *)
+use_statement = "@use" , rust_path , [ "as" , identifier ] ;
+rust_path = identifier , { "::" , identifier } ;
+
+(* Template imports *)
+import_statement = "@import" , string_literal , "as" , identifier ;
+
+(* Type definitions *)
+struct_definition = "@struct" , [ attribute_list ] , identifier , [ generic_params ] , "{" , { struct_field } , "}" ;
+struct_field = identifier , [ attribute_list ] , ":" , type_expression , [ "," ] ;
+
+enum_definition = "@enum" , [ attribute_list ] , identifier , [ generic_params ] , "{" , { enum_variant } , "}" ;
+enum_variant = identifier , [ "(" , { type_expression , [ "," ] } , ")" ] , [ "," ] ;
+
+(* Attribute lists for structs, enums, and fields *)
+attribute_list = "[" , [ attribute , { "," , attribute } ] , "]" ;
+attribute = identifier , [ "(" , attribute_content , ")" ] ;
+attribute_content = ? any character sequence with balanced parentheses ? ;
+
+generic_params = "<" , identifier , { "," , identifier } , ">" ;
+type_expression = rust_type ;
+
+(* Function definitions *)
+function_definition = "@fn" , identifier , parameter_list , content_block ;
+parameter_list = "(" , [ parameter , { "," , parameter } ] , ")" ;
+parameter = identifier , ":" , rust_type , [ "=" , default_value ] ;
+default_value = expression ;
+content_block = "{" , { template_node } , "}" ;
+
+(* Template nodes *)
+template_node = html_element
+              | template_expression
+              | template_control_flow
+              | raw_block
+              | text_content
+              | comment ;
+
+(* HTML elements *)
+html_element = "<" , tag_name , { html_attribute } , [ "/" ] , ">"
+             | "<" , tag_name , { html_attribute } , ">" , { template_node } , "</" , tag_name , ">" ;
+
+tag_name = identifier ;
+html_attribute = attribute_name , [ "=" , attribute_value ] ;
+attribute_name = identifier | "@" , expression_identifier ;
+attribute_value = string_literal | template_expression | "@" , "{" , expression , "}" ;
+
+(* Template expressions *)
+template_expression = simple_expression | complex_expression | safe_expression | out_ref | target_ref ;
+simple_expression = "@" , expression_path ;
+complex_expression = "@" , "{" , expression , "}" ;
+safe_expression = "@" , "safe" , "(" , expression , [ "," , expression ] , ")" ;
+
+(* Compiler-injected output reference - resolves to &mut __wtz_buffer or __wtz_target *)
+out_ref = "@out" ;
+
+(* Compiler-injected target reference - DEPRECATED, use out_ref *)
+target_ref = "@target" ;
+
+expression_path = identifier , { "." , identifier | "[" , expression , "]" } ;
+
+(* Control flow *)
+template_control_flow = if_statement
+                      | for_loop
+                      | match_statement
+                      | break_statement
+                      | continue_statement ;
+
+if_statement = "@if" , [ "let" , pattern , "=" ] , expression , content_block
+             , { else_if_branch }
+             , [ else_branch ] ;
+
+else_if_branch = "else" , "if" , [ "let" , pattern , "=" ] , expression , content_block ;
+else_branch = "else" , content_block ;
+
+for_loop = "@for" , [ identifier , ":" ] , "(" , pattern , "in" , expression , ")" , content_block ;
+
+match_statement = "@match" , "(" , expression , ")" , "{" , { match_arm } , "}" ;
+match_arm = pattern , [ "if" , expression ] , "=>" , content_block , [ "," ] ;
+
+break_statement = "@break" , [ ":" , identifier ] , [ ";" ] ;
+continue_statement = "@continue" , [ ":" , identifier ] , [ ";" ] ;
+
+(* Patterns (Rust-like) *)
+pattern = wildcard_pattern
+        | identifier_pattern
+        | struct_pattern
+        | tuple_pattern
+        | enum_pattern
+        | literal_pattern
+        | range_pattern ;
+
+wildcard_pattern = "_" ;
+identifier_pattern = identifier ;
+struct_pattern = path , "{" , { field_pattern , [ "," ] } , [ ".." ] , "}" ;
+field_pattern = identifier , [ ":" , pattern ] ;
+tuple_pattern = "(" , pattern , { "," , pattern } , [ "," ] , ")" ;
+enum_pattern = path , [ "(" , { pattern , [ "," ] } , ")" ] ;
+literal_pattern = literal ;
+range_pattern = expression , ".." , [ "=" ] , expression ;
+
+path = identifier , { "::" , identifier } ;
+
+(* Expressions (subset of Rust expressions) *)
+expression = binary_expression
+           | unary_expression
+           | primary_expression ;
+
+binary_expression = expression , binary_operator , expression ;
+unary_expression = unary_operator , expression ;
+
+primary_expression = literal
+                   | path
+                   | method_call
+                   | field_access
+                   | index_access
+                   | parenthesized_expression
+                   | struct_literal
+                   | array_literal
+                   | closure_expression
+                   | render_closure
+                   | statement_block
+                   | template_block ;
+
+(* Statement block - Rust statements in expression position *)
+(* The last expression is the value (like in Rust) *)
+(* Example: { let x = 1; x * 2 } evaluates to 2 *)
+statement_block = "{" , { statement } , [ expression ] , "}" ;
+
+(* Template block - explicit template content in expression position *)
+(* Use @{ ... } to create template content as an expression *)
+(* Example: @let html = @{ <div>Hello</div> } *)
+template_block = "@" , "{" , { template_node } , "}" ;
+
+method_call = expression , "." , identifier , "(" , [ argument_list ] , ")" ;
+field_access = expression , "." , identifier ;
+index_access = expression , "[" , expression , "]" ;
+parenthesized_expression = "(" , expression , ")" ;
+
+struct_literal = path , "{" , { struct_field_init , [ "," ] } , [ ".." , expression ] , "}" ;
+struct_field_init = identifier , ":" , expression ;
+
+array_literal = "[" , [ expression , { "," , expression } , [ "," ] ] , "]" ;
+
+closure_expression = "|" , [ parameter_list ] , "|" , ( expression | content_block ) ;
+
+(* Render closure - inline closure that writes to output target *)
+(* Generates: |params..., __wtz_target: &mut _WtzTarget| { template_content } *)
+(* Auto-threading: calling a @() variable automatically appends @out *)
+render_closure = "@" , "(" , [ parameter , { "," , parameter } ] , ")" , content_block ;
+
+argument_list = expression , { "," , expression } ;
+
+(* Operators *)
+binary_operator = "+" | "-" | "*" | "/" | "%" | "==" | "!=" | "<" | ">" | "<=" | ">="
+                | "&&" | "||" | "&" | "|" | "^" | "<<" | ">>" ;
+unary_operator = "!" | "-" | "*" | "&" | "&mut" ;
+
+(* Literals *)
+literal = string_literal | raw_string_literal | char_literal | number_literal | boolean_literal ;
+
+string_literal = '"' , { string_char | escape_sequence } , '"' ;
+raw_string_literal = "r" , { "#" } , '"' , { raw_string_char } , '"' , { "#" } ;
+char_literal = "'" , ( char | escape_sequence ) , "'" ;
+number_literal = integer_literal | float_literal ;
+boolean_literal = "true" | "false" ;
+
+integer_literal = decimal_literal | hex_literal | octal_literal | binary_literal ;
+decimal_literal = digit , { digit | "_" } , [ integer_suffix ] ;
+hex_literal = "0x" , hex_digit , { hex_digit | "_" } , [ integer_suffix ] ;
+octal_literal = "0o" , octal_digit , { octal_digit | "_" } , [ integer_suffix ] ;
+binary_literal = "0b" , binary_digit , { binary_digit | "_" } , [ integer_suffix ] ;
+
+float_literal = decimal_literal , "." , { digit } , [ exponent ] , [ float_suffix ]
+              | decimal_literal , exponent , [ float_suffix ]
+              | decimal_literal , float_suffix ;
+
+exponent = ( "e" | "E" ) , [ "+" | "-" ] , digit , { digit } ;
+integer_suffix = "i8" | "i16" | "i32" | "i64" | "i128" | "isize"
+               | "u8" | "u16" | "u32" | "u64" | "u128" | "usize" ;
+float_suffix = "f32" | "f64" ;
+
+(* Character classes *)
+string_char = ? any character except '"' and '\' ? ;
+raw_string_char = ? any character ? ;
+escape_sequence = "\" , ( "n" | "r" | "t" | "\" | "'" | '"' | "0" | "x" , hex_digit , hex_digit
+                       | "u" , "{" , { hex_digit } , "}" ) ;
+
+char = ? any character except '\'' and '\' ? ;
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+hex_digit = digit | "a" | "b" | "c" | "d" | "e" | "f" | "A" | "B" | "C" | "D" | "E" | "F" ;
+octal_digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" ;
+binary_digit = "0" | "1" ;
+
+identifier = ( letter | "_" ) , { letter | digit | "_" } ;
+letter = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m"
+       | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+       | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
+       | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" ;
+
+(* Rust types *)
+rust_type = primitive_type
+          | reference_type
+          | generic_type
+          | path_type
+          | tuple_type
+          | array_type
+          | slice_type
+          | closure_type
+          | render_type
+          | out_type
+          | target_type ;
+
+(* Closure type - generates impl Fn(...) -> ReturnType *)
+(* Return type is optional, defaults to () if omitted *)
+(* Closure types can have default values in function parameters *)
+(* Example: square: |a: i32| -> i32 = |a: i32| { a * a } *)
+closure_type = "|" , [ closure_param , { "," , closure_param } ] , "|" , [ "->" , rust_type ] ;
+closure_param = [ identifier , ":" ] , rust_type ;
+
+(* Compiler-injected render callback type - generates impl Fn(T1, T2, ..., &mut _WtzTarget) *)
+(* Full syntax: @render(T1, T2, ...) - explicit parameters *)
+(* Shorthand: @() - equivalent to @render(), no parameters *)
+render_type = "@render" , "(" , [ rust_type , { "," , rust_type } ] , ")"
+            | "@" , "(" , [ rust_type , { "," , rust_type } ] , ")" ;
+
+(* Compiler-injected output type - generates &mut _WtzTarget *)
+out_type = "@Out" ;
+
+(* Compiler-injected target type - DEPRECATED, use out_type *)
+target_type = "@Target" ;
+
+primitive_type = "i8" | "i16" | "i32" | "i64" | "i128" | "isize"
+               | "u8" | "u16" | "u32" | "u64" | "u128" | "usize"
+               | "f32" | "f64" | "bool" | "char" | "str" ;
+
+reference_type = [ "&" , [ "mut" ] ] , rust_type ;
+generic_type = path , "<" , rust_type , { "," , rust_type } , ">" ;
+path_type = identifier , { "::" , identifier } ;
+tuple_type = "(" , [ rust_type , { "," , rust_type } , [ "," ] ] , ")" ;
+array_type = "[" , rust_type , ";" , expression , "]" ;
+slice_type = "[" , rust_type , "]" ;
+
+(* Text and comments *)
+text_content = ? any character sequence not starting with '@' or '<' ? ;
+comment = template_comment | html_comment ;
+template_comment = "@*" , { ? any character ? } , "*@" ;
+html_comment = "<!--" , { ? any character ? } , "-->" ;
+
+(* Language switching *)
+language_switch = "@`" , language_name , content_block ;
+language_name = "html" | "css" | "js" | "javascript" ;
+
+(* Special constructs *)
+escape_at = "@@" ; (* Literal @ symbol - only needed outside raw blocks *)
+
+(* Raw blocks - verbatim content output *)
+(* Use @#...#@ with any matching number of # symbols *)
+(* Content inside raw blocks is output verbatim - no escaping needed *)
+(* Examples: @# content #@, @## content ##@, @### content ###@ *)
+raw_block = "@" , "#" , { "#" } , raw_content , "#" , { "#" } , "@" ;
+raw_content = ? any character sequence not containing the closing #...@ with matching # count ? ;
+
+(* Function tags - template function calls using HTML-like syntax *)
+(* Function tags can span multiple lines with attributes on separate lines *)
+(* Self-closing: <@module::func attr="value" /> - the /> is required for self-closing *)
+(* Container: <@module::func attr="value">content</@module::func> or </@> for shorthand close *)
+function_tag = self_closing_function_tag | container_function_tag ;
+
+(* Self-closing function tag - ends with /> *)
+(* Example: <@button::apply label="Submit" disabled=@is_disabled /> *)
+self_closing_function_tag = "<@" , function_path , { function_attribute } , "/" , ">" ;
+
+(* Container function tag - has content between open and close tags *)
+(* Example: <@layout::page title="Home">content</@layout::page> *)
+container_function_tag = "<@" , function_path , { function_attribute } , ">" ,
+                        { template_node } ,
+                        "</@" , [ function_path ] , ">" ;
+
+function_path = identifier , [ "::" , identifier ] ;
+
+function_attribute = attribute_reference
+                  | named_attribute
+                  | boolean_attribute ;
+
+attribute_reference = "@" , [ "&" ] , identifier ;
+named_attribute = identifier , "=" , function_attribute_value ;
+boolean_attribute = identifier ;
+
+function_attribute_value = string_literal
+                        | "@" , expression
+                        | render_closure
+                        | unquoted_value ;
+
+unquoted_value = ? sequence of characters not containing whitespace, '>', '/', or '=' ? ;
+
+(* Legacy component call syntax - deprecated in favor of function_tag *)
+component_call = "<@" , component_path , { html_attribute } , "/" , ">"
+               | "<@" , component_path , { html_attribute } , ">" , { template_node } , "</@" , [ component_path ] , ">" ;
+
+component_path = identifier , { "::" , identifier } ;
+
+(* Embedded Language Blocks - JSON/JavaScript/CSS *)
+(* These blocks support template expressions and control flow within language contexts *)
+embedded_language_block = "@```" , language_name , embedded_content , "```@" ;
+language_name = "json" | "js" | "javascript" | "css" | "style" ;
+
+(* JSON Object Properties *)
+(* Supports standard JavaScript object member syntax within @```json blocks *)
+(* Use @```json for Alpine.js x-data attributes *)
+json_object = "{" , [ json_member , { "," , json_member } , [ "," ] ] , "}" ;
+json_member = json_property
+            | json_method
+            | json_getter
+            | json_setter
+            | json_async_method
+            | json_control_flow
+            | json_spread ;
+
+json_property = json_key , ":" , json_value ;
+json_key = identifier | string_literal | template_expression ;
+json_value = json_object | json_array | expression | string_literal | number_literal | boolean_literal | "null" ;
+
+(* Method shorthand: methodName() { ... } *)
+json_method = identifier , "(" , [ parameter_list ] , ")" , "{" , js_statements , "}" ;
+
+(* Getter syntax: get propertyName() { return ...; } *)
+json_getter = "get" , identifier , "(" , ")" , "{" , js_statements , "}" ;
+
+(* Setter syntax: set propertyName(value) { this.x = value; } *)
+json_setter = "set" , identifier , "(" , identifier , ")" , "{" , js_statements , "}" ;
+
+(* Async method: async methodName() { ... } *)
+json_async_method = "async" , identifier , "(" , [ parameter_list ] , ")" , "{" , js_statements , "}" ;
+
+(* Template control flow in JSON context *)
+json_control_flow = "@if" , expression , "{" , { json_member } , "}" , [ "else" , "{" , { json_member } , "}" ]
+                  | "@for" , pattern , "in" , expression , "{" , { json_member } , "}"
+                  | "@match" , expression , "{" , { match_arm } , "}" ;
+
+json_spread = "..." , expression ;
+
+json_array = "[" , [ json_array_element , { "," , json_array_element } , [ "," ] ] , "]" ;
+json_array_element = json_value | json_control_flow | json_spread ;
