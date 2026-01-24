@@ -1,6 +1,22 @@
 @*
  * Avatar component
  * User avatar with image and fallback support
+ *
+ * @example
+ * @import components/avatar.wtz as avatar
+ *
+ * <@avatar::image src="/user.jpg" alt="John Doe" fallback="JD" />
+ * <@avatar::fallback initials="JD" />
+ * <@avatar::sm src="/user.jpg" alt="John Doe" fallback="JD" />
+ * <@avatar::lg src="/user.jpg" alt="John Doe" fallback="JD" />
+ *
+ * <@avatar::apply
+ *     src=Some("/user.jpg")
+ *     alt="John Doe"
+ *     fallback="JD"
+ *     size=avatar::Size::Lg
+ *     class=Some("ring-2 ring-primary")
+ * />
  *@
 
 @import lib/utils.wtz as utils
