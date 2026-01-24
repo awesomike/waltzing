@@ -39,6 +39,7 @@ tooltip = { path = "components/tooltip.wtz", deps = ["lib/utils"] }
 accordion = { path = "components/accordion.wtz", deps = ["lib/utils"] }
 collapsible = { path = "components/collapsible.wtz", deps = ["lib/utils"] }
 form = { path = "components/form.wtz", deps = ["lib/utils"] }
+validation-errors = { path = "components/validation-errors.wtz", deps = ["lib/utils"] }
 
 [layouts]
 base = { path = "layouts/base.wtz", deps = [] }
