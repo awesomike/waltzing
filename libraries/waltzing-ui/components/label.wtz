@@ -1,0 +1,47 @@
+@*
+ * Label component
+ * Basic label for form inputs with optional required indicator
+ *@
+
+@import lib/utils.wtz as utils
+
+@fn apply(
+    for_id: Option<&str>,
+    required: bool,
+    disabled: bool,
+    class: Option<&str>,
+    content: @(),
+) {
+    @let base = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+
+    @let disabled_cls = @if disabled { "cursor-not-allowed opacity-70" } else { "" }
+
+    <label
+        @if let Some(id) = for_id { for="@id" }
+        class="@utils::cn(&[@base, @disabled_cls, @class.unwrap_or("")])"
+    >
+        @content()
+        @if required { <span class="text-destructive ml-0.5">*</span> }
+    </label>
+}
+
+@* Simple label with just text *@
+@fn text(label: &str) {
+    <@apply for_id=None required=false disabled=false class=None>
+        @label
+    </@>
+}
+
+@* Label linked to a form element by id *@
+@fn for_input(for_id: &str, label: &str) {
+    <@apply for_id=Some(@for_id) required=false disabled=false class=None>
+        @label
+    </@>
+}
+
+@* Label with required indicator *@
+@fn required(for_id: Option<&str>, label: &str) {
+    <@apply for_id=@for_id required=true disabled=false class=None>
+        @label
+    </@>
+}
