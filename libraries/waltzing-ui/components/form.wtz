@@ -1,0 +1,177 @@
+@*
+ * Form component
+ * Form wrapper with validation display and field layouts
+ *@
+
+@import lib/utils.wtz as utils
+
+@struct FieldError {
+    field: String,
+    message: String,
+}
+
+@* Main form wrapper *@
+@fn apply(
+    action: Option<&str>,
+    method: Option<&str>,
+    enctype: Option<&str>,
+    class: Option<&str>,
+    content: @(),
+) {
+    @let base = "space-y-6"
+
+    <form
+        @if let Some(a) = action { action="@a" }
+        @if let Some(m) = method { method="@m" }
+        @if let Some(e) = enctype { enctype="@e" }
+        class="@utils::cn(&[@base, @class.unwrap_or("")])"
+        novalidate
+    >
+        @content()
+    </form>
+}
+
+@* Form field wrapper with label, description, and error *@
+@fn field(
+    name: &str,
+    label: Option<&str>,
+    description: Option<&str>,
+    error: Option<&str>,
+    required: bool,
+    class: Option<&str>,
+    content: @(),
+) {
+    @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+
+    <div class="@utils::cn(&["space-y-2", @class.unwrap_or("")])">
+        @if let Some(l) = label {
+            <label for="@name" class="@label_cls">
+                @l
+                @if required { <span class="text-destructive ml-0.5">*</span> }
+            </label>
+        }
+        @content()
+        @if let Some(d) = description {
+            @if error.is_none() {
+                <p class="text-sm text-muted-foreground">@d</p>
+            }
+        }
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive" role="alert">@e</p>
+        }
+    </div>
+}
+
+@* Form section with title and description *@
+@fn section(
+    title: Option<&str>,
+    description: Option<&str>,
+    class: Option<&str>,
+    content: @(),
+) {
+    <div class="@utils::cn(&["space-y-4", @class.unwrap_or("")])">
+        @if title.is_some() || description.is_some() {
+            <div class="space-y-1">
+                @if let Some(t) = title {
+                    <h3 class="text-lg font-medium">@t</h3>
+                }
+                @if let Some(d) = description {
+                    <p class="text-sm text-muted-foreground">@d</p>
+                }
+            </div>
+        }
+        <div class="space-y-4">
+            @content()
+        </div>
+    </div>
+}
+
+@* Inline form row for side-by-side fields *@
+@fn row(
+    class: Option<&str>,
+    content: @(),
+) {
+    <div class="@utils::cn(&["grid gap-4 sm:grid-cols-2", @class.unwrap_or("")])">
+        @content()
+    </div>
+}
+
+@* Form actions/buttons container *@
+@fn actions(
+    align: Option<&str>,
+    class: Option<&str>,
+    content: @(),
+) {
+    @let align_cls = @match align.unwrap_or("end") {
+        "start" => { "justify-start" }
+        "center" => { "justify-center" }
+        "end" => { "justify-end" }
+        "between" => { "justify-between" }
+        _ => { "justify-end" }
+    }
+
+    <div class="@utils::cn(&["flex flex-col-reverse gap-2 sm:flex-row", @align_cls, @class.unwrap_or("")])">
+        @content()
+    </div>
+}
+
+@* Display validation errors summary *@
+@fn errors(
+    errors: &[FieldError],
+    title: Option<&str>,
+    class: Option<&str>,
+) {
+    @if !errors.is_empty() {
+        @let base = "rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
+
+        <div role="alert" class="@utils::cn(&[@base, @class.unwrap_or("")])">
+            <p class="font-medium mb-2">@title.unwrap_or("Please fix the following errors:")</p>
+            <ul class="list-disc pl-5 space-y-1">
+                @for error in errors {
+                    <li>@error.message</li>
+                }
+            </ul>
+        </div>
+    }
+}
+
+@* Simple form for common use cases *@
+@fn simple(
+    action: &str,
+    method: &str,
+    content: @(),
+) {
+    <@apply
+        action=Some(@action)
+        method=Some(@method)
+        enctype=None
+        class=None
+    >
+        @content()
+    </@>
+}
+
+@* Multipart form for file uploads *@
+@fn multipart(
+    action: &str,
+    content: @(),
+) {
+    <@apply
+        action=Some(@action)
+        method=Some("POST")
+        enctype=Some("multipart/form-data")
+        class=None
+    >
+        @content()
+    </@>
+}
+
+@* Helper to get error for a specific field from error list *@
+@fn field_error(errors: &[FieldError], field: &str) -> Option<&str> {
+    {
+        errors
+            .iter()
+            .find(|e| e.field == field)
+            .map(|e| e.message.as_str())
+    }
+}
