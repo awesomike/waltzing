@@ -30,8 +30,8 @@
 
     <div
         role="separator"
-        aria-orientation=@match orientation { Orientation::Horizontal => "horizontal", Orientation::Vertical => "vertical" }
-        class=@utils::cn(&[@base, @orientation_cls, @class.unwrap_or("")])
+        aria-orientation="@match orientation { Orientation::Horizontal => "horizontal", Orientation::Vertical => "vertical" }"
+        class="@utils::cn(&[@base, @orientation_cls, @class.unwrap_or("")])"
     ></div>
 }
 

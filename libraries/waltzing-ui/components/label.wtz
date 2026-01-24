@@ -1,6 +1,15 @@
 @*
  * Label component
  * Basic label for form inputs with optional required indicator
+ *
+ * @example
+ * @import components/label.wtz as label
+ *
+ * <@label::for_input for_id="email" label="Email" />
+ *
+ * <@label::apply for_id=Some("username") required=true disabled=false class=None>
+ *     Username
+ * </@>
  *@
 
 @import lib/utils.wtz as utils

@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "waltzing": {
+      "command": "waltzing-mcp"
+    }
+  }
+}
