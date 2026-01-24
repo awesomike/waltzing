@@ -1,0 +1,88 @@
+@*
+ * Collapsible component
+ * Simple show/hide section using Alpine.js collapse plugin
+ *
+ * Dependencies: alpinejs/collapse
+ *
+ * Functions:
+ *   - apply: Full collapsible with trigger and content slots
+ *   - root: Collapsible container for composition
+ *   - trigger: Trigger element (button)
+ *   - content: Collapsible content area
+ *@
+
+@import lib/utils.wtz as utils
+
+@* Full collapsible with trigger and content *@
+@fn apply(
+    default_open: bool,
+    trigger: @(),
+    content: @(),
+    class: Option<&str>,
+) {
+    <div
+        x-data=@```json { open: @default_open } ```@
+        class="@utils::cn(&["", @class.unwrap_or("")])"
+    >
+        <button
+            type="button"
+            @click="open = !open"
+            :aria-expanded="open"
+            class="flex items-center gap-2"
+        >
+            @trigger()
+        </button>
+
+        <div
+            x-show="open"
+            x-collapse
+            x-cloak
+        >
+            @content()
+        </div>
+    </div>
+}
+
+@* Collapsible root container for composition *@
+@fn root(
+    default_open: bool,
+    class: Option<&str>,
+    content: @(),
+) {
+    <div
+        x-data=@```json { open: @default_open } ```@
+        class="@utils::cn(&["", @class.unwrap_or("")])"
+    >
+        @content()
+    </div>
+}
+
+@* Collapsible trigger button *@
+@fn trigger(
+    class: Option<&str>,
+    content: @(),
+) {
+    <button
+        type="button"
+        @click="open = !open"
+        :aria-expanded="open"
+        class="@utils::cn(&["flex items-center", @class.unwrap_or("")])"
+    >
+        @content()
+    </button>
+}
+
+@* Collapsible content area *@
+@fn content(
+    class: Option<&str>,
+    content: @(),
+) {
+    <div
+        x-show="open"
+        x-collapse
+        x-cloak
+        class="@utils::cn(&["", @class.unwrap_or("")])"
+    >
+        @content()
+    </div>
+}
