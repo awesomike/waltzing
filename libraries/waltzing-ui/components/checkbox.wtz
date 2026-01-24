@@ -1,6 +1,28 @@
 @*
  * Checkbox component
  * Boolean input with label
+ *
+ * @example
+ * @import components/checkbox.wtz as checkbox
+ *
+ * <@checkbox::simple name="terms" label="Accept terms and conditions" />
+ *
+ * <@checkbox::labeled
+ *     label="Remember me"
+ *     name="remember"
+ *     checked=true
+ *     disabled=false
+ *     required=false
+ *     class=None
+ * />
+ *
+ * <@checkbox::with_description
+ *     label="Marketing emails"
+ *     description="Receive emails about new products and features"
+ *     name="marketing"
+ *     checked=false
+ *     disabled=false
+ * />
  *@
 
 @import lib/utils.wtz as utils
