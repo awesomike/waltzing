@@ -1,0 +1,26 @@
+[library]
+name = "waltzing-ui"
+version = "0.1.0"
+description = "A shadcn-inspired component library for Waltzing"
+repository = "https://github.com/awesomike/waltzing-runtime"
+license = "MIT"
+
+[tailwind]
+plugins = ["@tailwindcss/forms"]
+
+[alpine]
+plugins = ["@alpinejs/focus", "@alpinejs/collapse"]
+
+[components]
+button = { path = "components/button.wtz", deps = ["lib/utils"] }
+card = { path = "components/card.wtz", deps = ["lib/utils"] }
+input = { path = "components/input.wtz", deps = ["lib/utils"] }
+dialog = { path = "components/dialog.wtz", deps = ["button", "lib/utils"] }
+dropdown = { path = "components/dropdown.wtz", deps = ["lib/utils"] }
+select = { path = "components/select.wtz", deps = ["lib/utils"] }
+table = { path = "components/table.wtz", deps = ["lib/utils"] }
+tabs = { path = "components/tabs.wtz", deps = ["lib/utils"] }
+
+[layouts]
+base = { path = "layouts/base.wtz", deps = [] }
+sidebar = { path = "layouts/sidebar.wtz", deps = ["base"] }

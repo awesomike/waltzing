@@ -1,0 +1,71 @@
+@*
+ * Card component
+ * A container with optional header and footer slots
+ *@
+
+@import lib/utils.wtz as utils
+
+@fn apply(
+    header: Option<@()>,
+    footer: Option<@()>,
+    class: Option<&str>,
+    content: @(),
+) {
+    <div class="@utils::cn(&["rounded-xl border bg-card text-card-foreground shadow", @class.unwrap_or("")])">
+        @if let Some(h) = header {
+            <div class="flex flex-col space-y-1.5 p-6">
+                @h()
+            </div>
+        }
+        <div class="p-6 pt-0">
+            @content()
+        </div>
+        @if let Some(f) = footer {
+            <div class="flex items-center p-6 pt-0">
+                @f()
+            </div>
+        }
+    </div>
+}
+
+@* Card with just content *@
+@fn simple(class: Option<&str>, content: @()) {
+    <div class="@utils::cn(&["rounded-xl border bg-card text-card-foreground shadow p-6", @class.unwrap_or("")])">
+        @content()
+    </div>
+}
+
+@* Card header component for composition *@
+@fn header(class: Option<&str>, content: @()) {
+    <div class="@utils::cn(&["flex flex-col space-y-1.5 p-6", @class.unwrap_or("")])">
+        @content()
+    </div>
+}
+
+@* Card title *@
+@fn title(class: Option<&str>, content: @()) {
+    <h3 class="@utils::cn(&["font-semibold leading-none tracking-tight", @class.unwrap_or("")])">
+        @content()
+    </h3>
+}
+
+@* Card description *@
+@fn description(class: Option<&str>, content: @()) {
+    <p class="@utils::cn(&["text-sm text-muted-foreground", @class.unwrap_or("")])">
+        @content()
+    </p>
+}
+
+@* Card content area *@
+@fn content(class: Option<&str>, content: @()) {
+    <div class="@utils::cn(&["p-6 pt-0", @class.unwrap_or("")])">
+        @content()
+    </div>
+}
+
+@* Card footer *@
+@fn footer(class: Option<&str>, content: @()) {
+    <div class="@utils::cn(&["flex items-center p-6 pt-0", @class.unwrap_or("")])">
+        @content()
+    </div>
+}

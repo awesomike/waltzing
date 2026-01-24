@@ -1,0 +1,94 @@
+{
+  "$schema": "https://waltzing.awesomike.com/schema/registry.json",
+  "name": "waltzing-ui",
+  "version": "0.1.0",
+  "description": "A shadcn-inspired component library for Waltzing",
+  "repository": "https://github.com/awesomike/waltzing-runtime",
+  "license": "MIT",
+  "components": [
+    {
+      "name": "button",
+      "path": "components/button.wtz",
+      "description": "A clickable button with multiple variants and sizes",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "card",
+      "path": "components/card.wtz",
+      "description": "A container with optional header and footer slots",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "input",
+      "path": "components/input.wtz",
+      "description": "Text input field with optional label and error state",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "select",
+      "path": "components/select.wtz",
+      "description": "A dropdown select input with custom styling",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "dialog",
+      "path": "components/dialog.wtz",
+      "description": "Modal dialog with backdrop, focus trap, and escape handling",
+      "dependencies": ["lib/utils"],
+      "alpine": ["@alpinejs/focus"]
+    },
+    {
+      "name": "dropdown",
+      "path": "components/dropdown.wtz",
+      "description": "A dropdown menu with trigger and items",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "table",
+      "path": "components/table.wtz",
+      "description": "Responsive data table with header and row rendering",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "tabs",
+      "path": "components/tabs.wtz",
+      "description": "Tabbed interface with Alpine.js state management",
+      "dependencies": ["lib/utils"]
+    }
+  ],
+  "layouts": [
+    {
+      "name": "base",
+      "path": "layouts/base.wtz",
+      "description": "HTML document structure with head and body"
+    },
+    {
+      "name": "sidebar",
+      "path": "layouts/sidebar.wtz",
+      "description": "Dashboard layout with collapsible sidebar",
+      "dependencies": ["layouts/base", "lib/utils"]
+    }
+  ],
+  "lib": [
+    {
+      "name": "utils",
+      "path": "lib/utils.wtz",
+      "description": "Utility functions: cn(), class_if(), class_toggle()"
+    }
+  ],
+  "themes": [
+    {
+      "name": "default",
+      "path": "theme/default.css",
+      "description": "Default light/dark theme with CSS variables"
+    }
+  ],
+  "requirements": {
+    "tailwind": {
+      "plugins": ["@tailwindcss/forms"]
+    },
+    "alpine": {
+      "plugins": ["@alpinejs/focus", "@alpinejs/collapse"]
+    }
+  }
+}

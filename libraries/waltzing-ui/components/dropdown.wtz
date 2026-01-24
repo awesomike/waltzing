@@ -1,0 +1,93 @@
+@*
+ * Dropdown component
+ * A dropdown menu with trigger and items
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Align {
+    Start,
+    Center,
+    End,
+}
+
+@fn apply(
+    align: Align,
+    trigger: @(),
+    content: @(),
+) {
+    @let align_cls = @match align {
+        Align::Start => { "left-0" }
+        Align::Center => { "left-1/2 -translate-x-1/2" }
+        Align::End => { "right-0" }
+    }
+
+    <div class="relative inline-block text-left" x-data="{ open: false }">
+        @* Trigger *@
+        <div @click="open = !open">
+            @trigger()
+        </div>
+
+        @* Dropdown content *@
+        <div
+            x-show="open"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="transform opacity-0 scale-95"
+            x-transition:enter-end="transform opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="transform opacity-100 scale-100"
+            x-transition:leave-end="transform opacity-0 scale-95"
+            @click.away="open = false"
+            @keydown.escape.window="open = false"
+            class="@utils::cn(&["absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md", @align_cls])"
+            style="display: none;"
+            role="menu"
+        >
+            @content()
+        </div>
+    </div>
+}
+
+@* Dropdown menu item *@
+@fn item(
+    disabled: bool,
+    class: Option<&str>,
+    content: @(),
+) {
+    <button
+        class="@utils::cn(&["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @utils::class_if(@disabled, "pointer-events-none opacity-50"), @class.unwrap_or("")])"
+        role="menuitem"
+        @if disabled { disabled }
+        @click="open = false"
+    >
+        @content()
+    </button>
+}
+
+@* Dropdown link item *@
+@fn link(
+    href: &str,
+    class: Option<&str>,
+    content: @(),
+) {
+    <a
+        href="@href"
+        class="@utils::cn(&["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @class.unwrap_or("")])"
+        role="menuitem"
+        @click="open = false"
+    >
+        @content()
+    </a>
+}
+
+@* Dropdown separator *@
+@fn separator() {
+    <div class="-mx-1 my-1 h-px bg-muted" role="separator"></div>
+}
+
+@* Dropdown label (non-interactive) *@
+@fn label(content: @()) {
+    <div class="px-2 py-1.5 text-sm font-semibold">
+        @content()
+    </div>
+}

@@ -1,0 +1,79 @@
+@*
+ * Table component
+ * Responsive data table with header and row rendering
+ *@
+
+@import lib/utils.wtz as utils
+
+@fn apply<T>(
+    items: &[T],
+    header: @(),
+    row: @(&T),
+    empty: Option<@()>,
+    class: Option<&str>,
+) {
+    <div class="relative w-full overflow-auto">
+        <table class="@utils::cn(&["w-full caption-bottom text-sm", @class.unwrap_or("")])">
+            <thead class="[&_tr]:border-b">
+                @header()
+            </thead>
+            <tbody class="[&_tr:last-child]:border-0">
+                @if items.is_empty() {
+                    @if let Some(e) = empty {
+                        <tr>
+                            <td colspan="100" class="h-24 text-center text-muted-foreground">
+                                @e()
+                            </td>
+                        </tr>
+                    }
+                } else {
+                    @for item in items {
+                        @row(item)
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@* Table header row *@
+@fn header_row(content: @()) {
+    <tr class="border-b transition-colors hover:bg-muted/50">
+        @content()
+    </tr>
+}
+
+@* Table header cell *@
+@fn th(class: Option<&str>, content: @()) {
+    <th class="@utils::cn(&["h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", @class.unwrap_or("")])">
+        @content()
+    </th>
+}
+
+@* Table row *@
+@fn row(class: Option<&str>, content: @()) {
+    <tr class="@utils::cn(&["border-b transition-colors hover:bg-muted/50", @class.unwrap_or("")])">
+        @content()
+    </tr>
+}
+
+@* Table cell *@
+@fn td(class: Option<&str>, content: @()) {
+    <td class="@utils::cn(&["p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", @class.unwrap_or("")])">
+        @content()
+    </td>
+}
+
+@* Table caption *@
+@fn caption(content: @()) {
+    <caption class="mt-4 text-sm text-muted-foreground">
+        @content()
+    </caption>
+}
+
+@* Table footer *@
+@fn footer(content: @()) {
+    <tfoot class="border-t bg-muted/50 font-medium [&>tr]:last:border-b-0">
+        @content()
+    </tfoot>
+}

@@ -1,0 +1,76 @@
+@*
+ * Button component
+ * A clickable button with multiple variants and sizes
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Variant {
+    Primary,
+    Secondary,
+    Outline,
+    Ghost,
+    Destructive,
+    Link,
+}
+
+@enum Size {
+    Sm,
+    Default,
+    Lg,
+    Icon,
+}
+
+@fn apply(
+    variant: Variant,
+    size: Size,
+    disabled: bool,
+    class: Option<&str>,
+    content: @(),
+) {
+    @let base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+
+    @let variant_cls = @match variant {
+        Variant::Primary => { "bg-primary text-primary-foreground shadow hover:bg-primary/90" }
+        Variant::Secondary => { "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80" }
+        Variant::Outline => { "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground" }
+        Variant::Ghost => { "hover:bg-accent hover:text-accent-foreground" }
+        Variant::Destructive => { "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90" }
+        Variant::Link => { "text-primary underline-offset-4 hover:underline" }
+    }
+
+    @let size_cls = @match size {
+        Size::Sm => { "h-8 rounded-md px-3 text-xs" }
+        Size::Default => { "h-9 px-4 py-2" }
+        Size::Lg => { "h-10 rounded-md px-8" }
+        Size::Icon => { "h-9 w-9" }
+    }
+
+    <button
+        class="@utils::cn(&[@base, @variant_cls, @size_cls, @class.unwrap_or("")])"
+        @if disabled { disabled }
+    >
+        @content()
+    </button>
+}
+
+@* Shorthand for primary button *@
+@fn primary(content: @()) {
+    <@apply variant=Variant::Primary size=Size::Default disabled=false class=None>
+        @content()
+    </@>
+}
+
+@* Shorthand for secondary button *@
+@fn secondary(content: @()) {
+    <@apply variant=Variant::Secondary size=Size::Default disabled=false class=None>
+        @content()
+    </@>
+}
+
+@* Shorthand for outline button *@
+@fn outline(content: @()) {
+    <@apply variant=Variant::Outline size=Size::Default disabled=false class=None>
+        @content()
+    </@>
+}

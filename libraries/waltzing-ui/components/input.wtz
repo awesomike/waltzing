@@ -1,0 +1,127 @@
+@*
+ * Input component
+ * Text input field with optional label and error state
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum InputType {
+    Text,
+    Email,
+    Password,
+    Number,
+    Tel,
+    Url,
+    Search,
+}
+
+@fn apply(
+    input_type: InputType,
+    name: &str,
+    value: Option<&str>,
+    placeholder: Option<&str>,
+    disabled: bool,
+    required: bool,
+    error: Option<&str>,
+    class: Option<&str>,
+) {
+    @let type_str = @match input_type {
+        InputType::Text => { "text" }
+        InputType::Email => { "email" }
+        InputType::Password => { "password" }
+        InputType::Number => { "number" }
+        InputType::Tel => { "tel" }
+        InputType::Url => { "url" }
+        InputType::Search => { "search" }
+    }
+
+    @let base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+
+    @let error_cls = @if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
+
+    <input
+        type="@type_str"
+        name="@name"
+        class="@utils::cn(&[@base, @error_cls, @class.unwrap_or("")])"
+        @if let Some(v) = value { value="@v" }
+        @if let Some(p) = placeholder { placeholder="@p" }
+        @if disabled { disabled }
+        @if required { required }
+        @if error.is_some() { aria-invalid="true" }
+    />
+}
+
+@* Input with label *@
+@fn labeled(
+    label: &str,
+    input_type: InputType,
+    name: &str,
+    value: Option<&str>,
+    placeholder: Option<&str>,
+    disabled: bool,
+    required: bool,
+    error: Option<&str>,
+    class: Option<&str>,
+) {
+    <div class="space-y-2">
+        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            @label
+            @if required { <span class="text-destructive">*</span> }
+        </label>
+        <@apply
+            input_type=@input_type
+            name=@name
+            value=@value
+            placeholder=@placeholder
+            disabled=@disabled
+            required=@required
+            error=@error
+            class=@class
+        />
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </div>
+}
+
+@* Shorthand for text input *@
+@fn text(name: &str, value: Option<&str>, placeholder: Option<&str>) {
+    <@apply
+        input_type=InputType::Text
+        name=@name
+        value=@value
+        placeholder=@placeholder
+        disabled=false
+        required=false
+        error=None
+        class=None
+    />
+}
+
+@* Shorthand for email input *@
+@fn email(name: &str, value: Option<&str>, placeholder: Option<&str>) {
+    <@apply
+        input_type=InputType::Email
+        name=@name
+        value=@value
+        placeholder=@placeholder
+        disabled=false
+        required=false
+        error=None
+        class=None
+    />
+}
+
+@* Shorthand for password input *@
+@fn password(name: &str, placeholder: Option<&str>) {
+    <@apply
+        input_type=InputType::Password
+        name=@name
+        value=None
+        placeholder=@placeholder
+        disabled=false
+        required=false
+        error=None
+        class=None
+    />
+}

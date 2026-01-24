@@ -1,0 +1,81 @@
+@*
+ * Select component
+ * A dropdown select input with custom styling
+ *@
+
+@import lib/utils.wtz as utils
+
+@struct SelectOption {
+    value: String,
+    label: String,
+    disabled: bool,
+}
+
+@fn apply(
+    name: &str,
+    options: &[SelectOption],
+    selected: Option<&str>,
+    placeholder: Option<&str>,
+    disabled: bool,
+    required: bool,
+    error: Option<&str>,
+    class: Option<&str>,
+) {
+    @let base = "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+
+    @let error_cls = @if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
+
+    <select
+        name="@name"
+        class="@utils::cn(&[@base, @error_cls, @class.unwrap_or("")])"
+        @if disabled { disabled }
+        @if required { required }
+        @if error.is_some() { aria-invalid="true" }
+    >
+        @if let Some(ph) = placeholder {
+            <option value="" disabled @if selected.is_none() { selected }>@ph</option>
+        }
+        @for opt in options {
+            <option
+                value="@opt.value"
+                @if opt.disabled { disabled }
+                @if selected == Some(opt.value.as_str()) { selected }
+            >
+                @opt.label
+            </option>
+        }
+    </select>
+}
+
+@* Select with label *@
+@fn labeled(
+    label: &str,
+    name: &str,
+    options: &[SelectOption],
+    selected: Option<&str>,
+    placeholder: Option<&str>,
+    disabled: bool,
+    required: bool,
+    error: Option<&str>,
+    class: Option<&str>,
+) {
+    <div class="space-y-2">
+        <label for="@name" class="text-sm font-medium leading-none">
+            @label
+            @if required { <span class="text-destructive">*</span> }
+        </label>
+        <@apply
+            name=@name
+            options=@options
+            selected=@selected
+            placeholder=@placeholder
+            disabled=@disabled
+            required=@required
+            error=@error
+            class=@class
+        />
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </div>
+}
