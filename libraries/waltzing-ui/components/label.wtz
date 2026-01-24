@@ -7,28 +7,48 @@
  *
  * <@label::for_input for_id="email" label="Email" />
  *
- * <@label::apply for_id=Some("username") required=true disabled=false class=None>
+ * <@label::with_for for_id="username" required=true disabled=false class=None>
  *     Username
  * </@>
+ *
+ * <@label::text label="Standalone label" />
  *@
 
 @import lib/utils.wtz as utils
 
-@fn apply(
-    for_id: Option<&str>,
+@* Label with for attribute linking to an input *@
+@fn with_for(
+    for_id: &str,
     required: bool,
     disabled: bool,
     class: Option<&str>,
     content: @(),
 ) {
     @let base = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-
     @let disabled_cls = @if disabled { "cursor-not-allowed opacity-70" } else { "" }
+    @let cls = @class.unwrap_or("")
 
     <label
-        @if let Some(id) = for_id { for="@id" }
-        class="@utils::cn(&[@base, @disabled_cls, @class.unwrap_or("")])"
+        for="@for_id"
+        class="@utils::cn(&[@base, @disabled_cls, @cls])"
     >
+        @content()
+        @if required { <span class="text-destructive ml-0.5">*</span> }
+    </label>
+}
+
+@* Label without for attribute *@
+@fn apply(
+    required: bool,
+    disabled: bool,
+    class: Option<&str>,
+    content: @(),
+) {
+    @let base = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    @let disabled_cls = @if disabled { "cursor-not-allowed opacity-70" } else { "" }
+    @let cls = @class.unwrap_or("")
+
+    <label class="@utils::cn(&[@base, @disabled_cls, @cls])">
         @content()
         @if required { <span class="text-destructive ml-0.5">*</span> }
     </label>
@@ -36,21 +56,28 @@
 
 @* Simple label with just text *@
 @fn text(label: &str) {
-    <@apply for_id=None required=false disabled=false class=None>
+    <@apply required=false disabled=false class=None>
         @label
     </@>
 }
 
 @* Label linked to a form element by id *@
 @fn for_input(for_id: &str, label: &str) {
-    <@apply for_id=Some(@for_id) required=false disabled=false class=None>
+    <@with_for for_id=@for_id required=false disabled=false class=None>
         @label
     </@>
 }
 
 @* Label with required indicator *@
-@fn required(for_id: Option<&str>, label: &str) {
-    <@apply for_id=@for_id required=true disabled=false class=None>
+@fn required(for_id: &str, label: &str) {
+    <@with_for for_id=@for_id required=true disabled=false class=None>
+        @label
+    </@>
+}
+
+@* Required label without for attribute *@
+@fn required_text(label: &str) {
+    <@apply required=true disabled=false class=None>
         @label
     </@>
 }
