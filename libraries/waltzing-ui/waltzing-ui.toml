@@ -34,6 +34,7 @@ progress = { path = "components/progress.wtz", deps = ["lib/utils"] }
 skeleton = { path = "components/skeleton.wtz", deps = ["lib/utils"] }
 switch = { path = "components/switch.wtz", deps = ["lib/utils"] }
 tooltip = { path = "components/tooltip.wtz", deps = ["lib/utils"] }
+accordion = { path = "components/accordion.wtz", deps = ["lib/utils"] }
 
 [layouts]
 base = { path = "layouts/base.wtz", deps = [] }

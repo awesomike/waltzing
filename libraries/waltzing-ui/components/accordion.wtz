@@ -1,0 +1,198 @@
+@*
+ * Accordion component
+ * Collapsible content sections using Alpine.js collapse plugin
+ *
+ * Dependencies: alpinejs/collapse
+ *
+ * Functions:
+ *   - apply: Main accordion with multiple (bool) for multi-open support
+ *   - single: Shorthand for single-open-at-a-time accordion
+ *   - item: Standalone accordion item with default_open support
+ *
+ * AccordionItem struct: { id: String, title: String }
+ *@
+
+@import lib/utils.wtz as utils
+
+@struct AccordionItem {
+    id: String,
+    title: String,
+}
+
+@* Main accordion allowing multiple items open simultaneously *@
+@fn apply(
+    items: &[AccordionItem],
+    content: @(&str),
+    multiple: bool,
+    class: Option<&str>,
+) {
+    @if multiple {
+        <@multiple_mode items=@items content=@content class=@class />
+    } @else {
+        <@single_mode items=@items content=@content class=@class />
+    }
+}
+
+@* Accordion with only one section open at a time *@
+@fn single(
+    items: &[AccordionItem],
+    content: @(&str),
+    class: Option<&str>,
+) {
+    <@single_mode items=@items content=@content class=@class />
+}
+
+@* Internal: Single-open mode implementation *@
+@fn single_mode(
+    items: &[AccordionItem],
+    content: @(&str),
+    class: Option<&str>,
+) {
+    <div
+        x-data="{ active: null }"
+        class="@utils::cn(&["divide-y divide-border rounded-md border", @class.unwrap_or("")])"
+    >
+        @for item in items {
+            <div class="accordion-item">
+                @* Trigger button *@
+                <button
+                    type="button"
+                    @click="active = active === '@item.id' ? null : '@item.id'"
+                    :aria-expanded="active === '@item.id'"
+                    aria-controls="accordion-content-@item.id"
+                    class="flex w-full items-center justify-between px-4 py-4 text-sm font-medium transition-all hover:underline [&[aria-expanded=true]>svg]:rotate-180"
+                >
+                    <span>@item.title</span>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200"
+                    >
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </button>
+
+                @* Collapsible content *@
+                <div
+                    id="accordion-content-@item.id"
+                    x-show="active === '@item.id'"
+                    x-collapse
+                    x-cloak
+                >
+                    <div class="px-4 pb-4 pt-0 text-sm">
+                        @content(&item.id)
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@* Internal: Multiple-open mode implementation *@
+@fn multiple_mode(
+    items: &[AccordionItem],
+    content: @(&str),
+    class: Option<&str>,
+) {
+    <div
+        x-data=@```json { open: {} } ```@
+        class="@utils::cn(&["divide-y divide-border rounded-md border", @class.unwrap_or("")])"
+    >
+        @for item in items {
+            <div class="accordion-item">
+                @* Trigger button *@
+                <button
+                    type="button"
+                    @click="open['@item.id'] = !open['@item.id']"
+                    :aria-expanded="open['@item.id']"
+                    aria-controls="accordion-content-@item.id"
+                    class="flex w-full items-center justify-between px-4 py-4 text-sm font-medium transition-all hover:underline [&[aria-expanded=true]>svg]:rotate-180"
+                >
+                    <span>@item.title</span>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200"
+                    >
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </button>
+
+                @* Collapsible content *@
+                <div
+                    id="accordion-content-@item.id"
+                    x-show="open['@item.id']"
+                    x-collapse
+                    x-cloak
+                >
+                    <div class="px-4 pb-4 pt-0 text-sm">
+                        @content(&item.id)
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@* Pre-configured accordion item component for more control *@
+@fn item(
+    id: &str,
+    title: &str,
+    default_open: bool,
+    content: @(),
+    class: Option<&str>,
+) {
+    <div
+        x-data=@```json { open: @default_open } ```@
+        class="@utils::cn(&["border-b", @class.unwrap_or("")])"
+    >
+        <button
+            type="button"
+            @click="open = !open"
+            :aria-expanded="open"
+            aria-controls="accordion-content-@id"
+            class="flex w-full items-center justify-between px-4 py-4 text-sm font-medium transition-all hover:underline [&[aria-expanded=true]>svg]:rotate-180"
+        >
+            <span>@title</span>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200"
+            >
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        </button>
+
+        <div
+            id="accordion-content-@id"
+            x-show="open"
+            x-collapse
+            x-cloak
+        >
+            <div class="px-4 pb-4 pt-0 text-sm">
+                @content()
+            </div>
+        </div>
+    </div>
+}
