@@ -1,0 +1,92 @@
+@*
+ * Textarea component
+ * Multi-line text input field with optional label and error state
+ *@
+
+@import lib/utils.wtz as utils
+
+@fn apply(
+    name: &str,
+    value: Option<&str>,
+    placeholder: Option<&str>,
+    rows: Option<u32>,
+    disabled: bool,
+    required: bool,
+    error: Option<&str>,
+    class: Option<&str>,
+) {
+    @let base = "flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+
+    @let error_cls = @if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
+
+    <textarea
+        name="@name"
+        class="@utils::cn(&[@base, @error_cls, @class.unwrap_or("")])"
+        @if let Some(r) = rows { rows="@r" }
+        @if let Some(p) = placeholder { placeholder="@p" }
+        @if disabled { disabled }
+        @if required { required }
+        @if error.is_some() { aria-invalid="true" }
+    >@if let Some(v) = value { @v }</textarea>
+}
+
+@* Textarea with label *@
+@fn labeled(
+    label: &str,
+    name: &str,
+    value: Option<&str>,
+    placeholder: Option<&str>,
+    rows: Option<u32>,
+    disabled: bool,
+    required: bool,
+    error: Option<&str>,
+    class: Option<&str>,
+) {
+    <div class="space-y-2">
+        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            @label
+            @if required { <span class="text-destructive">*</span> }
+        </label>
+        <@apply
+            name=@name
+            value=@value
+            placeholder=@placeholder
+            rows=@rows
+            disabled=@disabled
+            required=@required
+            error=@error
+            class=@class
+        />
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </div>
+}
+
+@* Simple textarea shorthand *@
+@fn simple(name: &str, value: Option<&str>, placeholder: Option<&str>) {
+    <@apply
+        name=@name
+        value=@value
+        placeholder=@placeholder
+        rows=None
+        disabled=false
+        required=false
+        error=None
+        class=None
+    />
+}
+
+@* Textarea with specific row count *@
+@fn with_rows(name: &str, rows: u32, value: Option<&str>, placeholder: Option<&str>) {
+    <@apply
+        name=@name
+        value=@value
+        placeholder=@placeholder
+        rows=Some(@rows)
+        disabled=false
+        required=false
+        error=None
+        class=None
+    />
+}
