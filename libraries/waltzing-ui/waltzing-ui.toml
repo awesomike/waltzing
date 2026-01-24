@@ -12,6 +12,7 @@ plugins = ["@tailwindcss/forms"]
 plugins = ["@alpinejs/focus", "@alpinejs/collapse"]
 
 [components]
+alert = { path = "components/alert.wtz", deps = ["lib/utils"] }
 avatar = { path = "components/avatar.wtz", deps = ["lib/utils"] }
 badge = { path = "components/badge.wtz", deps = ["lib/utils"] }
 button = { path = "components/button.wtz", deps = ["lib/utils"] }
