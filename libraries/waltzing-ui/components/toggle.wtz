@@ -1,0 +1,163 @@
+@*
+ * Toggle component
+ * A two-state button that can be toggled on or off
+ *
+ * Usage:
+ *   @import ui/components/toggle.wtz as toggle
+ *
+ *   <@toggle::apply name="bold" pressed=false disabled=false variant=toggle::Variant::Default size=toggle::Size::Default class=None>B</@>
+ *   <@toggle::simple name="italic">I</@>
+ *   <@toggle::outline name="underline" pressed=true>U</@>
+ *   <@toggle::icon name="star">★</@>
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Variant {
+    Default,
+    Outline,
+}
+
+@enum Size {
+    Sm,
+    Default,
+    Lg,
+}
+
+@fn apply(
+    name: &str,
+    pressed: bool,
+    disabled: bool,
+    variant: Variant,
+    size: Size,
+    class: Option<&str>,
+    content: @(),
+) {
+    @let base = "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+
+    @let variant_cls = @match variant {
+        Variant::Default => { "bg-transparent" }
+        Variant::Outline => { "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground" }
+    }
+
+    @let size_cls = @match size {
+        Size::Sm => { "h-8 px-2 min-w-8" }
+        Size::Default => { "h-9 px-3 min-w-9" }
+        Size::Lg => { "h-10 px-3 min-w-10" }
+    }
+
+    @let pressed_cls = "bg-accent text-accent-foreground"
+
+    <button
+        type="button"
+        id="@name"
+        name="@name"
+        role="button"
+        class="@utils::cn(&[@base, @variant_cls, @size_cls, @if pressed { @pressed_cls } else { "" }, @class.unwrap_or("")])"
+        aria-pressed="@if pressed { "true" } else { "false" }"
+        @if pressed { data-state="on" } else { data-state="off" }
+        @if disabled { disabled aria-disabled="true" }
+        x-data="{ pressed: @if pressed { "true" } else { "false" } }"
+        x-on:click="pressed = !pressed; $dispatch('input', { name: '@name', value: pressed })"
+        :aria-pressed="pressed.toString()"
+        :data-state="pressed ? 'on' : 'off'"
+        :class="pressed ? '@pressed_cls' : ''"
+    >
+        @content()
+    </button>
+    <input type="hidden" name="@name" :value="pressed" />
+}
+
+@* Simple toggle with default settings *@
+@fn simple(name: &str, content: @()) {
+    <@apply
+        name=@name
+        pressed=false
+        disabled=false
+        variant=Variant::Default
+        size=Size::Default
+        class=None
+    >
+        @content()
+    </@>
+}
+
+@* Toggle with outline variant *@
+@fn outline(name: &str, pressed: bool, content: @()) {
+    <@apply
+        name=@name
+        pressed=@pressed
+        disabled=false
+        variant=Variant::Outline
+        size=Size::Default
+        class=None
+    >
+        @content()
+    </@>
+}
+
+@* Toggle sized for icons *@
+@fn icon(name: &str, content: @()) {
+    <@apply
+        name=@name
+        pressed=false
+        disabled=false
+        variant=Variant::Default
+        size=Size::Default
+        class=Some("h-9 w-9 p-0")
+    >
+        @content()
+    </@>
+}
+
+@* Disabled toggle *@
+@fn disabled(name: &str, pressed: bool, content: @()) {
+    <@apply
+        name=@name
+        pressed=@pressed
+        disabled=true
+        variant=Variant::Default
+        size=Size::Default
+        class=None
+    >
+        @content()
+    </@>
+}
+
+@* Small toggle *@
+@fn sm(name: &str, content: @()) {
+    <@apply
+        name=@name
+        pressed=false
+        disabled=false
+        variant=Variant::Default
+        size=Size::Sm
+        class=None
+    >
+        @content()
+    </@>
+}
+
+@* Large toggle *@
+@fn lg(name: &str, content: @()) {
+    <@apply
+        name=@name
+        pressed=false
+        disabled=false
+        variant=Variant::Default
+        size=Size::Lg
+        class=None
+    >
+        @content()
+    </@>
+}
+
+@* Toggle group for multiple related toggles (like text formatting) *@
+@fn group(class: Option<&str>, content: @()) {
+    <div
+        class="@utils::cn(&["inline-flex items-center gap-1", @class.unwrap_or("")])"
+        role="group"
+    >
+        @content()
+    </div>
+}
