@@ -37,7 +37,9 @@
         Variant::Destructive => { "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80" }
     }
 
-    <span class="@utils::cn(&[@base, @variant_cls, @class.unwrap_or("")])">
+    @let cls = utils::cn(&[base, variant_cls, class.unwrap_or("")])
+
+    <span class="@cls">
         @content()
     </span>
 }
