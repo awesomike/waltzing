@@ -1,0 +1,78 @@
+@*
+ * Avatar component
+ * User avatar with image and fallback support
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Size {
+    Sm,
+    Default,
+    Lg,
+}
+
+@fn apply(
+    src: Option<&str>,
+    alt: &str,
+    fallback: &str,
+    size: Size,
+    class: Option<&str>,
+) {
+    @let base = "relative flex shrink-0 overflow-hidden rounded-full"
+
+    @let size_cls = @match size {
+        Size::Sm => { "h-8 w-8" }
+        Size::Default => { "h-10 w-10" }
+        Size::Lg => { "h-14 w-14" }
+    }
+
+    @let fallback_text_size = @match size {
+        Size::Sm => { "text-xs" }
+        Size::Default => { "text-sm" }
+        Size::Lg => { "text-lg" }
+    }
+
+    <span class="@utils::cn(&[@base, @size_cls, @class.unwrap_or("")])">
+        @if let Some(image_src) = src {
+            <img
+                src="@image_src"
+                alt="@alt"
+                class="aspect-square h-full w-full object-cover"
+                x-data="{ failed: false }"
+                x-on:error="failed = true"
+                x-show="!failed"
+            />
+            <span
+                class="@utils::cn(&["flex h-full w-full items-center justify-center rounded-full bg-muted", @fallback_text_size])"
+                x-show="failed"
+                x-cloak
+            >
+                @fallback
+            </span>
+        } @else {
+            <span class="@utils::cn(&["flex h-full w-full items-center justify-center rounded-full bg-muted", @fallback_text_size])">
+                @fallback
+            </span>
+        }
+    </span>
+}
+
+@* Shorthand for default avatar with image *@
+@fn image(src: &str, alt: &str, fallback: &str) {
+    <@apply src=Some(@src) alt=@alt fallback=@fallback size=Size::Default class=None />
+}
+
+@* Shorthand for avatar with only fallback (no image) *@
+@fn fallback(initials: &str) {
+    <@apply src=None alt=@initials fallback=@initials size=Size::Default class=None />
+}
+
+@* Small avatar with image *@
+@fn sm(src: &str, alt: &str, fallback: &str) {
+    <@apply src=Some(@src) alt=@alt fallback=@fallback size=Size::Sm class=None />
+}
+
+@* Large avatar with image *@
+@fn lg(src: &str, alt: &str, fallback: &str) {
+    <@apply src=Some(@src) alt=@alt fallback=@fallback size=Size::Lg class=None />
+}
