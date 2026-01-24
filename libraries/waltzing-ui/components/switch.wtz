@@ -1,0 +1,110 @@
+@*
+ * Switch component
+ * Toggle switch for boolean values with animated thumb
+ *
+ * Usage:
+ *   @import ui/components/switch.wtz as switch
+ *
+ *   <@switch::apply name="notifications" checked=true disabled=false class=None />
+ *   <@switch::labeled label="Enable notifications" name="notifications" checked=false disabled=false description=None />
+ *   <@switch::simple name="dark_mode" />
+ *   <@switch::on name="feature" />
+ *@
+
+@import lib/utils.wtz as utils
+
+@fn apply(
+    name: &str,
+    checked: bool,
+    disabled: bool,
+    class: Option<&str>,
+) {
+    @let track_base = "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+
+    @let track_checked = "bg-primary"
+    @let track_unchecked = "bg-input"
+
+    @let thumb_base = "pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform"
+    @let thumb_checked = "translate-x-4"
+    @let thumb_unchecked = "translate-x-0"
+
+    <button
+        type="button"
+        role="switch"
+        id="@name"
+        name="@name"
+        class="@utils::cn(&[@track_base, @if checked { @track_checked } else { @track_unchecked }, @class.unwrap_or("")])"
+        aria-checked="@if checked { "true" } else { "false" }"
+        @if checked { data-state="checked" } else { data-state="unchecked" }
+        @if disabled { disabled aria-disabled="true" }
+        x-data="{ on: @if checked { "true" } else { "false" } }"
+        x-on:click="on = !on; $dispatch('input', { name: '@name', value: on })"
+        :aria-checked="on.toString()"
+        :data-state="on ? 'checked' : 'unchecked'"
+        :class="on ? '@track_checked' : '@track_unchecked'"
+    >
+        <span
+            class="@utils::cn(&[@thumb_base, @if checked { @thumb_checked } else { @thumb_unchecked }])"
+            :class="on ? '@thumb_checked' : '@thumb_unchecked'"
+        ></span>
+    </button>
+    <input type="hidden" name="@name" :value="on" />
+}
+
+@* Switch with label *@
+@fn labeled(
+    label: &str,
+    name: &str,
+    checked: bool,
+    disabled: bool,
+    description: Option<&str>,
+) {
+    @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+
+    @let disabled_cls = @if disabled { "cursor-not-allowed opacity-70" } else { "" }
+
+    <div class="flex items-center justify-between space-x-4">
+        <div class="space-y-0.5">
+            <label for="@name" class="@utils::cn(&[@label_cls, @disabled_cls])">
+                @label
+            </label>
+            @if let Some(desc) = description {
+                <p class="text-sm text-muted-foreground">@desc</p>
+            }
+        </div>
+        <@apply
+            name=@name
+            checked=@checked
+            disabled=@disabled
+            class=None
+        />
+    </div>
+}
+
+@* Switch with label on the left *@
+@fn with_label(label: &str, name: &str, checked: bool, disabled: bool) {
+    @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    @let disabled_cls = @if disabled { "cursor-not-allowed opacity-70" } else { "" }
+
+    <div class="flex items-center space-x-2">
+        <@apply name=@name checked=@checked disabled=@disabled class=None />
+        <label for="@name" class="@utils::cn(&[@label_cls, @disabled_cls])">
+            @label
+        </label>
+    </div>
+}
+
+@* Simple switch, unchecked by default *@
+@fn simple(name: &str) {
+    <@apply name=@name checked=false disabled=false class=None />
+}
+
+@* Switch that's on by default *@
+@fn on(name: &str) {
+    <@apply name=@name checked=true disabled=false class=None />
+}
+
+@* Disabled switch *@
+@fn disabled(name: &str, checked: bool) {
+    <@apply name=@name checked=@checked disabled=true class=None />
+}
