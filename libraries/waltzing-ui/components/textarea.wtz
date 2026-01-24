@@ -1,6 +1,25 @@
 @*
  * Textarea component
  * Multi-line text input field with optional label and error state
+ *
+ * Usage:
+ * ```
+ * @import ui/components/textarea.wtz as textarea
+ *
+ * <@textarea::simple name="bio" value=None placeholder=Some("Tell us about yourself") />
+ *
+ * <@textarea::labeled
+ *     label="Description"
+ *     name="description"
+ *     value=Some("Initial text")
+ *     placeholder=Some("Enter description...")
+ *     rows=Some(6)
+ *     disabled=false
+ *     required=true
+ *     error=None
+ *     class=None
+ * />
+ * ```
  *@
 
 @import lib/utils.wtz as utils
