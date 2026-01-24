@@ -1,6 +1,24 @@
 @*
  * Alert component
  * Callout for important messages
+ *
+ * @example
+ * @import components/alert.wtz as alert
+ *
+ * <@alert::default>
+ *     <@alert::title>Heads up!</@>
+ *     <@alert::description>You can use alerts to display important messages.</@>
+ * </@>
+ *
+ * <@alert::destructive>
+ *     <@alert::title>Error</@>
+ *     <@alert::description>Something went wrong. Please try again.</@>
+ * </@>
+ *
+ * <@alert::apply variant=alert::Variant::Success class=Some("my-4")>
+ *     <@alert::title>Success!</@>
+ *     <@alert::description>Your changes have been saved.</@>
+ * </@>
  *@
 
 @import lib/utils.wtz as utils
