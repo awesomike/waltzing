@@ -1,0 +1,136 @@
+@*
+ * Popover component
+ * Floating content anchored to a trigger element
+ * Uses Alpine.js for positioning and click-outside handling
+ *
+ * Usage:
+ *   @import ui/components/popover.wtz as popover
+ *
+ *   <@popover::apply
+ *       side=popover::Side::Bottom
+ *       align=popover::Align::Center
+ *       trigger=@{ <button>Open</button> }
+ *       content=@{ <p>Popover content here</p> }
+ *   />
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Side {
+    Top,
+    Right,
+    Bottom,
+    Left,
+}
+
+@enum Align {
+    Start,
+    Center,
+    End,
+}
+
+@fn apply(
+    side: Side,
+    align: Align,
+    trigger: @(),
+    content: @(),
+) {
+    @let side_cls = @match side {
+        Side::Top => { "bottom-full mb-2" }
+        Side::Right => { "left-full ml-2" }
+        Side::Bottom => { "top-full mt-2" }
+        Side::Left => { "right-full mr-2" }
+    }
+
+    @let align_cls = @match align {
+        Align::Start => { "left-0" }
+        Align::Center => { "left-1/2 -translate-x-1/2" }
+        Align::End => { "right-0" }
+    }
+
+    <div class="relative inline-block" x-data="{ open: false }">
+        @* Trigger *@
+        <div @click="open = !open" aria-haspopup="true" :aria-expanded="open">
+            @trigger()
+        </div>
+
+        @* Popover content *@
+        <div
+            x-show="open"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            @click.outside="open = false"
+            @keydown.escape.window="open = false"
+            class="@utils::cn(&["absolute z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", @side_cls, @align_cls])"
+            style="display: none;"
+            role="dialog"
+        >
+            @content()
+        </div>
+    </div>
+}
+
+@* Controlled popover (external state) *@
+@fn controlled(
+    open_var: &str,
+    side: Side,
+    align: Align,
+    trigger: @(),
+    content: @(),
+) {
+    @let side_cls = @match side {
+        Side::Top => { "bottom-full mb-2" }
+        Side::Right => { "left-full ml-2" }
+        Side::Bottom => { "top-full mt-2" }
+        Side::Left => { "right-full mr-2" }
+    }
+
+    @let align_cls = @match align {
+        Align::Start => { "left-0" }
+        Align::Center => { "left-1/2 -translate-x-1/2" }
+        Align::End => { "right-0" }
+    }
+
+    <div class="relative inline-block">
+        @* Trigger *@
+        <div @click="@open_var = !@open_var" aria-haspopup="true" :aria-expanded="@open_var">
+            @trigger()
+        </div>
+
+        @* Popover content *@
+        <div
+            x-show="@open_var"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            @click.outside="@open_var = false"
+            @keydown.escape.window="@open_var = false"
+            class="@utils::cn(&["absolute z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", @side_cls, @align_cls])"
+            style="display: none;"
+            role="dialog"
+        >
+            @content()
+        </div>
+    </div>
+}
+
+@* Close button helper for popover content *@
+@fn close_button(class: Option<&str>) {
+    <button
+        class="@utils::cn(&["absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", @class.unwrap_or("")])"
+        @click="open = false"
+        aria-label="Close"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+        </svg>
+    </button>
+}

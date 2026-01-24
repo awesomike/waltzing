@@ -28,6 +28,7 @@ select = { path = "components/select.wtz", deps = ["lib/utils"] }
 table = { path = "components/table.wtz", deps = ["lib/utils"] }
 tabs = { path = "components/tabs.wtz", deps = ["lib/utils"] }
 textarea = { path = "components/textarea.wtz", deps = ["lib/utils"] }
+popover = { path = "components/popover.wtz", deps = ["lib/utils"] }
 progress = { path = "components/progress.wtz", deps = ["lib/utils"] }
 skeleton = { path = "components/skeleton.wtz", deps = ["lib/utils"] }
 switch = { path = "components/switch.wtz", deps = ["lib/utils"] }
