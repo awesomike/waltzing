@@ -16,6 +16,7 @@ button = { path = "components/button.wtz", deps = ["lib/utils"] }
 card = { path = "components/card.wtz", deps = ["lib/utils"] }
 input = { path = "components/input.wtz", deps = ["lib/utils"] }
 label = { path = "components/label.wtz", deps = ["lib/utils"] }
+separator = { path = "components/separator.wtz", deps = ["lib/utils"] }
 dialog = { path = "components/dialog.wtz", deps = ["button", "lib/utils"] }
 dropdown = { path = "components/dropdown.wtz", deps = ["lib/utils"] }
 select = { path = "components/select.wtz", deps = ["lib/utils"] }

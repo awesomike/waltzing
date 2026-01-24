@@ -1,0 +1,46 @@
+@*
+ * Separator component
+ * Visual divider between sections
+ *
+ * Usage:
+ *   @import ui/components/separator.wtz as separator
+ *
+ *   <@separator::horizontal />
+ *   <@separator::vertical />
+ *   <@separator::apply orientation=separator::Orientation::Horizontal class=None />
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Orientation {
+    Horizontal,
+    Vertical,
+}
+
+@fn apply(
+    orientation: Orientation,
+    class: Option<&str>,
+) {
+    @let base = "shrink-0 bg-border"
+
+    @let orientation_cls = @match orientation {
+        Orientation::Horizontal => "h-[1px] w-full",
+        Orientation::Vertical => "h-full w-[1px]",
+    }
+
+    <div
+        role="separator"
+        aria-orientation="@match orientation { Orientation::Horizontal => "horizontal", Orientation::Vertical => "vertical" }"
+        class="@utils::cn(&[@base, @orientation_cls, @class.unwrap_or("")])"
+    ></div>
+}
+
+@* Horizontal separator (default) *@
+@fn horizontal() {
+    <@apply orientation=Orientation::Horizontal class=None />
+}
+
+@* Vertical separator *@
+@fn vertical() {
+    <@apply orientation=Orientation::Vertical class=None />
+}
