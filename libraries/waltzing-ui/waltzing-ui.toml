@@ -12,6 +12,7 @@ plugins = ["@tailwindcss/forms"]
 plugins = ["@alpinejs/focus", "@alpinejs/collapse"]
 
 [components]
+badge = { path = "components/badge.wtz", deps = ["lib/utils"] }
 button = { path = "components/button.wtz", deps = ["lib/utils"] }
 card = { path = "components/card.wtz", deps = ["lib/utils"] }
 input = { path = "components/input.wtz", deps = ["lib/utils"] }
