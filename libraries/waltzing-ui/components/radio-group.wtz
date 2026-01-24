@@ -51,7 +51,7 @@
     >
         @for opt in options {
             @let is_checked = @selected == Some(opt.value.as_str())
-            @let is_disabled = @disabled || @opt.disabled
+            @let is_disabled = (@disabled || @opt.disabled)
             @let item_id = @format!("{}_{}", @name, @opt.value)
 
             <div class="flex items-center space-x-2">
@@ -134,7 +134,7 @@
     >
         @for opt in options {
             @let is_checked = @selected == Some(opt.value.as_str())
-            @let is_disabled = @disabled || @opt.disabled
+            @let is_disabled = (@disabled || @opt.disabled)
             @let item_id = @format!("{}_{}", @name, @opt.value)
 
             <div class="flex items-start space-x-2">
