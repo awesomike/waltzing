@@ -1,0 +1,280 @@
+@*
+ * MinMax Editor Component
+ * A collapsible range input that shows a single value when min equals max,
+ * and expands to show separate min/max inputs for range editing.
+ *
+ * Usage:
+ *   @import ui/components/minmax-editor.wtz as minmax
+ *
+ *   // Basic form input
+ *   <@minmax::apply
+ *       name="reps"
+ *       min_value=Some(8.0)
+ *       max_value=Some(12.0)
+ *       step=1.0
+ *       min_allowed=Some(1.0)
+ *   />
+ *
+ *   // With label
+ *   <@minmax::labeled
+ *       label="Repetitions"
+ *       name="reps"
+ *       min_value=Some(8.0)
+ *       max_value=Some(12.0)
+ *       step=1.0
+ *   />
+ *
+ *   // Alpine.js reactive input
+ *   <@minmax::input
+ *       label="Sets"
+ *       model_min="data.sets_min"
+ *       model_max="data.sets_max"
+ *       step=1.0
+ *   />
+ *@
+
+@import lib/utils.wtz as utils
+
+@* Main form-compatible apply function *@
+@fn apply(
+    name: &str,
+    min_value: Option<f64>,
+    max_value: Option<f64>,
+    min_allowed: Option<f64>,
+    max_allowed: Option<f64>,
+    step: f64,
+    class: Option<&str>,
+) {
+    @let step_str = step.to_string()
+    @let min_attr = min_allowed.map(|v| v.to_string())
+    @let max_attr = max_allowed.map(|v| v.to_string())
+    @let is_expanded = (min_value.is_some() && max_value.is_some() && min_value != max_value)
+    @let min_init = min_value.unwrap_or(0.0)
+    @let max_init = max_value.unwrap_or(0.0)
+    @let name_min = format!("{}_min", name)
+    @let name_max = format!("{}_max", name)
+
+    @let container_cls = "inline-flex items-center"
+    @let input_cls = "flex h-9 w-20 rounded-md border border-input bg-transparent px-3 py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+
+    @let classes = &[@container_cls, @class.unwrap_or("")]
+
+    <div
+        class="@utils::cn(@classes)"
+        x-data=@```json {
+            expanded: @is_expanded,
+            minVal: @min_init,
+            maxVal: @max_init,
+            validateRange() {
+                if (this.minVal !== null && this.maxVal !== null && this.minVal > this.maxVal) {
+                    this.maxVal = this.minVal;
+                }
+            }
+        } ```@
+    >
+        @* Collapsed: Single input *@
+        <div x-show="!expanded" class="flex items-center gap-2">
+            <input
+                type="number"
+                name="@name_min"
+                step="@step_str"
+                @if let Some(min) = &min_attr { min="@min" }
+                @if let Some(max) = &max_attr { max="@max" }
+                x-model.number="minVal"
+                @@input="maxVal = minVal"
+                class="@input_cls"
+                placeholder="-"
+            />
+            @* Hidden max input synced with min when collapsed *@
+            <input type="hidden" name="@name_max" x-model="maxVal" />
+            <button
+                type="button"
+                @@click="expanded = true"
+                class="@btn_cls"
+                title="Expand to range"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        @* Expanded: Min to Max *@
+        <div x-show="expanded" class="flex items-center gap-2">
+            <input
+                type="number"
+                name="@name_min"
+                step="@step_str"
+                @if let Some(min) = &min_attr { min="@min" }
+                @if let Some(max) = &max_attr { max="@max" }
+                x-model.number="minVal"
+                @@blur="validateRange()"
+                class="@input_cls"
+                placeholder="Min"
+                aria-label="Minimum value"
+            />
+            <span class="text-sm text-muted-foreground">to</span>
+            <input
+                type="number"
+                name="@name_max"
+                step="@step_str"
+                @if let Some(min) = &min_attr { min="@min" }
+                @if let Some(max) = &max_attr { max="@max" }
+                x-model.number="maxVal"
+                @@blur="validateRange()"
+                class="@input_cls"
+                placeholder="Max"
+                aria-label="Maximum value"
+            />
+            <button
+                type="button"
+                @@click="if (minVal === maxVal || maxVal === null || maxVal === '') expanded = false"
+                :class="(minVal === maxVal || maxVal === null || maxVal === '') ? 'text-muted-foreground hover:text-foreground' : 'text-muted-foreground/30 cursor-not-allowed'"
+                :disabled="minVal !== maxVal && maxVal !== null && maxVal !== ''"
+                class="@btn_cls"
+                title="Collapse to single value"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="m18 15-6-6-6 6"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+}
+
+@* Apply with label *@
+@fn labeled(
+    label: &str,
+    name: &str,
+    min_value: Option<f64>,
+    max_value: Option<f64>,
+    min_allowed: Option<f64>,
+    max_allowed: Option<f64>,
+    step: f64,
+    class: Option<&str>,
+) {
+    <div class="space-y-1.5">
+        <label class="text-sm font-medium leading-none">@label</label>
+        <@apply
+            name=@name
+            min_value=@min_value
+            max_value=@max_value
+            min_allowed=@min_allowed
+            max_allowed=@max_allowed
+            step=@step
+            class=@class
+        />
+    </div>
+}
+
+@* Alpine.js reactive input with model binding *@
+@fn input(
+    label: &str,
+    model_min: &str,
+    model_max: &str,
+    step: f64,
+    min_allowed: Option<f64>,
+    max_allowed: Option<f64>,
+    class: Option<&str>,
+) {
+    @let step_str = step.to_string()
+    @let min_attr = min_allowed.map(|v| v.to_string())
+    @let max_attr = max_allowed.map(|v| v.to_string())
+
+    @let container_cls = "space-y-1.5"
+    @let input_cls = "flex h-9 w-20 rounded-md border border-input bg-transparent px-3 py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+
+    @let classes = &[@container_cls, @class.unwrap_or("")]
+
+    @let x_data_init = format!("{{ expanded: ({} !== null && {} !== null && {} !== {}) }}", model_min, model_max, model_min, model_max)
+    @let input_handler = format!("{} = {}", model_max, model_min)
+    @let blur_handler = format!("if ({} > {}) {{ {} = {} }}", model_min, model_max, model_max, model_min)
+    @let collapse_handler = format!("if ({} === {} || {} === null) expanded = false", model_min, model_max, model_max)
+    @let collapse_class = format!("({} === {} || {} === null) ? 'text-muted-foreground hover:text-foreground' : 'text-muted-foreground/30 cursor-not-allowed'", model_min, model_max, model_max)
+    @let collapse_disabled = format!("{} !== {} && {} !== null", model_min, model_max, model_max)
+
+    <div
+        class="@utils::cn(@classes)"
+        x-data="@x_data_init"
+    >
+        <label class="text-sm font-medium leading-none">@label</label>
+
+        @* Collapsed: Single input *@
+        <div x-show="!expanded" class="flex items-center gap-2">
+            <input
+                type="number"
+                step="@step_str"
+                @if let Some(min) = &min_attr { min="@min" }
+                @if let Some(max) = &max_attr { max="@max" }
+                x-model.number=@model_min
+                @@input="@input_handler"
+                class="@input_cls"
+                placeholder="-"
+            />
+            <button
+                type="button"
+                @@click="expanded = true"
+                class="@btn_cls"
+                title="Expand to range"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        @* Expanded: Min to Max *@
+        <div x-show="expanded" class="flex items-center gap-2">
+            <input
+                type="number"
+                step="@step_str"
+                @if let Some(min) = &min_attr { min="@min" }
+                @if let Some(max) = &max_attr { max="@max" }
+                x-model.number=@model_min
+                @@blur="@blur_handler"
+                class="@input_cls"
+                placeholder="Min"
+                aria-label="Minimum value"
+            />
+            <span class="text-sm text-muted-foreground">to</span>
+            <input
+                type="number"
+                step="@step_str"
+                @if let Some(min) = &min_attr { min="@min" }
+                @if let Some(max) = &max_attr { max="@max" }
+                x-model.number=@model_max
+                @@blur="@blur_handler"
+                class="@input_cls"
+                placeholder="Max"
+                aria-label="Maximum value"
+            />
+            <button
+                type="button"
+                @@click="@collapse_handler"
+                :class="@collapse_class"
+                :disabled="@collapse_disabled"
+                class="@btn_cls"
+                title="Collapse to single value"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="m18 15-6-6-6 6"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+}
+
+@* Shorthand for simple apply with defaults *@
+@fn simple(name: &str, min_value: Option<f64>, max_value: Option<f64>) {
+    <@apply
+        name=@name
+        min_value=@min_value
+        max_value=@max_value
+        min_allowed=None
+        max_allowed=None
+        step=1.0
+        class=None
+    />
+}
