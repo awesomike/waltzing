@@ -31,6 +31,8 @@ struct LibraryManifest {
     components: HashMap<String, ComponentEntry>,
     #[serde(default)]
     layouts: HashMap<String, ComponentEntry>,
+    #[serde(default)]
+    blocks: HashMap<String, ComponentEntry>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -251,8 +253,14 @@ fn generate_libraries_module(libraries: &[DiscoveredLibrary], out_dir: &str) {
         let module_name = lib.dir_name.replace("-", "_");
         let module_path = gen_dir.join(format!("{}.rs", module_name));
 
-        let components: Vec<&String> = lib.manifest.components.keys().collect();
-        let layouts: Vec<&String> = lib.manifest.layouts.keys().collect();
+        let mut components: Vec<&String> = lib.manifest.components.keys().collect();
+        let mut layouts: Vec<&String> = lib.manifest.layouts.keys().collect();
+        let mut blocks: Vec<&String> = lib.manifest.blocks.keys().collect();
+
+        // Sort for consistent output
+        components.sort();
+        layouts.sort();
+        blocks.sort();
 
         let mut lib_code = String::new();
         lib_code.push_str(&format!(
@@ -273,6 +281,13 @@ fn generate_libraries_module(libraries: &[DiscoveredLibrary], out_dir: &str) {
         lib_code.push_str("pub const LAYOUTS: &[&str] = &[\n");
         for layout in &layouts {
             lib_code.push_str(&format!("    \"{}\",\n", layout));
+        }
+        lib_code.push_str("];\n\n");
+
+        lib_code.push_str("/// List of blocks in this library\n");
+        lib_code.push_str("pub const BLOCKS: &[&str] = &[\n");
+        for block in &blocks {
+            lib_code.push_str(&format!("    \"{}\",\n", block));
         }
         lib_code.push_str("];\n\n");
 

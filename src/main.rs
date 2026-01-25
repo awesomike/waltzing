@@ -464,100 +464,55 @@ fn not_found_page(id: &str) -> String {
     )
 }
 
-fn get_component_list(library_id: &str) -> Vec<(&'static str, &'static str)> {
+/// Convert kebab-case id to Title Case display name
+fn id_to_title(id: &str) -> String {
+    id.split('-')
+        .map(|s| {
+            let mut c = s.chars();
+            match c.next() {
+                None => String::new(),
+                Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn get_component_list(library_id: &str) -> Vec<(String, String)> {
     match library_id {
-        "waltzing-ui" => vec![
-            ("accordion", "Accordion"),
-            ("ajax-select", "Ajax Select"),
-            ("alert", "Alert"),
-            ("alert-dialog", "Alert Dialog"),
-            ("aspect-ratio", "Aspect Ratio"),
-            ("avatar", "Avatar"),
-            ("badge", "Badge"),
-            ("breadcrumb", "Breadcrumb"),
-            ("button", "Button"),
-            ("calendar", "Calendar"),
-            ("card", "Card"),
-            ("carousel", "Carousel"),
-            ("checkbox", "Checkbox"),
-            ("collapsible", "Collapsible"),
-            ("combobox", "Combobox"),
-            ("command", "Command"),
-            ("context-menu", "Context Menu"),
-            ("date-picker", "Date Picker"),
-            ("datetime-picker", "DateTime Picker"),
-            ("dialog", "Dialog"),
-            ("drawer", "Drawer"),
-            ("dropdown", "Dropdown"),
-            ("duration-input", "Duration Input"),
-            ("file-upload", "File Upload"),
-            ("flash-messages", "Flash Messages"),
-            ("form", "Form"),
-            ("formatted-number", "Formatted Number"),
-            ("hover-card", "Hover Card"),
-            ("input", "Input"),
-            ("input-otp", "Input OTP"),
-            ("label", "Label"),
-            ("menubar", "Menubar"),
-            ("minmax-editor", "Min/Max Editor"),
-            ("navigation-menu", "Navigation Menu"),
-            ("numeric-input", "Numeric Input"),
-            ("pagination", "Pagination"),
-            ("password-input", "Password Input"),
-            ("popover", "Popover"),
-            ("progress", "Progress"),
-            ("radio-group", "Radio Group"),
-            ("resizable", "Resizable"),
-            ("scroll-area", "Scroll Area"),
-            ("searchable-select", "Searchable Select"),
-            ("select", "Select"),
-            ("separator", "Separator"),
-            ("sheet", "Sheet"),
-            ("skeleton", "Skeleton"),
-            ("slider", "Slider"),
-            ("switch", "Switch"),
-            ("table", "Table"),
-            ("tabs", "Tabs"),
-            ("textarea", "Textarea"),
-            ("time-picker", "Time Picker"),
-            ("toast", "Toast"),
-            ("toggle", "Toggle"),
-            ("toggle-group", "Toggle Group"),
-            ("tooltip", "Tooltip"),
-            ("validation-errors", "Validation Errors"),
-        ],
+        "waltzing-ui" => generated::waltzing_ui::COMPONENTS
+            .iter()
+            .map(|id| (id.to_string(), id_to_title(id)))
+            .collect(),
         _ => vec![],
     }
 }
 
-fn get_layout_list(library_id: &str) -> Vec<(&'static str, &'static str)> {
+fn get_layout_list(library_id: &str) -> Vec<(String, String)> {
     match library_id {
-        "waltzing-ui" => vec![
-            ("base", "Base"),
-            ("sidebar", "Sidebar"),
-        ],
+        "waltzing-ui" => generated::waltzing_ui::LAYOUTS
+            .iter()
+            .map(|id| (id.to_string(), id_to_title(id)))
+            .collect(),
         _ => vec![],
     }
 }
 
-fn get_block_list(library_id: &str) -> Vec<(&'static str, &'static str)> {
+fn get_block_list(library_id: &str) -> Vec<(String, String)> {
     match library_id {
-        "waltzing-ui" => vec![
-            ("contact-form", "Contact Form"),
-            ("profile-form", "Profile Form"),
-            ("confirm-dialog", "Confirm Dialog"),
-            ("delete-dialog", "Delete Dialog"),
-            ("share-dialog", "Share Dialog"),
-        ],
+        "waltzing-ui" => generated::waltzing_ui::BLOCKS
+            .iter()
+            .map(|id| (id.to_string(), id_to_title(id)))
+            .collect(),
         _ => vec![],
     }
 }
 
 fn generate_sidebar(
     library_id: &str,
-    components: &[(&str, &str)],
-    layouts: &[(&str, &str)],
-    blocks: &[(&str, &str)],
+    components: &[(String, String)],
+    layouts: &[(String, String)],
+    blocks: &[(String, String)],
     active: Option<&str>,
 ) -> String {
     // Generate options for combobox
@@ -577,7 +532,7 @@ fn generate_sidebar(
     let nav_items: String = components
         .iter()
         .map(|(id, name)| {
-            let is_active = active == Some(*id);
+            let is_active = active == Some(id.as_str());
             let active_class = if is_active {
                 "bg-accent text-accent-foreground"
             } else {
@@ -596,7 +551,7 @@ fn generate_sidebar(
     let layout_nav_items: String = layouts
         .iter()
         .map(|(id, name)| {
-            let is_active = active == Some(*id);
+            let is_active = active == Some(id.as_str());
             let active_class = if is_active {
                 "bg-accent text-accent-foreground"
             } else {
@@ -615,7 +570,7 @@ fn generate_sidebar(
     let block_nav_items: String = blocks
         .iter()
         .map(|(id, name)| {
-            let is_active = active == Some(*id);
+            let is_active = active == Some(id.as_str());
             let active_class = if is_active {
                 "bg-accent text-accent-foreground"
             } else {
@@ -715,7 +670,7 @@ fn generate_sidebar(
     )
 }
 
-fn generate_all_components_preview(library_id: &str, components: &[(&str, &str)]) -> String {
+fn generate_all_components_preview(library_id: &str, components: &[(String, String)]) -> String {
     let cards: String = components
         .iter()
         .map(|(id, name)| {
