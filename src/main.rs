@@ -468,34 +468,63 @@ fn get_component_list(library_id: &str) -> Vec<(&'static str, &'static str)> {
     match library_id {
         "waltzing-ui" => vec![
             ("accordion", "Accordion"),
+            ("ajax-select", "Ajax Select"),
             ("alert", "Alert"),
             ("alert-dialog", "Alert Dialog"),
+            ("aspect-ratio", "Aspect Ratio"),
             ("avatar", "Avatar"),
             ("badge", "Badge"),
             ("breadcrumb", "Breadcrumb"),
             ("button", "Button"),
+            ("calendar", "Calendar"),
             ("card", "Card"),
+            ("carousel", "Carousel"),
             ("checkbox", "Checkbox"),
             ("collapsible", "Collapsible"),
             ("combobox", "Combobox"),
+            ("command", "Command"),
+            ("context-menu", "Context Menu"),
+            ("date-picker", "Date Picker"),
+            ("datetime-picker", "DateTime Picker"),
             ("dialog", "Dialog"),
+            ("drawer", "Drawer"),
             ("dropdown", "Dropdown"),
+            ("duration-input", "Duration Input"),
+            ("file-upload", "File Upload"),
+            ("flash-messages", "Flash Messages"),
             ("form", "Form"),
+            ("formatted-number", "Formatted Number"),
+            ("hover-card", "Hover Card"),
             ("input", "Input"),
+            ("input-otp", "Input OTP"),
             ("label", "Label"),
+            ("menubar", "Menubar"),
+            ("minmax-editor", "Min/Max Editor"),
+            ("navigation-menu", "Navigation Menu"),
+            ("numeric-input", "Numeric Input"),
+            ("pagination", "Pagination"),
+            ("password-input", "Password Input"),
             ("popover", "Popover"),
             ("progress", "Progress"),
             ("radio-group", "Radio Group"),
+            ("resizable", "Resizable"),
+            ("scroll-area", "Scroll Area"),
+            ("searchable-select", "Searchable Select"),
             ("select", "Select"),
             ("separator", "Separator"),
+            ("sheet", "Sheet"),
             ("skeleton", "Skeleton"),
             ("slider", "Slider"),
             ("switch", "Switch"),
             ("table", "Table"),
             ("tabs", "Tabs"),
             ("textarea", "Textarea"),
+            ("time-picker", "Time Picker"),
+            ("toast", "Toast"),
             ("toggle", "Toggle"),
+            ("toggle-group", "Toggle Group"),
             ("tooltip", "Tooltip"),
+            ("validation-errors", "Validation Errors"),
         ],
         _ => vec![],
     }
@@ -993,6 +1022,349 @@ fn get_component_preview(component: &str) -> &'static str {
             </div>
         "#,
 
+        "ajax-select" => r#"
+            <div x-data="{ open: false, search: '', loading: false, selected: '' }" class="relative w-[200px]">
+                <button @click="open = !open" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
+                    <span x-text="selected || 'Search users...'"></span>
+                    <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+            </div>
+        "#,
+
+        "aspect-ratio" => r#"
+            <div class="w-full max-w-[200px]">
+                <div class="relative" style="aspect-ratio: 16/9;">
+                    <img src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=800&dpr=2&q=80" alt="Photo" class="h-full w-full rounded-md object-cover">
+                </div>
+            </div>
+        "#,
+
+        "calendar" => r#"
+            <div class="p-3 rounded-md border bg-card text-card-foreground">
+                <div class="flex items-center justify-between mb-4">
+                    <button class="h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <div class="text-sm font-medium">January 2026</div>
+                    <button class="h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                    <div class="text-muted-foreground">Su</div><div class="text-muted-foreground">Mo</div><div class="text-muted-foreground">Tu</div><div class="text-muted-foreground">We</div><div class="text-muted-foreground">Th</div><div class="text-muted-foreground">Fr</div><div class="text-muted-foreground">Sa</div>
+                    <div class="h-8 w-8"></div><div class="h-8 w-8"></div><div class="h-8 w-8"></div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">1</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">2</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">3</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">4</div>
+                    <div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">5</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">6</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">7</div><div class="h-8 w-8 flex items-center justify-center rounded-md bg-primary text-primary-foreground">8</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">9</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">10</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">11</div>
+                </div>
+            </div>
+        "#,
+
+        "carousel" => r#"
+            <div class="relative w-full max-w-xs overflow-hidden">
+                <div class="flex transition-transform duration-300">
+                    <div class="w-full flex-shrink-0 p-4">
+                        <div class="rounded-lg border bg-card p-6 text-center">
+                            <span class="text-2xl">1</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 border flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <button class="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 border flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                    <div class="h-2 w-2 rounded-full bg-primary"></div>
+                    <div class="h-2 w-2 rounded-full bg-primary/30"></div>
+                    <div class="h-2 w-2 rounded-full bg-primary/30"></div>
+                </div>
+            </div>
+        "#,
+
+        "command" => r#"
+            <div class="w-full max-w-sm rounded-lg border shadow-md">
+                <div class="flex items-center border-b px-3">
+                    <svg class="mr-2 h-4 w-4 shrink-0 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input class="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground" placeholder="Type a command or search...">
+                </div>
+                <div class="p-1">
+                    <div class="px-2 py-1.5 text-xs font-medium text-muted-foreground">Suggestions</div>
+                    <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Calendar</div>
+                    <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Search Emoji</div>
+                    <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Calculator</div>
+                </div>
+            </div>
+        "#,
+
+        "context-menu" => r#"
+            <div class="flex h-[150px] w-[200px] items-center justify-center rounded-md border border-dashed text-sm">
+                Right click here
+            </div>
+        "#,
+
+        "date-picker" => r#"
+            <div x-data="{ open: false }" class="relative">
+                <button @click="open = !open" class="flex h-9 w-[200px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+                    <span class="text-muted-foreground">Pick a date</span>
+                    <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                </button>
+            </div>
+        "#,
+
+        "datetime-picker" => r#"
+            <div class="flex gap-2">
+                <button class="flex h-9 w-[140px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
+                    <span class="text-muted-foreground">Date</span>
+                    <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                </button>
+                <button class="flex h-9 w-[100px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
+                    <span class="text-muted-foreground">Time</span>
+                    <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+            </div>
+        "#,
+
+        "drawer" => r#"
+            <div x-data="{ open: false }">
+                <button @click="open = true" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Open Drawer</button>
+                <template x-teleport="body">
+                    <div x-show="open" x-cloak class="fixed inset-0 z-50">
+                        <div class="fixed inset-0 bg-black/80" @click="open = false"></div>
+                        <div x-show="open" class="fixed inset-x-0 bottom-0 z-50 rounded-t-xl border bg-background p-4">
+                            <div class="mx-auto mb-4 h-2 w-24 rounded-full bg-muted"></div>
+                            <h3 class="text-lg font-semibold text-center">Drawer Title</h3>
+                            <p class="text-sm text-muted-foreground text-center mt-2">Drawer content goes here.</p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        "#,
+
+        "duration-input" => r#"
+            <div class="flex items-center gap-2">
+                <input type="number" value="2" class="w-16 h-9 rounded-md border border-input bg-transparent px-3 text-sm text-center">
+                <select class="h-9 rounded-md border border-input bg-transparent px-2 text-sm">
+                    <option>hours</option>
+                    <option>minutes</option>
+                    <option>days</option>
+                </select>
+            </div>
+        "#,
+
+        "file-upload" => r#"
+            <div class="flex flex-col items-center justify-center w-full max-w-sm rounded-lg border-2 border-dashed border-input p-6 hover:bg-accent/50 cursor-pointer">
+                <svg class="h-10 w-10 text-muted-foreground mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                <p class="text-sm text-muted-foreground">Drag and drop or click to upload</p>
+            </div>
+        "#,
+
+        "flash-messages" => r#"
+            <div class="w-full max-w-sm space-y-2">
+                <div class="flex items-center gap-2 rounded-lg border border-green-500/50 bg-green-50 dark:bg-green-950 p-3">
+                    <svg class="h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span class="text-sm text-green-900 dark:text-green-100">Changes saved successfully!</span>
+                </div>
+            </div>
+        "#,
+
+        "formatted-number" => r#"
+            <div class="space-y-2 text-center">
+                <div class="text-2xl font-bold">$1,234.56</div>
+                <div class="text-sm text-muted-foreground">Formatted currency</div>
+            </div>
+        "#,
+
+        "hover-card" => r##"
+            <div x-data="{ open: false }" class="relative inline-block">
+                <a href="#" @mouseenter="open = true" @mouseleave="open = false" class="text-sm underline">@nextjs</a>
+                <div x-show="open" x-cloak class="absolute top-full mt-2 w-64 rounded-md border bg-popover text-popover-foreground p-4 shadow-md z-50">
+                    <div class="flex gap-4">
+                        <div class="h-12 w-12 rounded-full bg-muted"></div>
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-semibold">Next.js</h4>
+                            <p class="text-xs text-muted-foreground">The React Framework for the Web</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        "##,
+
+        "input-otp" => r#"
+            <div class="flex gap-2">
+                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
+                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
+                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
+                <span class="flex items-center text-muted-foreground">-</span>
+                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
+                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
+                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
+            </div>
+        "#,
+
+        "menubar" => r#"
+            <div class="flex h-9 items-center space-x-1 rounded-md border bg-background p-1">
+                <button class="px-3 py-1 text-sm rounded-sm hover:bg-accent">File</button>
+                <button class="px-3 py-1 text-sm rounded-sm hover:bg-accent">Edit</button>
+                <button class="px-3 py-1 text-sm rounded-sm hover:bg-accent">View</button>
+                <button class="px-3 py-1 text-sm rounded-sm hover:bg-accent">Help</button>
+            </div>
+        "#,
+
+        "minmax-editor" => r#"
+            <div x-data="{ expanded: false }" class="w-full max-w-xs">
+                <button @click="expanded = !expanded" class="flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm">
+                    <span>Price Range</span>
+                    <span class="text-muted-foreground">$10 - $100</span>
+                </button>
+                <div x-show="expanded" x-collapse class="mt-2 space-y-2 rounded-md border p-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm w-10">Min</span>
+                        <input type="number" value="10" class="flex-1 h-8 rounded-md border border-input bg-transparent px-2 text-sm">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm w-10">Max</span>
+                        <input type="number" value="100" class="flex-1 h-8 rounded-md border border-input bg-transparent px-2 text-sm">
+                    </div>
+                </div>
+            </div>
+        "#,
+
+        "navigation-menu" => r##"
+            <nav class="flex items-center space-x-4">
+                <a href="#" class="text-sm font-medium transition-colors hover:text-primary">Getting Started</a>
+                <a href="#" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">Components</a>
+                <a href="#" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">Documentation</a>
+            </nav>
+        "##,
+
+        "numeric-input" => r#"
+            <div class="flex items-center">
+                <button class="h-9 w-9 rounded-l-md border border-r-0 hover:bg-accent">-</button>
+                <input type="number" value="5" class="h-9 w-16 border text-center bg-transparent text-sm">
+                <button class="h-9 w-9 rounded-r-md border border-l-0 hover:bg-accent">+</button>
+            </div>
+        "#,
+
+        "pagination" => r#"
+            <nav class="flex items-center space-x-2">
+                <button class="h-9 px-3 rounded-md border text-sm hover:bg-accent flex items-center gap-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                    Previous
+                </button>
+                <button class="h-9 w-9 rounded-md border bg-primary text-primary-foreground text-sm">1</button>
+                <button class="h-9 w-9 rounded-md border text-sm hover:bg-accent">2</button>
+                <button class="h-9 w-9 rounded-md border text-sm hover:bg-accent">3</button>
+                <span class="h-9 w-9 flex items-center justify-center text-muted-foreground">...</span>
+                <button class="h-9 w-9 rounded-md border text-sm hover:bg-accent">10</button>
+                <button class="h-9 px-3 rounded-md border text-sm hover:bg-accent flex items-center gap-1">
+                    Next
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </nav>
+        "#,
+
+        "password-input" => r#"
+            <div class="relative w-full max-w-xs">
+                <input type="password" value="password123" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm pr-10">
+                <button class="absolute right-0 top-0 h-9 w-9 flex items-center justify-center text-muted-foreground hover:text-foreground">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+            </div>
+        "#,
+
+        "resizable" => r#"
+            <div class="flex h-[150px] w-full max-w-md rounded-lg border">
+                <div class="flex-1 p-4 flex items-center justify-center">
+                    <span class="text-sm text-muted-foreground">Panel 1</span>
+                </div>
+                <div class="w-1 bg-border cursor-col-resize hover:bg-primary/50"></div>
+                <div class="flex-1 p-4 flex items-center justify-center">
+                    <span class="text-sm text-muted-foreground">Panel 2</span>
+                </div>
+            </div>
+        "#,
+
+        "scroll-area" => r#"
+            <div class="h-[150px] w-[200px] rounded-md border overflow-hidden">
+                <div class="p-4 space-y-4 h-full overflow-y-auto">
+                    <div class="text-sm">Item 1</div>
+                    <div class="text-sm">Item 2</div>
+                    <div class="text-sm">Item 3</div>
+                    <div class="text-sm">Item 4</div>
+                    <div class="text-sm">Item 5</div>
+                    <div class="text-sm">Item 6</div>
+                    <div class="text-sm">Item 7</div>
+                    <div class="text-sm">Item 8</div>
+                </div>
+            </div>
+        "#,
+
+        "searchable-select" => r#"
+            <div class="relative w-[200px]">
+                <div class="flex h-9 items-center rounded-md border border-input px-3">
+                    <svg class="h-4 w-4 mr-2 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" placeholder="Search..." class="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground">
+                </div>
+            </div>
+        "#,
+
+        "sheet" => r#"
+            <div x-data="{ open: false }">
+                <button @click="open = true" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Open Sheet</button>
+                <template x-teleport="body">
+                    <div x-show="open" x-cloak class="fixed inset-0 z-50">
+                        <div class="fixed inset-0 bg-black/80" @click="open = false"></div>
+                        <div class="fixed inset-y-0 right-0 z-50 w-3/4 max-w-sm border-l bg-background p-6 shadow-lg">
+                            <h3 class="text-lg font-semibold">Sheet Title</h3>
+                            <p class="text-sm text-muted-foreground mt-2">Sheet content slides in from the side.</p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        "#,
+
+        "time-picker" => r#"
+            <div class="flex items-center gap-2">
+                <select class="h-9 rounded-md border border-input bg-transparent px-2 text-sm">
+                    <option>09</option><option>10</option><option>11</option><option>12</option>
+                </select>
+                <span>:</span>
+                <select class="h-9 rounded-md border border-input bg-transparent px-2 text-sm">
+                    <option>00</option><option>15</option><option>30</option><option>45</option>
+                </select>
+                <select class="h-9 rounded-md border border-input bg-transparent px-2 text-sm">
+                    <option>AM</option><option>PM</option>
+                </select>
+            </div>
+        "#,
+
+        "toast" => r#"
+            <div class="flex gap-2">
+                <button onclick="if(window.showToast) showToast({title:'Success!',description:'Your message was sent.',variant:'success'})" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">Show Toast</button>
+            </div>
+        "#,
+
+        "toggle-group" => r#"
+            <div class="inline-flex rounded-md border">
+                <button class="h-9 px-3 text-sm rounded-l-md bg-accent">Left</button>
+                <button class="h-9 px-3 text-sm border-l hover:bg-accent">Center</button>
+                <button class="h-9 px-3 text-sm border-l rounded-r-md hover:bg-accent">Right</button>
+            </div>
+        "#,
+
+        "validation-errors" => r#"
+            <div class="w-full max-w-sm rounded-md border border-destructive/50 bg-destructive/10 p-4">
+                <div class="flex items-center gap-2 text-destructive mb-2">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span class="text-sm font-medium">Please fix the following errors:</span>
+                </div>
+                <ul class="list-disc list-inside text-sm text-destructive space-y-1">
+                    <li>Email is required</li>
+                    <li>Password must be at least 8 characters</li>
+                </ul>
+            </div>
+        "#,
+
         _ => r#"<div class="text-muted-foreground text-sm">Component preview</div>"#,
     }
 }
@@ -1472,6 +1844,401 @@ fn get_component_usage(component: &str) -> String {
     &lt;@combobox::item value="nuxt"&gt;Nuxt&lt;/@&gt;
     &lt;@combobox::item value="remix"&gt;Remix&lt;/@&gt;
 &lt;/@&gt;"#.to_string(),
+
+        "ajax-select" => r#"@import components/ajax_select.wtz as ajax_select
+
+// Ajax select with remote search
+&lt;@ajax_select
+    name="user"
+    placeholder="Search users..."
+    url="/api/users/search"
+    label_key="name"
+    value_key="id"
+/&gt;"#.to_string(),
+
+        "aspect-ratio" => r#"@import components/aspect_ratio.wtz as aspect_ratio
+
+// 16:9 aspect ratio
+&lt;@aspect_ratio ratio="16/9"&gt;
+    &lt;img src="/image.jpg" class="object-cover" /&gt;
+&lt;/@&gt;
+
+// Square
+&lt;@aspect_ratio ratio="1/1"&gt;
+    &lt;img src="/avatar.jpg" /&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "calendar" => r#"@import components/calendar.wtz as calendar
+
+// Basic calendar
+&lt;@calendar name="date" /&gt;
+
+// With selected date
+&lt;@calendar name="date" selected=Some("2026-01-15") /&gt;
+
+// With min/max dates
+&lt;@calendar
+    name="booking"
+    min_date=Some("2026-01-01")
+    max_date=Some("2026-12-31")
+/&gt;"#.to_string(),
+
+        "carousel" => r#"@import components/carousel.wtz as carousel
+
+// Basic carousel
+&lt;@carousel&gt;
+    &lt;@carousel::item&gt;&lt;img src="/slide1.jpg" /&gt;&lt;/@&gt;
+    &lt;@carousel::item&gt;&lt;img src="/slide2.jpg" /&gt;&lt;/@&gt;
+    &lt;@carousel::item&gt;&lt;img src="/slide3.jpg" /&gt;&lt;/@&gt;
+&lt;/@&gt;
+
+// Auto-playing carousel
+&lt;@carousel::autoplay interval=5000&gt;
+    &lt;@carousel::item&gt;Slide 1&lt;/@&gt;
+    &lt;@carousel::item&gt;Slide 2&lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "command" => r#"@import components/command.wtz as command
+
+&lt;@command&gt;
+    &lt;@command::input placeholder="Type a command..." /&gt;
+    &lt;@command::list&gt;
+        &lt;@command::group heading="Suggestions"&gt;
+            &lt;@command::item&gt;Calendar&lt;/@&gt;
+            &lt;@command::item&gt;Calculator&lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "context-menu" => r#"@import components/context_menu.wtz as context_menu
+
+&lt;@context_menu&gt;
+    &lt;@context_menu::trigger&gt;
+        &lt;div class="border border-dashed p-8"&gt;
+            Right click here
+        &lt;/div&gt;
+    &lt;/@&gt;
+    &lt;@context_menu::content&gt;
+        &lt;@context_menu::item&gt;Cut&lt;/@&gt;
+        &lt;@context_menu::item&gt;Copy&lt;/@&gt;
+        &lt;@context_menu::item&gt;Paste&lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "date-picker" => r#"@import components/date_picker.wtz as date_picker
+
+// Basic date picker
+&lt;@date_picker name="date" placeholder="Pick a date" /&gt;
+
+// With preselected value
+&lt;@date_picker name="birthday" value=Some("2000-01-15") /&gt;
+
+// With format
+&lt;@date_picker name="date" format="DD/MM/YYYY" /&gt;"#.to_string(),
+
+        "datetime-picker" => r#"@import components/datetime_picker.wtz as datetime_picker
+
+// Combined date and time picker
+&lt;@datetime_picker name="event_time" /&gt;
+
+// With default value
+&lt;@datetime_picker
+    name="meeting"
+    value=Some("2026-01-15T14:30")
+/&gt;"#.to_string(),
+
+        "drawer" => r#"@import components/drawer.wtz as drawer
+
+&lt;@drawer
+    title="Edit Profile"
+    description=Some("Make changes to your profile.")
+    trigger=@{ &lt;@button&gt;Open Drawer&lt;/@&gt; }
+    content=@{
+        &lt;p&gt;Drawer content here&lt;/p&gt;
+    }
+    footer=Some(@{
+        &lt;@button&gt;Save changes&lt;/@&gt;
+    })
+/&gt;"#.to_string(),
+
+        "duration-input" => r#"@import components/duration_input.wtz as duration_input
+
+// Duration with hours/minutes/days
+&lt;@duration_input
+    name="timeout"
+    value=2
+    unit="hours"
+/&gt;
+
+// Custom units
+&lt;@duration_input
+    name="delay"
+    units=vec!["seconds", "minutes", "hours"]
+/&gt;"#.to_string(),
+
+        "file-upload" => r#"@import components/file_upload.wtz as file_upload
+
+// Basic file upload
+&lt;@file_upload name="document" /&gt;
+
+// With accepted types
+&lt;@file_upload
+    name="image"
+    accept=".jpg,.png,.gif"
+    max_size_mb=5
+/&gt;
+
+// Multiple files
+&lt;@file_upload name="files" multiple=true /&gt;"#.to_string(),
+
+        "flash-messages" => r#"@import components/flash_messages.wtz as flash
+
+// Place container in layout (once)
+&lt;@flash::container /&gt;
+
+// Show messages
+&lt;@flash::success message="Saved successfully!" /&gt;
+&lt;@flash::error message="Something went wrong." /&gt;
+&lt;@flash::warning message="Please review your input." /&gt;"#.to_string(),
+
+        "formatted-number" => r#"@import components/formatted_number.wtz as formatted_number
+
+// Currency formatting
+&lt;@formatted_number value=1234.56 style="currency" currency="USD" /&gt;
+
+// Percentage
+&lt;@formatted_number value=0.85 style="percent" /&gt;
+
+// With locale
+&lt;@formatted_number value=1234567 locale="de-DE" /&gt;"#.to_string(),
+
+        "hover-card" => r#"@import components/hover_card.wtz as hover_card
+
+&lt;@hover_card
+    trigger=@{ &lt;a href="/user/jane"&gt;@jane&lt;/a&gt; }
+    content=@{
+        &lt;div class="flex gap-4"&gt;
+            &lt;img src="/avatar.jpg" class="h-12 w-12 rounded-full" /&gt;
+            &lt;div&gt;
+                &lt;h4 class="font-semibold"&gt;Jane Doe&lt;/h4&gt;
+                &lt;p class="text-sm text-muted-foreground"&gt;Software Engineer&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    }
+/&gt;"#.to_string(),
+
+        "input-otp" => r#"@import components/input_otp.wtz as input_otp
+
+// 6-digit OTP
+&lt;@input_otp name="code" length=6 /&gt;
+
+// With separator
+&lt;@input_otp name="code" length=6 separator_after=3 /&gt;
+
+// 4-digit PIN
+&lt;@input_otp name="pin" length=4 /&gt;"#.to_string(),
+
+        "menubar" => r#"@import components/menubar.wtz as menubar
+
+&lt;@menubar&gt;
+    &lt;@menubar::menu&gt;
+        &lt;@menubar::trigger&gt;File&lt;/@&gt;
+        &lt;@menubar::content&gt;
+            &lt;@menubar::item&gt;New&lt;/@&gt;
+            &lt;@menubar::item&gt;Open&lt;/@&gt;
+            &lt;@menubar::separator /&gt;
+            &lt;@menubar::item&gt;Exit&lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@menubar::menu&gt;
+        &lt;@menubar::trigger&gt;Edit&lt;/@&gt;
+        &lt;@menubar::content&gt;
+            &lt;@menubar::item&gt;Undo&lt;/@&gt;
+            &lt;@menubar::item&gt;Redo&lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "minmax-editor" => r#"@import components/minmax_editor.wtz as minmax_editor
+
+// Price range editor
+&lt;@minmax_editor
+    name="price"
+    label="Price Range"
+    min_value=0
+    max_value=100
+    prefix="$"
+/&gt;
+
+// With step
+&lt;@minmax_editor
+    name="quantity"
+    label="Quantity"
+    min_value=1
+    max_value=1000
+    step=10
+/&gt;"#.to_string(),
+
+        "navigation-menu" => r#"@import components/navigation_menu.wtz as nav
+
+&lt;@nav&gt;
+    &lt;@nav::list&gt;
+        &lt;@nav::item&gt;
+            &lt;@nav::link href="/getting-started"&gt;
+                Getting Started
+            &lt;/@&gt;
+        &lt;/@&gt;
+        &lt;@nav::item&gt;
+            &lt;@nav::trigger&gt;Components&lt;/@&gt;
+            &lt;@nav::content&gt;
+                &lt;@nav::link href="/components/button"&gt;Button&lt;/@&gt;
+                &lt;@nav::link href="/components/input"&gt;Input&lt;/@&gt;
+            &lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "numeric-input" => r#"@import components/numeric_input.wtz as numeric_input
+
+// Basic numeric input with +/- buttons
+&lt;@numeric_input name="quantity" value=1 min=0 max=100 /&gt;
+
+// With step
+&lt;@numeric_input name="price" value=10 step=0.5 /&gt;"#.to_string(),
+
+        "pagination" => r#"@import components/pagination.wtz as pagination
+
+// Full pagination with page numbers
+&lt;@pagination
+    current=3
+    total=10
+    siblings=1
+    href_template="/posts?page={page}"
+/&gt;
+
+// Simple prev/next
+&lt;@pagination::simple
+    current=2
+    total=5
+    prev_url=Some("/posts?page=1")
+    next_url=Some("/posts?page=3")
+/&gt;"#.to_string(),
+
+        "password-input" => r#"@import components/password_input.wtz as password_input
+
+// Password input with show/hide toggle
+&lt;@password_input name="password" placeholder="Enter password" /&gt;
+
+// With strength indicator
+&lt;@password_input
+    name="new_password"
+    show_strength=true
+/&gt;"#.to_string(),
+
+        "resizable" => r#"@import components/resizable.wtz as resizable
+
+&lt;@resizable direction="horizontal"&gt;
+    &lt;@resizable::panel default_size=50&gt;
+        Panel 1
+    &lt;/@&gt;
+    &lt;@resizable::handle /&gt;
+    &lt;@resizable::panel default_size=50&gt;
+        Panel 2
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "scroll-area" => r#"@import components/scroll_area.wtz as scroll_area
+
+&lt;@scroll_area class="h-[200px]"&gt;
+    @for item in items {
+        &lt;div&gt;@item&lt;/div&gt;
+    }
+&lt;/@&gt;
+
+// Horizontal scroll
+&lt;@scroll_area orientation="horizontal"&gt;
+    &lt;div class="flex gap-4"&gt;...&lt;/div&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "searchable-select" => r#"@import components/searchable_select.wtz as searchable_select
+
+&lt;@searchable_select name="country" placeholder="Search countries..."&gt;
+    &lt;@searchable_select::item value="us"&gt;United States&lt;/@&gt;
+    &lt;@searchable_select::item value="uk"&gt;United Kingdom&lt;/@&gt;
+    &lt;@searchable_select::item value="ca"&gt;Canada&lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "sheet" => r#"@import components/sheet.wtz as sheet
+
+&lt;@sheet side=sheet::Side::Right&gt;
+    &lt;@sheet::trigger&gt;
+        &lt;@button variant=button::Variant::Outline&gt;Open&lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@sheet::content&gt;
+        &lt;@sheet::header&gt;
+            &lt;@sheet::title&gt;Edit profile&lt;/@&gt;
+            &lt;@sheet::description&gt;
+                Make changes to your profile here.
+            &lt;/@&gt;
+        &lt;/@&gt;
+        &lt;div class="py-4"&gt;Content&lt;/div&gt;
+        &lt;@sheet::footer&gt;
+            &lt;@button&gt;Save&lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "time-picker" => r#"@import components/time_picker.wtz as time_picker
+
+// 12-hour format
+&lt;@time_picker name="time" format="12h" /&gt;
+
+// 24-hour format
+&lt;@time_picker name="time" format="24h" /&gt;
+
+// With default value
+&lt;@time_picker name="meeting" value="14:30" /&gt;"#.to_string(),
+
+        "toast" => r#"@import components/toast.wtz as toast
+
+// Place container once in layout
+&lt;@toast::container position="bottom-right" /&gt;
+
+// Show toasts via Alpine.js
+&lt;button @click="$dispatch('toast', {
+    title: 'Success',
+    description: 'Your changes were saved.',
+    variant: 'success'
+})"&gt;Save&lt;/button&gt;
+
+// Or use shorthand functions
+&lt;@toast::success title="Saved!" description=Some("Changes applied.") /&gt;
+&lt;@toast::error title="Error" description=Some("Something went wrong.") /&gt;"#.to_string(),
+
+        "toggle-group" => r#"@import components/toggle_group.wtz as toggle_group
+
+@let items = vec![
+    ToggleItem { value: "left".into(), label: "Left".into(), ... },
+    ToggleItem { value: "center".into(), label: "Center".into(), ... },
+    ToggleItem { value: "right".into(), label: "Right".into(), ... },
+];
+
+// Single selection
+&lt;@toggle_group::single name="align" items=&items selected=Some("left") /&gt;
+
+// Multiple selection
+&lt;@toggle_group::multiple name="format" items=&items selected=vec!["left"] /&gt;"#.to_string(),
+
+        "validation-errors" => r#"@import components/validation_errors.wtz as validation_errors
+
+// Display validation errors
+&lt;@validation_errors errors=@errors /&gt;
+
+// With custom title
+&lt;@validation_errors
+    errors=@errors
+    title="Please fix the following:"
+/&gt;"#.to_string(),
 
         _ => {
             let comp_name = component.replace('-', "_");
