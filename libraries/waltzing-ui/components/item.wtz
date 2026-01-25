@@ -1,0 +1,110 @@
+@*
+ * Item component
+ * Generic list item with flexible slots for icon, title, description, and action
+ *
+ * @example
+ * @import components/item.wtz as item
+ * @import components/badge.wtz as badge
+ *
+ * <@item::apply title="Settings" description="Manage your preferences">
+ *   <@item::icon>⚙️</@>
+ *   <@item::action><@badge::default>New</@></@>
+ * </@>
+ *
+ * <@item::apply title="Notifications" variant=item::Variant::Compact>
+ *   <@item::icon>🔔</@>
+ * </@>
+ *
+ * <@item::simple title="Simple item" />
+ *@
+
+
+@enum Variant {
+    Default,
+    Compact,
+}
+
+@fn apply(
+    title: &str,
+    description: Option<&str> = None,
+    variant: Variant = Variant::Default,
+    icon: Option<@()> = None,
+    action: Option<@()> = None,
+    class: &str = "",
+) {
+    @let base = "flex items-center gap-3 rounded-md transition-colors hover:bg-accent"
+
+    @let variant_cls = match variant {
+        Variant::Default => { "px-3 py-3" }
+        Variant::Compact => { "px-2 py-2" }
+    }
+
+    @let container_classes = vec![@base, @variant_cls, @class]
+    @let container_cls = cn(@container_classes)
+
+    <div class="@container_cls">
+        @if let Some(icon_content) = icon {
+            <div class="flex-shrink-0 text-muted-foreground">
+                @icon_content()
+            </div>
+        }
+        <div class="flex-1 min-w-0">
+            @match variant {
+                Variant::Default => {
+                    <div class="text-sm font-medium leading-none">@title</div>
+                }
+                Variant::Compact => {
+                    <div class="text-sm leading-none">@title</div>
+                }
+            }
+            @if let Some(desc) = description {
+                @match variant {
+                    Variant::Default => {
+                        <div class="text-sm text-muted-foreground mt-1">@desc</div>
+                    }
+                    Variant::Compact => {
+                        <div class="text-xs text-muted-foreground mt-0.5">@desc</div>
+                    }
+                }
+            }
+        </div>
+        @if let Some(action_content) = action {
+            <div class="flex-shrink-0">
+                @action_content()
+            </div>
+        }
+    </div>
+}
+
+@* Shorthand for simple item with just title *@
+@fn simple(title: &str, class: &str = "") {
+    <@apply title=@title class=@class />
+}
+
+@* Shorthand for compact variant *@
+@fn compact(
+    title: &str,
+    description: Option<&str> = None,
+    icon: Option<@()> = None,
+    action: Option<@()> = None,
+    class: &str = "",
+) {
+    <@apply
+        title=@title
+        description=@description
+        variant=Variant::Compact
+        icon=@icon
+        action=@action
+        class=@class
+    />
+}
+
+@* Icon slot helper for use inside apply *@
+@fn icon(content: @()) {
+    @content()
+}
+
+@* Action slot helper for use inside apply *@
+@fn action(content: @()) {
+    @content()
+}

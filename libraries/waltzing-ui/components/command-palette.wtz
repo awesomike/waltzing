@@ -1,0 +1,278 @@
+@**
+ * Command Palette component
+ * Cmd+K style command palette dialog with search, filtering, and keyboard navigation
+ * Builds on command.wtz for core functionality
+ * Uses Alpine.js for state and keyboard handling
+ *
+ * @example
+ * @import components/command-palette.wtz as command_palette
+ *
+ * Basic usage with groups:
+ * <@command_palette::apply>
+ *     <@command_palette::group label="Navigation">
+ *         <@command_palette::item label="Home" shortcut="G H" />
+ *         <@command_palette::item label="Settings" shortcut="G S" />
+ *     </@>
+ *     <@command_palette::group label="Actions">
+ *         <@command_palette::item label="New File" shortcut="Ctrl N" />
+ *         <@command_palette::item label="Save" shortcut="Ctrl S" />
+ *     </@>
+ * </@>
+ *
+ * With custom placeholder and trigger:
+ * <@command_palette::apply
+ *     placeholder="Search commands..."
+ *     trigger=@{<button class="btn">Open Palette</button>}
+ * >
+ *     ...
+ * </@>
+ *
+ * Handling selection:
+ * <@command_palette::apply @@command-select="handleCommand($event.detail)">
+ *     ...
+ * </@>
+ **@
+
+
+@** Main command palette container with dialog wrapper **@
+@fn apply(
+    placeholder: Option<&str> = None,
+    trigger: Option<@()> = None,
+    class: &str = "",
+    content: @() = @{},
+) {
+    @let ph = placeholder.unwrap_or("Type a command or search...")
+    @let dialog_cls = cn(&[
+        "fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg border bg-popover shadow-lg",
+        class
+    ])
+    @let container_cls = "flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground"
+
+    <div x-data="{
+        open: false,
+        search: '',
+        selectedIndex: 0,
+        items: [],
+        registerItem(id, label, group) {
+            this.items.push({ id, label, group });
+        },
+        get filteredItems() {
+            if (!this.search) return this.items;
+            const query = this.search.toLowerCase();
+            return this.items.filter(item => item.label.toLowerCase().includes(query));
+        },
+        get totalItems() {
+            return this.filteredItems.length;
+        },
+        selectNext() {
+            if (this.totalItems > 0) {
+                this.selectedIndex = (this.selectedIndex + 1) % this.totalItems;
+                this.scrollToSelected();
+            }
+        },
+        selectPrev() {
+            if (this.totalItems > 0) {
+                this.selectedIndex = (this.selectedIndex - 1 + this.totalItems) % this.totalItems;
+                this.scrollToSelected();
+            }
+        },
+        selectItem() {
+            if (this.totalItems > 0 && this.filteredItems[this.selectedIndex]) {
+                const item = this.filteredItems[this.selectedIndex];
+                this.$dispatch('command-select', { id: item.id, label: item.label, group: item.group });
+                this.close();
+            }
+        },
+        scrollToSelected() {
+            this.$nextTick(() => {
+                const selected = this.$el.querySelector('[data-selected=true]');
+                if (selected) {
+                    selected.scrollIntoView({ block: 'nearest' });
+                }
+            });
+        },
+        resetSelection() {
+            this.selectedIndex = 0;
+        },
+        toggle() {
+            this.open = !this.open;
+            if (this.open) {
+                this.$nextTick(() => {
+                    this.$refs.searchInput?.focus();
+                });
+            }
+        },
+        close() {
+            this.open = false;
+            this.search = '';
+            this.selectedIndex = 0;
+        }
+    }"
+    @@keydown.meta.k.window.prevent="toggle()"
+    @@keydown.ctrl.k.window.prevent="toggle()"
+    >
+        @* Optional custom trigger *@
+        @if let Some(t) = trigger {
+            <div @@click="toggle()">
+                @t()
+            </div>
+        }
+
+        @* Dialog *@
+        <template x-teleport="body">
+            <div
+                x-show="open"
+                x-transition:enter="ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-50"
+                style="display: none;"
+            >
+                @* Backdrop *@
+                <div
+                    class="fixed inset-0 bg-black/50"
+                    @@click="close()"
+                    aria-hidden="true"
+                ></div>
+
+                @* Command palette dialog *@
+                <div
+                    class="@dialog_cls"
+                    @@keydown.escape.prevent="close()"
+                    @@keydown.down.prevent="selectNext()"
+                    @@keydown.up.prevent="selectPrev()"
+                    @@keydown.enter.prevent="selectItem()"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Command palette"
+                >
+                    <div class="@container_cls">
+                        @* Search input *@
+                        <div class="flex items-center border-b px-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4 shrink-0 opacity-50">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                            <input
+                                x-ref="searchInput"
+                                x-model="search"
+                                @@input="resetSelection()"
+                                class="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                                placeholder="@ph"
+                                type="text"
+                                autocomplete="off"
+                                autocorrect="off"
+                                spellcheck="false"
+                            />
+                        </div>
+
+                        @* Command list *@
+                        <div class="max-h-[300px] overflow-y-auto overflow-x-hidden" role="listbox">
+                            @content()
+
+                            @* Empty state *@
+                            <div class="py-6 text-center text-sm text-muted-foreground" x-show="search && totalItems === 0">
+                                No results found.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+}
+
+@** Command group with heading **@
+@fn group(
+    label: &str,
+    class: &str = "",
+    content: @() = @{},
+) {
+    @let group_cls = cn(&[
+        "overflow-hidden p-1 text-foreground",
+        class
+    ])
+
+    <div
+        class="@group_cls"
+        role="group"
+        x-data="{ groupLabel: '@label' }"
+        x-show="!search || filteredItems.some(i => i.group === '@label')"
+    >
+        <div class="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+            @label
+        </div>
+        @content()
+    </div>
+}
+
+@** Command item **@
+@fn item(
+    label: &str,
+    shortcut: Option<&str> = None,
+    icon: Option<&str> = None,
+    disabled: bool = false,
+    id: Option<&str> = None,
+    class: &str = "",
+) {
+    @let item_id = id.unwrap_or(label)
+    @let item_cls = cn(&[
+        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground",
+        class_if(disabled, "pointer-events-none opacity-50"),
+        class
+    ])
+
+    <div
+        class="@item_cls"
+        role="option"
+        tabindex="-1"
+        @if disabled { aria-disabled="true" }
+        x-data="{ itemIndex: -1, itemLabel: '@label', itemId: '@item_id' }"
+        x-init="itemIndex = items.length; registerItem('@item_id', '@label', groupLabel || '')"
+        :data-selected="(() => {
+            if (!search) return selectedIndex === itemIndex;
+            const idx = filteredItems.findIndex(i => i.id === '@item_id');
+            return idx !== -1 && selectedIndex === idx;
+        })()"
+        x-show="!search || filteredItems.some(i => i.id === '@item_id')"
+        data-id="@item_id"
+        @@click="(() => {
+            if (!search) {
+                selectedIndex = itemIndex;
+            } else {
+                const idx = filteredItems.findIndex(i => i.id === '@item_id');
+                if (idx !== -1) selectedIndex = idx;
+            }
+            selectItem();
+        })()"
+        @@mouseenter="(() => {
+            if (!search) {
+                selectedIndex = itemIndex;
+            } else {
+                const idx = filteredItems.findIndex(i => i.id === '@item_id');
+                if (idx !== -1) selectedIndex = idx;
+            }
+        })()"
+    >
+        @if let Some(i) = icon {
+            <span class="mr-2 h-4 w-4 flex items-center justify-center">@i</span>
+        }
+        <span>@label</span>
+        @if let Some(s) = shortcut {
+            <span class="ml-auto text-xs tracking-widest text-muted-foreground">@s</span>
+        }
+    </div>
+}
+
+@** Command separator **@
+@fn separator(class: &str = "") {
+    @let sep_cls = cn(&[
+        "-mx-1 h-px bg-border",
+        class
+    ])
+
+    <div class="@sep_cls" role="separator"></div>
+}

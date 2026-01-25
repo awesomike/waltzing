@@ -1,0 +1,238 @@
+@*
+ * Profile Form Block
+ * Profile/account settings form with avatar, personal info, and social links
+ *
+ * @example
+ * @import blocks/forms/profile.wtz as profile
+ *
+ * <@profile::apply action="/api/profile" method="post" />
+ *
+ * With pre-filled values:
+ * <@profile::apply
+ *     action="/api/profile"
+ *     method="post"
+ *     avatar_src=Some("/avatars/user.jpg")
+ *     avatar_fallback="JD"
+ *     name_value=Some("John Doe")
+ *     email_value=Some("john@example.com")
+ *     bio_value=Some("Software developer")
+ *     twitter_value=Some("johndoe")
+ *     github_value=Some("johndoe")
+ *     website_value=Some("https://johndoe.com")
+ * />
+ *@
+
+@import components/avatar.wtz as avatar
+@import components/button.wtz as button
+@import components/card.wtz as card
+@import components/field.wtz as field
+@import components/form.wtz as form
+@import components/input.wtz as input
+@import components/input-group.wtz as input_group
+@import components/separator.wtz as separator
+@import components/textarea.wtz as textarea
+
+
+@* Main profile form *@
+@fn apply(
+    action: &str,
+    method: &str,
+    avatar_src: Option<&str> = None,
+    avatar_fallback: &str = "U",
+    name_value: Option<&str> = None,
+    name_error: Option<&str> = None,
+    email_value: Option<&str> = None,
+    email_error: Option<&str> = None,
+    bio_value: Option<&str> = None,
+    bio_error: Option<&str> = None,
+    twitter_value: Option<&str> = None,
+    twitter_error: Option<&str> = None,
+    github_value: Option<&str> = None,
+    github_error: Option<&str> = None,
+    website_value: Option<&str> = None,
+    website_error: Option<&str> = None,
+    class: &str = "",
+) {
+    @let cls = class
+    @let form_classes = vec!["max-w-2xl", cls]
+
+    <@form::apply
+        action=@Some(action)
+        method=@Some(method)
+        enctype=@Some("multipart/form-data")
+        class=@cn(form_classes)
+    >
+        @* Avatar Section *@
+        <@form::section title=@Some("Profile Picture") description=@Some("Upload a photo to personalize your account")>
+            <div class="flex items-center gap-6">
+                <@avatar::apply
+                    src=@avatar_src
+                    alt="Profile avatar"
+                    fallback=@avatar_fallback
+                    size=avatar::Size::Lg
+                    class="h-20 w-20"
+                />
+                <div class="flex flex-col gap-2">
+                    <label
+                        for="avatar"
+                        class="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" x2="12" y1="3" y2="15"/>
+                        </svg>
+                        Upload Photo
+                    </label>
+                    <input
+                        type="file"
+                        id="avatar"
+                        name="avatar"
+                        accept="image/*"
+                        class="sr-only"
+                    />
+                    <p class="text-xs text-muted-foreground">JPG, PNG or GIF. Max 2MB.</p>
+                </div>
+            </div>
+        </@>
+
+        <@separator::horizontal class="my-6" />
+
+        @* Personal Information Section *@
+        <@form::section title=@Some("Personal Information") description=@Some("Update your personal details")>
+            <@field::apply label="Full Name" required=true error=@name_error>
+                <@input::apply
+                    input_type=input::InputType::Text
+                    name="name"
+                    value=@name_value
+                    placeholder=@Some("Enter your full name")
+                    required=true
+                    error=@name_error
+                />
+            </@>
+
+            <@field::apply label="Email Address" required=true error=@email_error description=@Some("This email will be used for account notifications")>
+                <@input::apply
+                    input_type=input::InputType::Email
+                    name="email"
+                    value=@email_value
+                    placeholder=@Some("you@example.com")
+                    required=true
+                    error=@email_error
+                />
+            </@>
+
+            <@field::apply label="Bio" error=@bio_error description=@Some("Brief description for your profile. Max 160 characters.")>
+                <@textarea::apply
+                    name="bio"
+                    value=@bio_value
+                    placeholder=@Some("Tell us about yourself...")
+                    rows=@Some(3)
+                    error=@bio_error
+                />
+            </@>
+        </@>
+
+        <@separator::horizontal class="my-6" />
+
+        @* Social Links Section *@
+        <@form::section title=@Some("Social Links") description=@Some("Add links to your social profiles")>
+            <@field::apply label="Twitter" error=@twitter_error>
+                <@input_group::with_prefix prefix_text="twitter.com/">
+                    <@input::apply
+                        input_type=input::InputType::Text
+                        name="twitter"
+                        value=@twitter_value
+                        placeholder=@Some("username")
+                        error=@twitter_error
+                    />
+                </@>
+            </@>
+
+            <@field::apply label="GitHub" error=@github_error>
+                <@input_group::with_prefix prefix_text="github.com/">
+                    <@input::apply
+                        input_type=input::InputType::Text
+                        name="github"
+                        value=@github_value
+                        placeholder=@Some("username")
+                        error=@github_error
+                    />
+                </@>
+            </@>
+
+            <@field::apply label="Website" error=@website_error>
+                <@input_group::with_prefix prefix_text="https://">
+                    <@input::apply
+                        input_type=input::InputType::Url
+                        name="website"
+                        value=@website_value
+                        placeholder=@Some("yoursite.com")
+                        error=@website_error
+                    />
+                </@>
+            </@>
+        </@>
+
+        <@separator::horizontal class="my-6" />
+
+        @* Form Actions *@
+        <@form::actions>
+            <@button::primary>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Save Changes
+            </@>
+        </@>
+    </@>
+}
+
+@* Compact profile form wrapped in a card *@
+@fn card(
+    action: &str,
+    method: &str,
+    avatar_src: Option<&str> = None,
+    avatar_fallback: &str = "U",
+    name_value: Option<&str> = None,
+    name_error: Option<&str> = None,
+    email_value: Option<&str> = None,
+    email_error: Option<&str> = None,
+    bio_value: Option<&str> = None,
+    bio_error: Option<&str> = None,
+    twitter_value: Option<&str> = None,
+    twitter_error: Option<&str> = None,
+    github_value: Option<&str> = None,
+    github_error: Option<&str> = None,
+    website_value: Option<&str> = None,
+    website_error: Option<&str> = None,
+) {
+    <@card::apply
+        header=@Some(@() {
+            <@card::title>Profile Settings</@>
+            <@card::description>Manage your account information and social links</@>
+        })
+        footer=None
+    >
+        <@apply
+            action=@action
+            method=@method
+            avatar_src=@avatar_src
+            avatar_fallback=@avatar_fallback
+            name_value=@name_value
+            name_error=@name_error
+            email_value=@email_value
+            email_error=@email_error
+            bio_value=@bio_value
+            bio_error=@bio_error
+            twitter_value=@twitter_value
+            twitter_error=@twitter_error
+            github_value=@github_value
+            github_error=@github_error
+            website_value=@website_value
+            website_error=@website_error
+        />
+    </@>
+}

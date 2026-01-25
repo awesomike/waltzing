@@ -1,0 +1,452 @@
+@*
+ * Sonner-style toast component
+ * Modern stacked toast notification system
+ *
+ * @example
+ * @import components/sonner.wtz as sonner
+ *
+ * Toast container (place once in your layout):
+ * <@sonner::toaster position="bottom-right" />
+ *
+ * Trigger toasts via Alpine.js events:
+ * <button @click="$dispatch('sonner', { title: 'Event created', description: 'Monday, January 3rd at 6:00 PM' })">
+ *     Show Toast
+ * </button>
+ *
+ * With variants:
+ * $dispatch('sonner', { title: 'Success!', variant: 'success' })
+ * $dispatch('sonner', { title: 'Error', variant: 'error', description: 'Something went wrong.' })
+ * $dispatch('sonner', { title: 'Warning', variant: 'warning' })
+ * $dispatch('sonner', { title: 'Info', variant: 'info', description: 'New update available.' })
+ *
+ * With custom duration (0 = no auto-dismiss):
+ * $dispatch('sonner', { title: 'Persistent', duration: 0 })
+ * $dispatch('sonner', { title: 'Quick', duration: 2000 })
+ *
+ * Programmatic usage with helper:
+ * <@sonner::script />
+ * <script>
+ *   sonner.success('Saved!', { description: 'Your changes have been saved.' });
+ *   sonner.error('Error', { duration: 10000 });
+ * </script>
+ *@
+
+
+@enum Variant {
+    Default,
+    Success,
+    Error,
+    Warning,
+    Info,
+}
+
+@enum Position {
+    TopLeft,
+    TopCenter,
+    TopRight,
+    BottomLeft,
+    BottomCenter,
+    BottomRight,
+}
+
+@* Main toaster container - place once in layout *@
+@fn toaster(
+    position: &str = "bottom-right",
+    expand: bool = false,
+    rich_colors: bool = true,
+    close_button: bool = true,
+    duration: u32 = 4000,
+    gap: u32 = 14,
+    visible_toasts: u32 = 3,
+    class: &str = "",
+) {
+    @let position_cls = match position {
+        "top-left" => "top-0 left-0 items-start",
+        "top-center" => "top-0 left-1/2 -translate-x-1/2 items-center",
+        "top-right" => "top-0 right-0 items-end",
+        "bottom-left" => "bottom-0 left-0 items-start",
+        "bottom-center" => "bottom-0 left-1/2 -translate-x-1/2 items-center",
+        "bottom-right" | _ => "bottom-0 right-0 items-end",
+    }
+
+    @let is_top = position.starts_with("top")
+    @let extra_cls = class
+    @let cls_parts = vec!["fixed z-[100] flex flex-col p-4 md:p-6 pointer-events-none w-full md:max-w-[420px]", position_cls, extra_cls]
+    @let container_cls = cn(cls_parts)
+
+    <div
+        id="sonner-toaster"
+        class="@container_cls"
+        x-data="{
+            toasts: [],
+            expanded: @expand,
+            hovered: false,
+            gap: @gap,
+            visibleToasts: @visible_toasts,
+            defaultDuration: @duration,
+            isTop: @is_top,
+            showCloseButton: @close_button,
+            richColors: @rich_colors,
+
+            addToast(detail) {
+                const id = Date.now() + Math.random();
+                const toast = {
+                    id,
+                    title: detail.title || '',
+                    description: detail.description || null,
+                    variant: detail.variant || 'default',
+                    duration: detail.duration !== undefined ? detail.duration : this.defaultDuration,
+                    dismissible: detail.dismissible !== false,
+                    createdAt: Date.now()
+                };
+
+                if (this.isTop) {
+                    this.toasts.unshift(toast);
+                } else {
+                    this.toasts.push(toast);
+                }
+
+                if (toast.duration > 0) {
+                    setTimeout(() => this.removeToast(id), toast.duration);
+                }
+            },
+
+            removeToast(id) {
+                const index = this.toasts.findIndex(t => t.id === id);
+                if (index > -1) {
+                    this.toasts.splice(index, 1);
+                }
+            },
+
+            getOffset(index) {
+                if (this.expanded || this.hovered) {
+                    return index * (this.gap + 64);
+                }
+                const visibleIndex = Math.min(index, this.visibleToasts - 1);
+                return visibleIndex * this.gap;
+            },
+
+            getScale(index) {
+                if (this.expanded || this.hovered) return 1;
+                const visibleIndex = Math.min(index, this.visibleToasts - 1);
+                return 1 - (visibleIndex * 0.05);
+            },
+
+            getOpacity(index) {
+                if (this.expanded || this.hovered) return 1;
+                if (index >= this.visibleToasts) return 0;
+                return 1 - (index * 0.1);
+            },
+
+            getZIndex(index) {
+                return this.toasts.length - index;
+            }
+        }"
+        @sonner.window="addToast($event.detail)"
+        @mouseenter="hovered = true"
+        @mouseleave="hovered = false"
+    >
+        <template x-for="(toast, index) in toasts" :key="toast.id">
+            <div
+                class="pointer-events-auto w-full rounded-lg border shadow-lg transition-all duration-300 ease-out"
+                :class="{
+                    'bg-background text-foreground border-border': toast.variant === 'default' || !richColors,
+                    'bg-green-600 text-white border-green-600': toast.variant === 'success' && richColors,
+                    'bg-destructive text-destructive-foreground border-destructive': toast.variant === 'error' && richColors,
+                    'bg-yellow-500 text-white border-yellow-500': toast.variant === 'warning' && richColors,
+                    'bg-blue-600 text-white border-blue-600': toast.variant === 'info' && richColors,
+                    'opacity-0 pointer-events-none': index >= visibleToasts && !expanded && !hovered
+                }"
+                :style="`
+                    position: absolute;
+                    ${isTop ? 'top' : 'bottom'}: ${getOffset(index)}px;
+                    transform: scale(${getScale(index)});
+                    opacity: ${getOpacity(index)};
+                    z-index: ${getZIndex(index)};
+                    width: calc(100% - 2rem);
+                `"
+                x-transition:enter="transform ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:leave="transform ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                role="alert"
+                aria-live="polite"
+            >
+                <div class="flex items-start gap-3 p-4">
+                    @* Icon based on variant *@
+                    <template x-if="toast.variant === 'success'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="m9 12 2 2 4-4"></path>
+                        </svg>
+                    </template>
+                    <template x-if="toast.variant === 'error'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="m15 9-6 6"></path>
+                            <path d="m9 9 6 6"></path>
+                        </svg>
+                    </template>
+                    <template x-if="toast.variant === 'warning'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+                            <path d="M12 9v4"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                    </template>
+                    <template x-if="toast.variant === 'info'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                    </template>
+
+                    @* Content *@
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold leading-none tracking-tight" x-text="toast.title"></p>
+                        <template x-if="toast.description">
+                            <p class="mt-1.5 text-sm opacity-90" x-text="toast.description"></p>
+                        </template>
+                    </div>
+
+                    @* Close button *@
+                    <template x-if="showCloseButton && toast.dismissible">
+                        <button
+                            type="button"
+                            class="shrink-0 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            :class="{
+                                'ring-offset-background focus:ring-ring': toast.variant === 'default' || !richColors,
+                                'ring-offset-green-600 focus:ring-white/50': toast.variant === 'success' && richColors,
+                                'ring-offset-destructive focus:ring-white/50': toast.variant === 'error' && richColors,
+                                'ring-offset-yellow-500 focus:ring-white/50': toast.variant === 'warning' && richColors,
+                                'ring-offset-blue-600 focus:ring-white/50': toast.variant === 'info' && richColors
+                            }"
+                            @click="removeToast(toast.id)"
+                            aria-label="Close"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 6 6 18"></path>
+                                <path d="m6 6 12 12"></path>
+                            </svg>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+}
+
+@* Lightweight toaster - simpler version without stacking *@
+@fn toaster_simple(
+    position: &str = "bottom-right",
+    duration: u32 = 4000,
+    class: &str = "",
+) {
+    @let position_cls = match position {
+        "top-left" => "top-0 left-0",
+        "top-center" => "top-0 left-1/2 -translate-x-1/2",
+        "top-right" => "top-0 right-0",
+        "bottom-left" => "bottom-0 left-0",
+        "bottom-center" => "bottom-0 left-1/2 -translate-x-1/2",
+        "bottom-right" | _ => "bottom-0 right-0",
+    }
+
+    @let extra_cls = class
+    @let cls_parts = vec!["fixed z-[100] flex flex-col gap-3 p-4 md:p-6 pointer-events-none w-full md:max-w-[420px]", position_cls, extra_cls]
+    @let container_cls = cn(cls_parts)
+
+    <div
+        id="sonner-toaster"
+        class="@container_cls"
+        x-data="{
+            toasts: [],
+            defaultDuration: @duration,
+
+            addToast(detail) {
+                const id = Date.now() + Math.random();
+                const toast = {
+                    id,
+                    title: detail.title || '',
+                    description: detail.description || null,
+                    variant: detail.variant || 'default',
+                    duration: detail.duration !== undefined ? detail.duration : this.defaultDuration
+                };
+                this.toasts.push(toast);
+                if (toast.duration > 0) {
+                    setTimeout(() => this.removeToast(id), toast.duration);
+                }
+            },
+
+            removeToast(id) {
+                this.toasts = this.toasts.filter(t => t.id !== id);
+            }
+        }"
+        @sonner.window="addToast($event.detail)"
+    >
+        <template x-for="toast in toasts" :key="toast.id">
+            <div
+                class="pointer-events-auto w-full rounded-lg border shadow-lg"
+                :class="{
+                    'bg-background text-foreground border-border': toast.variant === 'default',
+                    'bg-green-600 text-white border-green-600': toast.variant === 'success',
+                    'bg-destructive text-destructive-foreground border-destructive': toast.variant === 'error',
+                    'bg-yellow-500 text-white border-yellow-500': toast.variant === 'warning',
+                    'bg-blue-600 text-white border-blue-600': toast.variant === 'info'
+                }"
+                x-transition:enter="transform ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-2"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transform ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0 translate-y-2"
+                role="alert"
+            >
+                <div class="flex items-start gap-3 p-4">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold" x-text="toast.title"></p>
+                        <template x-if="toast.description">
+                            <p class="mt-1 text-sm opacity-90" x-text="toast.description"></p>
+                        </template>
+                    </div>
+                    <button
+                        type="button"
+                        class="shrink-0 rounded-md p-1 opacity-70 hover:opacity-100"
+                        @click="removeToast(toast.id)"
+                        aria-label="Close"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6 6 18"></path>
+                            <path d="m6 6 12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+}
+
+@* Helper script for programmatic toast usage *@
+@fn script() {
+    <script>
+        window.sonner = {
+            show(title, options = {}) {
+                window.dispatchEvent(new CustomEvent('sonner', {
+                    detail: { title, ...options }
+                }));
+            },
+            success(title, options = {}) {
+                this.show(title, { ...options, variant: 'success' });
+            },
+            error(title, options = {}) {
+                this.show(title, { ...options, variant: 'error' });
+            },
+            warning(title, options = {}) {
+                this.show(title, { ...options, variant: 'warning' });
+            },
+            info(title, options = {}) {
+                this.show(title, { ...options, variant: 'info' });
+            },
+            dismiss(id) {
+                // Dismiss all if no id provided
+                const toaster = document.getElementById('sonner-toaster');
+                if (toaster && toaster._x_dataStack) {
+                    const data = toaster._x_dataStack[0];
+                    if (id) {
+                        data.removeToast(id);
+                    } else {
+                        data.toasts = [];
+                    }
+                }
+            }
+        };
+    </script>
+}
+
+@* Static toast for SSR or non-JS fallback *@
+@fn toast(
+    variant: Variant = Variant::Default,
+    title: &str,
+    description: Option<&str> = None,
+    class: &str = "",
+) {
+    @let base = "w-full rounded-lg border p-4 shadow-lg"
+
+    @let variant_cls = match variant {
+        Variant::Default => { "bg-background text-foreground border-border" }
+        Variant::Success => { "bg-green-600 text-white border-green-600" }
+        Variant::Error => { "bg-destructive text-destructive-foreground border-destructive" }
+        Variant::Warning => { "bg-yellow-500 text-white border-yellow-500" }
+        Variant::Info => { "bg-blue-600 text-white border-blue-600" }
+    }
+
+    @let extra_cls = class
+    @let cls_parts = vec![base, variant_cls, extra_cls]
+    @let toast_cls = cn(cls_parts)
+
+    <div class="@toast_cls" role="alert">
+        <div class="flex items-start gap-3">
+            @* Icon *@
+            @match variant {
+                Variant::Success => {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                }
+                Variant::Error => {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="m15 9-6 6"></path>
+                        <path d="m9 9 6 6"></path>
+                    </svg>
+                }
+                Variant::Warning => {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+                        <path d="M12 9v4"></path>
+                        <path d="M12 17h.01"></path>
+                    </svg>
+                }
+                Variant::Info => {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 mt-0.5">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                }
+                Variant::Default => {}
+            }
+
+            @* Content *@
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold">@title</p>
+                @if let Some(desc) = description {
+                    <p class="mt-1 text-sm opacity-90">@desc</p>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@* Shorthand for success toast *@
+@fn success(title: &str, description: Option<&str> = None) {
+    <@toast variant=Variant::Success title=@title description=@description />
+}
+
+@* Shorthand for error toast *@
+@fn error(title: &str, description: Option<&str> = None) {
+    <@toast variant=Variant::Error title=@title description=@description />
+}
+
+@* Shorthand for warning toast *@
+@fn warning(title: &str, description: Option<&str> = None) {
+    <@toast variant=Variant::Warning title=@title description=@description />
+}
+
+@* Shorthand for info toast *@
+@fn info(title: &str, description: Option<&str> = None) {
+    <@toast variant=Variant::Info title=@title description=@description />
+}

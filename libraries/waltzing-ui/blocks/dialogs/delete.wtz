@@ -1,0 +1,160 @@
+@*
+ * Delete confirmation dialog block
+ * A destructive action confirmation dialog with warning icon/styling
+ * Requires: dialog component, button component, @alpinejs/focus plugin
+ *@
+
+@import "../../components/dialog.wtz" as dialog
+@import "../../components/button.wtz" as button
+
+@*
+ * Delete confirmation dialog with trigger element
+ * @param title - Dialog title (e.g., "Delete Item")
+ * @param itemName - Name of the item being deleted
+ * @param message - Warning message (e.g., "This action cannot be undone.")
+ * @param confirmLabel - Label for delete button (default: "Delete")
+ * @param cancelLabel - Label for cancel button (default: "Cancel")
+ * @param trigger - Trigger element render callback
+ * @param onConfirm - JavaScript expression to execute on confirm (optional)
+ *@
+@fn apply(
+    title: &str,
+    itemName: &str,
+    message: &str,
+    confirmLabel: &str = "Delete",
+    cancelLabel: &str = "Cancel",
+    trigger: @(),
+    onConfirm: Option<&str>,
+) {
+    @let confirm_action = match onConfirm {
+        Some(action) => { @action; open = false }
+        None => { open = false }
+    }
+
+    <@dialog::apply
+        title=@title
+        description=None
+        trigger=@{ @trigger() }
+        content=@{
+            <div class="flex flex-col gap-4">
+                @* Warning icon *@
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-destructive">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+
+                @* Item name *@
+                <div class="text-center">
+                    <p class="text-sm text-muted-foreground">
+                        You are about to delete:
+                    </p>
+                    <p class="mt-1 font-semibold text-foreground">
+                        @itemName
+                    </p>
+                </div>
+
+                @* Warning message *@
+                <p class="text-center text-sm text-muted-foreground">
+                    @message
+                </p>
+            </div>
+        }
+        footer=Some(@{
+            <@button::apply
+                variant=button::Variant::Outline
+                size=button::Size::Default
+                class=""
+                @click="open = false"
+            >
+                @cancelLabel
+            </@>
+            <@button::apply
+                variant=button::Variant::Destructive
+                size=button::Size::Default
+                class=""
+                @click="@confirm_action"
+            >
+                @confirmLabel
+            </@>
+        })
+    />
+}
+
+@*
+ * Controlled delete dialog (external state)
+ * @param openVar - Alpine.js variable name controlling open state
+ * @param title - Dialog title (e.g., "Delete Item")
+ * @param itemName - Name of the item being deleted
+ * @param message - Warning message (e.g., "This action cannot be undone.")
+ * @param confirmLabel - Label for delete button (default: "Delete")
+ * @param cancelLabel - Label for cancel button (default: "Cancel")
+ * @param onConfirm - JavaScript expression to execute on confirm (optional)
+ *@
+@fn controlled(
+    openVar: &str,
+    title: &str,
+    itemName: &str,
+    message: &str,
+    confirmLabel: &str = "Delete",
+    cancelLabel: &str = "Cancel",
+    onConfirm: Option<&str>,
+) {
+    @let confirm_action = match onConfirm {
+        Some(action) => { @action; @openVar = false }
+        None => { @openVar = false }
+    }
+
+    <@dialog::controlled
+        open_var=@openVar
+        title=@title
+        description=None
+        content=@{
+            <div class="flex flex-col gap-4">
+                @* Warning icon *@
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-destructive">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+
+                @* Item name *@
+                <div class="text-center">
+                    <p class="text-sm text-muted-foreground">
+                        You are about to delete:
+                    </p>
+                    <p class="mt-1 font-semibold text-foreground">
+                        @itemName
+                    </p>
+                </div>
+
+                @* Warning message *@
+                <p class="text-center text-sm text-muted-foreground">
+                    @message
+                </p>
+            </div>
+        }
+        footer=Some(@{
+            <@button::apply
+                variant=button::Variant::Outline
+                size=button::Size::Default
+                class=""
+                @click="@openVar = false"
+            >
+                @cancelLabel
+            </@>
+            <@button::apply
+                variant=button::Variant::Destructive
+                size=button::Size::Default
+                class=""
+                @click="@confirm_action"
+            >
+                @confirmLabel
+            </@>
+        })
+    />
+}

@@ -1,0 +1,654 @@
+@*
+ * Theme Switcher component
+ * Toggle between light/dark/system themes with dropdown or toggle button variants
+ *
+ * Usage:
+ *   @import ui/components/theme-switcher.wtz as theme_switcher
+ *
+ *   // Dropdown variant with light/dark/system options
+ *   <@theme_switcher::dropdown />
+ *
+ *   // Simple toggle button (light/dark only)
+ *   <@theme_switcher::toggle />
+ *
+ *   // With custom class
+ *   <@theme_switcher::dropdown class="ml-auto" />
+ *
+ * Prerequisites:
+ *   - Include theme script in <head> for no flash of wrong theme:
+ *     <@theme::script />  (from lib/theme.wtz)
+ *
+ * JavaScript API (provided by lib/theme.wtz):
+ *   window.themeManager.current()     // Get current theme ('light', 'dark', 'system')
+ *   window.themeManager.apply('dark') // Set theme
+ *   window.themeManager.toggle()      // Toggle between light/dark
+ *   window.themeManager.effective()   // Get effective theme (resolves 'system')
+ *@
+
+
+@enum Size {
+    Sm,
+    Default,
+    Lg,
+}
+
+@* Dropdown selector for light/dark/system themes *@
+@fn dropdown(
+    size: Size = Size::Default,
+    class: &str = "",
+) {
+    @let size_cls = match size {
+        Size::Sm => "h-8 px-2 text-xs"
+        Size::Default => "h-9 px-3"
+        Size::Lg => "h-10 px-4"
+    }
+    @let icon_size = match size {
+        Size::Sm => "h-3.5 w-3.5"
+        Size::Default => "h-4 w-4"
+        Size::Lg => "h-5 w-5"
+    }
+    @let extra_class = class
+    @let base = "relative inline-block text-left"
+    @let classes = vec![@base, @extra_class]
+
+    <div
+        class="@cn(@classes)"
+        x-data="{
+            open: false,
+            theme: window.themeManager ? window.themeManager.current() : 'system',
+            setTheme(t) {
+                this.theme = t;
+                window.themeManager.apply(t);
+                this.open = false;
+            }
+        }"
+        x-init="window.addEventListener('theme-change', (e) => theme = e.detail.theme)"
+    >
+        @* Trigger button *@
+        <button
+            type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring @size_cls"
+            @@click="open = !open"
+            :aria-expanded="open"
+            aria-haspopup="true"
+            aria-label="Select theme"
+        >
+            @* Sun icon (light) *@
+            <svg
+                x-show="theme === 'light'"
+                x-cloak
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="@icon_size"
+            >
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2"></path>
+                <path d="M12 20v2"></path>
+                <path d="m4.93 4.93 1.41 1.41"></path>
+                <path d="m17.66 17.66 1.41 1.41"></path>
+                <path d="M2 12h2"></path>
+                <path d="M20 12h2"></path>
+                <path d="m6.34 17.66-1.41 1.41"></path>
+                <path d="m19.07 4.93-1.41 1.41"></path>
+            </svg>
+
+            @* Moon icon (dark) *@
+            <svg
+                x-show="theme === 'dark'"
+                x-cloak
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="@icon_size"
+            >
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+
+            @* Monitor icon (system) *@
+            <svg
+                x-show="theme === 'system'"
+                x-cloak
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="@icon_size"
+            >
+                <rect width="20" height="14" x="2" y="3" rx="2"></rect>
+                <line x1="8" x2="16" y1="21" y2="21"></line>
+                <line x1="12" x2="12" y1="17" y2="21"></line>
+            </svg>
+
+            @* Chevron *@
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="@icon_size opacity-50"
+            >
+                <path d="m6 9 6 6 6-6"></path>
+            </svg>
+        </button>
+
+        @* Dropdown menu *@
+        <div
+            x-show="open"
+            x-cloak
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="transform opacity-0 scale-95"
+            x-transition:enter-end="transform opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="transform opacity-100 scale-100"
+            x-transition:leave-end="transform opacity-0 scale-95"
+            @@click.away="open = false"
+            @@keydown.escape.window="open = false"
+            class="absolute right-0 z-50 mt-2 w-36 origin-top-right rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+            role="menu"
+        >
+            @* Light option *@
+            <button
+                type="button"
+                class="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                :class="{ 'bg-accent': theme === 'light' }"
+                role="menuitem"
+                @@click="setTheme('light')"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                >
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+                Light
+            </button>
+
+            @* Dark option *@
+            <button
+                type="button"
+                class="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                :class="{ 'bg-accent': theme === 'dark' }"
+                role="menuitem"
+                @@click="setTheme('dark')"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                >
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+                Dark
+            </button>
+
+            @* System option *@
+            <button
+                type="button"
+                class="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                :class="{ 'bg-accent': theme === 'system' }"
+                role="menuitem"
+                @@click="setTheme('system')"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                >
+                    <rect width="20" height="14" x="2" y="3" rx="2"></rect>
+                    <line x1="8" x2="16" y1="21" y2="21"></line>
+                    <line x1="12" x2="12" y1="17" y2="21"></line>
+                </svg>
+                System
+            </button>
+        </div>
+    </div>
+}
+
+@* Dropdown with label showing selected theme *@
+@fn dropdown_with_label(
+    size: Size = Size::Default,
+    class: &str = "",
+) {
+    @let size_cls = match size {
+        Size::Sm => "h-8 px-2 text-xs"
+        Size::Default => "h-9 px-3"
+        Size::Lg => "h-10 px-4"
+    }
+    @let icon_size = match size {
+        Size::Sm => "h-3.5 w-3.5"
+        Size::Default => "h-4 w-4"
+        Size::Lg => "h-5 w-5"
+    }
+    @let extra_class = class
+    @let base = "relative inline-block text-left"
+    @let classes = vec![@base, @extra_class]
+
+    <div
+        class="@cn(@classes)"
+        x-data="{
+            open: false,
+            theme: window.themeManager ? window.themeManager.current() : 'system',
+            setTheme(t) {
+                this.theme = t;
+                window.themeManager.apply(t);
+                this.open = false;
+            }
+        }"
+        x-init="window.addEventListener('theme-change', (e) => theme = e.detail.theme)"
+    >
+        @* Trigger button with label *@
+        <button
+            type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring @size_cls"
+            @@click="open = !open"
+            :aria-expanded="open"
+            aria-haspopup="true"
+            aria-label="Select theme"
+        >
+            @* Sun icon (light) *@
+            <svg
+                x-show="theme === 'light'"
+                x-cloak
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="@icon_size"
+            >
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2"></path>
+                <path d="M12 20v2"></path>
+                <path d="m4.93 4.93 1.41 1.41"></path>
+                <path d="m17.66 17.66 1.41 1.41"></path>
+                <path d="M2 12h2"></path>
+                <path d="M20 12h2"></path>
+                <path d="m6.34 17.66-1.41 1.41"></path>
+                <path d="m19.07 4.93-1.41 1.41"></path>
+            </svg>
+
+            @* Moon icon (dark) *@
+            <svg
+                x-show="theme === 'dark'"
+                x-cloak
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="@icon_size"
+            >
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+
+            @* Monitor icon (system) *@
+            <svg
+                x-show="theme === 'system'"
+                x-cloak
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="@icon_size"
+            >
+                <rect width="20" height="14" x="2" y="3" rx="2"></rect>
+                <line x1="8" x2="16" y1="21" y2="21"></line>
+                <line x1="12" x2="12" y1="17" y2="21"></line>
+            </svg>
+
+            <span x-text="theme.charAt(0).toUpperCase() + theme.slice(1)"></span>
+
+            @* Chevron *@
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="@icon_size opacity-50"
+            >
+                <path d="m6 9 6 6 6-6"></path>
+            </svg>
+        </button>
+
+        @* Dropdown menu *@
+        <div
+            x-show="open"
+            x-cloak
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="transform opacity-0 scale-95"
+            x-transition:enter-end="transform opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="transform opacity-100 scale-100"
+            x-transition:leave-end="transform opacity-0 scale-95"
+            @@click.away="open = false"
+            @@keydown.escape.window="open = false"
+            class="absolute right-0 z-50 mt-2 w-36 origin-top-right rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+            role="menu"
+        >
+            @* Light option *@
+            <button
+                type="button"
+                class="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                :class="{ 'bg-accent': theme === 'light' }"
+                role="menuitem"
+                @@click="setTheme('light')"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                >
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+                Light
+            </button>
+
+            @* Dark option *@
+            <button
+                type="button"
+                class="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                :class="{ 'bg-accent': theme === 'dark' }"
+                role="menuitem"
+                @@click="setTheme('dark')"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                >
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+                Dark
+            </button>
+
+            @* System option *@
+            <button
+                type="button"
+                class="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                :class="{ 'bg-accent': theme === 'system' }"
+                role="menuitem"
+                @@click="setTheme('system')"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                >
+                    <rect width="20" height="14" x="2" y="3" rx="2"></rect>
+                    <line x1="8" x2="16" y1="21" y2="21"></line>
+                    <line x1="12" x2="12" y1="17" y2="21"></line>
+                </svg>
+                System
+            </button>
+        </div>
+    </div>
+}
+
+@* Simple toggle button for switching between light and dark mode *@
+@fn toggle(
+    size: Size = Size::Default,
+    class: &str = "",
+) {
+    @let size_cls = match size {
+        Size::Sm => "h-8 w-8"
+        Size::Default => "h-9 w-9"
+        Size::Lg => "h-10 w-10"
+    }
+    @let icon_size = match size {
+        Size::Sm => "h-4 w-4"
+        Size::Default => "h-5 w-5"
+        Size::Lg => "h-6 w-6"
+    }
+    @let extra_class = class
+    @let base = "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+    @let classes = vec![@base, @size_cls, @extra_class]
+
+    <button
+        type="button"
+        class="@cn(@classes)"
+        x-data="{ dark: document.documentElement.classList.contains('dark') }"
+        x-init="window.addEventListener('theme-change', () => dark = document.documentElement.classList.contains('dark'))"
+        @@click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"
+        :aria-label="dark ? 'Switch to light mode' : 'Switch to dark mode'"
+    >
+        @* Sun icon (shown in dark mode - click to go light) *@
+        <svg
+            x-show="dark"
+            x-cloak
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="@icon_size"
+        >
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m6.34 17.66-1.41 1.41"></path>
+            <path d="m19.07 4.93-1.41 1.41"></path>
+        </svg>
+
+        @* Moon icon (shown in light mode - click to go dark) *@
+        <svg
+            x-show="!dark"
+            x-cloak
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="@icon_size"
+        >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+
+        <span class="sr-only" x-text="dark ? 'Switch to light mode' : 'Switch to dark mode'"></span>
+    </button>
+}
+
+@* Icon-only toggle with outline style *@
+@fn toggle_outline(
+    size: Size = Size::Default,
+    class: &str = "",
+) {
+    @let size_cls = match size {
+        Size::Sm => "h-8 w-8"
+        Size::Default => "h-9 w-9"
+        Size::Lg => "h-10 w-10"
+    }
+    @let icon_size = match size {
+        Size::Sm => "h-4 w-4"
+        Size::Default => "h-5 w-5"
+        Size::Lg => "h-6 w-6"
+    }
+    @let extra_class = class
+    @let base = "inline-flex items-center justify-center rounded-md border border-input bg-background p-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+    @let classes = vec![@base, @size_cls, @extra_class]
+
+    <button
+        type="button"
+        class="@cn(@classes)"
+        x-data="{ dark: document.documentElement.classList.contains('dark') }"
+        x-init="window.addEventListener('theme-change', () => dark = document.documentElement.classList.contains('dark'))"
+        @@click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"
+        :aria-label="dark ? 'Switch to light mode' : 'Switch to dark mode'"
+    >
+        @* Sun icon (shown in dark mode - click to go light) *@
+        <svg
+            x-show="dark"
+            x-cloak
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="@icon_size"
+        >
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m6.34 17.66-1.41 1.41"></path>
+            <path d="m19.07 4.93-1.41 1.41"></path>
+        </svg>
+
+        @* Moon icon (shown in light mode - click to go dark) *@
+        <svg
+            x-show="!dark"
+            x-cloak
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="@icon_size"
+        >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+
+        <span class="sr-only" x-text="dark ? 'Switch to light mode' : 'Switch to dark mode'"></span>
+    </button>
+}
+
+@* Theme initialization script - place in <head> to prevent flash *@
+@fn script() {
+    <script>
+        (function() {
+            var storageKey = 'theme';
+            var root = document.documentElement;
+
+            function getSystemTheme() {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            function applyTheme(theme) {
+                var effectiveTheme = theme === 'system' ? getSystemTheme() : theme;
+                if (effectiveTheme === 'dark') {
+                    root.classList.add('dark');
+                } else {
+                    root.classList.remove('dark');
+                }
+            }
+
+            function getTheme() {
+                return localStorage.getItem(storageKey) || 'system';
+            }
+
+            function setTheme(theme) {
+                localStorage.setItem(storageKey, theme);
+                applyTheme(theme);
+                window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: theme } }));
+            }
+
+            applyTheme(getTheme());
+
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+                if (getTheme() === 'system') {
+                    applyTheme('system');
+                }
+            });
+
+            window.themeManager = {
+                current: getTheme,
+                apply: setTheme,
+                toggle: function() {
+                    var current = getTheme();
+                    var effectiveTheme = current === 'system' ? getSystemTheme() : current;
+                    setTheme(effectiveTheme === 'dark' ? 'light' : 'dark');
+                },
+                effective: function() {
+                    var theme = getTheme();
+                    return theme === 'system' ? getSystemTheme() : theme;
+                }
+            };
+        })();
+    </script>
+}
