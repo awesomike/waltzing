@@ -288,7 +288,9 @@ async fn library_showcase(Path(id): Path<String>) -> impl IntoResponse {
     match library {
         Some(lib) => {
             let components = get_component_list(&id);
-            let sidebar = generate_sidebar(&id, &components, None);
+            let layouts = get_layout_list(&id);
+            let blocks = get_block_list(&id);
+            let sidebar = generate_sidebar(&id, &components, &layouts, &blocks, None);
             let content = generate_all_components_preview(&id, &components);
 
             let html = format!(
@@ -364,7 +366,9 @@ async fn component_showcase(Path((id, component)): Path<(String, String)>) -> im
     match library {
         Some(lib) => {
             let components = get_component_list(&id);
-            let sidebar = generate_sidebar(&id, &components, Some(&component));
+            let layouts = get_layout_list(&id);
+            let blocks = get_block_list(&id);
+            let sidebar = generate_sidebar(&id, &components, &layouts, &blocks, Some(&component));
             let content = generate_component_detail(&component);
 
             let title = component
@@ -526,9 +530,34 @@ fn get_component_list(library_id: &str) -> Vec<(&'static str, &'static str)> {
     }
 }
 
+fn get_layout_list(library_id: &str) -> Vec<(&'static str, &'static str)> {
+    match library_id {
+        "waltzing-ui" => vec![
+            ("base", "Base"),
+            ("sidebar", "Sidebar"),
+        ],
+        _ => vec![],
+    }
+}
+
+fn get_block_list(library_id: &str) -> Vec<(&'static str, &'static str)> {
+    match library_id {
+        "waltzing-ui" => vec![
+            ("contact-form", "Contact Form"),
+            ("profile-form", "Profile Form"),
+            ("confirm-dialog", "Confirm Dialog"),
+            ("delete-dialog", "Delete Dialog"),
+            ("share-dialog", "Share Dialog"),
+        ],
+        _ => vec![],
+    }
+}
+
 fn generate_sidebar(
     library_id: &str,
     components: &[(&str, &str)],
+    layouts: &[(&str, &str)],
+    blocks: &[(&str, &str)],
     active: Option<&str>,
 ) -> String {
     // Generate options for combobox
@@ -558,6 +587,44 @@ fn generate_sidebar(
                 r#"<a href="/library/{lib}/component/{comp}" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"#,
                 lib = library_id,
                 comp = id,
+                cls = active_class,
+                name = name
+            )
+        })
+        .collect();
+
+    let layout_nav_items: String = layouts
+        .iter()
+        .map(|(id, name)| {
+            let is_active = active == Some(*id);
+            let active_class = if is_active {
+                "bg-accent text-accent-foreground"
+            } else {
+                "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            };
+            format!(
+                r#"<a href="/library/{lib}/layout/{layout}" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"#,
+                lib = library_id,
+                layout = id,
+                cls = active_class,
+                name = name
+            )
+        })
+        .collect();
+
+    let block_nav_items: String = blocks
+        .iter()
+        .map(|(id, name)| {
+            let is_active = active == Some(*id);
+            let active_class = if is_active {
+                "bg-accent text-accent-foreground"
+            } else {
+                "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            };
+            format!(
+                r#"<a href="/library/{lib}/block/{block}" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"#,
+                lib = library_id,
+                block = id,
                 cls = active_class,
                 name = name
             )
@@ -626,6 +693,14 @@ fn generate_sidebar(
                 All Components
             </a>
             <div class="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 py-2 mt-4">
+                Layouts
+            </div>
+            {layout_items}
+            <div class="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 py-2 mt-4">
+                Blocks
+            </div>
+            {block_items}
+            <div class="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 py-2 mt-4">
                 Components
             </div>
             {items}
@@ -633,6 +708,8 @@ fn generate_sidebar(
         "##,
         lib = library_id,
         all_cls = all_active,
+        layout_items = layout_nav_items,
+        block_items = block_nav_items,
         items = nav_items,
         options = combobox_options
     )
