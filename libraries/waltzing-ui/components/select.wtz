@@ -1,56 +1,247 @@
 @*
  * Select component
- * A dropdown select input with custom styling
+ * A custom dropdown select with Alpine.js
+ *
+ * Two usage patterns:
+ *
+ * 1. Declarative (for static options):
+ * <@select::group name="country" selected=Some("us") placeholder="Select country">
+ *     <@select::option value="us">United States</@>
+ *     <@select::option value="uk">United Kingdom</@>
+ *     <@select::option value="ca" disabled=true>Canada</@>
+ * </@>
+ *
+ * 2. Data-driven (for dynamic options):
+ * <@select::from_vec name="country" options=@options selected=Some("us") />
  *@
 
 
+@* Option struct for data-driven usage *@
 @struct SelectOption {
     value: String,
     label: String,
     disabled: bool,
 }
 
-@fn apply(
+@* Select group container *@
+@fn group(
+    name: &str,
+    selected: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: &str = "",
+    content: @(),
+) {
+    @let base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
+    @let trigger_classes = vec![@base, @error_cls, @class]
+    @let trigger_cls = cn(@trigger_classes)
+
+    @let sel = selected.unwrap_or("")
+    @let ph = placeholder.unwrap_or("Select...")
+
+    <div
+        class="relative w-full"
+        x-data="{
+            open: false,
+            flipTop: false,
+            pos: { x: 0, y: 0, width: 0 },
+            selected: '@sel',
+            selectedLabel: '',
+            selectName: '@name',
+            init() {
+                const initial = this.$refs.options?.querySelector(`[data-value='${this.selected}']`);
+                if (initial) this.selectedLabel = initial.dataset.label || initial.textContent.trim();
+                this._scrollHandler = () => { if (this.open) this.updatePos(); };
+                window.addEventListener('scroll', this._scrollHandler, true);
+                window.addEventListener('resize', this._scrollHandler);
+            },
+            destroy() {
+                window.removeEventListener('scroll', this._scrollHandler, true);
+                window.removeEventListener('resize', this._scrollHandler);
+            },
+            updatePos() {
+                const trigger = this.$refs.trigger;
+                if (!trigger) return;
+                const rect = trigger.getBoundingClientRect();
+                const dropdownHeight = 240;
+                const spaceBelow = window.innerHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+                this.pos.x = rect.left;
+                this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                this.pos.width = rect.width;
+            },
+            selectOption(value, label) {
+                this.selected = value;
+                this.selectedLabel = label;
+                this.open = false;
+                this.$refs.hiddenInput.value = value;
+                this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }"
+        x-init="init()"
+        @destroy="destroy()"
+        @keydown.escape="open = false"
+    >
+        @* Hidden input for form submission *@
+        <input
+            type="hidden"
+            name="@name"
+            x-ref="hiddenInput"
+            :value="selected"
+            @if required { required }
+        />
+
+        @* Trigger button *@
+        <button
+            type="button"
+            x-ref="trigger"
+            class="@trigger_cls"
+            @click="open = !open; if(open) $nextTick(() => updatePos())"
+            @if disabled { disabled }
+            @if error.is_some() { aria-invalid="true" }
+            aria-haspopup="listbox"
+            :aria-expanded="open"
+        >
+            <span x-text="selectedLabel || '@ph'" :class="!selectedLabel && 'text-muted-foreground'"></span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 opacity-50 transition-transform" :class="open && 'rotate-180'">
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        </button>
+
+        @* Dropdown (teleported to body) *@
+        <template x-teleport="body">
+            <div
+                x-show="open"
+                x-cloak
+                x-ref="options"
+                x-transition:enter="transition ease-out duration-100"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                @click.outside="open = false"
+                class="fixed z-[9999] max-h-60 overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`"
+                role="listbox"
+            >
+                @content()
+            </div>
+        </template>
+    </div>
+}
+
+@* Individual select option - must be used inside a group *@
+@fn option(
+    value: &str,
+    disabled: bool = false,
+    content: @(),
+) {
+    @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
+
+    <div
+        data-value="@value"
+        data-label
+        x-data="{ get label() { return this.$el.textContent.trim(); } }"
+        x-init="$el.dataset.label = label"
+        class="@option_base @if disabled { pointer-events-none opacity-50 }"
+        :class="selected === '@value' ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'"
+        @click="@if !disabled { selectOption('@value', label) }"
+        role="option"
+        :aria-selected="selected === '@value'"
+        @if disabled { aria-disabled="true" }
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="mr-2 h-4 w-4"
+            :class="selected === '@value' ? 'opacity-100' : 'opacity-0'"
+        >
+            <path d="M20 6 9 17l-5-5"/>
+        </svg>
+        <span>@content()</span>
+    </div>
+}
+
+@* Data-driven select from Vec<SelectOption> *@
+@fn from_vec(
     name: &str,
     options: Vec<SelectOption>,
-    selected: Option<&str>,
+    selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
     class: &str = "",
 ) {
-    @let base = "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-
-    @let cls = class
-    <select
-        name="@name"
-        class="@base @if error.is_some() { border-destructive focus:ring-destructive } @cls"
-        @if disabled { disabled }
-        @if required { required }
-        @if error.is_some() { aria-invalid="true" }
+    <@group
+        name=@name
+        selected=@selected
+        placeholder=@placeholder
+        disabled=@disabled
+        required=@required
+        error=@error
+        class=@class
     >
-        @if let Some(ph) = placeholder {
-            <option value="" disabled @if selected.is_none() { selected }>@ph</option>
-        }
         @for opt in options {
-            <option
-                value="@opt.value"
-                @if opt.disabled { disabled }
-                @if selected == Some(opt.value.as_str()) { selected }
-            >
+            <@option value=@opt.value disabled=@opt.disabled>
                 @opt.label
-            </option>
+            </@>
         }
-    </select>
+    </@>
 }
 
-@* Select with label *@
+@* Select with label (declarative) *@
 @fn labeled(
     label: &str,
     name: &str,
+    selected: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: &str = "",
+    content: @(),
+) {
+    <div class="space-y-2">
+        <label class="text-sm font-medium leading-none">
+            @label
+            @if required { <span class="text-destructive">*</span> }
+        </label>
+        <@group
+            name=@name
+            selected=@selected
+            placeholder=@placeholder
+            disabled=@disabled
+            required=@required
+            error=@error
+            class=@class
+        >
+            @content()
+        </@>
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </div>
+}
+
+@* Select with label (data-driven) *@
+@fn labeled_from_vec(
+    label: &str,
+    name: &str,
     options: Vec<SelectOption>,
-    selected: Option<&str>,
+    selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     disabled: bool = false,
     required: bool = false,
@@ -58,11 +249,11 @@
     class: &str = "",
 ) {
     <div class="space-y-2">
-        <label for="@name" class="text-sm font-medium leading-none">
+        <label class="text-sm font-medium leading-none">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>
-        <@apply
+        <@from_vec
             name=@name
             options=@options
             selected=@selected
