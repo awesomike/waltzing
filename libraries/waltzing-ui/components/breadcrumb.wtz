@@ -33,12 +33,12 @@
 
 @* Root breadcrumb container *@
 @fn root(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     <nav
         aria-label="Breadcrumb"
-        class=@class.unwrap_or("")
+        class=@class
     >
         @content()
     </nav>
@@ -46,20 +46,20 @@
 
 @* Breadcrumb list container *@
 @fn list(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
-    <ol class=@cn(&["flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5", class.unwrap_or("")])>
+    <ol class=@cn(&["flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5", class])>
         @content()
     </ol>
 }
 
 @* Individual breadcrumb item wrapper *@
 @fn item(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
-    <li class=@cn(&["inline-flex items-center gap-1.5", class.unwrap_or("")])>
+    <li class=@cn(&["inline-flex items-center gap-1.5", class])>
         @content()
     </li>
 }
@@ -67,12 +67,12 @@
 @* Breadcrumb link (clickable item) *@
 @fn link(
     href: &str,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     <a
         href=@href
-        class=@cn(&["transition-colors hover:text-foreground", class.unwrap_or("")])
+        class=@cn(&["transition-colors hover:text-foreground", class])
     >
         @content()
     </a>
@@ -80,14 +80,14 @@
 
 @* Current page indicator (non-clickable, last item) *@
 @fn page(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     <span
         role="link"
         aria-disabled="true"
         aria-current="page"
-        class=@cn(&["font-normal text-foreground", class.unwrap_or("")])
+        class=@cn(&["font-normal text-foreground", class])
     >
         @content()
     </span>
@@ -96,13 +96,13 @@
 @* Separator between breadcrumb items (customizable, default: /) *@
 @fn separator(
     text: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let sep = text.unwrap_or("/")
     <li
         role="presentation"
         aria-hidden="true"
-        class=@cn(&["text-muted-foreground", class.unwrap_or("")])
+        class=@cn(&["text-muted-foreground", class])
     >
         @sep
     </li>
@@ -110,12 +110,12 @@
 
 @* Ellipsis for collapsed breadcrumb items *@
 @fn ellipsis(
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <span
         role="presentation"
         aria-hidden="true"
-        class=@cn(&["flex h-9 w-9 items-center justify-center", class.unwrap_or("")])
+        class=@cn(&["flex h-9 w-9 items-center justify-center", class])
     >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
             <circle cx="12" cy="12" r="1"/>
@@ -130,7 +130,7 @@
 @fn apply(
     items: Vec<BreadcrumbItem>,
     separator_text: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <@root class=@class>
         <@list>

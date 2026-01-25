@@ -58,7 +58,7 @@
     disabled: bool,
     dropzone_text: Option<&str>,
     dropzone_hint: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let input_id = unique_id("file-upload")
     @let dropzone_label = dropzone_text.unwrap_or("Click to upload or drag and drop")
@@ -66,7 +66,7 @@
 
     @let base = "flex flex-col gap-2"
 
-    <div class=@cn(&[base, class.unwrap_or("")])>
+    <div class=@cn(&[base, class])>
         @if let Some(lbl) = label {
             <label for=@input_id class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 @lbl
@@ -232,7 +232,7 @@
     current_url: Option<&str>,
     dropzone_text: Option<&str>,
     dropzone_hint: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let input_id = unique_id("file-upload-edit")
     @let dropzone_label = dropzone_text.unwrap_or("Click to upload or drag and drop")
@@ -241,7 +241,7 @@
 
     @let base = "flex flex-col gap-2"
 
-    <div class=@cn(&[base, class.unwrap_or("")])>
+    <div class=@cn(&[base, class])>
         @if let Some(lbl) = label {
             <label for=@input_id class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 @lbl
@@ -483,7 +483,7 @@
     disabled: bool,
     text: Option<&str>,
     hint: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let input_id = unique_id("file-dropzone")
     @let dropzone_label = text.unwrap_or("Click to upload or drag and drop")
@@ -491,7 +491,7 @@
 
     <div
         x-data="{ dragging: false }"
-        class=@cn(&["relative rounded-lg border-2 border-dashed border-input bg-background transition-colors", class.unwrap_or("")])
+        class=@cn(&["relative rounded-lg border-2 border-dashed border-input bg-background transition-colors", class])
         :class="{ 'border-primary bg-primary/5': dragging }"
     >
         <input

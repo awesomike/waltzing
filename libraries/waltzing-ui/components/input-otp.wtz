@@ -23,13 +23,13 @@
     name: &str,
     length: u32,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let container_base = "flex items-center gap-2"
     @let input_base = "h-10 w-10 text-center text-sm font-medium rounded-md border border-input bg-transparent shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 
     <div
-        class=@cn(&[container_base, class.unwrap_or("")])
+        class=@cn(&[container_base, class])
         x-data=@```json {
             digits: Array(@length).fill(''),
             get value() { return this.digits.join(''); },
@@ -109,14 +109,14 @@
     length: u32,
     separator_after: u32,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let container_base = "flex items-center gap-2"
     @let input_base = "h-10 w-10 text-center text-sm font-medium rounded-md border border-input bg-transparent shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
     @let separator_cls = "text-muted-foreground text-xl font-light"
 
     <div
-        class=@cn(&[container_base, class.unwrap_or("")])
+        class=@cn(&[container_base, class])
         x-data=@```json {
             digits: Array(@length).fill(''),
             get value() { return this.digits.join(''); },

@@ -41,7 +41,7 @@
     align: Align = Align::Center,
     open_delay_ms: u32 = 500,
     close_delay_ms: u32 = 300,
-    class: Option<&str> = None,
+    class: &str = "",
     trigger: @() = @{},
     content: @() = @{},
 ) {
@@ -58,7 +58,7 @@
         Align::End => "end",
     }
 
-    @let extra_cls = class.unwrap_or("")
+    @let extra_cls = class
 
     <div class="inline-block" x-data="{
         open: false,
@@ -135,7 +135,7 @@
 @fn instant(
     side: Side = Side::Bottom,
     align: Align = Align::Center,
-    class: Option<&str> = None,
+    class: &str = "",
     trigger: @() = @{},
     content: @() = @{},
 ) {
@@ -156,7 +156,7 @@
         }
     }
 
-    @let card_cls = cn(&["absolute z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", side_cls, align_cls, class.unwrap_or("")])
+    @let card_cls = cn(&["absolute z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", side_cls, align_cls, class])
 
     <div class="relative inline-block" x-data="{ open: false }">
         <div
@@ -187,8 +187,8 @@
 }
 
 @* Hover card trigger wrapper *@
-@fn trigger(class: Option<&str> = None, content: @() = @{}) {
-    @let trigger_cls = cn(&["cursor-pointer", class.unwrap_or("")])
+@fn trigger(class: &str = "", content: @() = @{}) {
+    @let trigger_cls = cn(&["cursor-pointer", class])
 
     <span class="@trigger_cls">
         @content()
@@ -199,10 +199,10 @@
 @fn avatar_content(
     avatar_src: &str = "",
     avatar_alt: &str = "",
-    class: Option<&str> = None,
+    class: &str = "",
     content: @() = @{},
 ) {
-    @let content_cls = cn(&["flex gap-4", class.unwrap_or("")])
+    @let content_cls = cn(&["flex gap-4", class])
 
     <div class="@content_cls">
         <img src="@avatar_src" alt="@avatar_alt" class="h-12 w-12 rounded-full" />

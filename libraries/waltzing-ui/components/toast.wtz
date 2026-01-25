@@ -31,7 +31,7 @@
 }
 
 @* Toast container for positioning - place once in layout *@
-@fn container(position: &str = "bottom-right", class: Option<&str> = None) {
+@fn container(position: &str = "bottom-right", class: &str = "") {
     @let position_cls = {
         match position {
             "top-left" => "top-0 left-0",
@@ -43,7 +43,7 @@
         }
     }
 
-    @let extra_cls = class.unwrap_or("")
+    @let extra_cls = class
     @let cls_parts = vec!["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, extra_cls]
     @let container_cls = cn(cls_parts)
 
@@ -134,7 +134,7 @@
     title: &str,
     description: Option<&str> = None,
     duration: Option<u32> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let base = "pointer-events-auto w-full max-w-sm rounded-lg border p-4 shadow-lg"
 
@@ -145,7 +145,7 @@
         Variant::Warning => { "border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950 text-yellow-900 dark:text-yellow-100" }
     }
 
-    @let extra_cls = class.unwrap_or("")
+    @let extra_cls = class
     @let cls_parts = vec![base, variant_cls, extra_cls]
     @let toast_cls = cn(cls_parts)
 

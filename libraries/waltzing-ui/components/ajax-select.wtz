@@ -57,11 +57,11 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let trigger_base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-    @let class_str = class.unwrap_or("")
+    @let class_str = class
     @let classes = vec![@trigger_base, @error_cls, @class_str]
     @let trigger_cls = cn(&@classes)
 
@@ -365,7 +365,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <div class="space-y-2">
         <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">

@@ -37,7 +37,7 @@
     items: Vec<AccordionItem>,
     content: |id: &str, out: @Out|,
     multiple: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @if multiple {
         <@multiple_mode items=@items content=@content class=@class />
@@ -50,7 +50,7 @@
 @fn single(
     items: Vec<AccordionItem>,
     content: |id: &str, out: @Out|,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <@single_mode items=@items content=@content class=@class />
 }
@@ -59,13 +59,13 @@
 @fn single_mode(
     items: Vec<AccordionItem>,
     content: |id: &str, out: @Out|,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let base = "divide-y divide-border rounded-md border"
 
     <div
         x-data="{ active: null }"
-        class=@cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class])
     >
         @for item in items.iter() {
             <div class="accordion-item">
@@ -114,13 +114,13 @@
 @fn multiple_mode(
     items: Vec<AccordionItem>,
     content: |id: &str, out: @Out|,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let base = "divide-y divide-border rounded-md border"
 
     <div
         x-data="{ open: {} }"
-        class=@cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class])
     >
         @for item in items.iter() {
             <div class="accordion-item">
@@ -170,7 +170,7 @@
     id: &str,
     title: &str,
     default_open: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "border-b"
@@ -178,7 +178,7 @@
 
     <div
         x-data=@format!("{{ open: {} }}", open_str)
-        class=@cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class])
     >
         <button
             type="button"

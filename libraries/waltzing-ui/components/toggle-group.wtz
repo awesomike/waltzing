@@ -41,7 +41,7 @@
     selected: Option<&str>,
     variant: Variant,
     size: Size,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let group_base = "inline-flex items-center rounded-md"
 
@@ -60,7 +60,7 @@
         }
     }
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     <div
         role="group"
         class="@cn(&[@group_base, @variant_cls, @cls])"
@@ -130,7 +130,7 @@
     selected: Vec<&str>,
     variant: Variant,
     size: Size,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let group_base = "inline-flex items-center rounded-md"
 
@@ -143,7 +143,7 @@
 
     @let selected_json = format!("[{}]", selected.iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(", "))
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     <div
         role="group"
         class="@cn(&[@group_base, @variant_cls, @cls])"
@@ -211,7 +211,7 @@
     name: &str,
     items: Vec<ToggleItem>,
     selected: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     <@single
         name=@name
@@ -228,7 +228,7 @@
     name: &str,
     items: Vec<ToggleItem>,
     selected: Vec<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     <@multiple
         name=@name
@@ -245,7 +245,7 @@
     name: &str,
     items: Vec<ToggleItem>,
     selected: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     <@single
         name=@name
@@ -262,7 +262,7 @@
     name: &str,
     items: Vec<ToggleItem>,
     selected: Vec<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     <@multiple
         name=@name
@@ -279,7 +279,7 @@
     name: &str,
     items: Vec<ToggleItem>,
     selected: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     <@single
         name=@name
@@ -296,7 +296,7 @@
     name: &str,
     items: Vec<ToggleItem>,
     selected: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     <@single
         name=@name

@@ -30,12 +30,12 @@
 
 @* Menubar container *@
 @fn apply(
-    class: Option<&str>,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "flex h-9 items-center space-x-1 rounded-md border bg-background p-1 shadow-sm"
     @let empty = ""
-    @let cls = class.unwrap_or(@empty)
+    @let cls = class
     @let parts = vec![@base, @cls]
     @let classes = cn(@parts)
 

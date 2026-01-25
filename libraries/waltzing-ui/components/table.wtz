@@ -7,9 +7,9 @@
 @fn apply(
     header: @(),
     body: @(),
-    class: Option<&str>,
+    class: &str = "",
 ) {
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let base = "w-full caption-bottom text-sm"
     @let classes = &[base, cls]
     <div class="relative w-full overflow-auto">
@@ -32,8 +32,8 @@
 }
 
 @* Table header cell *@
-@fn th(class: Option<&str>, content: @()) {
-    @let cls = class.unwrap_or("")
+@fn th(class: &str = "", content: @()) {
+    @let cls = class
     @let base = "h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
     @let classes = &[base, cls]
     <th class="@cn(@classes)">
@@ -42,8 +42,8 @@
 }
 
 @* Table row *@
-@fn row(class: Option<&str>, content: @()) {
-    @let cls = class.unwrap_or("")
+@fn row(class: &str = "", content: @()) {
+    @let cls = class
     @let base = "border-b transition-colors hover:bg-muted/50"
     @let classes = &[base, cls]
     <tr class="@cn(@classes)">
@@ -52,8 +52,8 @@
 }
 
 @* Table cell *@
-@fn td(class: Option<&str>, content: @()) {
-    @let cls = class.unwrap_or("")
+@fn td(class: &str = "", content: @()) {
+    @let cls = class
     @let base = "p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
     @let classes = &[base, cls]
     <td class="@cn(@classes)">

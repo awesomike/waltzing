@@ -7,10 +7,10 @@
 @fn apply(
     header: Option<@()>,
     footer: Option<@()>,
-    class: Option<&str>,
+    class: &str = "",
     content: @(),
 ) {
-    @let extra = class.unwrap_or("")
+    @let extra = class
     @let classes = vec!["rounded-xl border bg-card text-card-foreground shadow", extra]
     <div class="@cn(classes)">
         @if let Some(h) = header {
@@ -30,8 +30,8 @@
 }
 
 @* Card with just content *@
-@fn simple(class: Option<&str>, content: @()) {
-    @let extra = class.unwrap_or("")
+@fn simple(class: &str = "", content: @()) {
+    @let extra = class
     @let classes = vec!["rounded-xl border bg-card text-card-foreground shadow p-6", extra]
     <div class="@cn(classes)">
         @content()
@@ -39,8 +39,8 @@
 }
 
 @* Card header component for composition *@
-@fn header(class: Option<&str>, content: @()) {
-    @let extra = class.unwrap_or("")
+@fn header(class: &str = "", content: @()) {
+    @let extra = class
     @let classes = vec!["flex flex-col space-y-1.5 p-6", extra]
     <div class="@cn(classes)">
         @content()
@@ -48,8 +48,8 @@
 }
 
 @* Card title *@
-@fn title(class: Option<&str>, content: @()) {
-    @let extra = class.unwrap_or("")
+@fn title(class: &str = "", content: @()) {
+    @let extra = class
     @let classes = vec!["font-semibold leading-none tracking-tight", extra]
     <h3 class="@cn(classes)">
         @content()
@@ -57,8 +57,8 @@
 }
 
 @* Card description *@
-@fn description(class: Option<&str>, content: @()) {
-    @let extra = class.unwrap_or("")
+@fn description(class: &str = "", content: @()) {
+    @let extra = class
     @let classes = vec!["text-sm text-muted-foreground", extra]
     <p class="@cn(classes)">
         @content()
@@ -66,8 +66,8 @@
 }
 
 @* Card content area *@
-@fn content(class: Option<&str>, content: @()) {
-    @let extra = class.unwrap_or("")
+@fn content(class: &str = "", content: @()) {
+    @let extra = class
     @let classes = vec!["p-6 pt-0", extra]
     <div class="@cn(classes)">
         @content()
@@ -75,8 +75,8 @@
 }
 
 @* Card footer *@
-@fn footer(class: Option<&str>, content: @()) {
-    @let extra = class.unwrap_or("")
+@fn footer(class: &str = "", content: @()) {
+    @let extra = class
     @let classes = vec!["flex items-center p-6 pt-0", extra]
     <div class="@cn(classes)">
         @content()

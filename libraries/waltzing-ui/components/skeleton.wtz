@@ -6,15 +6,15 @@
  *   @import ui/components/skeleton.wtz as skeleton
  *
  *   <@skeleton::apply />
- *   <@skeleton::apply class=Some("h-12 w-12") />
+ *   <@skeleton::apply class="h-12 w-12" />
  *   <@skeleton::circle size="h-10 w-10" />
  *   <@skeleton::text lines=3 />
  *@
 
 
-@fn apply(class: Option<&str>) {
+@fn apply(class: &str = "") {
     @let base = "animate-pulse rounded-md bg-muted"
-    @let extra = class.unwrap_or("")
+    @let extra = class
     @let classes = vec![@base, @extra]
 
     <div class="@cn(@classes)"></div>

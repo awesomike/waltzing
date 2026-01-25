@@ -9,20 +9,20 @@
  *
  * <@label>Standalone label</@>
  *
- * <@label for_id=Some("username") class=Some("mb-2")>Username</@>
+ * <@label for_id=Some("username") class="mb-2">Username</@>
  *@
 
 @* Main label component with optional for attribute *@
 @fn apply(
     for_id: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 
     <label
         @if let Some(id) = for_id { for=@id }
-        class=@cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class])
     >
         @content()
     </label>

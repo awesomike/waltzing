@@ -28,12 +28,12 @@
 @fn apply(
     selected: Option<&str> = None,
     on_select: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let initial_selected = selected.unwrap_or("")
     @let select_handler = on_select.unwrap_or("null")
 
-    @let container_cls = cn(&["p-3", class.unwrap_or("")])
+    @let container_cls = cn(&["p-3", class])
 
     <div
         class="@container_cls"
@@ -223,13 +223,13 @@
     start: Option<&str> = None,
     end: Option<&str> = None,
     on_select: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let initial_start = start.unwrap_or("")
     @let initial_end = end.unwrap_or("")
     @let select_handler = on_select.unwrap_or("null")
 
-    @let container_cls = cn(&["p-3", class.unwrap_or("")])
+    @let container_cls = cn(&["p-3", class])
 
     <div
         class="@container_cls"
@@ -449,9 +449,9 @@
 @fn display(
     month: u32,
     year: u32,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
-    @let container_cls = cn(&["p-3", class.unwrap_or("")])
+    @let container_cls = cn(&["p-3", class])
 
     <div
         class="@container_cls"
@@ -536,6 +536,6 @@
 }
 
 @* Simple calendar shorthand with no initial selection *@
-@fn simple(on_select: Option<&str> = None, class: Option<&str> = None) {
+@fn simple(on_select: Option<&str> = None, class: &str = "") {
     <@apply selected=None on_select=@on_select class=@class />
 }

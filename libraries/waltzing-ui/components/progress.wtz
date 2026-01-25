@@ -12,7 +12,7 @@
  *   <@progress::apply value=75.0 max=150.0 />
  *
  *   // Progress with custom class
- *   <@progress::apply value=30.0 class=Some("w-64") />
+ *   <@progress::apply value=30.0 class="w-64" />
  *
  *   // Indeterminate loading state (unknown duration)
  *   <@progress::indeterminate />
@@ -26,14 +26,14 @@
 @fn apply(
     value: f64,
     max: f64 = 100.0,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let percentage = (value / max * 100.0)
     @let clamped = if (percentage > 100.0) { 100.0 } else if (percentage < 0.0) { 0.0 } else { percentage }
 
     @let base = "relative h-2 w-full overflow-hidden rounded-full bg-primary/20"
     @let indicator = "h-full bg-primary transition-all duration-300 ease-in-out"
-    @let extra_class = class.unwrap_or_default()
+    @let extra_class = class
     @let classes = vec![@base, @extra_class]
 
     <div
@@ -48,10 +48,10 @@
 }
 
 @* Indeterminate progress bar for unknown duration *@
-@fn indeterminate(class: Option<&str> = None) {
+@fn indeterminate(class: &str = "") {
     @let base = "relative h-2 w-full overflow-hidden rounded-full bg-primary/20"
     @let indicator = "h-full w-1/3 bg-primary animate-progress-indeterminate"
-    @let extra_class = class.unwrap_or_default()
+    @let extra_class = class
     @let classes = vec![@base, @extra_class]
 
     <div
@@ -69,7 +69,7 @@
     value: f64,
     max: f64 = 100.0,
     label: &str = "Progress",
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let percentage = (value / max * 100.0)
     @let clamped = if (percentage > 100.0) { 100.0 } else if (percentage < 0.0) { 0.0 } else { percentage }

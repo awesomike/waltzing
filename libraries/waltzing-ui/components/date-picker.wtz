@@ -30,7 +30,7 @@
     min: Option<&str> = None,
     max: Option<&str> = None,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let initial_value = value.unwrap_or("")
     @let min_date = min.unwrap_or("")
@@ -41,7 +41,7 @@
         "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors",
         "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         "disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer pr-10",
-        class.unwrap_or("")
+        class
     ])
 
     <div
@@ -583,7 +583,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <div class="space-y-2">
         <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">

@@ -15,7 +15,7 @@
  *     <@alert::description>Something went wrong. Please try again.</@>
  * </@>
  *
- * <@alert::apply variant=alert::Variant::Success class=Some("my-4")>
+ * <@alert::apply variant=alert::Variant::Success class="my-4">
  *     <@alert::title>Success!</@>
  *     <@alert::description>Your changes have been saved.</@>
  * </@>
@@ -31,7 +31,7 @@
 
 @fn apply(
     variant: Variant,
-    class: Option<&str>,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7"
@@ -43,7 +43,7 @@
         Variant::Success => { "border-green-500/50 text-green-600 dark:text-green-500 [&>svg]:text-green-600 dark:[&>svg]:text-green-500" }
     }
 
-    @let extra = class.unwrap_or("")
+    @let extra = class
     @let classes = vec![@base, @variant_cls, @extra]
     <div role="alert" class="@cn(classes)">
         @content()
@@ -51,8 +51,8 @@
 }
 
 @* Alert title *@
-@fn title(class: Option<&str>, content: @()) {
-    @let extra = class.unwrap_or("")
+@fn title(class: &str = "", content: @()) {
+    @let extra = class
     @let classes = vec!["mb-1 font-medium leading-none tracking-tight", @extra]
     <h5 class="@cn(classes)">
         @content()
@@ -60,8 +60,8 @@
 }
 
 @* Alert description *@
-@fn description(class: Option<&str>, content: @()) {
-    @let extra = class.unwrap_or("")
+@fn description(class: &str = "", content: @()) {
+    @let extra = class
     @let classes = vec!["text-sm [&_p]:leading-relaxed", @extra]
     <div class="@cn(classes)">
         @content()

@@ -43,7 +43,7 @@
 @* Main container for resizable panels *@
 @fn panel_group(
     direction: Direction = Direction::Horizontal,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let is_horizontal = match direction {
@@ -56,7 +56,7 @@
         Direction::Vertical => "flex flex-col h-full w-full",
     }
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let container_classes = vec![container_cls, cls]
     <div
         x-data="resizableGroup(@is_horizontal)"
@@ -73,14 +73,14 @@
     default_size: f64,
     min_size: Option<f64> = None,
     max_size: Option<f64> = None,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "overflow-auto"
     @let min_val = min_size.unwrap_or(0.0)
     @let max_val = max_size.unwrap_or(100.0)
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let panel_classes = vec![base, cls]
     <div
         class="@cn(@panel_classes)"
@@ -94,10 +94,10 @@
 }
 
 @* Drag handle between panels *@
-@fn handle(class: Option<&str> = None) {
+@fn handle(class: &str = "") {
     @let base = "relative flex items-center justify-center bg-border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1"
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let handle_classes = vec![base, cls]
     <div
         class="@cn(@handle_classes)"
@@ -145,7 +145,7 @@
     left_size: f64 = 50.0,
     left: @(),
     right: @(),
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let right_size = (100.0 - left_size)
 
@@ -161,7 +161,7 @@
     top_size: f64 = 50.0,
     top: @(),
     bottom: @(),
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let bottom_size = (100.0 - top_size)
 
@@ -179,7 +179,7 @@
     left: @(),
     center: @(),
     right: @(),
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let center_size = (100.0 - left_size - right_size)
 

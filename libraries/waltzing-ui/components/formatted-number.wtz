@@ -67,7 +67,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let input_base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let error_cls = if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
@@ -77,7 +77,7 @@
     @let prefix_cls = if has_prefix { "pl-7" } else { "" }
     @let suffix_cls = if has_suffix { "pr-8" } else { "" }
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let input_classes = vec![@input_base, @error_cls, @prefix_cls, @suffix_cls, @cls]
     @let input_cls = cn(@input_classes)
 
@@ -201,7 +201,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <@apply
         name=@name
@@ -240,7 +240,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <@apply
         name=@name
@@ -275,7 +275,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <@apply
         name=@name
@@ -308,7 +308,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <@apply
         name=@name
@@ -342,7 +342,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <@apply
         name=@name
@@ -376,7 +376,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <@apply
         name=@name

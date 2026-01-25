@@ -6,12 +6,12 @@
  * @import components/scroll-area.wtz as scroll_area
  *
  * // Vertical scroll area (default)
- * <@scroll_area::apply class=Some("h-72 w-48")>
+ * <@scroll_area::apply class="h-72 w-48">
  *     <p>Long scrollable content...</p>
  * </@>
  *
  * // Horizontal scroll area
- * <@scroll_area::horizontal class=Some("w-96")>
+ * <@scroll_area::horizontal class="w-96">
  *     <div class="flex gap-4">
  *         <div class="w-32 shrink-0">Item 1</div>
  *         <div class="w-32 shrink-0">Item 2</div>
@@ -19,12 +19,12 @@
  * </@>
  *
  * // Both directions
- * <@scroll_area::both class=Some("h-72 w-96")>
+ * <@scroll_area::both class="h-72 w-96">
  *     <div class="w-[600px]">Wide and tall content...</div>
  * </@>
  *
  * // With fade edges
- * <@scroll_area::apply class=Some("h-72") fade=true>
+ * <@scroll_area::apply class="h-72" fade=true>
  *     <p>Content with faded edges...</p>
  * </@>
  *@
@@ -32,7 +32,7 @@
 
 @* Vertical scroll area *@
 @fn apply(
-    class: Option<&str> = None,
+    class: &str = "",
     fade: bool = false,
     content: @(),
 ) {
@@ -41,14 +41,14 @@
 
     @if fade {
         <div class="relative">
-            <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
+            <div class=@cn(&[base, scrollbar, class])>
                 @content()
             </div>
             <div class="pointer-events-none absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-background to-transparent"></div>
             <div class="pointer-events-none absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-background to-transparent"></div>
         </div>
     } else {
-        <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
+        <div class=@cn(&[base, scrollbar, class])>
             @content()
         </div>
     }
@@ -56,7 +56,7 @@
 
 @* Horizontal scroll area *@
 @fn horizontal(
-    class: Option<&str> = None,
+    class: &str = "",
     fade: bool = false,
     content: @(),
 ) {
@@ -65,14 +65,14 @@
 
     @if fade {
         <div class="relative">
-            <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
+            <div class=@cn(&[base, scrollbar, class])>
                 @content()
             </div>
             <div class="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent"></div>
             <div class="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent"></div>
         </div>
     } else {
-        <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
+        <div class=@cn(&[base, scrollbar, class])>
             @content()
         </div>
     }
@@ -80,7 +80,7 @@
 
 @* Scroll area with both directions *@
 @fn both(
-    class: Option<&str> = None,
+    class: &str = "",
     fade: bool = false,
     content: @(),
 ) {
@@ -89,7 +89,7 @@
 
     @if fade {
         <div class="relative">
-            <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
+            <div class=@cn(&[base, scrollbar, class])>
                 @content()
             </div>
             <div class="pointer-events-none absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-background to-transparent"></div>
@@ -98,7 +98,7 @@
             <div class="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent"></div>
         </div>
     } else {
-        <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
+        <div class=@cn(&[base, scrollbar, class])>
             @content()
         </div>
     }
@@ -106,10 +106,10 @@
 
 @* Viewport wrapper for custom positioning *@
 @fn viewport(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
-    <div class=@cn(&["h-full w-full rounded-[inherit]", class.unwrap_or("")])>
+    <div class=@cn(&["h-full w-full rounded-[inherit]", class])>
         @content()
     </div>
 }

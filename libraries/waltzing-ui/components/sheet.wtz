@@ -36,7 +36,7 @@
     description: Option<&str>,
     trigger: @(),
     content: @(),
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let position_cls = match side {
         Side::Top => { "inset-x-0 top-0 border-b" }
@@ -60,7 +60,7 @@
     }
 
     @let base_cls = "fixed z-50 gap-4 bg-background p-6 shadow-lg"
-    @let extra_cls = class.unwrap_or("")
+    @let extra_cls = class
     @let sheet_cls = vec![@base_cls, @position_cls, @extra_cls]
 
     <div x-data="{ open: false }">
@@ -144,7 +144,7 @@
     title: &str,
     description: Option<&str>,
     content: @(),
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let position_cls = match side {
         Side::Top => { "inset-x-0 top-0 border-b" }
@@ -168,7 +168,7 @@
     }
 
     @let base_cls = "fixed z-50 gap-4 bg-background p-6 shadow-lg"
-    @let extra_cls = class.unwrap_or("")
+    @let extra_cls = class
     @let sheet_cls = vec![@base_cls, @position_cls, @extra_cls]
 
     <template x-teleport="body">

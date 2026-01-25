@@ -220,7 +220,7 @@ Wrap components to add project-specific defaults:
         variant=ui_button::Variant::Primary
         size=ui_button::Size::Md
         disabled=false
-        class=Some("my-custom-class")
+        class="my-custom-class"
         content=@content
     />
 }

@@ -90,7 +90,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Badges Section *@
                 <@section title="Badges" id="badges">
@@ -103,7 +103,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Inputs Section *@
                 <@section title="Inputs" id="inputs">
@@ -134,7 +134,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Textarea Section *@
                 <@section title="Textarea" id="textarea">
@@ -154,7 +154,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Checkbox Section *@
                 <@section title="Checkbox" id="checkbox">
@@ -172,7 +172,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Switch Section *@
                 <@section title="Switch" id="switch">
@@ -195,7 +195,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Toggle Section *@
                 <@section title="Toggle" id="toggle">
@@ -207,7 +207,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Slider Section *@
                 <@section title="Slider" id="slider">
@@ -236,7 +236,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Progress Section *@
                 <@section title="Progress" id="progress">
@@ -249,7 +249,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Avatar Section *@
                 <@section title="Avatar" id="avatar">
@@ -263,7 +263,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Card Section *@
                 <@section title="Card" id="card">
@@ -281,7 +281,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Alert Section *@
                 <@section title="Alert" id="alert">
@@ -306,7 +306,7 @@
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Skeleton Section *@
                 <@section title="Skeleton" id="skeleton">
@@ -315,15 +315,15 @@
                         <div class="flex items-center gap-4">
                             <@skeleton::circle size=@skeleton_circle_size />
                             <div class="space-y-2 flex-1">
-                                <@skeleton::apply class=Some(@skeleton_w34) />
-                                <@skeleton::apply class=Some(@skeleton_w12) />
+                                <@skeleton::apply class=@skeleton_w34 />
+                                <@skeleton::apply class=@skeleton_w12 />
                             </div>
                         </div>
                         <@skeleton::text lines=3 />
                     </div>
                 </@>
 
-                <@separator::horizontal class=Some("my-8") />
+                <@separator::horizontal class="my-8" />
 
                 @* Separator Section *@
                 <@section title="Separator" id="separator">

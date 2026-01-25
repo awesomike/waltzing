@@ -15,7 +15,7 @@
  *     alt="John Doe"
  *     fallback="JD"
  *     size=avatar::Size::Lg
- *     class=Some("ring-2 ring-primary")
+ *     class="ring-2 ring-primary"
  * />
  *@
 
@@ -31,10 +31,10 @@
     alt: &str,
     fallback: &str,
     size: Size,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let base = "relative flex shrink-0 overflow-hidden rounded-full"
-    @let cls = class.unwrap_or_default()
+    @let cls = class
 
     @let size_cls = match size {
         Size::Sm => { "h-8 w-8" }

@@ -32,13 +32,13 @@
 
 @* Root pagination container *@
 @fn root(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     <nav
         role="navigation"
         aria-label="pagination"
-        class=@cn(&["mx-auto flex w-full justify-center", class.unwrap_or("")])
+        class=@cn(&["mx-auto flex w-full justify-center", class])
     >
         @content()
     </nav>
@@ -46,20 +46,20 @@
 
 @* Pagination content wrapper (ul) *@
 @fn content(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
-    <ul class=@cn(&["flex flex-row items-center gap-1", class.unwrap_or("")])>
+    <ul class=@cn(&["flex flex-row items-center gap-1", class])>
         @content()
     </ul>
 }
 
 @* Pagination item wrapper (li) *@
 @fn item(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
-    <li class=@class.unwrap_or("")>
+    <li class=@class>
         @content()
     </li>
 }
@@ -68,7 +68,7 @@
 @fn link(
     href: &str,
     is_active: bool,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 w-9"
@@ -78,7 +78,7 @@
     <@item>
         <a
             href=@href
-            class=@cn(&[base, active_cls, inactive_cls, class.unwrap_or("")])
+            class=@cn(&[base, active_cls, inactive_cls, class])
             @if is_active { aria-current="page" }
         >
             @content()
@@ -89,14 +89,14 @@
 @* Previous page button (enabled) *@
 @fn prev_enabled(
     href: &str,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let base = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 gap-1 pl-2.5 hover:bg-accent hover:text-accent-foreground"
 
     <@item>
         <a
             href=@href
-            class=@cn(&[base, class.unwrap_or("")])
+            class=@cn(&[base, class])
             aria-label="Go to previous page"
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
@@ -109,13 +109,13 @@
 
 @* Previous page button (disabled) *@
 @fn prev_disabled(
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let base = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors h-9 px-4 py-2 gap-1 pl-2.5 pointer-events-none opacity-50"
 
     <@item>
         <span
-            class=@cn(&[base, class.unwrap_or("")])
+            class=@cn(&[base, class])
             aria-disabled="true"
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
@@ -129,14 +129,14 @@
 @* Next page button (enabled) *@
 @fn next_enabled(
     href: &str,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let base = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 gap-1 pr-2.5 hover:bg-accent hover:text-accent-foreground"
 
     <@item>
         <a
             href=@href
-            class=@cn(&[base, class.unwrap_or("")])
+            class=@cn(&[base, class])
             aria-label="Go to next page"
         >
             <span>Next</span>
@@ -149,13 +149,13 @@
 
 @* Next page button (disabled) *@
 @fn next_disabled(
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let base = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors h-9 px-4 py-2 gap-1 pr-2.5 pointer-events-none opacity-50"
 
     <@item>
         <span
-            class=@cn(&[base, class.unwrap_or("")])
+            class=@cn(&[base, class])
             aria-disabled="true"
         >
             <span>Next</span>
@@ -168,12 +168,12 @@
 
 @* Ellipsis indicator for skipped pages *@
 @fn ellipsis(
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <@item>
         <span
             aria-hidden="true"
-            class=@cn(&["flex h-9 w-9 items-center justify-center", class.unwrap_or("")])
+            class=@cn(&["flex h-9 w-9 items-center justify-center", class])
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
                 <circle cx="12" cy="12" r="1"/>
@@ -191,7 +191,7 @@
     total: u32,
     prev_url: Option<&str>,
     next_url: Option<&str>,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let is_first = (current == 1)
     @let is_last = (current == total)
@@ -227,7 +227,7 @@
     total: u32,
     siblings: u32,
     href_template: &str,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let is_first = (current == 1)
     @let is_last = (current == total)

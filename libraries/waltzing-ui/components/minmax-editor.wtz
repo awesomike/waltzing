@@ -42,7 +42,7 @@
     min_allowed: Option<f64>,
     max_allowed: Option<f64>,
     step: f64,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let step_str = step.to_string()
     @let min_attr = min_allowed.map(|v| v.to_string())
@@ -57,7 +57,7 @@
     @let input_cls = "flex h-9 w-20 rounded-md border border-input bg-transparent px-3 py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let classes = vec![@container_cls, @cls]
 
     <div
@@ -152,7 +152,7 @@
     min_allowed: Option<f64>,
     max_allowed: Option<f64>,
     step: f64,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     <div class="space-y-1.5">
         <label class="text-sm font-medium leading-none">@label</label>
@@ -176,7 +176,7 @@
     step: f64,
     min_allowed: Option<f64>,
     max_allowed: Option<f64>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let step_str = step.to_string()
     @let min_attr = min_allowed.map(|v| v.to_string())
@@ -186,7 +186,7 @@
     @let input_cls = "flex h-9 w-20 rounded-md border border-input bg-transparent px-3 py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let classes = vec![@container_cls, @cls]
 
     @let x_data_init = format!("{{ expanded: ({} !== null && {} !== null && {} !== {}) }}", model_min, model_max, model_min, model_max)

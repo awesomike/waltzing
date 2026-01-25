@@ -36,7 +36,7 @@
     min: Option<u32> = None,
     max: Option<u32> = None,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let initial_seconds = value.unwrap_or(0)
     @let min_seconds = min.unwrap_or(0)
@@ -109,12 +109,12 @@
     min_seconds: u32,
     max_seconds: u32,
     disabled: bool,
-    class: Option<&str>,
+    class: &str = "",
     container_base: &str,
     input_base: &str,
     separator_cls: &str,
 ) {
-    @let extra_cls = class.unwrap_or("")
+    @let extra_cls = class
     @let container_cls = cn(vec![container_base, extra_cls])
     <div
         class="@container_cls"
@@ -224,12 +224,12 @@
     min_seconds: u32,
     max_seconds: u32,
     disabled: bool,
-    class: Option<&str>,
+    class: &str = "",
     container_base: &str,
     input_base: &str,
     separator_cls: &str,
 ) {
-    @let extra_cls = class.unwrap_or("")
+    @let extra_cls = class
     @let container_cls = cn(vec![container_base, extra_cls])
     <div
         class="@container_cls"
@@ -328,12 +328,12 @@
     min_seconds: u32,
     max_seconds: u32,
     disabled: bool,
-    class: Option<&str>,
+    class: &str = "",
     container_base: &str,
     input_base: &str,
     separator_cls: &str,
 ) {
-    @let extra_cls = class.unwrap_or("")
+    @let extra_cls = class
     @let container_cls = cn(vec![container_base, extra_cls])
     <div
         class="@container_cls"
@@ -433,7 +433,7 @@
     min: Option<u32> = None,
     max: Option<u32> = None,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let initial_seconds = value.unwrap_or(0)
     @let min_seconds = min.unwrap_or(0)
@@ -511,7 +511,7 @@
     required: bool = false,
     error: Option<&str> = None,
     description: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
     @let disabled_label = if disabled { "opacity-70" } else { "" }
@@ -551,10 +551,10 @@
     min: Option<u32> = None,
     max: Option<u32> = None,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let label_cls = "text-xs font-medium text-muted-foreground"
-    @let extra_cls = class.unwrap_or("")
+    @let extra_cls = class
     @let container_cls = cn(vec!["inline-flex items-center gap-2", extra_cls])
 
     <div class="@container_cls">

@@ -59,7 +59,7 @@
     duration: u32 = 5000,
     max_messages: Option<usize> = None,
     transition_duration: u32 = 300,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let position_cls = {
         match position {
@@ -72,7 +72,7 @@
         }
     }
 
-    @let container_cls = cn(&["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, class.unwrap_or("")])
+    @let container_cls = cn(&["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, class])
 
     @let display_messages = {
         if let Some(max) = max_messages {
@@ -114,7 +114,7 @@
     duration: u32 = 5000,
     transition_duration: u32 = 300,
     index: usize = 0,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let base = "pointer-events-auto w-full max-w-sm rounded-lg border p-4 shadow-lg"
 
@@ -128,7 +128,7 @@
         }
     }
 
-    @let flash_cls = cn(&[base, variant_cls, class.unwrap_or("")])
+    @let flash_cls = cn(&[base, variant_cls, class])
 
     @let stagger_delay = (index * 100)
     @let total_duration = (duration + stagger_delay as u32)
@@ -209,7 +209,7 @@
     styles: Option<VariantStyles> = None,
     duration: u32 = 5000,
     transition_duration: u32 = 300,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let default_styles = VariantStyles {
         success: "border-green-500/50 bg-green-50 dark:bg-green-950 text-green-900 dark:text-green-100".into(),
@@ -232,22 +232,22 @@
 }
 
 @* Shorthand for success flash message *@
-@fn success(message: &str, duration: u32 = 5000, class: Option<&str> = None) {
+@fn success(message: &str, duration: u32 = 5000, class: &str = "") {
     <@apply level="success" message=@message duration=@duration class=@class />
 }
 
 @* Shorthand for error flash message *@
-@fn error(message: &str, duration: u32 = 5000, class: Option<&str> = None) {
+@fn error(message: &str, duration: u32 = 5000, class: &str = "") {
     <@apply level="error" message=@message duration=@duration class=@class />
 }
 
 @* Shorthand for warning flash message *@
-@fn warning(message: &str, duration: u32 = 5000, class: Option<&str> = None) {
+@fn warning(message: &str, duration: u32 = 5000, class: &str = "") {
     <@apply level="warning" message=@message duration=@duration class=@class />
 }
 
 @* Shorthand for info flash message *@
-@fn info(message: &str, duration: u32 = 5000, class: Option<&str> = None) {
+@fn info(message: &str, duration: u32 = 5000, class: &str = "") {
     <@apply level="info" message=@message duration=@duration class=@class />
 }
 
@@ -257,7 +257,7 @@
     duration: u32 = 5000,
     max_messages: usize = 5,
     transition_duration: u32 = 300,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let position_cls = {
         match position {
@@ -270,7 +270,7 @@
         }
     }
 
-    @let container_cls = cn(&["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, class.unwrap_or("")])
+    @let container_cls = cn(&["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, class])
 
     <div
         id="flash-container"

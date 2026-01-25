@@ -40,11 +40,11 @@
     action: Option<&str>,
     method: Option<&str>,
     enctype: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "space-y-6"
-    @let class_val = class.unwrap_or("")
+    @let class_val = class
     @let class_vec = vec![base, class_val]
     @let classes = cn(class_vec)
 
@@ -66,11 +66,11 @@
     description: Option<&str>,
     error: Option<&str>,
     required: bool,
-    class: Option<&str>,
+    class: &str = "",
     content: @(),
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-    @let class_val = class.unwrap_or("")
+    @let class_val = class
     @let field_vec = vec!["space-y-2", class_val]
     @let field_cls = cn(field_vec)
 
@@ -104,10 +104,10 @@
 @fn section(
     title: Option<&str>,
     description: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
     content: @(),
 ) {
-    @let class_val = class.unwrap_or("")
+    @let class_val = class
     @let section_vec = vec!["space-y-4", class_val]
     @let section_cls = cn(section_vec)
 
@@ -130,10 +130,10 @@
 
 @* Inline form row for side-by-side fields *@
 @fn row(
-    class: Option<&str>,
+    class: &str = "",
     content: @(),
 ) {
-    @let class_val = class.unwrap_or("")
+    @let class_val = class
     @let row_vec = vec!["grid gap-4 sm:grid-cols-2", class_val]
     @let row_cls = cn(row_vec)
 
@@ -145,7 +145,7 @@
 @* Form actions/buttons container *@
 @fn actions(
     align: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
     content: @(),
 ) {
     @let align_val = align.unwrap_or("end")
@@ -156,7 +156,7 @@
         "between" => { "justify-between" }
         _ => { "justify-end" }
     }
-    @let class_val = class.unwrap_or("")
+    @let class_val = class
     @let actions_vec = vec!["flex flex-col-reverse gap-2 sm:flex-row", align_cls, class_val]
     @let actions_cls = cn(actions_vec)
 

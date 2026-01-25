@@ -16,11 +16,11 @@
  **@
 
 @* Display a list of validation errors with icon and destructive styling *@
-@fn apply(errors: Vec<&str>, class: Option<&str>) {
+@fn apply(errors: Vec<&str>, class: &str = "") {
     @if !errors.is_empty() {
         @let base = "rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
 
-        <div role="alert" aria-live="polite" class=@cn(&[base, class.unwrap_or("")])>
+        <div role="alert" aria-live="polite" class=@cn(&[base, class])>
             <div class="flex items-start gap-3">
                 <svg class="h-4 w-4 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -40,11 +40,11 @@
 }
 
 @* Display a single error message if present *@
-@fn single(error: Option<&str>, class: Option<&str>) {
+@fn single(error: Option<&str>, class: &str = "") {
     @if let Some(msg) = error {
         @let base = "rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
 
-        <div role="alert" aria-live="polite" class=@cn(&[base, class.unwrap_or("")])>
+        <div role="alert" aria-live="polite" class=@cn(&[base, class])>
             <div class="flex items-start gap-3">
                 <svg class="h-4 w-4 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -65,11 +65,11 @@
 }
 
 @* Display errors with a title header *@
-@fn with_title(errors: Vec<&str>, title: &str, class: Option<&str>) {
+@fn with_title(errors: Vec<&str>, title: &str, class: &str = "") {
     @if !errors.is_empty() {
         @let base = "rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
 
-        <div role="alert" aria-live="polite" class=@cn(&[base, class.unwrap_or("")])>
+        <div role="alert" aria-live="polite" class=@cn(&[base, class])>
             <div class="flex items-start gap-3">
                 <svg class="h-4 w-4 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"></circle>

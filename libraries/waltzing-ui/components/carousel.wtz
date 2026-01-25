@@ -62,7 +62,7 @@
     auto_play: bool = false,
     interval: u32 = 4000,
     loop_slides: bool = true,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let is_horizontal = match orientation { Orientation::Horizontal => true, _ => false }
@@ -154,7 +154,7 @@
         x-init="init()"
         @mouseenter="if (autoPlay) stopAutoPlay()"
         @mouseleave="if (autoPlay && total > 1) startAutoPlay()"
-        class=@cn(&[container_cls, class.unwrap_or("")])
+        class=@cn(&[container_cls, class])
         role="region"
         aria-roledescription="carousel"
         aria-label="Carousel"
@@ -248,13 +248,13 @@
 
 @* Individual carousel slide item *@
 @fn item(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "w-full flex-shrink-0"
 
     <div
-        class=@cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class])
         role="group"
         aria-roledescription="slide"
     >
@@ -264,7 +264,7 @@
 
 @* Simple carousel without controls - just navigation buttons *@
 @fn simple(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     <@apply
@@ -282,7 +282,7 @@
 @* Auto-playing carousel *@
 @fn autoplay(
     interval: u32 = 4000,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     <@apply
@@ -302,12 +302,12 @@
     src: &str,
     alt: &str,
     index: u32 = 0,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <button
         type="button"
         @click=@format!("$dispatch('carousel-goto', {{ index: {} }}); activeThumb = {}", index, index)
-        class=@cn(&["h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring", class.unwrap_or("")])
+        class=@cn(&["h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring", class])
         :class=@format!("activeThumb === {} ? 'border-primary' : 'border-transparent'", index)
     >
         <img src=@src alt=@alt class="h-full w-full object-cover" />
@@ -316,11 +316,11 @@
 
 @* Thumbnail strip container for carousel *@
 @fn thumbnail_strip(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     <div
-        class=@cn(&["flex gap-2 justify-center overflow-x-auto", class.unwrap_or("")])
+        class=@cn(&["flex gap-2 justify-center overflow-x-auto", class])
         x-data="{ activeThumb: 0 }"
         @carousel-goto.window="activeThumb = $event.detail.index"
     >
@@ -330,13 +330,13 @@
 
 @* Card-style carousel item with padding *@
 @fn card_item(
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "w-full flex-shrink-0 p-4"
 
     <div
-        class=@cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class])
         role="group"
         aria-roledescription="slide"
     >

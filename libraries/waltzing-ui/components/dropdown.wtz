@@ -88,10 +88,10 @@
 @* Dropdown menu item *@
 @fn item(
     disabled: bool,
-    class: Option<String>,
+    class: &str = "",
     content: @(),
 ) {
-    @let extra_class = class.unwrap_or_default()
+    @let extra_class = class
     @let classes = vec!["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @class_if(@disabled, "pointer-events-none opacity-50"), @extra_class]
     <button
         class="@cn(@classes)"
@@ -106,10 +106,10 @@
 @* Dropdown link item *@
 @fn link(
     href: String,
-    class: Option<String>,
+    class: &str = "",
     content: @(),
 ) {
-    @let extra_class = class.unwrap_or_default()
+    @let extra_class = class
     @let classes = vec!["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @extra_class]
     <a
         href="@href"

@@ -30,7 +30,7 @@
     max: Option<f64> = None,
     step: f64 = 1.0,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let initial_value = value.unwrap_or(0.0)
     @let min_str = if let Some(m) = min { m.to_string() } else { "null".to_string() }
@@ -46,7 +46,7 @@
     @let btn_left = "rounded-l-md border-r-0"
     @let btn_right = "rounded-r-md border-l-0"
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let container_classes = vec![container_base, disabled_cls, cls]
     <div
         class="@cn(@container_classes)"
@@ -132,7 +132,7 @@
     max: Option<f64> = None,
     step: f64 = 1.0,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let initial_value = value.unwrap_or(0.0)
     @let min_str = if let Some(m) = min { m.to_string() } else { "null".to_string() }
@@ -148,7 +148,7 @@
     @let btn_left = "rounded-l-md border-r-0"
     @let btn_right = "rounded-r-md border-l-0"
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let container_classes = vec![container_base, disabled_cls, cls]
     <div
         class="@cn(@container_classes)"
@@ -234,7 +234,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let label_cls = "text-sm font-medium leading-none"
     @let disabled_label = if disabled { "opacity-70" } else { "" }

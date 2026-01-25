@@ -30,7 +30,7 @@
     max: f64 = 100.0,
     step: f64 = 1.0,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let percentage = ((value - min) / (max - min) * 100.0)
     @let clamped = if (percentage > 100.0) { 100.0 } else if (percentage < 0.0) { 0.0 } else { percentage }
@@ -41,7 +41,7 @@
     @let track = "relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20"
     @let filled = "absolute h-full bg-primary"
     @let thumb = "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none"
-    @let extra_class = class.unwrap_or("")
+    @let extra_class = class
     @let container_classes = vec![@container_base, @disabled_cls, @extra_class]
 
     <div
@@ -105,7 +105,7 @@
     max: f64 = 100.0,
     step: f64 = 1.0,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let label_cls = "text-sm font-medium leading-none"
     @let disabled_label = if disabled { "opacity-70" } else { "" }
@@ -139,7 +139,7 @@
     max: f64 = 100.0,
     step: f64 = 1.0,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let pct_min = ((value_min - min) / (max - min) * 100.0)
     @let pct_max = ((value_max - min) / (max - min) * 100.0)
@@ -150,7 +150,7 @@
     @let track = "relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20"
     @let filled = "absolute h-full bg-primary"
     @let thumb = "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none"
-    @let extra_class = class.unwrap_or("")
+    @let extra_class = class
     @let container_classes = vec![@container_base, @disabled_cls, @extra_class]
 
     <div
@@ -248,7 +248,7 @@
     max: f64 = 100.0,
     step: f64 = 1.0,
     disabled: bool = false,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let label_cls = "text-sm font-medium leading-none"
     @let disabled_label = if disabled { "opacity-70" } else { "" }

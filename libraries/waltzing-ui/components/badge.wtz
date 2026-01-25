@@ -9,7 +9,7 @@
  * <@badge::secondary>Pending</@>
  * <@badge::destructive>Error</@>
  *
- * <@badge variant=badge::Variant::Outline class=Some("ml-2")>
+ * <@badge variant=badge::Variant::Outline class="ml-2">
  *     Custom
  * </@>
  *@
@@ -23,29 +23,29 @@
 
 @fn apply(
     variant: Variant = Variant::Default,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 
     @match variant {
         Variant::Default => {
-            <span class=@cn(&[base, "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80", class.unwrap_or("")])>
+            <span class=@cn(&[base, "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80", class])>
                 @content()
             </span>
         }
         Variant::Secondary => {
-            <span class=@cn(&[base, "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80", class.unwrap_or("")])>
+            <span class=@cn(&[base, "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80", class])>
                 @content()
             </span>
         }
         Variant::Outline => {
-            <span class=@cn(&[base, "text-foreground", class.unwrap_or("")])>
+            <span class=@cn(&[base, "text-foreground", class])>
                 @content()
             </span>
         }
         Variant::Destructive => {
-            <span class=@cn(&[base, "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80", class.unwrap_or("")])>
+            <span class=@cn(&[base, "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80", class])>
                 @content()
             </span>
         }
@@ -53,28 +53,28 @@
 }
 
 @* Shorthand for default badge *@
-@fn default(class: Option<&str> = None, content: @()) {
+@fn default(class: &str = "", content: @()) {
     <@apply variant=Variant::Default class=@class>
         @content()
     </@>
 }
 
 @* Shorthand for secondary badge *@
-@fn secondary(class: Option<&str> = None, content: @()) {
+@fn secondary(class: &str = "", content: @()) {
     <@apply variant=Variant::Secondary class=@class>
         @content()
     </@>
 }
 
 @* Shorthand for outline badge *@
-@fn outline(class: Option<&str> = None, content: @()) {
+@fn outline(class: &str = "", content: @()) {
     <@apply variant=Variant::Outline class=@class>
         @content()
     </@>
 }
 
 @* Shorthand for destructive badge *@
-@fn destructive(class: Option<&str> = None, content: @()) {
+@fn destructive(class: &str = "", content: @()) {
     <@apply variant=Variant::Destructive class=@class>
         @content()
     </@>

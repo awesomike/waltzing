@@ -13,7 +13,7 @@
  *   separator::vertical
  *
  *   With custom class:
- *   separator::apply with class=Some("my-4")
+ *   separator::apply with class="my-4"
  **@
 
 @enum Orientation {
@@ -24,7 +24,7 @@
 
 @fn apply(
     orientation: Orientation = Orientation::Horizontal,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let base = "shrink-0 bg-border"
 
@@ -38,7 +38,7 @@
         Orientation::Vertical => "vertical",
     }
 
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let classes = vec![base, orientation_cls, cls]
     <div
         role="separator"
@@ -48,11 +48,11 @@
 }
 
 @* Horizontal separator (default) *@
-@fn horizontal(class: Option<&str> = None) {
+@fn horizontal(class: &str = "") {
     <@apply orientation=Orientation::Horizontal class=@class />
 }
 
 @* Vertical separator *@
-@fn vertical(class: Option<&str> = None) {
+@fn vertical(class: &str = "") {
     <@apply orientation=Orientation::Vertical class=@class />
 }

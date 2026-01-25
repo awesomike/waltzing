@@ -26,13 +26,13 @@
 @* Main aspect ratio container *@
 @fn apply(
     ratio: f64,
-    class: Option<&str> = None,
+    class: &str = "",
     content: @(),
 ) {
     @let base = "relative w-full"
 
     <div
-        class=@cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class])
         style="aspect-ratio: @ratio;"
     >
         <div class="absolute inset-0">
@@ -42,35 +42,35 @@
 }
 
 @* 16:9 aspect ratio (widescreen video) *@
-@fn video(class: Option<&str> = None, content: @()) {
+@fn video(class: &str = "", content: @()) {
     <@apply ratio=1.7778 class=@class>
         @content()
     </@>
 }
 
 @* 1:1 aspect ratio (square) *@
-@fn square(class: Option<&str> = None, content: @()) {
+@fn square(class: &str = "", content: @()) {
     <@apply ratio=1.0 class=@class>
         @content()
     </@>
 }
 
 @* 4:3 aspect ratio (classic TV/photo) *@
-@fn standard(class: Option<&str> = None, content: @()) {
+@fn standard(class: &str = "", content: @()) {
     <@apply ratio=1.3333 class=@class>
         @content()
     </@>
 }
 
 @* 21:9 aspect ratio (ultrawide/cinema) *@
-@fn ultrawide(class: Option<&str> = None, content: @()) {
+@fn ultrawide(class: &str = "", content: @()) {
     <@apply ratio=2.3333 class=@class>
         @content()
     </@>
 }
 
 @* 3:4 aspect ratio (portrait photo) *@
-@fn portrait(class: Option<&str> = None, content: @()) {
+@fn portrait(class: &str = "", content: @()) {
     <@apply ratio=0.75 class=@class>
         @content()
     </@>

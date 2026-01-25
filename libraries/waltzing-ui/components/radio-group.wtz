@@ -33,10 +33,10 @@
     name: &str,
     options: Vec<RadioOption>,
     selected: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let group_base = "grid gap-2"
-    @let cls = class.unwrap_or("")
+    @let cls = class
 
     <div
         role="radiogroup"
@@ -88,10 +88,10 @@
     name: &str,
     options: Vec<RadioOption>,
     selected: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
     @let group_base = "flex flex-wrap gap-4"
-    @let cls = class.unwrap_or("")
+    @let cls = class
 
     <div
         role="radiogroup"
@@ -132,9 +132,9 @@
     selected: Option<&str>,
     required: bool,
     error: Option<&str>,
-    class: Option<&str>,
+    class: &str = "",
 ) {
-    @let cls = class.unwrap_or("")
+    @let cls = class
 
     <fieldset class="space-y-3 @if error.is_some() { [&_input]:border-destructive }">
         <legend class="text-sm font-medium leading-none">
@@ -145,7 +145,7 @@
             name=@name
             options=@options
             selected=@selected
-            class=Some(@cls)
+            class=@cls
         />
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>

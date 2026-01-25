@@ -13,9 +13,9 @@
     tabs: Vec<Tab>,
     default_tab: &str,
     content: @(&str),
-    class: Option<&str>,
+    class: &str = "",
 ) {
-    @let cls = class.unwrap_or("")
+    @let cls = class
     <div
         x-data=@```json { activeTab: "@default_tab" } ```@
         class="@cls"
@@ -66,9 +66,9 @@
     tabs: Vec<Tab>,
     default_tab: &str,
     content: @(&str),
-    class: Option<&str>,
+    class: &str = "",
 ) {
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let classes = cn(&["flex gap-4", @cls])
     <div
         x-data=@```json { activeTab: "@default_tab" } ```@

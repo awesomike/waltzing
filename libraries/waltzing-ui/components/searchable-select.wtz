@@ -70,11 +70,11 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let trigger_base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let trigger_cls = cn(&[@trigger_base, @error_cls, @cls])
 
     @let initial_label = {
@@ -294,12 +294,12 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let trigger_base = "flex min-h-9 w-full flex-wrap items-center gap-1 rounded-md border border-input bg-transparent px-3 py-1.5 text-sm shadow-sm ring-offset-background focus-within:outline-none focus-within:ring-1 focus-within:ring-ring"
     @let error_cls = if error.is_some() { "border-destructive focus-within:ring-destructive" } else { "" }
     @let disabled_cls = if disabled { "cursor-not-allowed opacity-50" } else { "" }
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let trigger_cls = cn(&[@trigger_base, @error_cls, @disabled_cls, @cls])
 
     @let ph = placeholder.unwrap_or("Select...")
@@ -560,11 +560,11 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let trigger_base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let trigger_cls = cn(&[@trigger_base, @error_cls, @cls])
 
     @let initial_label = {
@@ -739,11 +739,11 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let trigger_base = "flex h-8 w-full items-center justify-between rounded border-0 border-transparent bg-transparent px-2 py-1 text-sm hover:bg-muted/50 focus:bg-background focus:ring-1 focus:ring-ring"
     @let error_cls = if error.is_some() { "ring-1 ring-destructive" } else { "" }
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let trigger_cls = cn(&[@trigger_base, @error_cls, @cls])
 
     @let initial_label = {
@@ -952,11 +952,11 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     @let trigger_base = "flex min-h-8 w-full flex-wrap items-center gap-1 rounded border-0 border-transparent bg-transparent px-2 py-1 text-sm hover:bg-muted/50 focus-within:bg-background focus-within:ring-1 focus-within:ring-ring"
     @let error_cls = if error.is_some() { "ring-1 ring-destructive" } else { "" }
-    @let cls = class.unwrap_or("")
+    @let cls = class
     @let trigger_cls = cn(&[@trigger_base, @error_cls, @cls])
 
     @let ph = placeholder.unwrap_or("Select...")
@@ -1209,7 +1209,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <div class="space-y-2">
         <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -1248,7 +1248,7 @@
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
-    class: Option<&str> = None,
+    class: &str = "",
 ) {
     <div class="space-y-2">
         <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
