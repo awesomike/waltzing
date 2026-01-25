@@ -2,64 +2,79 @@
  * Accordion component
  * Collapsible content sections using Alpine.js collapse plugin
  *
- * Dependencies: alpinejs/collapse
+ * Dependencies: @alpinejs/collapse
  *
- * Functions:
- *   - apply: Main accordion with multiple (bool) for multi-open support
- *   - single: Shorthand for single-open-at-a-time accordion
- *   - item: Standalone accordion item with default_open support
+ * @example
+ * @import components/accordion.wtz as accordion
  *
- * AccordionItem struct: { id: String, title: String }
+ * @let items = vec![
+ *     accordion::AccordionItem { id: "faq-1".into(), title: "What is Waltzing?".into() },
+ *     accordion::AccordionItem { id: "faq-2".into(), title: "How do I get started?".into() },
+ * ]
+ *
+ * <@accordion items=items content=|id: &str, out: @Out| @{
+ *     @match id {
+ *         "faq-1" => { <p>Waltzing is a template engine for Rust.</p> }
+ *         "faq-2" => { <p>Install via cargo and read the docs!</p> }
+ *         _ => {}
+ *     }
+ * } />
+ *
+ * <@accordion::single items=items content=|id: &str, out: @Out| @{ <p>Content for @id</p> } />
+ *
+ * <@accordion::item id="standalone" title="Standalone Item">
+ *     <p>This is a standalone accordion item.</p>
+ * </@>
  *@
-
-@import lib/utils.wtz as utils
 
 @struct AccordionItem {
     id: String,
     title: String,
 }
 
-@* Main accordion allowing multiple items open simultaneously *@
+@* Main accordion with configurable multi-open support *@
 @fn apply(
-    items: &[AccordionItem],
-    content: @(&str),
-    multiple: bool,
-    class: Option<&str>,
+    items: Vec<AccordionItem>,
+    content: |id: &str, out: @Out|,
+    multiple: bool = false,
+    class: Option<&str> = None,
 ) {
     @if multiple {
         <@multiple_mode items=@items content=@content class=@class />
-    } @else {
+    } else {
         <@single_mode items=@items content=@content class=@class />
     }
 }
 
 @* Accordion with only one section open at a time *@
 @fn single(
-    items: &[AccordionItem],
-    content: @(&str),
-    class: Option<&str>,
+    items: Vec<AccordionItem>,
+    content: |id: &str, out: @Out|,
+    class: Option<&str> = None,
 ) {
     <@single_mode items=@items content=@content class=@class />
 }
 
 @* Internal: Single-open mode implementation *@
 @fn single_mode(
-    items: &[AccordionItem],
-    content: @(&str),
-    class: Option<&str>,
+    items: Vec<AccordionItem>,
+    content: |id: &str, out: @Out|,
+    class: Option<&str> = None,
 ) {
+    @let base = "divide-y divide-border rounded-md border"
+
     <div
         x-data="{ active: null }"
-        class="@utils::cn(&["divide-y divide-border rounded-md border", @class.unwrap_or("")])"
+        class=@cn(&[base, class.unwrap_or("")])
     >
-        @for item in items {
+        @for item in items.iter() {
             <div class="accordion-item">
                 @* Trigger button *@
                 <button
                     type="button"
-                    @click="active = active === '@item.id' ? null : '@item.id'"
-                    :aria-expanded="active === '@item.id'"
-                    aria-controls="accordion-content-@item.id"
+                    @@click=@format!("active = active === '{}' ? null : '{}'", item.id, item.id)
+                    :aria-expanded=@format!("active === '{}'", item.id)
+                    aria-controls=@format!("accordion-content-{}", item.id)
                     class="flex w-full items-center justify-between px-4 py-4 text-sm font-medium transition-all hover:underline [&[aria-expanded=true]>svg]:rotate-180"
                 >
                     <span>@item.title</span>
@@ -81,13 +96,13 @@
 
                 @* Collapsible content *@
                 <div
-                    id="accordion-content-@item.id"
-                    x-show="active === '@item.id'"
+                    id=@format!("accordion-content-{}", item.id)
+                    x-show=@format!("active === '{}'", item.id)
                     x-collapse
                     x-cloak
                 >
                     <div class="px-4 pb-4 pt-0 text-sm">
-                        @content(&item.id)
+                        @content(&item.id, @out)
                     </div>
                 </div>
             </div>
@@ -97,22 +112,24 @@
 
 @* Internal: Multiple-open mode implementation *@
 @fn multiple_mode(
-    items: &[AccordionItem],
-    content: @(&str),
-    class: Option<&str>,
+    items: Vec<AccordionItem>,
+    content: |id: &str, out: @Out|,
+    class: Option<&str> = None,
 ) {
+    @let base = "divide-y divide-border rounded-md border"
+
     <div
-        x-data=@```json { open: {} } ```@
-        class="@utils::cn(&["divide-y divide-border rounded-md border", @class.unwrap_or("")])"
+        x-data="{ open: {} }"
+        class=@cn(&[base, class.unwrap_or("")])
     >
-        @for item in items {
+        @for item in items.iter() {
             <div class="accordion-item">
                 @* Trigger button *@
                 <button
                     type="button"
-                    @click="open['@item.id'] = !open['@item.id']"
-                    :aria-expanded="open['@item.id']"
-                    aria-controls="accordion-content-@item.id"
+                    @@click=@format!("open['{}'] = !open['{}']", item.id, item.id)
+                    :aria-expanded=@format!("open['{}']", item.id)
+                    aria-controls=@format!("accordion-content-{}", item.id)
                     class="flex w-full items-center justify-between px-4 py-4 text-sm font-medium transition-all hover:underline [&[aria-expanded=true]>svg]:rotate-180"
                 >
                     <span>@item.title</span>
@@ -134,13 +151,13 @@
 
                 @* Collapsible content *@
                 <div
-                    id="accordion-content-@item.id"
-                    x-show="open['@item.id']"
+                    id=@format!("accordion-content-{}", item.id)
+                    x-show=@format!("open['{}']", item.id)
                     x-collapse
                     x-cloak
                 >
                     <div class="px-4 pb-4 pt-0 text-sm">
-                        @content(&item.id)
+                        @content(&item.id, @out)
                     </div>
                 </div>
             </div>
@@ -148,23 +165,26 @@
     </div>
 }
 
-@* Pre-configured accordion item component for more control *@
+@* Standalone accordion item for custom composition *@
 @fn item(
     id: &str,
     title: &str,
-    default_open: bool,
+    default_open: bool = false,
+    class: Option<&str> = None,
     content: @(),
-    class: Option<&str>,
 ) {
+    @let base = "border-b"
+    @let open_str = if default_open { "true" } else { "false" }
+
     <div
-        x-data=@```json { open: @default_open } ```@
-        class="@utils::cn(&["border-b", @class.unwrap_or("")])"
+        x-data=@format!("{{ open: {} }}", open_str)
+        class=@cn(&[base, class.unwrap_or("")])
     >
         <button
             type="button"
-            @click="open = !open"
+            @@click="open = !open"
             :aria-expanded="open"
-            aria-controls="accordion-content-@id"
+            aria-controls=@format!("accordion-content-{}", id)
             class="flex w-full items-center justify-between px-4 py-4 text-sm font-medium transition-all hover:underline [&[aria-expanded=true]>svg]:rotate-180"
         >
             <span>@title</span>
@@ -185,13 +205,13 @@
         </button>
 
         <div
-            id="accordion-content-@id"
+            id=@format!("accordion-content-{}", id)
             x-show="open"
             x-collapse
             x-cloak
         >
             <div class="px-4 pb-4 pt-0 text-sm">
-                @content()
+                @content(@out)
             </div>
         </div>
     </div>

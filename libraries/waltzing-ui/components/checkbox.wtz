@@ -1,27 +1,26 @@
 @*
  * Checkbox component
- * Boolean input with label
+ * Custom styled checkbox with SVG checkmark icon
  *
  * @example
  * @import components/checkbox.wtz as checkbox
  *
- * <@checkbox::simple name="terms" label="Accept terms and conditions" />
+ * <@checkbox::apply name="terms" checked=false disabled=false class=None />
  *
  * <@checkbox::labeled
- *     label="Remember me"
- *     name="remember"
- *     checked=true
- *     disabled=false
- *     required=false
- *     class=None
- * />
- *
- * <@checkbox::with_description
- *     label="Marketing emails"
- *     description="Receive emails about new products and features"
- *     name="marketing"
+ *     label="Accept terms and conditions"
+ *     name="terms"
  *     checked=false
  *     disabled=false
+ *     description=None
+ * />
+ *
+ * <@checkbox::labeled
+ *     label="Marketing emails"
+ *     name="marketing"
+ *     checked=true
+ *     disabled=false
+ *     description=Some("Receive emails about new products and features")
  * />
  *@
 
@@ -31,82 +30,83 @@
     name: &str,
     checked: bool,
     disabled: bool,
-    required: bool,
     class: Option<&str>,
 ) {
-    @let base = "peer h-4 w-4 shrink-0 rounded-sm border border-primary shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+    @let base = "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 
-    <input
-        type="checkbox"
-        name="@name"
-        id="@name"
-        class="@utils::cn(&[@base, @class.unwrap_or("")])"
-        @if checked { checked data-state="checked" } else { data-state="unchecked" }
-        @if disabled { disabled }
-        @if required { required }
-    />
+    @let checked_cls = @if checked { "bg-primary text-primary-foreground" } else { "" }
+
+    @let data_state = @if checked { "checked" } else { "unchecked" }
+
+    @let classes = &[@base, @checked_cls, @class.unwrap_or("")]
+
+    <div class="relative inline-flex items-center justify-center">
+        <input
+            type="checkbox"
+            name="@name"
+            id="@name"
+            class="sr-only peer"
+            data-state="@data_state"
+            @if checked { checked }
+            @if disabled { disabled }
+        />
+        <div
+            class="@utils::cn(@classes)"
+            data-state="@data_state"
+        >
+            @if checked {
+                <svg
+                    class="h-3 w-3 text-current"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            }
+        </div>
+    </div>
 }
 
-@* Checkbox with label *@
+@* Checkbox with label and optional description *@
 @fn labeled(
     label: &str,
     name: &str,
     checked: bool,
     disabled: bool,
-    required: bool,
-    class: Option<&str>,
+    description: Option<&str>,
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 
-    <div class="flex items-center space-x-2">
-        <@apply
-            name=@name
-            checked=@checked
-            disabled=@disabled
-            required=@required
-            class=@class
-        />
-        <label for="@name" class="@label_cls">
-            @label
-            @if required { <span class="text-destructive ml-0.5">*</span> }
-        </label>
-    </div>
-}
-
-@* Checkbox with label and description *@
-@fn with_description(
-    label: &str,
-    description: &str,
-    name: &str,
-    checked: bool,
-    disabled: bool,
-) {
-    @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    @let checkbox_cls = @if description.is_some() { Some("mt-0.5") } else { None }
 
     <div class="flex items-start space-x-2">
         <@apply
             name=@name
             checked=@checked
             disabled=@disabled
-            required=false
-            class=Some("mt-0.5")
+            class=@checkbox_cls
         />
         <div class="grid gap-1.5 leading-none">
             <label for="@name" class="@label_cls">@label</label>
-            <p class="text-sm text-muted-foreground">@description</p>
+            @if let Some(desc) = description {
+                <p class="text-sm text-muted-foreground">@desc</p>
+            }
         </div>
     </div>
 }
 
-@* Simple unchecked checkbox *@
+@* Simple unchecked checkbox with label *@
 @fn simple(name: &str, label: &str) {
     <@labeled
         label=@label
         name=@name
         checked=false
         disabled=false
-        required=false
-        class=None
+        description=None
     />
 }
 
@@ -117,7 +117,6 @@
         name=@name
         checked=true
         disabled=false
-        required=false
-        class=None
+        description=None
     />
 }

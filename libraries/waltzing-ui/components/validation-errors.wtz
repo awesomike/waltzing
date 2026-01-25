@@ -1,51 +1,36 @@
-@*
+@**
  * Validation Errors component
- * Generic validation errors display that works with any validation library
- *@
+ * Display a list of form validation errors with destructive styling
+ *
+ * Usage:
+ *   import components/validation-errors.wtz as validation
+ *
+ *   Display list of errors:
+ *   <validation::apply errors=errors class=None />
+ *
+ *   Display single error if present:
+ *   <validation::single error=Some("This field is required") class=None />
+ *
+ *   Minimal inline field error:
+ *   <validation::field_error error=Some("Invalid email format") />
+ **@
 
-@import lib/utils.wtz as utils
-
-@* A single validation error *@
-@struct ValidationError {
-    field: Option<String>,
-    message: String,
-    code: Option<String>,
-}
-
-@* Collection of validation errors with helper methods *@
-@struct ValidationErrors {
-    errors: Vec<ValidationError>,
-}
-
-@* Display all validation errors in a summary box *@
-@fn apply(
-    errors: &ValidationErrors,
-    title: Option<&str>,
-    show_field_names: bool,
-    class: Option<&str>,
-) {
-    @if !errors.errors.is_empty() {
+@* Display a list of validation errors with icon and destructive styling *@
+@fn apply(errors: Vec<&str>, class: Option<&str>) {
+    @if !errors.is_empty() {
         @let base = "rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
 
-        <div role="alert" aria-live="polite" class="@utils::cn(&[@base, @class.unwrap_or("")])">
+        <div role="alert" aria-live="polite" class=@cn(&[base, class.unwrap_or("")])>
             <div class="flex items-start gap-3">
-                <svg class="h-4 w-4 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="h-4 w-4 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="8" x2="12" y2="12"></line>
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
                 <div class="flex-1">
-                    <p class="font-medium mb-2">@title.unwrap_or("Please fix the following errors:")</p>
                     <ul class="list-disc pl-5 space-y-1">
-                        @for error in &errors.errors {
-                            <li>
-                                @if show_field_names {
-                                    @if let Some(field) = &error.field {
-                                        <span class="font-medium">@field:</span>
-                                    }
-                                }
-                                @&error.message
-                            </li>
+                        @for error in errors {
+                            <li>@error</li>
                         }
                     </ul>
                 </div>
@@ -54,171 +39,52 @@
     }
 }
 
-@* Display errors for a specific field (inline use) *@
-@fn field_error(
-    errors: &ValidationErrors,
-    field: &str,
-    class: Option<&str>,
-) {
-    @let field_errors = {
-        errors.errors
-            .iter()
-            .filter(|e| e.field.as_deref() == Some(field))
-            .collect::<Vec<_>>()
-    }
-
-    @if !field_errors.is_empty() {
-        @let base = "text-sm text-destructive"
-
-        @for error in field_errors {
-            <p class="@utils::cn(&[@base, @class.unwrap_or("")])" role="alert">
-                @&error.message
-            </p>
-        }
-    }
-}
-
-@* Display only the first error for a field (single line) *@
-@fn field_error_single(
-    errors: &ValidationErrors,
-    field: &str,
-    class: Option<&str>,
-) {
-    @let first_error = {
-        errors.errors
-            .iter()
-            .find(|e| e.field.as_deref() == Some(field))
-            .map(|e| e.message.as_str())
-    }
-
-    @if let Some(message) = first_error {
-        @let base = "text-sm text-destructive"
-
-        <p class="@utils::cn(&[@base, @class.unwrap_or("")])" role="alert">
-            @message
-        </p>
-    }
-}
-
-@* Display errors grouped by field *@
-@fn grouped(
-    errors: &ValidationErrors,
-    title: Option<&str>,
-    class: Option<&str>,
-) {
-    @if !errors.errors.is_empty() {
+@* Display a single error message if present *@
+@fn single(error: Option<&str>, class: Option<&str>) {
+    @if let Some(msg) = error {
         @let base = "rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
 
-        <div role="alert" aria-live="polite" class="@utils::cn(&[@base, @class.unwrap_or("")])">
-            <p class="font-medium mb-3">@title.unwrap_or("Please fix the following errors:")</p>
-
-            @* General errors first *@
-            @let general = {
-                errors.errors
-                    .iter()
-                    .filter(|e| e.field.is_none())
-                    .collect::<Vec<_>>()
-            }
-            @if !general.is_empty() {
-                <div class="mb-3">
-                    <ul class="list-disc pl-5 space-y-1">
-                        @for error in general {
-                            <li>@&error.message</li>
-                        }
-                    </ul>
-                </div>
-            }
-
-            @* Field-specific errors, grouped *@
-            @let fields = {
-                let mut seen = std::collections::HashSet::new();
-                errors.errors
-                    .iter()
-                    .filter_map(|e| e.field.as_ref())
-                    .filter(|f| seen.insert(f.clone()))
-                    .cloned()
-                    .collect::<Vec<_>>()
-            }
-
-            @if !fields.is_empty() {
-                <dl class="space-y-2">
-                    @for field in &fields {
-                        @let field_errors = {
-                            errors.errors
-                                .iter()
-                                .filter(|e| e.field.as_deref() == Some(field.as_str()))
-                                .collect::<Vec<_>>()
-                        }
-                        <div>
-                            <dt class="font-medium">@field</dt>
-                            <dd>
-                                <ul class="list-disc pl-5 space-y-1 mt-1">
-                                    @for error in field_errors {
-                                        <li>@&error.message</li>
-                                    }
-                                </ul>
-                            </dd>
-                        </div>
-                    }
-                </dl>
-            }
+        <div role="alert" aria-live="polite" class=@cn(&[base, class.unwrap_or("")])>
+            <div class="flex items-start gap-3">
+                <svg class="h-4 w-4 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <p>@msg</p>
+            </div>
         </div>
     }
 }
 
-@* Compact inline list of errors (for toast/notification use) *@
-@fn inline(
-    errors: &ValidationErrors,
-    separator: Option<&str>,
-    class: Option<&str>,
-) {
-    @if !errors.errors.is_empty() {
-        @let base = "text-sm text-destructive"
-        @let sep = separator.unwrap_or(", ")
-
-        <span class="@utils::cn(&[@base, @class.unwrap_or("")])">
-            @{
-                errors.errors
-                    .iter()
-                    .map(|e| e.message.as_str())
-                    .collect::<Vec<_>>()
-                    .join(sep)
-            }
-        </span>
+@* Minimal inline field error - for use below form inputs *@
+@fn field_error(error: Option<&str>) {
+    @if let Some(msg) = error {
+        <p class="text-sm text-destructive mt-1" role="alert">@msg</p>
     }
 }
 
-@* Helper to check if errors collection has any errors *@
-@fn has_errors(errors: &ValidationErrors) -> bool {
-    { !errors.errors.is_empty() }
-}
+@* Display errors with a title header *@
+@fn with_title(errors: Vec<&str>, title: &str, class: Option<&str>) {
+    @if !errors.is_empty() {
+        @let base = "rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
 
-@* Helper to check if field has error (for conditional styling) *@
-@fn has_field_error(errors: &ValidationErrors, field: &str) -> bool {
-    { errors.errors.iter().any(|e| e.field.as_deref() == Some(field)) }
-}
-
-@* Get the first error message for a field *@
-@fn get_field_error(errors: &ValidationErrors, field: &str) -> Option<&str> {
-    {
-        errors.errors
-            .iter()
-            .find(|e| e.field.as_deref() == Some(field))
-            .map(|e| e.message.as_str())
+        <div role="alert" aria-live="polite" class=@cn(&[base, class.unwrap_or("")])>
+            <div class="flex items-start gap-3">
+                <svg class="h-4 w-4 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <div class="flex-1">
+                    <p class="font-medium mb-2">@title</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        @for error in errors {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
     }
-}
-
-@* Get error count *@
-@fn count(errors: &ValidationErrors) -> usize {
-    { errors.errors.len() }
-}
-
-@* Get aria-invalid attribute value for a field *@
-@fn aria_invalid(errors: &ValidationErrors, field: &str) -> &str {
-    { if errors.errors.iter().any(|e| e.field.as_deref() == Some(field)) { "true" } else { "false" } }
-}
-
-@* Get input border class based on error state *@
-@fn input_error_class(errors: &ValidationErrors, field: &str) -> &str {
-    { if errors.errors.iter().any(|e| e.field.as_deref() == Some(field)) { "border-destructive focus-visible:ring-destructive" } else { "" } }
 }

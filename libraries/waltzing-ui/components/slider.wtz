@@ -1,0 +1,278 @@
+@*
+ * Slider component
+ * Range input with custom track and thumb styling
+ *
+ * Usage:
+ *   @import ui/components/slider.wtz as slider
+ *
+ *   // Basic slider (0-100 with step of 1)
+ *   <@slider::apply name="volume" value=50.0 />
+ *
+ *   // Slider with custom range
+ *   <@slider::apply name="price" value=25.0 min=0.0 max=100.0 step=5.0 />
+ *
+ *   // Slider with label showing value
+ *   <@slider::with_label label="Volume" name="volume" value=75.0 />
+ *
+ *   // Dual-handle range slider
+ *   <@slider::range name="price_range" value_min=20.0 value_max=80.0 min=0.0 max=100.0 step=1.0 />
+ *
+ *   // Disabled slider
+ *   <@slider::apply name="locked" value=50.0 disabled=true />
+ *@
+
+@* Main slider with single handle *@
+@fn apply(
+    name: &str,
+    value: f64,
+    min: f64 = 0.0,
+    max: f64 = 100.0,
+    step: f64 = 1.0,
+    disabled: bool = false,
+    class: Option<&str> = None,
+) {
+    @let percentage = ((value - min) / (max - min) * 100.0)
+    @let clamped = @if (percentage > 100.0) { 100.0 } else if (percentage < 0.0) { 0.0 } else { @percentage }
+
+    @let container_base = "relative flex w-full touch-none select-none items-center"
+    @let disabled_cls = @if disabled { "opacity-50 cursor-not-allowed" } else { "" }
+
+    @let track = "relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20"
+    @let filled = "absolute h-full bg-primary"
+    @let thumb = "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none"
+
+    <div
+        class=@cn(&[container_base, disabled_cls, class.unwrap_or("")])
+        x-data=@```json { value: @value, min: @min, max: @max, step: @step, percentage: @clamped } ```@
+        x-init="$watch('value', v => { percentage = ((v - min) / (max - min)) * 100; $dispatch('input', { name: '@name', value: v }) })"
+    >
+        @* Hidden input for form submission *@
+        <input type="hidden" name="@name" :value="value" />
+
+        @* Track container *@
+        <div
+            class=@track
+            @if !disabled {
+                @click="
+                    const rect = $el.getBoundingClientRect();
+                    const pct = (($event.clientX - rect.left) / rect.width) * 100;
+                    const rawValue = min + (pct / 100) * (max - min);
+                    value = Math.round(rawValue / step) * step;
+                    value = Math.max(min, Math.min(max, value));
+                "
+            }
+        >
+            @* Filled portion *@
+            <div class=@filled :style="'width: ' + percentage + '%'"></div>
+        </div>
+
+        @* Thumb *@
+        <div
+            class="absolute"
+            :style="'left: calc(' + percentage + '% - 8px)'"
+        >
+            <button
+                type="button"
+                role="slider"
+                tabindex="0"
+                class=@thumb
+                aria-valuenow="@value"
+                aria-valuemin="@min"
+                aria-valuemax="@max"
+                aria-label="@name"
+                :aria-valuenow="value"
+                @if disabled { disabled aria-disabled="true" }
+                @if !disabled {
+                    @keydown.left.prevent="value = Math.max(min, value - step)"
+                    @keydown.right.prevent="value = Math.min(max, value + step)"
+                    @keydown.home.prevent="value = min"
+                    @keydown.end.prevent="value = max"
+                }
+            ></button>
+        </div>
+    </div>
+}
+
+@* Slider with label showing current value *@
+@fn with_label(
+    label: &str,
+    name: &str,
+    value: f64,
+    min: f64 = 0.0,
+    max: f64 = 100.0,
+    step: f64 = 1.0,
+    disabled: bool = false,
+    class: Option<&str> = None,
+) {
+    @let label_cls = "text-sm font-medium leading-none"
+    @let disabled_label = @if disabled { "opacity-70" } else { "" }
+
+    <div class="space-y-2" x-data=@```json { displayValue: @value } ```@>
+        <div class="flex justify-between">
+            <label for="@name" class=@cn(&[label_cls, disabled_label])>@label</label>
+            <span class="text-sm text-muted-foreground" x-text="displayValue"></span>
+        </div>
+        <div @input.camel="displayValue = $event.detail.value">
+            <@apply
+                name=@name
+                value=@value
+                min=@min
+                max=@max
+                step=@step
+                disabled=@disabled
+                class=@class
+            />
+        </div>
+    </div>
+}
+
+@* Dual-handle range slider *@
+@fn range(
+    name: &str,
+    value_min: f64,
+    value_max: f64,
+    min: f64 = 0.0,
+    max: f64 = 100.0,
+    step: f64 = 1.0,
+    disabled: bool = false,
+    class: Option<&str> = None,
+) {
+    @let pct_min = ((value_min - min) / (max - min) * 100.0)
+    @let pct_max = ((value_max - min) / (max - min) * 100.0)
+
+    @let container_base = "relative flex w-full touch-none select-none items-center"
+    @let disabled_cls = @if disabled { "opacity-50 cursor-not-allowed" } else { "" }
+
+    @let track = "relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20"
+    @let filled = "absolute h-full bg-primary"
+    @let thumb = "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none"
+
+    <div
+        class=@cn(&[container_base, disabled_cls, class.unwrap_or("")])
+        x-data=@```json {
+            minValue: @value_min,
+            maxValue: @value_max,
+            min: @min,
+            max: @max,
+            step: @step,
+            pctMin: @pct_min,
+            pctMax: @pct_max,
+            updatePercentages() {
+                this.pctMin = ((this.minValue - this.min) / (this.max - this.min)) * 100;
+                this.pctMax = ((this.maxValue - this.min) / (this.max - this.min)) * 100;
+            },
+            dispatchValues() {
+                $dispatch('input', { name: '@name', valueMin: this.minValue, valueMax: this.maxValue });
+            }
+        } ```@
+        x-init="$watch('minValue', () => { updatePercentages(); dispatchValues(); }); $watch('maxValue', () => { updatePercentages(); dispatchValues(); })"
+    >
+        @* Hidden inputs for form submission *@
+        <input type="hidden" name="@(name)_min" :value="minValue" />
+        <input type="hidden" name="@(name)_max" :value="maxValue" />
+
+        @* Track container *@
+        <div class=@track>
+            @* Filled portion between handles *@
+            <div
+                class=@filled
+                :style="'left: ' + pctMin + '%; width: ' + (pctMax - pctMin) + '%'"
+            ></div>
+        </div>
+
+        @* Min thumb *@
+        <div
+            class="absolute"
+            :style="'left: calc(' + pctMin + '% - 8px)'"
+        >
+            <button
+                type="button"
+                role="slider"
+                tabindex="0"
+                class=@thumb
+                aria-valuenow="@value_min"
+                aria-valuemin="@min"
+                aria-valuemax="@max"
+                aria-label="@name minimum"
+                :aria-valuenow="minValue"
+                @if disabled { disabled aria-disabled="true" }
+                @if !disabled {
+                    @keydown.left.prevent="minValue = Math.max(min, minValue - step)"
+                    @keydown.right.prevent="minValue = Math.min(maxValue - step, minValue + step)"
+                    @keydown.home.prevent="minValue = min"
+                    @keydown.end.prevent="minValue = maxValue - step"
+                }
+            ></button>
+        </div>
+
+        @* Max thumb *@
+        <div
+            class="absolute"
+            :style="'left: calc(' + pctMax + '% - 8px)'"
+        >
+            <button
+                type="button"
+                role="slider"
+                tabindex="0"
+                class=@thumb
+                aria-valuenow="@value_max"
+                aria-valuemin="@min"
+                aria-valuemax="@max"
+                aria-label="@name maximum"
+                :aria-valuenow="maxValue"
+                @if disabled { disabled aria-disabled="true" }
+                @if !disabled {
+                    @keydown.left.prevent="maxValue = Math.max(minValue + step, maxValue - step)"
+                    @keydown.right.prevent="maxValue = Math.min(max, maxValue + step)"
+                    @keydown.home.prevent="maxValue = minValue + step"
+                    @keydown.end.prevent="maxValue = max"
+                }
+            ></button>
+        </div>
+    </div>
+}
+
+@* Range slider with labels showing both values *@
+@fn range_with_label(
+    label: &str,
+    name: &str,
+    value_min: f64,
+    value_max: f64,
+    min: f64 = 0.0,
+    max: f64 = 100.0,
+    step: f64 = 1.0,
+    disabled: bool = false,
+    class: Option<&str> = None,
+) {
+    @let label_cls = "text-sm font-medium leading-none"
+    @let disabled_label = @if disabled { "opacity-70" } else { "" }
+
+    <div class="space-y-2" x-data=@```json { displayMin: @value_min, displayMax: @value_max } ```@>
+        <div class="flex justify-between">
+            <label for="@name" class=@cn(&[label_cls, disabled_label])>@label</label>
+            <span class="text-sm text-muted-foreground" x-text="displayMin + ' - ' + displayMax"></span>
+        </div>
+        <div @input.camel="displayMin = $event.detail.valueMin; displayMax = $event.detail.valueMax">
+            <@range
+                name=@name
+                value_min=@value_min
+                value_max=@value_max
+                min=@min
+                max=@max
+                step=@step
+                disabled=@disabled
+                class=@class
+            />
+        </div>
+    </div>
+}
+
+@* Simple slider with default values *@
+@fn simple(name: &str, value: f64) {
+    <@apply name=@name value=@value min=0.0 max=100.0 step=1.0 disabled=false class=None />
+}
+
+@* Disabled slider *@
+@fn disabled(name: &str, value: f64) {
+    <@apply name=@name value=@value min=0.0 max=100.0 step=1.0 disabled=true class=None />
+}

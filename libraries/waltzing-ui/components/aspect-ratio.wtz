@@ -1,87 +1,78 @@
 @*
  * Aspect Ratio component
- * Displays content within a desired aspect ratio
+ * Displays content within a desired aspect ratio using CSS aspect-ratio property
  *
- * Usage:
- *   @import ui/components/aspect-ratio.wtz as aspect_ratio
+ * @example
+ * @import components/aspect-ratio.wtz as aspect_ratio
  *
- *   <@aspect_ratio::apply ratio=1.7778>
- *       <img src="photo.jpg" class="object-cover w-full h-full" />
- *   </@>
+ * <@aspect_ratio::apply ratio=1.7778>
+ *     <img src="photo.jpg" class="object-cover w-full h-full" />
+ * </@>
  *
- *   <@aspect_ratio::video>
- *       <iframe src="..." class="w-full h-full"></iframe>
- *   </@>
+ * <@aspect_ratio::video>
+ *     <iframe src="..." class="w-full h-full"></iframe>
+ * </@>
  *
- *   <@aspect_ratio::square>
- *       <img src="avatar.jpg" class="object-cover w-full h-full rounded-md" />
- *   </@>
+ * <@aspect_ratio::square>
+ *     <img src="avatar.jpg" class="object-cover w-full h-full rounded-md" />
+ * </@>
+ *
+ * <@aspect_ratio::portrait>
+ *     <img src="portrait.jpg" class="object-cover w-full h-full" />
+ * </@>
  *@
 
 @import lib/utils.wtz as utils
 
-@* Common aspect ratio constants *@
-@fn ratio_16_9() -> f64 { { 16.0 / 9.0 } }
-@fn ratio_4_3() -> f64 { { 4.0 / 3.0 } }
-@fn ratio_1_1() -> f64 { { 1.0 } }
-@fn ratio_21_9() -> f64 { { 21.0 / 9.0 } }
-@fn ratio_9_16() -> f64 { { 9.0 / 16.0 } }
-@fn ratio_3_4() -> f64 { { 3.0 / 4.0 } }
-
 @* Main aspect ratio container *@
 @fn apply(
     ratio: f64,
-    class: Option<&str>,
+    class: Option<&str> = None,
     content: @(),
 ) {
     @let base = "relative w-full"
 
     <div
-        class="@utils::cn(&[@base, @class.unwrap_or("")])"
+        class=@utils::cn(&[base, class.unwrap_or("")])
         style="aspect-ratio: @ratio;"
     >
-        @content()
+        <div class="absolute inset-0">
+            @content()
+        </div>
     </div>
 }
 
 @* 16:9 aspect ratio (widescreen video) *@
-@fn video(class: Option<&str>, content: @()) {
-    <@apply ratio=@ratio_16_9() class=@class>
+@fn video(class: Option<&str> = None, content: @()) {
+    <@apply ratio=1.7778 class=@class>
         @content()
     </@>
 }
 
 @* 1:1 aspect ratio (square) *@
-@fn square(class: Option<&str>, content: @()) {
-    <@apply ratio=@ratio_1_1() class=@class>
+@fn square(class: Option<&str> = None, content: @()) {
+    <@apply ratio=1.0 class=@class>
         @content()
     </@>
 }
 
 @* 4:3 aspect ratio (classic TV/photo) *@
-@fn standard(class: Option<&str>, content: @()) {
-    <@apply ratio=@ratio_4_3() class=@class>
+@fn standard(class: Option<&str> = None, content: @()) {
+    <@apply ratio=1.3333 class=@class>
         @content()
     </@>
 }
 
 @* 21:9 aspect ratio (ultrawide/cinema) *@
-@fn ultrawide(class: Option<&str>, content: @()) {
-    <@apply ratio=@ratio_21_9() class=@class>
-        @content()
-    </@>
-}
-
-@* 9:16 aspect ratio (portrait/mobile video) *@
-@fn portrait(class: Option<&str>, content: @()) {
-    <@apply ratio=@ratio_9_16() class=@class>
+@fn ultrawide(class: Option<&str> = None, content: @()) {
+    <@apply ratio=2.3333 class=@class>
         @content()
     </@>
 }
 
 @* 3:4 aspect ratio (portrait photo) *@
-@fn portrait_photo(class: Option<&str>, content: @()) {
-    <@apply ratio=@ratio_3_4() class=@class>
+@fn portrait(class: Option<&str> = None, content: @()) {
+    <@apply ratio=0.75 class=@class>
         @content()
     </@>
 }

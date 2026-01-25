@@ -1,0 +1,348 @@
+@*
+ * Carousel component
+ * Image/content slider with navigation, dots, and touch support
+ *
+ * Dependencies: Alpine.js
+ *
+ * Usage:
+ *   @import ui/components/carousel.wtz as carousel
+ *
+ *   // Basic carousel with items
+ *   <@carousel::apply>
+ *       <@carousel::item><img src="/image1.jpg" alt="Slide 1" /></@>
+ *       <@carousel::item><img src="/image2.jpg" alt="Slide 2" /></@>
+ *       <@carousel::item><img src="/image3.jpg" alt="Slide 3" /></@>
+ *   </@>
+ *
+ *   // Carousel with auto-play (interval in ms)
+ *   <@carousel::apply auto_play=true interval=5000>
+ *       <@carousel::item>Slide 1</@>
+ *       <@carousel::item>Slide 2</@>
+ *   </@>
+ *
+ *   // Carousel without dots
+ *   <@carousel::apply show_dots=false>
+ *       <@carousel::item>Content</@>
+ *   </@>
+ *
+ *   // Carousel without navigation buttons
+ *   <@carousel::apply show_buttons=false>
+ *       <@carousel::item>Content</@>
+ *   </@>
+ *
+ *   // Full control with custom orientation
+ *   <@carousel::apply orientation=carousel::Orientation::Vertical>
+ *       <@carousel::item>Vertical slide</@>
+ *   </@>
+ *
+ *   // Carousel with thumbnails
+ *   <div class="space-y-2">
+ *       <@carousel::apply show_dots=false>
+ *           <@carousel::item><img src="/image1.jpg" /></@>
+ *           <@carousel::item><img src="/image2.jpg" /></@>
+ *       </@>
+ *       <@carousel::thumbnail_strip>
+ *           <@carousel::thumbnail src="/thumb1.jpg" alt="Thumb 1" index=0 />
+ *           <@carousel::thumbnail src="/thumb2.jpg" alt="Thumb 2" index=1 />
+ *       </@>
+ *   </div>
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Orientation {
+    Horizontal,
+    Vertical,
+}
+
+@* Main carousel container with navigation *@
+@fn apply(
+    orientation: Orientation = Orientation::Horizontal,
+    show_buttons: bool = true,
+    show_dots: bool = true,
+    auto_play: bool = false,
+    interval: u32 = 4000,
+    loop_slides: bool = true,
+    class: Option<&str> = None,
+    content: @(),
+) {
+    @let is_horizontal = match orientation { Orientation::Horizontal => true, _ => false }
+    @let container_cls = if is_horizontal { "relative overflow-hidden" } else { "relative overflow-hidden" }
+    @let track_cls = if is_horizontal {
+        "flex transition-transform duration-300 ease-in-out"
+    } else {
+        "flex flex-col transition-transform duration-300 ease-in-out"
+    }
+
+    <div
+        x-data=@```json {
+            current: 0,
+            total: 0,
+            autoPlay: @auto_play,
+            interval: @interval,
+            loop: @loop_slides,
+            isHorizontal: @is_horizontal,
+            autoPlayTimer: null,
+            touchStartX: 0,
+            touchStartY: 0,
+            touchEndX: 0,
+            touchEndY: 0,
+            init() {
+                this.total = this.$refs.track.children.length;
+                if (this.autoPlay && this.total > 1) {
+                    this.startAutoPlay();
+                }
+            },
+            next() {
+                if (this.current < this.total - 1) {
+                    this.current++;
+                } else if (this.loop) {
+                    this.current = 0;
+                }
+            },
+            prev() {
+                if (this.current > 0) {
+                    this.current--;
+                } else if (this.loop) {
+                    this.current = this.total - 1;
+                }
+            },
+            goTo(index) {
+                if (index >= 0 && index < this.total) {
+                    this.current = index;
+                }
+            },
+            startAutoPlay() {
+                this.autoPlayTimer = setInterval(() => this.next(), this.interval);
+            },
+            stopAutoPlay() {
+                if (this.autoPlayTimer) {
+                    clearInterval(this.autoPlayTimer);
+                    this.autoPlayTimer = null;
+                }
+            },
+            handleTouchStart(e) {
+                this.touchStartX = e.changedTouches[0].screenX;
+                this.touchStartY = e.changedTouches[0].screenY;
+            },
+            handleTouchEnd(e) {
+                this.touchEndX = e.changedTouches[0].screenX;
+                this.touchEndY = e.changedTouches[0].screenY;
+                this.handleSwipe();
+            },
+            handleSwipe() {
+                const diffX = this.touchStartX - this.touchEndX;
+                const diffY = this.touchStartY - this.touchEndY;
+                const threshold = 50;
+                if (this.isHorizontal) {
+                    if (Math.abs(diffX) > threshold && Math.abs(diffX) > Math.abs(diffY)) {
+                        if (diffX > 0) this.next();
+                        else this.prev();
+                    }
+                } else {
+                    if (Math.abs(diffY) > threshold && Math.abs(diffY) > Math.abs(diffX)) {
+                        if (diffY > 0) this.next();
+                        else this.prev();
+                    }
+                }
+            },
+            getTransform() {
+                return this.isHorizontal
+                    ? 'translateX(-' + (this.current * 100) + '%)'
+                    : 'translateY(-' + (this.current * 100) + '%)';
+            }
+        } ```@
+        x-init="init()"
+        @mouseenter="if (autoPlay) stopAutoPlay()"
+        @mouseleave="if (autoPlay && total > 1) startAutoPlay()"
+        class=@utils::cn(&[container_cls, class.unwrap_or("")])
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Carousel"
+    >
+        @* Carousel track *@
+        <div
+            x-ref="track"
+            class=@track_cls
+            :style="'transform: ' + getTransform()"
+            @touchstart="handleTouchStart($event)"
+            @touchend="handleTouchEnd($event)"
+        >
+            @content()
+        </div>
+
+        @* Previous button *@
+        @if show_buttons {
+            @if is_horizontal {
+                <button
+                    type="button"
+                    @click="prev()"
+                    x-show="loop || current > 0"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-background/80 border border-input shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    aria-label="Previous slide"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    @click="next()"
+                    x-show="loop || current < total - 1"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-background/80 border border-input shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    aria-label="Next slide"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </button>
+            } else {
+                <button
+                    type="button"
+                    @click="prev()"
+                    x-show="loop || current > 0"
+                    class="absolute top-2 left-1/2 -translate-x-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-background/80 border border-input shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    aria-label="Previous slide"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                        <path d="m18 15-6-6-6 6"/>
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    @click="next()"
+                    x-show="loop || current < total - 1"
+                    class="absolute bottom-2 left-1/2 -translate-x-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-background/80 border border-input shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                    aria-label="Next slide"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                </button>
+            }
+        }
+
+        @* Dot indicators *@
+        @if show_dots {
+            @let dots_cls = if is_horizontal {
+                "absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1"
+            } else {
+                "absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1"
+            }
+
+            <div class=@dots_cls role="tablist" aria-label="Slides">
+                <template x-for="(_, index) in Array.from({ length: total })" :key="index">
+                    <button
+                        type="button"
+                        @click="goTo(index)"
+                        :class="current === index ? 'bg-primary' : 'bg-primary/30'"
+                        class="h-2 w-2 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        role="tab"
+                        :aria-selected="current === index"
+                        :aria-label="'Go to slide ' + (index + 1)"
+                    ></button>
+                </template>
+            </div>
+        }
+    </div>
+}
+
+@* Individual carousel slide item *@
+@fn item(
+    class: Option<&str> = None,
+    content: @(),
+) {
+    @let base = "w-full flex-shrink-0"
+
+    <div
+        class=@utils::cn(&[base, class.unwrap_or("")])
+        role="group"
+        aria-roledescription="slide"
+    >
+        @content()
+    </div>
+}
+
+@* Simple carousel without controls - just navigation buttons *@
+@fn simple(
+    class: Option<&str> = None,
+    content: @(),
+) {
+    <@apply
+        orientation=Orientation::Horizontal
+        show_buttons=true
+        show_dots=false
+        auto_play=false
+        interval=4000
+        loop_slides=true
+        class=@class
+        content=@content
+    />
+}
+
+@* Auto-playing carousel *@
+@fn autoplay(
+    interval: u32 = 4000,
+    class: Option<&str> = None,
+    content: @(),
+) {
+    <@apply
+        orientation=Orientation::Horizontal
+        show_buttons=true
+        show_dots=true
+        auto_play=true
+        interval=@interval
+        loop_slides=true
+        class=@class
+        content=@content
+    />
+}
+
+@* Thumbnail item for use with thumbnail carousel *@
+@fn thumbnail(
+    src: &str,
+    alt: &str,
+    index: u32 = 0,
+    class: Option<&str> = None,
+) {
+    <button
+        type="button"
+        @click=@format!("$dispatch('carousel-goto', {{ index: {} }}); activeThumb = {}", index, index)
+        class=@utils::cn(&["h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring", class.unwrap_or("")])
+        :class=@format!("activeThumb === {} ? 'border-primary' : 'border-transparent'", index)
+    >
+        <img src=@src alt=@alt class="h-full w-full object-cover" />
+    </button>
+}
+
+@* Thumbnail strip container for carousel *@
+@fn thumbnail_strip(
+    class: Option<&str> = None,
+    content: @(),
+) {
+    <div
+        class=@utils::cn(&["flex gap-2 justify-center overflow-x-auto", class.unwrap_or("")])
+        x-data="{ activeThumb: 0 }"
+        @carousel-goto.window="activeThumb = $event.detail.index"
+    >
+        @content()
+    </div>
+}
+
+@* Card-style carousel item with padding *@
+@fn card_item(
+    class: Option<&str> = None,
+    content: @(),
+) {
+    @let base = "w-full flex-shrink-0 p-4"
+
+    <div
+        class=@utils::cn(&[base, class.unwrap_or("")])
+        role="group"
+        aria-roledescription="slide"
+    >
+        <div class="rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
+            @content()
+        </div>
+    </div>
+}

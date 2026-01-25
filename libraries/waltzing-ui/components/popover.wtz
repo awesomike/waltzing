@@ -4,7 +4,7 @@
  * Uses Alpine.js for positioning and click-outside handling
  *
  * Usage:
- *   @import ui/components/popover.wtz as popover
+ *   @import components/popover.wtz as popover
  *
  *   <@popover::apply
  *       side=popover::Side::Bottom
@@ -13,8 +13,6 @@
  *       content=@{ <p>Popover content here</p> }
  *   />
  *@
-
-@import lib/utils.wtz as utils
 
 @enum Side {
     Top,
@@ -30,33 +28,39 @@
 }
 
 @fn apply(
-    side: Side,
-    align: Align,
-    trigger: @(),
-    content: @(),
+    side: Side = Side::Bottom,
+    align: Align = Align::Center,
+    class: Option<&str> = None,
+    trigger: @() = @{},
+    content: @() = @{},
 ) {
-    @let side_cls = @match side {
-        Side::Top => { "bottom-full mb-2" }
-        Side::Right => { "left-full ml-2" }
-        Side::Bottom => { "top-full mt-2" }
-        Side::Left => { "right-full mr-2" }
+    @let side_cls = {
+        match side {
+            Side::Top => "bottom-full mb-2",
+            Side::Right => "left-full ml-2",
+            Side::Bottom => "top-full mt-2",
+            Side::Left => "right-full mr-2",
+        }
     }
 
-    @let align_cls = @match align {
-        Align::Start => { "left-0" }
-        Align::Center => { "left-1/2 -translate-x-1/2" }
-        Align::End => { "right-0" }
+    @let align_cls = {
+        match align {
+            Align::Start => "left-0",
+            Align::Center => "left-1/2 -translate-x-1/2",
+            Align::End => "right-0",
+        }
     }
+
+    @let popover_cls = cn(&["absolute z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", side_cls, align_cls, class.unwrap_or("")])
 
     <div class="relative inline-block" x-data="{ open: false }">
-        @* Trigger *@
         <div @click="open = !open" aria-haspopup="true" :aria-expanded="open">
             @trigger()
         </div>
 
-        @* Popover content *@
         <div
             x-show="open"
+            x-cloak
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -65,8 +69,7 @@
             x-transition:leave-end="opacity-0 scale-95"
             @click.outside="open = false"
             @keydown.escape.window="open = false"
-            class="@utils::cn(&["absolute z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", @side_cls, @align_cls])"
-            style="display: none;"
+            class="@popover_cls"
             role="dialog"
         >
             @content()
@@ -77,33 +80,39 @@
 @* Controlled popover (external state) *@
 @fn controlled(
     open_var: &str,
-    side: Side,
-    align: Align,
-    trigger: @(),
-    content: @(),
+    side: Side = Side::Bottom,
+    align: Align = Align::Center,
+    class: Option<&str> = None,
+    trigger: @() = @{},
+    content: @() = @{},
 ) {
-    @let side_cls = @match side {
-        Side::Top => { "bottom-full mb-2" }
-        Side::Right => { "left-full ml-2" }
-        Side::Bottom => { "top-full mt-2" }
-        Side::Left => { "right-full mr-2" }
+    @let side_cls = {
+        match side {
+            Side::Top => "bottom-full mb-2",
+            Side::Right => "left-full ml-2",
+            Side::Bottom => "top-full mt-2",
+            Side::Left => "right-full mr-2",
+        }
     }
 
-    @let align_cls = @match align {
-        Align::Start => { "left-0" }
-        Align::Center => { "left-1/2 -translate-x-1/2" }
-        Align::End => { "right-0" }
+    @let align_cls = {
+        match align {
+            Align::Start => "left-0",
+            Align::Center => "left-1/2 -translate-x-1/2",
+            Align::End => "right-0",
+        }
     }
+
+    @let popover_cls = cn(&["absolute z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", side_cls, align_cls, class.unwrap_or("")])
 
     <div class="relative inline-block">
-        @* Trigger *@
         <div @click="@open_var = !@open_var" aria-haspopup="true" :aria-expanded="@open_var">
             @trigger()
         </div>
 
-        @* Popover content *@
         <div
             x-show="@open_var"
+            x-cloak
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -112,8 +121,7 @@
             x-transition:leave-end="opacity-0 scale-95"
             @click.outside="@open_var = false"
             @keydown.escape.window="@open_var = false"
-            class="@utils::cn(&["absolute z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", @side_cls, @align_cls])"
-            style="display: none;"
+            class="@popover_cls"
             role="dialog"
         >
             @content()
@@ -122,9 +130,11 @@
 }
 
 @* Close button helper for popover content *@
-@fn close_button(class: Option<&str>) {
+@fn close_button(class: Option<&str> = None) {
+    @let btn_cls = cn(&["absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", class.unwrap_or("")])
+
     <button
-        class="@utils::cn(&["absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", @class.unwrap_or("")])"
+        class="@btn_cls"
         @click="open = false"
         aria-label="Close"
     >

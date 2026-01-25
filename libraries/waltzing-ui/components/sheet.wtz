@@ -1,0 +1,295 @@
+@*
+ * Sheet component
+ * Slide-out panel from edge of screen with backdrop
+ * Requires: @alpinejs/focus plugin
+ *
+ * @example
+ * @import components/sheet.wtz as sheet
+ *
+ * <@sheet::apply
+ *     side=sheet::Side::Right
+ *     title="Settings"
+ *     description=Some("Manage your preferences")
+ *     trigger=@{ <button>Open Sheet</button> }
+ *     content=@{ <p>Sheet content here</p> }
+ * />
+ *
+ * <@sheet::right
+ *     title="Menu"
+ *     description=None
+ *     trigger=@{ <button>Open Menu</button> }
+ *     content=@{ <nav>Navigation items</nav> }
+ * />
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Side {
+    Top,
+    Right,
+    Bottom,
+    Left,
+}
+
+@fn apply(
+    side: Side,
+    title: &str,
+    description: Option<&str>,
+    trigger: @(),
+    content: @(),
+    class: Option<&str>,
+) {
+    @let position_cls = @match side {
+        Side::Top => { "inset-x-0 top-0 border-b" }
+        Side::Right => { "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm" }
+        Side::Bottom => { "inset-x-0 bottom-0 border-t" }
+        Side::Left => { "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm" }
+    }
+
+    @let enter_start_cls = @match side {
+        Side::Top => { "opacity-0 -translate-y-full" }
+        Side::Right => { "opacity-0 translate-x-full" }
+        Side::Bottom => { "opacity-0 translate-y-full" }
+        Side::Left => { "opacity-0 -translate-x-full" }
+    }
+
+    @let enter_end_cls = @match side {
+        Side::Top => { "opacity-100 translate-y-0" }
+        Side::Right => { "opacity-100 translate-x-0" }
+        Side::Bottom => { "opacity-100 translate-y-0" }
+        Side::Left => { "opacity-100 translate-x-0" }
+    }
+
+    @let base_cls = "fixed z-50 gap-4 bg-background p-6 shadow-lg"
+    @let sheet_cls = &[@base_cls, @position_cls, @class.unwrap_or("")]
+
+    <div x-data="{ open: false }">
+        @* Trigger *@
+        <div @click="open = true">
+            @trigger()
+        </div>
+
+        @* Sheet *@
+        <template x-teleport="body">
+            <div
+                x-show="open"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-50"
+                style="display: none;"
+            >
+                @* Backdrop *@
+                <div
+                    class="fixed inset-0 bg-black/80"
+                    @click="open = false"
+                    aria-hidden="true"
+                ></div>
+
+                @* Content *@
+                <div
+                    x-show="open"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="@enter_start_cls"
+                    x-transition:enter-end="@enter_end_cls"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="@enter_end_cls"
+                    x-transition:leave-end="@enter_start_cls"
+                    class="@utils::cn(@sheet_cls)"
+                    x-trap.inert.noscroll="open"
+                    @keydown.escape.window="open = false"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="sheet-title"
+                >
+                    @* Close button *@
+                    <button
+                        class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                        @click="open = false"
+                        aria-label="Close"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="M18 6 6 18"></path>
+                            <path d="m6 6 12 12"></path>
+                        </svg>
+                    </button>
+
+                    @* Header *@
+                    <div class="flex flex-col space-y-2 text-center sm:text-left">
+                        <h2 id="sheet-title" class="text-lg font-semibold text-foreground">
+                            @title
+                        </h2>
+                        @if let Some(desc) = description {
+                            <p class="text-sm text-muted-foreground">@desc</p>
+                        }
+                    </div>
+
+                    @* Content *@
+                    <div class="py-4">
+                        @content()
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+}
+
+@* Controlled sheet (external state) *@
+@fn controlled(
+    open_var: &str,
+    side: Side,
+    title: &str,
+    description: Option<&str>,
+    content: @(),
+    class: Option<&str>,
+) {
+    @let position_cls = @match side {
+        Side::Top => { "inset-x-0 top-0 border-b" }
+        Side::Right => { "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm" }
+        Side::Bottom => { "inset-x-0 bottom-0 border-t" }
+        Side::Left => { "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm" }
+    }
+
+    @let enter_start_cls = @match side {
+        Side::Top => { "opacity-0 -translate-y-full" }
+        Side::Right => { "opacity-0 translate-x-full" }
+        Side::Bottom => { "opacity-0 translate-y-full" }
+        Side::Left => { "opacity-0 -translate-x-full" }
+    }
+
+    @let enter_end_cls = @match side {
+        Side::Top => { "opacity-100 translate-y-0" }
+        Side::Right => { "opacity-100 translate-x-0" }
+        Side::Bottom => { "opacity-100 translate-y-0" }
+        Side::Left => { "opacity-100 translate-x-0" }
+    }
+
+    @let base_cls = "fixed z-50 gap-4 bg-background p-6 shadow-lg"
+    @let sheet_cls = &[@base_cls, @position_cls, @class.unwrap_or("")]
+
+    <template x-teleport="body">
+        <div
+            x-show="@open_var"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50"
+            style="display: none;"
+        >
+            <div
+                class="fixed inset-0 bg-black/80"
+                @click="@open_var = false"
+                aria-hidden="true"
+            ></div>
+
+            <div
+                x-show="@open_var"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="@enter_start_cls"
+                x-transition:enter-end="@enter_end_cls"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="@enter_end_cls"
+                x-transition:leave-end="@enter_start_cls"
+                class="@utils::cn(@sheet_cls)"
+                x-trap.inert.noscroll="@open_var"
+                @keydown.escape.window="@open_var = false"
+                role="dialog"
+                aria-modal="true"
+            >
+                <button
+                    class="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100"
+                    @click="@open_var = false"
+                    aria-label="Close"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                        <path d="M18 6 6 18"></path>
+                        <path d="m6 6 12 12"></path>
+                    </svg>
+                </button>
+
+                <div class="flex flex-col space-y-2 text-center sm:text-left">
+                    <h2 class="text-lg font-semibold text-foreground">@title</h2>
+                    @if let Some(desc) = description {
+                        <p class="text-sm text-muted-foreground">@desc</p>
+                    }
+                </div>
+
+                <div class="py-4">@content()</div>
+            </div>
+        </div>
+    </template>
+}
+
+@* Shorthand for right sheet *@
+@fn right(
+    title: &str,
+    description: Option<&str>,
+    trigger: @(),
+    content: @(),
+) {
+    <@apply
+        side=Side::Right
+        title=@title
+        description=@description
+        trigger=@trigger
+        content=@content
+        class=None
+    />
+}
+
+@* Shorthand for left sheet *@
+@fn left(
+    title: &str,
+    description: Option<&str>,
+    trigger: @(),
+    content: @(),
+) {
+    <@apply
+        side=Side::Left
+        title=@title
+        description=@description
+        trigger=@trigger
+        content=@content
+        class=None
+    />
+}
+
+@* Shorthand for top sheet *@
+@fn top(
+    title: &str,
+    description: Option<&str>,
+    trigger: @(),
+    content: @(),
+) {
+    <@apply
+        side=Side::Top
+        title=@title
+        description=@description
+        trigger=@trigger
+        content=@content
+        class=None
+    />
+}
+
+@* Shorthand for bottom sheet *@
+@fn bottom(
+    title: &str,
+    description: Option<&str>,
+    trigger: @(),
+    content: @(),
+) {
+    <@apply
+        side=Side::Bottom
+        title=@title
+        description=@description
+        trigger=@trigger
+        content=@content
+        class=None
+    />
+}

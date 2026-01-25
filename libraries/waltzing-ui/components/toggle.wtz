@@ -46,22 +46,26 @@
         Size::Lg => { "h-10 px-3 min-w-10" }
     }
 
-    @let pressed_cls = "bg-accent text-accent-foreground"
+    @let pressed_cls = @if pressed { "bg-accent text-accent-foreground" } else { "" }
+    @let aria_pressed_val = @if pressed { "true" } else { "false" }
+    @let data_state_val = @if pressed { "on" } else { "off" }
+
+    @let classes = &[@base, @variant_cls, @size_cls, @pressed_cls, @class.unwrap_or("")]
 
     <button
         type="button"
         id="@name"
         name="@name"
         role="button"
-        class="@utils::cn(&[@base, @variant_cls, @size_cls, @if pressed { @pressed_cls } else { "" }, @class.unwrap_or("")])"
-        aria-pressed="@if pressed { "true" } else { "false" }"
-        @if pressed { data-state="on" } else { data-state="off" }
+        class="@utils::cn(@classes)"
+        aria-pressed="@aria_pressed_val"
+        data-state="@data_state_val"
         @if disabled { disabled aria-disabled="true" }
-        x-data="{ pressed: @if pressed { "true" } else { "false" } }"
+        x-data=@```json { pressed: @pressed } ```@
         x-on:click="pressed = !pressed; $dispatch('input', { name: '@name', value: pressed })"
         :aria-pressed="pressed.toString()"
         :data-state="pressed ? 'on' : 'off'"
-        :class="pressed ? '@pressed_cls' : ''"
+        :class="pressed ? 'bg-accent text-accent-foreground' : ''"
     >
         @content()
     </button>
@@ -98,13 +102,14 @@
 
 @* Toggle sized for icons *@
 @fn icon(name: &str, content: @()) {
+    @let icon_class = Some("h-9 w-9 p-0")
     <@apply
         name=@name
         pressed=false
         disabled=false
         variant=Variant::Default
         size=Size::Default
-        class=Some("h-9 w-9 p-0")
+        class=@icon_class
     >
         @content()
     </@>
@@ -154,8 +159,10 @@
 
 @* Toggle group for multiple related toggles (like text formatting) *@
 @fn group(class: Option<&str>, content: @()) {
+    @let base = "inline-flex items-center gap-1"
+    @let classes = &[@base, @class.unwrap_or("")]
     <div
-        class="@utils::cn(&["inline-flex items-center gap-1", @class.unwrap_or("")])"
+        class="@utils::cn(@classes)"
         role="group"
     >
         @content()

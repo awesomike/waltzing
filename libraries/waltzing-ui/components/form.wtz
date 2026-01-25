@@ -1,14 +1,40 @@
 @*
  * Form component
  * Form wrapper with validation display and field layouts
+ *
+ * @example
+ * @import components/form.wtz as form
+ * @import components/input.wtz as input
+ * @import components/button.wtz as button
+ *
+ * <@form::apply action=Some("/submit") method=Some("POST") class=None>
+ *     <@form::field
+ *         name="email"
+ *         label=Some("Email")
+ *         description=Some("We'll never share your email.")
+ *         error=email_error
+ *         required=true
+ *         class=None
+ *     >
+ *         <@input::apply
+ *             input_type=input::InputType::Email
+ *             name="email"
+ *             value=None
+ *             placeholder=Some("you@example.com")
+ *             disabled=false
+ *             required=true
+ *             error=email_error
+ *             class=None
+ *         />
+ *     </@>
+ *
+ *     <@form::actions align=None class=None>
+ *         <@button::primary>Submit</@>
+ *     </@>
+ * </@>
  *@
 
 @import lib/utils.wtz as utils
-
-@struct FieldError {
-    field: String,
-    message: String,
-}
 
 @* Main form wrapper *@
 @fn apply(
@@ -19,12 +45,13 @@
     content: @(),
 ) {
     @let base = "space-y-6"
+    @let classes = utils::cn(&[base, class.unwrap_or("")])
 
     <form
         @if let Some(a) = action { action="@a" }
         @if let Some(m) = method { method="@m" }
         @if let Some(e) = enctype { enctype="@e" }
-        class="@utils::cn(&[@base, @class.unwrap_or("")])"
+        class="@classes"
         novalidate
     >
         @content()
@@ -42,8 +69,9 @@
     content: @(),
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    @let field_cls = utils::cn(&["space-y-2", class.unwrap_or("")])
 
-    <div class="@utils::cn(&["space-y-2", @class.unwrap_or("")])">
+    <div class="@field_cls">
         @if let Some(l) = label {
             <label for="@name" class="@label_cls">
                 @l
@@ -62,6 +90,13 @@
     </div>
 }
 
+@* Display error message for a field *@
+@fn message(error: Option<&str>) {
+    @if let Some(e) = error {
+        <p class="text-sm text-destructive" role="alert">@e</p>
+    }
+}
+
 @* Form section with title and description *@
 @fn section(
     title: Option<&str>,
@@ -69,7 +104,9 @@
     class: Option<&str>,
     content: @(),
 ) {
-    <div class="@utils::cn(&["space-y-4", @class.unwrap_or("")])">
+    @let section_cls = utils::cn(&["space-y-4", class.unwrap_or("")])
+
+    <div class="@section_cls">
         @if title.is_some() || description.is_some() {
             <div class="space-y-1">
                 @if let Some(t) = title {
@@ -91,7 +128,9 @@
     class: Option<&str>,
     content: @(),
 ) {
-    <div class="@utils::cn(&["grid gap-4 sm:grid-cols-2", @class.unwrap_or("")])">
+    @let row_cls = utils::cn(&["grid gap-4 sm:grid-cols-2", class.unwrap_or("")])
+
+    <div class="@row_cls">
         @content()
     </div>
 }
@@ -109,30 +148,11 @@
         "between" => { "justify-between" }
         _ => { "justify-end" }
     }
+    @let actions_cls = utils::cn(&["flex flex-col-reverse gap-2 sm:flex-row", align_cls, class.unwrap_or("")])
 
-    <div class="@utils::cn(&["flex flex-col-reverse gap-2 sm:flex-row", @align_cls, @class.unwrap_or("")])">
+    <div class="@actions_cls">
         @content()
     </div>
-}
-
-@* Display validation errors summary *@
-@fn errors(
-    errors: &[FieldError],
-    title: Option<&str>,
-    class: Option<&str>,
-) {
-    @if !errors.is_empty() {
-        @let base = "rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
-
-        <div role="alert" class="@utils::cn(&[@base, @class.unwrap_or("")])">
-            <p class="font-medium mb-2">@title.unwrap_or("Please fix the following errors:")</p>
-            <ul class="list-disc pl-5 space-y-1">
-                @for error in errors {
-                    <li>@error.message</li>
-                }
-            </ul>
-        </div>
-    }
 }
 
 @* Simple form for common use cases *@
@@ -156,22 +176,16 @@
     action: &str,
     content: @(),
 ) {
+    @let method_val = "POST"
+    @let enctype_val = "multipart/form-data"
+
     <@apply
         action=Some(@action)
-        method=Some("POST")
-        enctype=Some("multipart/form-data")
+        method=Some(@method_val)
+        enctype=Some(@enctype_val)
         class=None
     >
         @content()
     </@>
 }
 
-@* Helper to get error for a specific field from error list *@
-@fn field_error(errors: &[FieldError], field: &str) -> Option<&str> {
-    {
-        errors
-            .iter()
-            .find(|e| e.field == field)
-            .map(|e| e.message.as_str())
-    }
-}

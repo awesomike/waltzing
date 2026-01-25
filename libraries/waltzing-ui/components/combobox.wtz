@@ -1,0 +1,235 @@
+@*
+ * Combobox component
+ * A searchable select dropdown with autocomplete
+ * Uses Alpine.js for search, filtering, and keyboard navigation
+ *
+ * Usage:
+ *   @import components/combobox.wtz as combobox
+ *
+ *   @let options = [
+ *       combobox::ComboboxOption { value: "react", label: "React", disabled: false },
+ *       combobox::ComboboxOption { value: "vue", label: "Vue", disabled: false },
+ *       combobox::ComboboxOption { value: "angular", label: "Angular", disabled: true },
+ *   ]
+ *
+ *   <@combobox::apply
+ *       name="framework"
+ *       options=@options
+ *       selected=Some("react")
+ *       placeholder=Some("Select a framework...")
+ *   />
+ *@
+
+@import lib/utils.wtz as utils
+
+@struct ComboboxOption {
+    value: String,
+    label: String,
+    disabled: bool,
+}
+
+@fn apply(
+    name: &str,
+    options: &[ComboboxOption],
+    selected: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    @let base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    @let error_cls = @if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
+    @let input_cls = utils::cn(&[@base, @error_cls, @class.unwrap_or("")])
+
+    @* Find the initial label for the selected value *@
+    @let initial_label = {
+        match selected {
+            Some(sel) => options.iter().find(|o| o.value == sel).map(|o| o.label.as_str()).unwrap_or(""),
+            None => "",
+        }
+    }
+
+    <div
+        class="relative w-full"
+        x-data="{
+            open: false,
+            search: '@initial_label',
+            selected: '@selected.unwrap_or("")',
+            highlightedIndex: -1,
+            get filteredOptions() {
+                const searchLower = this.search.toLowerCase();
+                return this.$refs.options ? Array.from(this.$refs.options.querySelectorAll('[data-option]')).filter(el => {
+                    const label = el.dataset.label.toLowerCase();
+                    return label.includes(searchLower);
+                }) : [];
+            },
+            selectOption(value, label) {
+                this.selected = value;
+                this.search = label;
+                this.open = false;
+                this.$refs.hiddenInput.value = value;
+                this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            },
+            highlightNext() {
+                const options = this.filteredOptions;
+                if (options.length === 0) return;
+                this.highlightedIndex = Math.min(this.highlightedIndex + 1, options.length - 1);
+                options[this.highlightedIndex]?.scrollIntoView({ block: 'nearest' });
+            },
+            highlightPrev() {
+                const options = this.filteredOptions;
+                if (options.length === 0) return;
+                this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
+                options[this.highlightedIndex]?.scrollIntoView({ block: 'nearest' });
+            },
+            selectHighlighted() {
+                const options = this.filteredOptions;
+                if (this.highlightedIndex >= 0 && this.highlightedIndex < options.length) {
+                    const el = options[this.highlightedIndex];
+                    if (!el.dataset.disabled) {
+                        this.selectOption(el.dataset.value, el.dataset.label);
+                    }
+                }
+            }
+        }"
+        @keydown.down.prevent="highlightNext()"
+        @keydown.up.prevent="highlightPrev()"
+        @keydown.enter.prevent="selectHighlighted()"
+        @keydown.escape="open = false"
+    >
+        @* Hidden input for form submission *@
+        <input
+            type="hidden"
+            name="@name"
+            x-ref="hiddenInput"
+            :value="selected"
+            @if required { required }
+        />
+
+        @* Search input *@
+        <div class="relative">
+            <input
+                type="text"
+                class="@input_cls pr-8"
+                x-model="search"
+                @focus="open = true; highlightedIndex = -1"
+                @click="open = true"
+                @input="open = true; highlightedIndex = -1"
+                placeholder="@placeholder.unwrap_or("Search...")"
+                @if disabled { disabled }
+                @if error.is_some() { aria-invalid="true" }
+                role="combobox"
+                aria-haspopup="listbox"
+                :aria-expanded="open"
+                aria-autocomplete="list"
+            />
+            @* Chevron icon *@
+            <button
+                type="button"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                @click="open = !open; if(open) $refs.input?.focus()"
+                tabindex="-1"
+                @if disabled { disabled }
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" :class="open ? 'rotate-180' : ''">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        @* Dropdown options *@
+        <div
+            x-show="open"
+            x-cloak
+            x-ref="options"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            @click.outside="open = false"
+            class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+            role="listbox"
+        >
+            @for (idx, opt) in options.iter().enumerate() {
+                <div
+                    data-option
+                    data-value="@opt.value"
+                    data-label="@opt.label"
+                    @if opt.disabled { data-disabled="true" }
+                    class="@utils::cn(&["relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors", utils::class_if(opt.disabled, "pointer-events-none opacity-50")])"
+                    :class="{
+                        'bg-accent text-accent-foreground': highlightedIndex === @idx || selected === '@opt.value',
+                        'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
+                    }"
+                    x-show="'@opt.label'.toLowerCase().includes(search.toLowerCase())"
+                    @click="@if !opt.disabled { selectOption('@opt.value', '@opt.label') }"
+                    @mouseenter="highlightedIndex = @idx"
+                    role="option"
+                    :aria-selected="selected === '@opt.value'"
+                >
+                    @* Check icon for selected item *@
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="mr-2 h-4 w-4"
+                        :class="selected === '@opt.value' ? 'opacity-100' : 'opacity-0'"
+                    >
+                        <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                    <span>@opt.label</span>
+                </div>
+            }
+
+            @* Empty state *@
+            <div
+                x-show="filteredOptions.length === 0"
+                class="py-6 text-center text-sm text-muted-foreground"
+            >
+                No results found.
+            </div>
+        </div>
+    </div>
+}
+
+@* Combobox with label *@
+@fn labeled(
+    label: &str,
+    name: &str,
+    options: &[ComboboxOption],
+    selected: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    <div class="space-y-2">
+        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            @label
+            @if required { <span class="text-destructive">*</span> }
+        </label>
+        <@apply
+            name=@name
+            options=@options
+            selected=@selected
+            placeholder=@placeholder
+            disabled=@disabled
+            required=@required
+            error=@error
+            class=@class
+        />
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </div>
+}

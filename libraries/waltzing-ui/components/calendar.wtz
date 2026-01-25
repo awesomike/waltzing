@@ -1,0 +1,542 @@
+@*
+ * Calendar component
+ * Month calendar grid with date selection and navigation
+ * Uses Alpine.js for month navigation and date selection
+ *
+ * Usage:
+ *   @import ui/components/calendar.wtz as calendar
+ *
+ *   // Basic calendar with single date selection
+ *   <@calendar::apply selected=Some("2024-03-15") on_select=Some("handleDateSelect") />
+ *
+ *   // Calendar with no initial selection
+ *   <@calendar::apply selected=None on_select=Some("onDateChange") />
+ *
+ *   // Date range selection
+ *   <@calendar::range
+ *       start=Some("2024-03-10")
+ *       end=Some("2024-03-20")
+ *       on_select=Some("handleRangeSelect")
+ *   />
+ *
+ *   // Standalone (readonly) calendar display
+ *   <@calendar::display month=3 year=2024 />
+ *@
+
+@import lib/utils.wtz as utils
+
+@* Main calendar with single date selection *@
+@fn apply(
+    selected: Option<&str> = None,
+    on_select: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    @let initial_selected = selected.unwrap_or("")
+    @let select_handler = on_select.unwrap_or("null")
+
+    @let container_cls = utils::cn(&["p-3", class.unwrap_or("")])
+
+    <div
+        class="@container_cls"
+        x-data=@```json {
+            selected: '@initial_selected',
+            currentMonth: null,
+            currentYear: null,
+            today: new Date(),
+            selectHandler: @select_handler,
+            weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            days: [],
+
+            init() {
+                if (this.selected) {
+                    const date = new Date(this.selected + 'T00:00:00');
+                    this.currentMonth = date.getMonth();
+                    this.currentYear = date.getFullYear();
+                } else {
+                    this.currentMonth = this.today.getMonth();
+                    this.currentYear = this.today.getFullYear();
+                }
+                this.buildCalendar();
+            },
+
+            buildCalendar() {
+                this.days = [];
+                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+                const prevMonthLastDay = new Date(this.currentYear, this.currentMonth, 0);
+                const startingDay = firstDay.getDay();
+                const totalDays = lastDay.getDate();
+
+                for (let i = startingDay - 1; i >= 0; i--) {
+                    this.days.push({
+                        day: prevMonthLastDay.getDate() - i,
+                        date: null,
+                        outside: true
+                    });
+                }
+
+                for (let day = 1; day <= totalDays; day++) {
+                    const isoDate = this.formatDate(day);
+                    this.days.push({
+                        day,
+                        date: isoDate,
+                        selected: this.selected === isoDate,
+                        today: this.isToday(day),
+                        outside: false
+                    });
+                }
+
+                const remainingCells = 42 - this.days.length;
+                for (let i = 1; i <= remainingCells; i++) {
+                    this.days.push({
+                        day: i,
+                        date: null,
+                        outside: true
+                    });
+                }
+            },
+
+            formatDate(day) {
+                const month = String(this.currentMonth + 1).padStart(2, '0');
+                const d = String(day).padStart(2, '0');
+                return this.currentYear + '-' + month + '-' + d;
+            },
+
+            isToday(day) {
+                return this.today.getDate() === day &&
+                       this.today.getMonth() === this.currentMonth &&
+                       this.today.getFullYear() === this.currentYear;
+            },
+
+            selectDate(day) {
+                if (day.outside) return;
+                this.selected = day.date;
+                this.buildCalendar();
+                if (typeof this.selectHandler === 'function') this.selectHandler(this.selected);
+                $dispatch('calendar-select', { date: this.selected });
+            },
+
+            prevMonth() {
+                if (this.currentMonth === 0) {
+                    this.currentMonth = 11;
+                    this.currentYear--;
+                } else {
+                    this.currentMonth--;
+                }
+                this.buildCalendar();
+            },
+
+            nextMonth() {
+                if (this.currentMonth === 11) {
+                    this.currentMonth = 0;
+                    this.currentYear++;
+                } else {
+                    this.currentMonth++;
+                }
+                this.buildCalendar();
+            },
+
+            goToYear(year) {
+                this.currentYear = parseInt(year);
+                this.buildCalendar();
+            },
+
+            getYearOptions() {
+                const years = [];
+                for (let i = this.currentYear - 10; i <= this.currentYear + 10; i++) {
+                    years.push(i);
+                }
+                return years;
+            }
+        } ```@
+    >
+        @* Month/Year header with navigation *@
+        <div class="flex items-center justify-between mb-4">
+            <button
+                type="button"
+                @@click="prevMonth()"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground h-7 w-7"
+                aria-label="Previous month"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+
+            <div class="flex items-center gap-1">
+                <span class="text-sm font-medium" x-text="months[currentMonth]"></span>
+                <select
+                    @@change="goToYear($event.target.value)"
+                    class="text-sm font-medium bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer hover:text-accent-foreground"
+                    :value="currentYear"
+                >
+                    <template x-for="year in getYearOptions()" :key="year">
+                        <option :value="year" x-text="year" :selected="year === currentYear"></option>
+                    </template>
+                </select>
+            </div>
+
+            <button
+                type="button"
+                @@click="nextMonth()"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground h-7 w-7"
+                aria-label="Next month"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        @* Day of week headers *@
+        <div class="grid grid-cols-7 gap-1 mb-1">
+            <template x-for="weekday in weekdays" :key="weekday">
+                <div class="text-center text-xs font-medium text-muted-foreground h-8 flex items-center justify-center" x-text="weekday"></div>
+            </template>
+        </div>
+
+        @* Calendar grid *@
+        <div class="grid grid-cols-7 gap-1" role="grid">
+            <template x-for="(day, index) in days" :key="index">
+                <button
+                    type="button"
+                    @@click="selectDate(day)"
+                    class="h-8 w-8 flex items-center justify-center text-sm rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    :class="{
+                        'bg-primary text-primary-foreground hover:bg-primary/90': day.selected,
+                        'bg-accent text-accent-foreground': day.today && !day.selected,
+                        'text-muted-foreground/50': day.outside,
+                        'hover:bg-accent hover:text-accent-foreground': !day.selected && !day.today && !day.outside
+                    }"
+                    :disabled="day.outside"
+                    :aria-selected="day.selected"
+                    :aria-current="day.today ? 'date' : null"
+                    x-text="day.day"
+                ></button>
+            </template>
+        </div>
+    </div>
+}
+
+@* Date range selection calendar *@
+@fn range(
+    start: Option<&str> = None,
+    end: Option<&str> = None,
+    on_select: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    @let initial_start = start.unwrap_or("")
+    @let initial_end = end.unwrap_or("")
+    @let select_handler = on_select.unwrap_or("null")
+
+    @let container_cls = utils::cn(&["p-3", class.unwrap_or("")])
+
+    <div
+        class="@container_cls"
+        x-data=@```json {
+            rangeStart: '@initial_start',
+            rangeEnd: '@initial_end',
+            selecting: 'start',
+            currentMonth: null,
+            currentYear: null,
+            today: new Date(),
+            selectHandler: @select_handler,
+            weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            days: [],
+
+            init() {
+                if (this.rangeStart) {
+                    const date = new Date(this.rangeStart + 'T00:00:00');
+                    this.currentMonth = date.getMonth();
+                    this.currentYear = date.getFullYear();
+                } else {
+                    this.currentMonth = this.today.getMonth();
+                    this.currentYear = this.today.getFullYear();
+                }
+                this.buildCalendar();
+            },
+
+            buildCalendar() {
+                this.days = [];
+                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+                const prevMonthLastDay = new Date(this.currentYear, this.currentMonth, 0);
+                const startingDay = firstDay.getDay();
+                const totalDays = lastDay.getDate();
+
+                for (let i = startingDay - 1; i >= 0; i--) {
+                    this.days.push({
+                        day: prevMonthLastDay.getDate() - i,
+                        date: null,
+                        outside: true
+                    });
+                }
+
+                for (let day = 1; day <= totalDays; day++) {
+                    const isoDate = this.formatDate(day);
+                    this.days.push({
+                        day,
+                        date: isoDate,
+                        rangeStart: this.rangeStart === isoDate,
+                        rangeEnd: this.rangeEnd === isoDate,
+                        inRange: this.isInRange(isoDate),
+                        today: this.isToday(day),
+                        outside: false
+                    });
+                }
+
+                const remainingCells = 42 - this.days.length;
+                for (let i = 1; i <= remainingCells; i++) {
+                    this.days.push({
+                        day: i,
+                        date: null,
+                        outside: true
+                    });
+                }
+            },
+
+            formatDate(day) {
+                const month = String(this.currentMonth + 1).padStart(2, '0');
+                const d = String(day).padStart(2, '0');
+                return this.currentYear + '-' + month + '-' + d;
+            },
+
+            isToday(day) {
+                return this.today.getDate() === day &&
+                       this.today.getMonth() === this.currentMonth &&
+                       this.today.getFullYear() === this.currentYear;
+            },
+
+            isInRange(isoDate) {
+                if (!this.rangeStart || !this.rangeEnd) return false;
+                return isoDate > this.rangeStart && isoDate < this.rangeEnd;
+            },
+
+            selectDate(day) {
+                if (day.outside) return;
+                const dateStr = day.date;
+
+                if (this.selecting === 'start') {
+                    this.rangeStart = dateStr;
+                    this.rangeEnd = '';
+                    this.selecting = 'end';
+                } else {
+                    if (dateStr < this.rangeStart) {
+                        this.rangeEnd = this.rangeStart;
+                        this.rangeStart = dateStr;
+                    } else {
+                        this.rangeEnd = dateStr;
+                    }
+                    this.selecting = 'start';
+                    if (typeof this.selectHandler === 'function') {
+                        this.selectHandler({ start: this.rangeStart, end: this.rangeEnd });
+                    }
+                    $dispatch('calendar-range-select', { start: this.rangeStart, end: this.rangeEnd });
+                }
+                this.buildCalendar();
+            },
+
+            prevMonth() {
+                if (this.currentMonth === 0) {
+                    this.currentMonth = 11;
+                    this.currentYear--;
+                } else {
+                    this.currentMonth--;
+                }
+                this.buildCalendar();
+            },
+
+            nextMonth() {
+                if (this.currentMonth === 11) {
+                    this.currentMonth = 0;
+                    this.currentYear++;
+                } else {
+                    this.currentMonth++;
+                }
+                this.buildCalendar();
+            },
+
+            goToYear(year) {
+                this.currentYear = parseInt(year);
+                this.buildCalendar();
+            },
+
+            getYearOptions() {
+                const years = [];
+                for (let i = this.currentYear - 10; i <= this.currentYear + 10; i++) {
+                    years.push(i);
+                }
+                return years;
+            }
+        } ```@
+    >
+        @* Month/Year header with navigation *@
+        <div class="flex items-center justify-between mb-4">
+            <button
+                type="button"
+                @@click="prevMonth()"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground h-7 w-7"
+                aria-label="Previous month"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+            </button>
+
+            <div class="flex items-center gap-1">
+                <span class="text-sm font-medium" x-text="months[currentMonth]"></span>
+                <select
+                    @@change="goToYear($event.target.value)"
+                    class="text-sm font-medium bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer hover:text-accent-foreground"
+                    :value="currentYear"
+                >
+                    <template x-for="year in getYearOptions()" :key="year">
+                        <option :value="year" x-text="year" :selected="year === currentYear"></option>
+                    </template>
+                </select>
+            </div>
+
+            <button
+                type="button"
+                @@click="nextMonth()"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground h-7 w-7"
+                aria-label="Next month"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        @* Selection mode indicator *@
+        <div class="text-xs text-muted-foreground mb-2 text-center">
+            <span x-text="selecting === 'start' ? 'Select start date' : 'Select end date'"></span>
+        </div>
+
+        @* Day of week headers *@
+        <div class="grid grid-cols-7 gap-1 mb-1">
+            <template x-for="weekday in weekdays" :key="weekday">
+                <div class="text-center text-xs font-medium text-muted-foreground h-8 flex items-center justify-center" x-text="weekday"></div>
+            </template>
+        </div>
+
+        @* Calendar grid *@
+        <div class="grid grid-cols-7 gap-1" role="grid">
+            <template x-for="(day, index) in days" :key="index">
+                <button
+                    type="button"
+                    @@click="selectDate(day)"
+                    class="h-8 w-8 flex items-center justify-center text-sm rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    :class="{
+                        'bg-primary text-primary-foreground hover:bg-primary/90': day.rangeStart || day.rangeEnd,
+                        'bg-primary/20 text-foreground': day.inRange,
+                        'bg-accent text-accent-foreground': day.today && !day.rangeStart && !day.rangeEnd && !day.inRange,
+                        'text-muted-foreground/50': day.outside,
+                        'hover:bg-accent hover:text-accent-foreground': !day.rangeStart && !day.rangeEnd && !day.inRange && !day.today && !day.outside
+                    }"
+                    :disabled="day.outside"
+                    :aria-selected="day.rangeStart || day.rangeEnd || day.inRange"
+                    :aria-current="day.today ? 'date' : null"
+                    x-text="day.day"
+                ></button>
+            </template>
+        </div>
+    </div>
+}
+
+@* Standalone display calendar (readonly) *@
+@fn display(
+    month: u32,
+    year: u32,
+    class: Option<&str> = None,
+) {
+    @let container_cls = utils::cn(&["p-3", class.unwrap_or("")])
+
+    <div
+        class="@container_cls"
+        x-data=@```json {
+            currentMonth: @(month - 1),
+            currentYear: @year,
+            today: new Date(),
+            weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            days: [],
+
+            init() {
+                this.buildCalendar();
+            },
+
+            buildCalendar() {
+                this.days = [];
+                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+                const prevMonthLastDay = new Date(this.currentYear, this.currentMonth, 0);
+                const startingDay = firstDay.getDay();
+                const totalDays = lastDay.getDate();
+
+                for (let i = startingDay - 1; i >= 0; i--) {
+                    this.days.push({
+                        day: prevMonthLastDay.getDate() - i,
+                        outside: true
+                    });
+                }
+
+                for (let day = 1; day <= totalDays; day++) {
+                    this.days.push({
+                        day,
+                        today: this.isToday(day),
+                        outside: false
+                    });
+                }
+
+                const remainingCells = 42 - this.days.length;
+                for (let i = 1; i <= remainingCells; i++) {
+                    this.days.push({
+                        day: i,
+                        outside: true
+                    });
+                }
+            },
+
+            isToday(day) {
+                return this.today.getDate() === day &&
+                       this.today.getMonth() === this.currentMonth &&
+                       this.today.getFullYear() === this.currentYear;
+            }
+        } ```@
+    >
+        @* Month/Year header *@
+        <div class="flex items-center justify-center mb-4">
+            <span class="text-sm font-medium" x-text="months[currentMonth] + ' ' + currentYear"></span>
+        </div>
+
+        @* Day of week headers *@
+        <div class="grid grid-cols-7 gap-1 mb-1">
+            <template x-for="weekday in weekdays" :key="weekday">
+                <div class="text-center text-xs font-medium text-muted-foreground h-8 flex items-center justify-center" x-text="weekday"></div>
+            </template>
+        </div>
+
+        @* Calendar grid *@
+        <div class="grid grid-cols-7 gap-1">
+            <template x-for="(day, index) in days" :key="index">
+                <div
+                    class="h-8 w-8 flex items-center justify-center text-sm rounded-md"
+                    :class="{
+                        'bg-accent text-accent-foreground': day.today,
+                        'text-muted-foreground/50': day.outside
+                    }"
+                    :aria-current="day.today ? 'date' : null"
+                    x-text="day.day"
+                ></div>
+            </template>
+        </div>
+    </div>
+}
+
+@* Simple calendar shorthand with no initial selection *@
+@fn simple(on_select: Option<&str> = None, class: Option<&str> = None) {
+    <@apply selected=None on_select=@on_select class=@class />
+}

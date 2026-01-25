@@ -1,0 +1,191 @@
+@*
+ * Navigation Menu component
+ * Horizontal navigation bar with dropdown menus for nested items
+ * Uses Alpine.js for hover-based dropdown behavior
+ *
+ * Usage:
+ *   @import components/navigation-menu.wtz as nav
+ *
+ *   Build manually with components:
+ *   <@nav::root>
+ *       <@nav::list>
+ *           <@nav::item label="Home" href=Some("/") active=false />
+ *           <@nav::dropdown label="Products">
+ *               <@nav::dropdown_item href="/products/widgets">Widgets</@>
+ *               <@nav::dropdown_item href="/products/gadgets">Gadgets</@>
+ *           </@>
+ *           <@nav::item label="About" href=Some("/about") />
+ *       </@>
+ *   </@>
+ *@
+
+@import lib/utils.wtz as utils
+
+@struct NavMenuItem {
+    label: String,
+    href: Option<String>,
+    children: Option<Vec<NavMenuItem>>,
+}
+
+@* Root navigation container *@
+@fn root(
+    class: Option<&str> = None,
+    content: @(),
+) {
+    <nav
+        class=@utils::cn(&["relative z-10", class.unwrap_or("")])
+        aria-label="Main navigation"
+    >
+        @content()
+    </nav>
+}
+
+@* Navigation list container *@
+@fn list(
+    class: Option<&str> = None,
+    content: @(),
+) {
+    <ul class=@utils::cn(&["flex items-center gap-1", class.unwrap_or("")]) role="menubar">
+        @content()
+    </ul>
+}
+
+@* Single navigation item (no dropdown) *@
+@fn item(
+    label: &str,
+    href: Option<&str> = None,
+    active: bool = false,
+    class: Option<&str> = None,
+) {
+    @let base_cls = "inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+    @let active_cls = utils::class_if(active, "bg-accent/50 text-accent-foreground")
+    @let item_cls = utils::cn(&[base_cls, active_cls, class.unwrap_or("")])
+
+    <li role="none">
+        @if let Some(url) = href {
+            <a
+                href=@url
+                class="@item_cls"
+                role="menuitem"
+                @if active { aria-current="page" }
+            >
+                @label
+            </a>
+        } else {
+            <span class="@item_cls" role="menuitem">
+                @label
+            </span>
+        }
+    </li>
+}
+
+@* Dropdown menu trigger with hoverable content *@
+@fn dropdown(
+    label: &str,
+    active: bool = false,
+    class: Option<&str> = None,
+    content: @(),
+) {
+    @let trigger_cls = "inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 group"
+    @let active_cls = utils::class_if(active, "bg-accent/50 text-accent-foreground")
+    @let btn_cls = utils::cn(&[trigger_cls, active_cls, class.unwrap_or("")])
+
+    <li
+        role="none"
+        class="relative"
+        x-data="{ open: false }"
+        @@mouseenter="open = true"
+        @@mouseleave="open = false"
+    >
+        <button
+            type="button"
+            class="@btn_cls"
+            role="menuitem"
+            aria-haspopup="true"
+            :aria-expanded="open"
+            @@focus="open = true"
+            @@blur="setTimeout(() => { if (!$el.parentElement.matches(':hover')) open = false }, 100)"
+            @@keydown.escape="open = false"
+            @@keydown.arrow-down.prevent="open = true"
+        >
+            @label
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="ml-1 h-3 w-3 transition-transform duration-200 group-hover:rotate-180"
+                :class="open ? 'rotate-180' : ''"
+                aria-hidden="true"
+            >
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </button>
+
+        <div
+            x-show="open"
+            x-cloak
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-1"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-1"
+            class="absolute left-0 top-full mt-1.5 min-w-[12rem] rounded-md border bg-popover p-1 text-popover-foreground shadow-lg"
+            role="menu"
+            aria-orientation="vertical"
+        >
+            @content()
+        </div>
+    </li>
+}
+
+@* Item within a dropdown menu *@
+@fn dropdown_item(
+    href: &str,
+    class: Option<&str> = None,
+    content: @(),
+) {
+    @let item_cls = utils::cn(&["block w-full select-none rounded-sm px-3 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground", class.unwrap_or("")])
+
+    <a
+        href="@href"
+        class="@item_cls"
+        role="menuitem"
+    >
+        @content()
+    </a>
+}
+
+@* Separator within a dropdown menu *@
+@fn dropdown_separator(class: Option<&str> = None) {
+    <div
+        class=@utils::cn(&["-mx-1 my-1 h-px bg-border", class.unwrap_or("")])
+        role="separator"
+    ></div>
+}
+
+@* Label/heading within a dropdown menu (non-interactive) *@
+@fn dropdown_label(
+    class: Option<&str> = None,
+    content: @(),
+) {
+    <div class=@utils::cn(&["px-3 py-2 text-xs font-semibold text-muted-foreground", class.unwrap_or("")])>
+        @content()
+    </div>
+}
+
+@* Viewport indicator that shows below active dropdown (optional visual enhancement) *@
+@fn viewport_indicator(class: Option<&str> = None) {
+    <div
+        class=@utils::cn(&["absolute left-0 top-full flex justify-center", class.unwrap_or("")])
+        style="perspective: 2000px;"
+    >
+        <div class="relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full origin-[top_center] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg transition-[width,height] duration-300"></div>
+    </div>
+}

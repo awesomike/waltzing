@@ -39,10 +39,12 @@
 
     @let error_cls = @if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
 
+    @let classes = &[@base, @error_cls, @class.unwrap_or("")]
+
     <input
         type="@type_str"
         name="@name"
-        class="@utils::cn(&[@base, @error_cls, @class.unwrap_or("")])"
+        class="@utils::cn(@classes)"
         @if let Some(v) = value { value="@v" }
         @if let Some(p) = placeholder { placeholder="@p" }
         @if disabled { disabled }

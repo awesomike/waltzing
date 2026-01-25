@@ -6,13 +6,16 @@
  *   @import ui/components/breadcrumb.wtz as breadcrumb
  *
  *   @let items = vec![
- *       breadcrumb::Item { label: "Home".to_string(), href: Some("/".to_string()) },
- *       breadcrumb::Item { label: "Products".to_string(), href: Some("/products".to_string()) },
- *       breadcrumb::Item { label: "Widgets".to_string(), href: None },
+ *       breadcrumb::BreadcrumbItem { label: "Home".to_string(), href: Some("/".to_string()) },
+ *       breadcrumb::BreadcrumbItem { label: "Products".to_string(), href: Some("/products".to_string()) },
+ *       breadcrumb::BreadcrumbItem { label: "Widgets".to_string(), href: None },
  *   ]
  *   <@breadcrumb::apply items=&items />
  *
- *   @* Or build manually with components *@
+ *   With custom separator:
+ *   <@breadcrumb::apply items=&items separator=Some(">") />
+ *
+ *   Or build manually with components:
  *   <@breadcrumb::root>
  *       <@breadcrumb::list>
  *           <@breadcrumb::item><@breadcrumb::link href="/">Home</@></@>
@@ -24,19 +27,19 @@
 
 @import lib/utils.wtz as utils
 
-@struct Item {
+@struct BreadcrumbItem {
     label: String,
     href: Option<String>,
 }
 
 @* Root breadcrumb container *@
 @fn root(
-    class: Option<&str>,
+    class: Option<&str> = None,
     content: @(),
 ) {
     <nav
         aria-label="Breadcrumb"
-        class="@class.unwrap_or("")"
+        class=@class.unwrap_or("")
     >
         @content()
     </nav>
@@ -44,20 +47,20 @@
 
 @* Breadcrumb list container *@
 @fn list(
-    class: Option<&str>,
+    class: Option<&str> = None,
     content: @(),
 ) {
-    <ol class="@utils::cn(&["flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5", @class.unwrap_or("")])">
+    <ol class=@utils::cn(&["flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5", class.unwrap_or("")])>
         @content()
     </ol>
 }
 
 @* Individual breadcrumb item wrapper *@
 @fn item(
-    class: Option<&str>,
+    class: Option<&str> = None,
     content: @(),
 ) {
-    <li class="@utils::cn(&["inline-flex items-center gap-1.5", @class.unwrap_or("")])">
+    <li class=@utils::cn(&["inline-flex items-center gap-1.5", class.unwrap_or("")])>
         @content()
     </li>
 }
@@ -65,12 +68,12 @@
 @* Breadcrumb link (clickable item) *@
 @fn link(
     href: &str,
-    class: Option<&str>,
+    class: Option<&str> = None,
     content: @(),
 ) {
     <a
-        href="@href"
-        class="@utils::cn(&["transition-colors hover:text-foreground", @class.unwrap_or("")])"
+        href=@href
+        class=@utils::cn(&["transition-colors hover:text-foreground", class.unwrap_or("")])
     >
         @content()
     </a>
@@ -78,42 +81,42 @@
 
 @* Current page indicator (non-clickable, last item) *@
 @fn page(
-    class: Option<&str>,
+    class: Option<&str> = None,
     content: @(),
 ) {
     <span
         role="link"
         aria-disabled="true"
         aria-current="page"
-        class="@utils::cn(&["font-normal text-foreground", @class.unwrap_or("")])"
+        class=@utils::cn(&["font-normal text-foreground", class.unwrap_or("")])
     >
         @content()
     </span>
 }
 
-@* Separator between breadcrumb items (chevron icon) *@
+@* Separator between breadcrumb items (customizable, default: /) *@
 @fn separator(
-    class: Option<&str>,
+    text: Option<&str> = None,
+    class: Option<&str> = None,
 ) {
+    @let sep = text.unwrap_or("/")
     <li
         role="presentation"
         aria-hidden="true"
-        class="@utils::cn(&["[&>svg]:size-3.5", @class.unwrap_or("")])"
+        class=@utils::cn(&["text-muted-foreground", class.unwrap_or("")])
     >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m9 18 6-6-6-6"/>
-        </svg>
+        @sep
     </li>
 }
 
 @* Ellipsis for collapsed breadcrumb items *@
 @fn ellipsis(
-    class: Option<&str>,
+    class: Option<&str> = None,
 ) {
     <span
         role="presentation"
         aria-hidden="true"
-        class="@utils::cn(&["flex h-9 w-9 items-center justify-center", @class.unwrap_or("")])"
+        class=@utils::cn(&["flex h-9 w-9 items-center justify-center", class.unwrap_or("")])
     >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
             <circle cx="12" cy="12" r="1"/>
@@ -126,20 +129,21 @@
 
 @* High-level apply function that renders a list of items *@
 @fn apply(
-    items: &[Item],
-    class: Option<&str>,
+    items: &[BreadcrumbItem],
+    separator: Option<&str> = None,
+    class: Option<&str> = None,
 ) {
     <@root class=@class>
-        <@list class=None>
+        <@list>
             @for (i, item) in items.iter().enumerate() {
                 @if i > 0 {
-                    <@separator class=None />
+                    <@separator text=@separator />
                 }
-                <@item class=None>
+                <@item>
                     @if item.href.is_some() {
-                        <@link href=@item.href.as_ref().unwrap() class=None>@item.label</@>
+                        <@link href=@item.href.as_ref().unwrap()>@item.label</@>
                     } @else {
-                        <@page class=None>@item.label</@>
+                        <@page>@item.label</@>
                     }
                 </@>
             }

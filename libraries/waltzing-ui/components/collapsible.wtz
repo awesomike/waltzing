@@ -1,36 +1,45 @@
 @*
  * Collapsible component
- * Simple show/hide section using Alpine.js collapse plugin
+ * Simple show/hide section with smooth collapse animation
  *
- * Dependencies: alpinejs/collapse
+ * Dependencies: @alpinejs/collapse
  *
- * Functions:
- *   - apply: Full collapsible with trigger and content slots
- *   - root: Collapsible container for composition
- *   - trigger: Trigger element (button)
- *   - content: Collapsible content area
+ * @example
+ * @import components/collapsible.wtz as collapsible
+ *
+ * <@collapsible
+ *     open=false
+ *     trigger=@{ <span>Toggle content</span> }
+ *     content=@{ <p>This content can be shown or hidden.</p> }
+ * />
+ *
+ * // With external state control (controlled version)
+ * <div x-data="{ isOpen: true }">
+ *     <button x-on:click="isOpen = !isOpen">External Toggle</button>
+ *     <@collapsible::controlled
+ *         open_var="isOpen"
+ *         trigger=@{ <span>Show/Hide</span> }
+ *         content=@{ <p>Controlled content.</p> }
+ *     />
+ * </div>
  *@
-
-@import lib/utils.wtz as utils
 
 @* Full collapsible with trigger and content *@
 @fn apply(
-    default_open: bool,
+    open: bool,
     trigger: @(),
     content: @(),
-    class: Option<&str>,
 ) {
-    <div
-        x-data=@```json { open: @default_open } ```@
-        class="@utils::cn(&["", @class.unwrap_or("")])"
-    >
+    @let open_str = if open { "true" } else { "false" }
+
+    <div x-data=@format!("{{ open: {} }}", open_str)>
         <button
             type="button"
-            @click="open = !open"
+            @@click="open = !open"
             :aria-expanded="open"
             class="flex items-center gap-2"
         >
-            @trigger()
+            @trigger(@out)
         </button>
 
         <div
@@ -38,51 +47,33 @@
             x-collapse
             x-cloak
         >
-            @content()
+            @content(@out)
         </div>
     </div>
 }
 
-@* Collapsible root container for composition *@
-@fn root(
-    default_open: bool,
-    class: Option<&str>,
+@* Controlled collapsible (external state) *@
+@fn controlled(
+    open_var: &str,
+    trigger: @(),
     content: @(),
 ) {
-    <div
-        x-data=@```json { open: @default_open } ```@
-        class="@utils::cn(&["", @class.unwrap_or("")])"
-    >
-        @content()
-    </div>
-}
+    <div>
+        <button
+            type="button"
+            @@click=@format!("{} = !{}", open_var, open_var)
+            :aria-expanded=@open_var
+            class="flex items-center gap-2"
+        >
+            @trigger(@out)
+        </button>
 
-@* Collapsible trigger button *@
-@fn trigger(
-    class: Option<&str>,
-    content: @(),
-) {
-    <button
-        type="button"
-        @click="open = !open"
-        :aria-expanded="open"
-        class="@utils::cn(&["flex items-center", @class.unwrap_or("")])"
-    >
-        @content()
-    </button>
-}
-
-@* Collapsible content area *@
-@fn content(
-    class: Option<&str>,
-    content: @(),
-) {
-    <div
-        x-show="open"
-        x-collapse
-        x-cloak
-        class="@utils::cn(&["", @class.unwrap_or("")])"
-    >
-        @content()
+        <div
+            x-show=@open_var
+            x-collapse
+            x-cloak
+        >
+            @content(@out)
+        </div>
     </div>
 }

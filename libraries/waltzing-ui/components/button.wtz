@@ -46,8 +46,10 @@
         Size::Icon => { "h-9 w-9" }
     }
 
+    @let classes = &[@base, @variant_cls, @size_cls, @class.unwrap_or("")]
+
     <button
-        class="@utils::cn(&[@base, @variant_cls, @size_cls, @class.unwrap_or("")])"
+        class="@utils::cn(@classes)"
         @if disabled { disabled }
     >
         @content()

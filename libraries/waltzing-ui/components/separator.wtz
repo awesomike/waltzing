@@ -2,15 +2,19 @@
  * Separator component
  * Visual divider between sections
  *
- * Usage:
- *   @import ui/components/separator.wtz as separator
+ * @example
+ * @import components/separator.wtz as separator
  *
- *   <@separator::horizontal />
- *   <@separator::vertical />
- *   <@separator::apply orientation=separator::Orientation::Horizontal class=None />
+ * @* Horizontal separator (default) *@
+ * <@separator />
+ * <@separator::horizontal />
+ *
+ * @* Vertical separator *@
+ * <@separator::vertical />
+ *
+ * @* With custom class *@
+ * <@separator class=Some("my-4") />
  *@
-
-@import lib/utils.wtz as utils
 
 @enum Orientation {
     Horizontal,
@@ -18,11 +22,10 @@
 }
 
 @fn apply(
-    orientation: Orientation,
-    class: Option<&str>,
+    orientation: Orientation = Orientation::Horizontal,
+    class: Option<&str> = None,
 ) {
     @let base = "shrink-0 bg-border"
-    @let cls = @class.unwrap_or("")
 
     @let orientation_cls = @match orientation {
         Orientation::Horizontal => { "h-[1px] w-full" }
@@ -36,17 +39,17 @@
 
     <div
         role="separator"
-        aria-orientation="@aria_orientation"
-        class="@utils::cn(&[@base, @orientation_cls, @cls])"
+        aria-orientation=@aria_orientation
+        class=@cn(&[base, orientation_cls, class.unwrap_or("")])
     ></div>
 }
 
 @* Horizontal separator (default) *@
-@fn horizontal() {
-    <@apply orientation=Orientation::Horizontal class=None />
+@fn horizontal(class: Option<&str> = None) {
+    <@apply orientation=Orientation::Horizontal class=@class />
 }
 
 @* Vertical separator *@
-@fn vertical() {
-    <@apply orientation=Orientation::Vertical class=None />
+@fn vertical(class: Option<&str> = None) {
+    <@apply orientation=Orientation::Vertical class=@class />
 }

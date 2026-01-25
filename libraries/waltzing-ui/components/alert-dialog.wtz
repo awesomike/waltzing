@@ -1,0 +1,174 @@
+@*
+ * Alert Dialog component
+ * Modal confirmation dialog for destructive actions
+ * Requires: @alpinejs/focus plugin
+ *
+ * Usage:
+ * ```
+ * @import ui/components/alert-dialog.wtz as alert_dialog
+ *
+ * <@alert_dialog::apply
+ *     title="Are you sure?"
+ *     description="This action cannot be undone."
+ *     cancel_label="Cancel"
+ *     confirm_label="Delete"
+ *     destructive=true
+ *     on_confirm=Some("deleteItem()")
+ * >
+ *     <button>Delete Item</button>
+ * </@>
+ * ```
+ *@
+
+@import lib/utils.wtz as utils
+
+@fn apply(
+    title: &str,
+    description: &str,
+    cancel_label: &str,
+    confirm_label: &str,
+    destructive: bool,
+    trigger: @(),
+    on_confirm: Option<&str>,
+) {
+    @let confirm_base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2"
+    @let confirm_variant = @(if destructive { "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90" } else { "bg-primary text-primary-foreground shadow hover:bg-primary/90" })
+    @let confirm_classes = &[@confirm_base, @confirm_variant]
+
+    <div x-data="{ open: false }">
+        @* Trigger *@
+        <div @click="open = true">
+            @trigger()
+        </div>
+
+        @* Alert Dialog *@
+        <template x-teleport="body">
+            <div
+                x-show="open"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-50"
+                style="display: none;"
+            >
+                @* Backdrop - no click to close for alert dialogs *@
+                <div
+                    class="fixed inset-0 bg-black/80"
+                    aria-hidden="true"
+                ></div>
+
+                @* Content *@
+                <div
+                    class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg"
+                    x-trap.inert.noscroll="open"
+                    @keydown.escape.window="open = false"
+                    role="alertdialog"
+                    aria-modal="true"
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    @* Header *@
+                    <div class="flex flex-col space-y-2 text-center sm:text-left">
+                        <h2 id="alert-dialog-title" class="text-lg font-semibold">
+                            @title
+                        </h2>
+                        <p id="alert-dialog-description" class="text-sm text-muted-foreground">
+                            @description
+                        </p>
+                    </div>
+
+                    @* Footer *@
+                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                        <button
+                            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 mt-2 sm:mt-0"
+                            @click="open = false"
+                        >
+                            @cancel_label
+                        </button>
+                        <button
+                            class="@utils::cn(@confirm_classes)"
+                            @if let Some(handler) = on_confirm {
+                                @click="@handler; open = false"
+                            }
+                            @if on_confirm.is_none() {
+                                @click="open = false"
+                            }
+                        >
+                            @confirm_label
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+}
+
+@* Controlled alert dialog (external state) *@
+@fn controlled(
+    open_var: &str,
+    title: &str,
+    description: &str,
+    cancel_label: &str,
+    confirm_label: &str,
+    destructive: bool,
+    on_confirm: Option<&str>,
+) {
+    @let confirm_base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2"
+    @let confirm_variant = @(if destructive { "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90" } else { "bg-primary text-primary-foreground shadow hover:bg-primary/90" })
+    @let confirm_classes = &[@confirm_base, @confirm_variant]
+
+    <template x-teleport="body">
+        <div
+            x-show="@open_var"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50"
+            style="display: none;"
+        >
+            <div
+                class="fixed inset-0 bg-black/80"
+                aria-hidden="true"
+            ></div>
+
+            <div
+                class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg"
+                x-trap.inert.noscroll="@open_var"
+                @keydown.escape.window="@open_var = false"
+                role="alertdialog"
+                aria-modal="true"
+            >
+                <div class="flex flex-col space-y-2 text-center sm:text-left">
+                    <h2 class="text-lg font-semibold">@title</h2>
+                    <p class="text-sm text-muted-foreground">@description</p>
+                </div>
+
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                    <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 mt-2 sm:mt-0"
+                        @click="@open_var = false"
+                    >
+                        @cancel_label
+                    </button>
+                    <button
+                        class="@utils::cn(@confirm_classes)"
+                        @if let Some(handler) = on_confirm {
+                            @click="@handler; @open_var = false"
+                        }
+                        @if on_confirm.is_none() {
+                            @click="@open_var = false"
+                        }
+                    >
+                        @confirm_label
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+}
