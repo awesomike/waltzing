@@ -1470,11 +1470,48 @@ fn get_component_preview(component: &str) -> &'static str {
                 dateOpen: false,
                 timeOpen: false,
                 selectedDate: '',
-                selectedTime: '',
+                hour: 9,
+                minute: 0,
+                second: 0,
+                period: 'AM',
+                use12h: true,
+                showSeconds: false,
                 datePos: { x: 0, y: 0 },
                 timePos: { x: 0, y: 0 },
                 dateFlipTop: false,
                 timeFlipTop: false,
+                get maxHour() { return this.use12h ? 12 : 23; },
+                get minHour() { return this.use12h ? 1 : 0; },
+                get displayHour() { return this.hour.toString().padStart(2, '0'); },
+                get displayMinute() { return this.minute.toString().padStart(2, '0'); },
+                get displaySecond() { return this.second.toString().padStart(2, '0'); },
+                get displayTime() {
+                    let t = this.displayHour + ':' + this.displayMinute;
+                    if (this.showSeconds) t += ':' + this.displaySecond;
+                    if (this.use12h) t += ' ' + this.period;
+                    return t;
+                },
+                toggle12h() {
+                    const was12h = this.use12h;
+                    this.use12h = !this.use12h;
+                    if (this.use12h && !was12h) {
+                        this.period = this.hour >= 12 ? 'PM' : 'AM';
+                        this.hour = this.hour % 12;
+                        if (this.hour === 0) this.hour = 12;
+                    } else if (!this.use12h && was12h) {
+                        let h = this.hour % 12;
+                        if (this.period === 'PM') h += 12;
+                        if (h === 24) h = 0;
+                        this.hour = h;
+                    }
+                },
+                incHour() { this.hour = this.hour >= this.maxHour ? this.minHour : this.hour + 1; },
+                decHour() { this.hour = this.hour <= this.minHour ? this.maxHour : this.hour - 1; },
+                incMinute() { this.minute = this.minute >= 59 ? 0 : this.minute + 1; },
+                decMinute() { this.minute = this.minute <= 0 ? 59 : this.minute - 1; },
+                incSecond() { this.second = this.second >= 59 ? 0 : this.second + 1; },
+                decSecond() { this.second = this.second <= 0 ? 59 : this.second - 1; },
+                togglePeriod() { this.period = this.period === 'AM' ? 'PM' : 'AM'; },
                 updateDatePos() {
                     const trigger = this.$refs.dateBtn;
                     if (!trigger) return;
@@ -1490,7 +1527,7 @@ fn get_component_preview(component: &str) -> &'static str {
                     const trigger = this.$refs.timeBtn;
                     if (!trigger) return;
                     const rect = trigger.getBoundingClientRect();
-                    const height = 150;
+                    const height = 200;
                     const spaceBelow = window.innerHeight - rect.bottom;
                     const spaceAbove = rect.top;
                     this.timeFlipTop = spaceBelow < height && spaceAbove > spaceBelow;
@@ -1537,21 +1574,45 @@ fn get_component_preview(component: &str) -> &'static str {
                     </template>
                 </div>
                 <div>
-                    <button x-ref="timeBtn" @click="timeOpen = !timeOpen; dateOpen = false; $nextTick(() => updateTimePos())" class="flex h-9 w-[100px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
-                        <span :class="selectedTime ? '' : 'text-muted-foreground'" x-text="selectedTime || 'Time'"></span>
+                    <button x-ref="timeBtn" @click="timeOpen = !timeOpen; dateOpen = false; $nextTick(() => updateTimePos())" class="flex h-9 w-[140px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+                        <span x-text="displayTime"></span>
                         <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </button>
                     <template x-teleport="body">
-                        <div x-show="timeOpen" @click.away="timeOpen = false" x-cloak class="fixed z-[9999] p-2 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${timePos.x}px; ${timeFlipTop ? 'bottom: ' + (window.innerHeight - timePos.y + 8) + 'px' : 'top: ' + (timePos.y + 8) + 'px'}`">
-                            <div class="grid grid-cols-4 gap-1 text-sm">
-                                <button type="button" @click="selectedTime = '9:00 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">9:00</button>
-                                <button type="button" @click="selectedTime = '9:30 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">9:30</button>
-                                <button type="button" @click="selectedTime = '10:00 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">10:00</button>
-                                <button type="button" @click="selectedTime = '10:30 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">10:30</button>
-                                <button type="button" @click="selectedTime = '11:00 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">11:00</button>
-                                <button type="button" @click="selectedTime = '11:30 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">11:30</button>
-                                <button type="button" @click="selectedTime = '12:00 PM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">12:00</button>
-                                <button type="button" @click="selectedTime = '12:30 PM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">12:30</button>
+                        <div x-show="timeOpen" @click.away="timeOpen = false" x-cloak class="fixed z-[9999] p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${timePos.x}px; ${timeFlipTop ? 'bottom: ' + (window.innerHeight - timePos.y + 8) + 'px' : 'top: ' + (timePos.y + 8) + 'px'}`">
+                            <div class="flex items-center justify-between mb-3 gap-2">
+                                <button type="button" @click="toggle12h()" class="text-xs px-2 py-1 rounded border border-input hover:bg-accent" x-text="use12h ? '12h' : '24h'"></button>
+                                <button type="button" @click="showSeconds = !showSeconds" class="text-xs px-2 py-1 rounded border border-input hover:bg-accent" x-text="showSeconds ? 'HH:MM:SS' : 'HH:MM'"></button>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <div class="flex flex-col items-center">
+                                    <button type="button" @click="incHour()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
+                                    <span class="text-lg font-mono w-10 text-center" x-text="displayHour"></span>
+                                    <button type="button" @click="decHour()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                                </div>
+                                <span class="text-lg font-bold">:</span>
+                                <div class="flex flex-col items-center">
+                                    <button type="button" @click="incMinute()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
+                                    <span class="text-lg font-mono w-10 text-center" x-text="displayMinute"></span>
+                                    <button type="button" @click="decMinute()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                                </div>
+                                <template x-if="showSeconds">
+                                    <span class="text-lg font-bold">:</span>
+                                </template>
+                                <template x-if="showSeconds">
+                                    <div class="flex flex-col items-center">
+                                        <button type="button" @click="incSecond()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
+                                        <span class="text-lg font-mono w-10 text-center" x-text="displaySecond"></span>
+                                        <button type="button" @click="decSecond()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                                    </div>
+                                </template>
+                                <template x-if="use12h">
+                                    <div class="flex flex-col items-center ml-2">
+                                        <button type="button" @click="togglePeriod()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
+                                        <span class="text-lg font-mono w-10 text-center" x-text="period"></span>
+                                        <button type="button" @click="togglePeriod()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </template>
@@ -1963,17 +2024,112 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "time-picker" => r#"
-            <div class="flex items-center gap-2">
-                <select class="h-9 rounded-md border border-input bg-transparent px-2 text-sm">
-                    <option>09</option><option>10</option><option>11</option><option>12</option>
-                </select>
-                <span>:</span>
-                <select class="h-9 rounded-md border border-input bg-transparent px-2 text-sm">
-                    <option>00</option><option>15</option><option>30</option><option>45</option>
-                </select>
-                <select class="h-9 rounded-md border border-input bg-transparent px-2 text-sm">
-                    <option>AM</option><option>PM</option>
-                </select>
+            <div x-data="{
+                open: false,
+                hour: 9,
+                minute: 0,
+                second: 0,
+                period: 'AM',
+                use12h: true,
+                showSeconds: false,
+                pos: { x: 0, y: 0 },
+                flipTop: false,
+                get maxHour() { return this.use12h ? 12 : 23; },
+                get minHour() { return this.use12h ? 1 : 0; },
+                get displayHour() { return this.hour.toString().padStart(2, '0'); },
+                get displayMinute() { return this.minute.toString().padStart(2, '0'); },
+                get displaySecond() { return this.second.toString().padStart(2, '0'); },
+                get displayTime() {
+                    let t = this.displayHour + ':' + this.displayMinute;
+                    if (this.showSeconds) t += ':' + this.displaySecond;
+                    if (this.use12h) t += ' ' + this.period;
+                    return t;
+                },
+                toggle12h() {
+                    const was12h = this.use12h;
+                    this.use12h = !this.use12h;
+                    if (this.use12h && !was12h) {
+                        this.period = this.hour >= 12 ? 'PM' : 'AM';
+                        this.hour = this.hour % 12;
+                        if (this.hour === 0) this.hour = 12;
+                    } else if (!this.use12h && was12h) {
+                        let h = this.hour % 12;
+                        if (this.period === 'PM') h += 12;
+                        if (h === 24) h = 0;
+                        this.hour = h;
+                    }
+                },
+                incHour() { this.hour = this.hour >= this.maxHour ? this.minHour : this.hour + 1; },
+                decHour() { this.hour = this.hour <= this.minHour ? this.maxHour : this.hour - 1; },
+                incMinute() { this.minute = this.minute >= 59 ? 0 : this.minute + 1; },
+                decMinute() { this.minute = this.minute <= 0 ? 59 : this.minute - 1; },
+                incSecond() { this.second = this.second >= 59 ? 0 : this.second + 1; },
+                decSecond() { this.second = this.second <= 0 ? 59 : this.second - 1; },
+                togglePeriod() { this.period = this.period === 'AM' ? 'PM' : 'AM'; },
+                updatePos() {
+                    const trigger = this.$refs.trigger;
+                    if (!trigger) return;
+                    const rect = trigger.getBoundingClientRect();
+                    const height = 200;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    this.flipTop = spaceBelow < height && spaceAbove > spaceBelow;
+                    this.pos.x = rect.left;
+                    this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                },
+                onScroll() { if (this.open) this.updatePos(); },
+                init() {
+                    this._scrollHandler = () => this.onScroll();
+                    window.addEventListener('scroll', this._scrollHandler, true);
+                    window.addEventListener('resize', this._scrollHandler);
+                },
+                destroy() {
+                    window.removeEventListener('scroll', this._scrollHandler, true);
+                    window.removeEventListener('resize', this._scrollHandler);
+                }
+            }" x-init="init()" @destroy="destroy()" class="inline-block">
+                <button x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())" class="flex h-9 w-[140px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+                    <span x-text="displayTime"></span>
+                    <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                <template x-teleport="body">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-[9999] p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${pos.x}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}`">
+                        <div class="flex items-center justify-between mb-3 gap-2">
+                            <button type="button" @click="toggle12h()" class="text-xs px-2 py-1 rounded border border-input hover:bg-accent" x-text="use12h ? '12h' : '24h'"></button>
+                            <button type="button" @click="showSeconds = !showSeconds" class="text-xs px-2 py-1 rounded border border-input hover:bg-accent" x-text="showSeconds ? 'HH:MM:SS' : 'HH:MM'"></button>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="flex flex-col items-center">
+                                <button type="button" @click="incHour()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
+                                <span class="text-lg font-mono w-10 text-center" x-text="displayHour"></span>
+                                <button type="button" @click="decHour()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                            </div>
+                            <span class="text-lg font-bold">:</span>
+                            <div class="flex flex-col items-center">
+                                <button type="button" @click="incMinute()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
+                                <span class="text-lg font-mono w-10 text-center" x-text="displayMinute"></span>
+                                <button type="button" @click="decMinute()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                            </div>
+                            <template x-if="showSeconds">
+                                <span class="text-lg font-bold">:</span>
+                            </template>
+                            <template x-if="showSeconds">
+                                <div class="flex flex-col items-center">
+                                    <button type="button" @click="incSecond()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
+                                    <span class="text-lg font-mono w-10 text-center" x-text="displaySecond"></span>
+                                    <button type="button" @click="decSecond()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                                </div>
+                            </template>
+                            <template x-if="use12h">
+                                <div class="flex flex-col items-center ml-2">
+                                    <button type="button" @click="togglePeriod()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
+                                    <span class="text-lg font-mono w-10 text-center" x-text="period"></span>
+                                    <button type="button" @click="togglePeriod()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
             </div>
         "#,
 
