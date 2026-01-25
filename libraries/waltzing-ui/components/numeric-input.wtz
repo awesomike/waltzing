@@ -264,7 +264,7 @@
 @fn simple(name: &str, value: f64) {
     <@create
         name=@name
-        value=Some(@value)
+        value=@Some(value)
         min=None
         max=None
         step=1.0
@@ -277,7 +277,7 @@
 @fn disabled(name: &str, value: f64) {
     <@create
         name=@name
-        value=Some(@value)
+        value=@Some(value)
         min=None
         max=None
         step=1.0

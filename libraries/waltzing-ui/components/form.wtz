@@ -172,8 +172,8 @@
     content: @(),
 ) {
     <@apply
-        action=Some(@action)
-        method=Some(@method)
+        action=@Some(action)
+        method=@Some(method)
         enctype=None
        
     >
@@ -190,9 +190,9 @@
     @let enctype_val = "multipart/form-data"
 
     <@apply
-        action=Some(@action)
-        method=Some(@method_val)
-        enctype=Some(@enctype_val)
+        action=@Some(action)
+        method=@Some(method_val)
+        enctype=@Some(enctype_val)
        
     >
         @content()

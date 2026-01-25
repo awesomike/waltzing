@@ -125,7 +125,7 @@
                             input_type=input::InputType::Password
                             name="password"
                            
-                            placeholder=Some(@enter_password)
+                            placeholder=@Some(enter_password)
                            
                             required=true
                            
@@ -144,7 +144,7 @@
                             label="Bio"
                             name="bio"
                            
-                            placeholder=Some(@tell_about)
+                            placeholder=@Some(tell_about)
                             rows=Some(4)
                            
                            
@@ -167,7 +167,7 @@
                             name="newsletter"
                             checked=false
                            
-                            description=Some(@weekly_updates)
+                            description=@Some(weekly_updates)
                         />
                     </div>
                 </@>
@@ -183,7 +183,7 @@
                             name="notifications"
                             checked=true
                            
-                            description=Some(@push_notifications)
+                            description=@Some(push_notifications)
                         />
                         <@switch::labeled
                             label="Email alerts"

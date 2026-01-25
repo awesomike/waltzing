@@ -81,7 +81,7 @@
 
 @* Shorthand for default avatar with image *@
 @fn image(src: &str, alt: &str, fallback: &str) {
-    <@apply src=Some(@src) alt=@alt fallback=@fallback size=Size::Default />
+    <@apply src=@Some(src) alt=@alt fallback=@fallback size=Size::Default />
 }
 
 @* Shorthand for avatar with only fallback (no image) *@
@@ -91,10 +91,10 @@
 
 @* Small avatar with image *@
 @fn sm(src: &str, alt: &str, fallback: &str) {
-    <@apply src=Some(@src) alt=@alt fallback=@fallback size=Size::Sm />
+    <@apply src=@Some(src) alt=@alt fallback=@fallback size=Size::Sm />
 }
 
 @* Large avatar with image *@
 @fn lg(src: &str, alt: &str, fallback: &str) {
-    <@apply src=Some(@src) alt=@alt fallback=@fallback size=Size::Lg />
+    <@apply src=@Some(src) alt=@alt fallback=@fallback size=Size::Lg />
 }

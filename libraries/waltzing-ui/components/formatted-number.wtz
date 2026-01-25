@@ -244,7 +244,7 @@
 ) {
     <@apply
         name=@name
-        value=Some(@value)
+        value=@Some(value)
         prefix=@prefix
         suffix=@suffix
         decimals=@decimals
@@ -280,7 +280,7 @@
     <@apply
         name=@name
         value=@value
-        prefix=Some(@symbol)
+        prefix=@Some(symbol)
         suffix=None
         decimals=@decimals
         multiplier=@multiplier
@@ -319,8 +319,8 @@
         multiplier=1.0
         thousand_separator=","
         decimal_separator="."
-        min=Some(@min)
-        max=Some(@max)
+        min=@Some(min)
+        max=@Some(max)
         step=None
         placeholder=@placeholder
         disabled=@disabled
@@ -348,7 +348,7 @@
         name=@name
         value=@value
         prefix=None
-        suffix=Some(@unit)
+        suffix=@Some(unit)
         decimals=@decimals
         multiplier=1.0
         thousand_separator=","

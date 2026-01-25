@@ -23,7 +23,7 @@
  *     info: "border-sky-500 bg-sky-100 text-sky-800".into(),
  *     default: "border-gray-300 bg-gray-50 text-gray-800".into(),
  * }
- * <@flash::container messages=@messages styles=Some(@styles) />
+ * <@flash::container messages=@messages styles=@Some(styles) />
  *
  * Individual flash message:
  * <@flash::apply level="info" message="Welcome back!" />
