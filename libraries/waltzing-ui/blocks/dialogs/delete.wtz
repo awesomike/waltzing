@@ -25,22 +25,6 @@
     trigger: @(),
     onConfirm: Option<&str> = None,
 ) {
-    @let dialog_footer = @() {
-        <button
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
-            @click="open = false"
-        >
-            @cancelLabel
-        </button>
-        <button
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
-            @if let Some(action) = onConfirm { @click=@format("{}; open = false", action) }
-            @else { @click="open = false" }
-        >
-            @confirmLabel
-        </button>
-    }
-
     <@dialog::apply
         title=@title
         description=@None
@@ -61,7 +45,21 @@
                 <p class="text-center text-sm text-muted-foreground">@message</p>
             </div>
         }
-        footer=@Some(dialog_footer)
+        footer=@Some(@() {
+            <button
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
+                @click="open = false"
+            >
+                @cancelLabel
+            </button>
+            <button
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
+                @if let Some(action) = onConfirm { @click=@format("{}; open = false", action) }
+                @else { @click="open = false" }
+            >
+                @confirmLabel
+            </button>
+        })
     />
 }
 
@@ -84,22 +82,6 @@
     cancelLabel: &str = "Cancel",
     onConfirm: Option<&str> = None,
 ) {
-    @let dialog_footer = @() {
-        <button
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
-            @click=@format("{} = false", openVar)
-        >
-            @cancelLabel
-        </button>
-        <button
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
-            @if let Some(action) = onConfirm { @click=@format("{}; {} = false", action, openVar) }
-            @else { @click=@format("{} = false", openVar) }
-        >
-            @confirmLabel
-        </button>
-    }
-
     <@dialog::controlled
         open_var=@openVar
         title=@title
@@ -120,6 +102,20 @@
                 <p class="text-center text-sm text-muted-foreground">@message</p>
             </div>
         }
-        footer=@Some(dialog_footer)
+        footer=@Some(@() {
+            <button
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
+                @click=@format("{} = false", openVar)
+            >
+                @cancelLabel
+            </button>
+            <button
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
+                @if let Some(action) = onConfirm { @click=@format("{}; {} = false", action, openVar) }
+                @else { @click=@format("{} = false", openVar) }
+            >
+                @confirmLabel
+            </button>
+        })
     />
 }
