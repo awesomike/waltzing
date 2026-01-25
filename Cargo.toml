@@ -1,0 +1,20 @@
+[package]
+name = "waltzing-showcase"
+version = "0.1.0"
+edition = "2021"
+description = "Showcase server for Waltzing template libraries"
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.6", features = ["fs", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+
+[build-dependencies]
+# waltzing = "0.2"  # TODO: Add when available (private repo)
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+walkdir = "2"
