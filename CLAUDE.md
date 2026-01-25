@@ -165,3 +165,17 @@ Key syntax points:
 - `<@component attr=@value>content</@>` - function tags for components
 - `@* comment *@` - template comments (asterisks must match)
 - `@render(T)` type and `@out` reference for higher-order functions
+
+### Callback Syntax
+
+When passing render callbacks to components:
+
+- **`@() { ... }`** - Correct syntax for inline callbacks
+  ```waltzing
+  <@dialog::apply trigger=@() { <button>Open</button> } />
+  @let my_callback = @() { <div>content</div> }
+  ```
+
+- **`@{ ... }`** - NOT valid for inline callbacks (causes parse errors)
+
+Always use `@() { ... }` when passing callbacks as parameters to function tags.

@@ -45,12 +45,11 @@
         Size::Lg => { "h-10 px-3 min-w-10" }
     }
 
-    @let pressed_cls = if pressed { "bg-accent text-accent-foreground" } else { "" }
     @let aria_pressed_val = if pressed { "true" } else { "false" }
     @let data_state_val = if pressed { "on" } else { "off" }
 
     @let extra_class = class
-    @let classes = vec![@base, @variant_cls, @size_cls, @pressed_cls, @extra_class]
+    @let classes = vec![@base, @variant_cls, @size_cls, @extra_class]
 
     <button
         type="button"

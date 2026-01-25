@@ -26,6 +26,8 @@
 @import /components/textarea.wtz
 @import /components/toggle.wtz
 
+@import /blocks/forms/contact.wtz as contact_form
+
 @* Section wrapper for consistent styling *@
 @fn section(title: &str, id: &str, content: @()) {
     <section id="@id" class="scroll-mt-8">
@@ -44,6 +46,7 @@
     @let skeleton_circle_size = "h-12 w-12"
     @let skeleton_w34 = "h-4 w-3/4"
     @let skeleton_w12 = "h-4 w-1/2"
+
     <@base::apply title=@page_title description=None head=None>
         <div x-data="{ darkMode: false }" x-init="darkMode = document.documentElement.classList.contains('dark')" x-effect="document.documentElement.classList.toggle('dark', darkMode)">
             <div class="container mx-auto px-4 py-8 max-w-6xl">
@@ -339,6 +342,45 @@
                         <span class="text-sm">Item 2</span>
                         <@separator::vertical />
                         <span class="text-sm">Item 3</span>
+                    </div>
+                </@>
+
+                <@separator::horizontal class="my-8" />
+
+                @* Layouts Section *@
+                <@section title="Layouts" id="layouts">
+                    <p class="text-muted-foreground mb-4">Page layout templates for common application structures.</p>
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <@card::simple>
+                            <@card::title>Base Layout</@>
+                            <@card::description>Standard HTML page with Tailwind, Alpine.js, and theme support</@>
+                            <p class="mt-2 text-xs text-muted-foreground">This showcase uses the base layout</p>
+                        </@>
+                        <@card::simple>
+                            <@card::title>Sidebar Layout</@>
+                            <@card::description>Dashboard layout with collapsible navigation sidebar</@>
+                            <p class="mt-2 text-xs text-muted-foreground">Supports NavItem and NavGroup for navigation</p>
+                        </@>
+                    </div>
+                </@>
+
+                <@separator::horizontal class="my-8" />
+
+                @* Blocks - Forms Section *@
+                <@section title="Blocks: Forms" id="blocks-forms">
+                    <p class="text-muted-foreground mb-4">Complete form blocks for common use cases.</p>
+                    <div class="grid gap-8 lg:grid-cols-2">
+                        <@card::simple>
+                            <@card::title>Contact Form</@>
+                            <@card::description>Standard contact form with validation support</@>
+                            <div class="mt-4">
+                                <@contact_form::apply
+                                    action="#"
+                                    method="post"
+                                    class="space-y-4"
+                                />
+                            </div>
+                        </@>
                     </div>
                 </@>
 

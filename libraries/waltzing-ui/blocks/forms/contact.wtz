@@ -18,10 +18,10 @@
  * />
  *@
 
-@import components/input.wtz as input
-@import components/textarea.wtz as textarea
-@import components/button.wtz as button
-@import components/field.wtz as field
+@import /components/input.wtz as input
+@import /components/textarea.wtz as textarea
+@import /components/button.wtz as button
+@import /components/field.wtz as field
 
 
 @* Main contact form *@

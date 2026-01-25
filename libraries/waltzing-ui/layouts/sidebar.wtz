@@ -3,7 +3,7 @@
  * Common dashboard/app layout with collapsible sidebar
  *@
 
-@import ./base.wtz
+@import /layouts/base.wtz
 
 @struct NavItem {
     label: String,

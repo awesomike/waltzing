@@ -9,42 +9,36 @@
  * <@share::apply url="https://example.com/item/123" title="Share this item" />
  *@
 
-@import components/dialog.wtz as dialog
-@import components/button.wtz as button
-@import components/input.wtz as input
-
+@import /components/dialog.wtz
+@import /components/button.wtz
 
 @* Share dialog with copy link, social sharing, and email invite *@
 @fn apply(
     url: &str,
     title: &str = "Share",
-    description: Option<&str> = None,
+    description: &str = "Share this link with others",
     trigger: Option<@()> = None,
 ) {
-    @let default_desc = "Share this link with others"
-    @let desc = description.unwrap_or(@default_desc)
-
-    <@dialog::apply
-        title=@title
-        description=Some(@desc)
-        trigger=@{
-            @if let Some(t) = trigger {
-                @t()
-            } else {
-                <@button::outline>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-                        <circle cx="18" cy="5" r="3"></circle>
-                        <circle cx="6" cy="12" r="3"></circle>
-                        <circle cx="18" cy="19" r="3"></circle>
-                        <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line>
-                        <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
-                    </svg>
-                    Share
-                </@>
-            }
+    @let dialog_trigger = @() {
+        @if let Some(t) = trigger {
+            @t()
+        } else {
+            <button
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line>
+                    <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
+                </svg>
+                Share
+            </button>
         }
-        footer=None
-    >
+    }
+
+    @let dialog_content = @() {
         <div class="space-y-4" x-data="{ copied: false }">
             @* Copy link section *@
             <div class="space-y-2">
@@ -57,16 +51,11 @@
                         class="flex h-9 w-full rounded-md border border-input bg-muted px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         x-ref="shareUrl"
                     />
-                    <@button::apply
-                        variant=button::Variant::Outline
-                        size=button::Size::Default
-                        class="shrink-0"
-                    >
-                        <span
-                            x-on:click="navigator.clipboard.writeText($refs.shareUrl.value); copied = true; setTimeout(() => copied = false, 2000)"
-                            x-text="copied ? 'Copied!' : 'Copy'"
-                        ></span>
-                    </@>
+                    <button
+                        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground shrink-0"
+                        x-on:click="navigator.clipboard.writeText($refs.shareUrl.value); copied = true; setTimeout(() => copied = false, 2000)"
+                        x-text="copied ? 'Copied!' : 'Copy'"
+                    ></button>
                 </div>
             </div>
 
@@ -84,7 +73,7 @@
             <div class="flex justify-center gap-4">
                 @* Twitter/X *@
                 <a
-                    href="https://twitter.com/intent/tweet?url=@url_encode(@url)"
+                    href="https://twitter.com/intent/tweet?url=@url"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -97,7 +86,7 @@
 
                 @* Facebook *@
                 <a
-                    href="https://www.facebook.com/sharer/sharer.php?u=@url_encode(@url)"
+                    href="https://www.facebook.com/sharer/sharer.php?u=@url"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -110,7 +99,7 @@
 
                 @* LinkedIn *@
                 <a
-                    href="https://www.linkedin.com/sharing/share-offsite/?url=@url_encode(@url)"
+                    href="https://www.linkedin.com/sharing/share-offsite/?url=@url"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -123,7 +112,7 @@
 
                 @* Email *@
                 <a
-                    href="mailto:?subject=Check%20this%20out&body=@url_encode(@url)"
+                    href="mailto:?subject=Check%20this%20out&body=@url"
                     class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
                     aria-label="Share via Email"
                 >
@@ -133,33 +122,17 @@
                     </svg>
                 </a>
             </div>
-
-            @* Email invite section *@
-            <div class="space-y-2">
-                <label class="text-sm font-medium">Invite by email</label>
-                <div class="flex gap-2" x-data="{ email: '', sending: false, sent: false }">
-                    <input
-                        type="email"
-                        x-model="email"
-                        placeholder="colleague@example.com"
-                        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    />
-                    <@button::apply
-                        variant=button::Variant::Primary
-                        size=button::Size::Default
-                        class="shrink-0"
-                    >
-                        <span
-                            x-on:click="if (email) { window.location.href = 'mailto:' + email + '?subject=Check%20this%20out&body=' + encodeURIComponent('@url'); sent = true; setTimeout(() => sent = false, 2000); }"
-                            x-text="sent ? 'Sent!' : 'Send'"
-                        ></span>
-                    </@>
-                </div>
-            </div>
         </div>
-    </@>
-}
+    }
 
+    <@dialog::apply
+        title=@title
+        description=Some(@description)
+        trigger=@dialog_trigger
+        content=@dialog_content
+        footer=None
+    />
+}
 
 @* Compact share dialog (link copy only) *@
 @fn compact(
@@ -169,26 +142,25 @@
 ) {
     @let compact_desc = "Copy the link below to share"
 
-    <@dialog::apply
-        title=@title
-        description=Some(@compact_desc)
-        trigger=@{
-            @if let Some(t) = trigger {
-                @t()
-            } else {
-                <@button::apply variant=button::Variant::Ghost size=button::Size::Icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="18" cy="5" r="3"></circle>
-                        <circle cx="6" cy="12" r="3"></circle>
-                        <circle cx="18" cy="19" r="3"></circle>
-                        <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line>
-                        <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
-                    </svg>
-                </@>
-            }
+    @let dialog_trigger = @() {
+        @if let Some(t) = trigger {
+            @t()
+        } else {
+            <button
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 w-9"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line>
+                    <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
+                </svg>
+            </button>
         }
-        footer=None
-    >
+    }
+
+    @let dialog_content = @() {
         <div class="flex gap-2" x-data="{ copied: false }">
             <input
                 type="text"
@@ -197,16 +169,19 @@
                 class="flex h-9 w-full rounded-md border border-input bg-muted px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 x-ref="shareUrl"
             />
-            <@button::apply
-                variant=button::Variant::Primary
-                size=button::Size::Default
-                class="shrink-0"
-            >
-                <span
-                    x-on:click="navigator.clipboard.writeText($refs.shareUrl.value); copied = true; setTimeout(() => copied = false, 2000)"
-                    x-text="copied ? 'Copied!' : 'Copy'"
-                ></span>
-            </@>
+            <button
+                class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90 shrink-0"
+                x-on:click="navigator.clipboard.writeText($refs.shareUrl.value); copied = true; setTimeout(() => copied = false, 2000)"
+                x-text="copied ? 'Copied!' : 'Copy'"
+            ></button>
         </div>
-    </@>
+    }
+
+    <@dialog::apply
+        title=@title
+        description=Some(@compact_desc)
+        trigger=@dialog_trigger
+        content=@dialog_content
+        footer=None
+    />
 }
