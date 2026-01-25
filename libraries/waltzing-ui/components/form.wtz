@@ -7,14 +7,14 @@
  * @import components/input.wtz as input
  * @import components/button.wtz as button
  *
- * <@form::apply action=Some("/submit") method=Some("POST") class=None>
+ * <@form::apply action=Some("/submit") method=Some("POST") class="">
  *     <@form::field
  *         name="email"
  *         label=Some("Email")
  *         description=Some("We'll never share your email.")
  *         error=email_error
  *         required=true
- *         class=None
+ *         class=""
  *     >
  *         <@input::apply
  *             input_type=input::InputType::Email
@@ -24,11 +24,11 @@
  *             disabled=false
  *             required=true
  *             error=email_error
- *             class=None
+ *             class=""
  *         />
  *     </@>
  *
- *     <@form::actions align=None class=None>
+ *     <@form::actions align=None class="">
  *         <@button::primary>Submit</@>
  *     </@>
  * </@>
@@ -175,7 +175,7 @@
         action=Some(@action)
         method=Some(@method)
         enctype=None
-        class=None
+        class=""
     >
         @content()
     </@>
@@ -193,7 +193,7 @@
         action=Some(@action)
         method=Some(@method_val)
         enctype=Some(@enctype_val)
-        class=None
+        class=""
     >
         @content()
     </@>

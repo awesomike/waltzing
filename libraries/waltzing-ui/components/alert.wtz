@@ -70,28 +70,28 @@
 
 @* Shorthand for default alert *@
 @fn default(content: @()) {
-    <@apply variant=Variant::Default class=None>
+    <@apply variant=Variant::Default class="">
         @content()
     </@>
 }
 
 @* Shorthand for destructive alert *@
 @fn destructive(content: @()) {
-    <@apply variant=Variant::Destructive class=None>
+    <@apply variant=Variant::Destructive class="">
         @content()
     </@>
 }
 
 @* Shorthand for warning alert *@
 @fn warning(content: @()) {
-    <@apply variant=Variant::Warning class=None>
+    <@apply variant=Variant::Warning class="">
         @content()
     </@>
 }
 
 @* Shorthand for success alert *@
 @fn success(content: @()) {
-    <@apply variant=Variant::Success class=None>
+    <@apply variant=Variant::Success class="">
         @content()
     </@>
 }

@@ -58,7 +58,7 @@
     default_tab: &str,
     panels: @(&str),
 ) {
-    <@apply tabs=@tabs default_tab=@default_tab content=@panels class=None />
+    <@apply tabs=@tabs default_tab=@default_tab content=@panels class="" />
 }
 
 @* Vertical tabs variant *@

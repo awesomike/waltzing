@@ -6,10 +6,10 @@
  *   import components/validation-errors.wtz as validation
  *
  *   Display list of errors:
- *   <validation::apply errors=errors class=None />
+ *   <validation::apply errors=errors class="" />
  *
  *   Display single error if present:
- *   <validation::single error=Some("This field is required") class=None />
+ *   <validation::single error=Some("This field is required") class="" />
  *
  *   Minimal inline field error:
  *   <validation::field_error error=Some("Invalid email format") />

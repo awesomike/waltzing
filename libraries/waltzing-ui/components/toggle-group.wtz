@@ -11,8 +11,8 @@
  *     ToggleItem { value: "right".into(), label: "Right".into(), icon: None, disabled: false },
  * ];
  *
- * <@toggle_group::single name="align" items=&items selected=Some("left") class=None />
- * <@toggle_group::multiple name="format" items=&items selected=&["left", "right"] class=None />
+ * <@toggle_group::single name="align" items=&items selected=Some("left") class="" />
+ * <@toggle_group::multiple name="format" items=&items selected=&["left", "right"] class="" />
  *@
 
 

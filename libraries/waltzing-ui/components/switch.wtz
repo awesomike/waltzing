@@ -5,7 +5,7 @@
  * @example
  * @import components/switch.wtz as switch
  *
- * <@switch::apply name="notifications" checked=true disabled=false class=None />
+ * <@switch::apply name="notifications" checked=true disabled=false class="" />
  * <@switch::labeled label="Enable notifications" name="notifications" checked=false disabled=false description=None />
  * <@switch::simple name="dark_mode" />
  * <@switch::on name="feature" />
@@ -81,7 +81,7 @@
             name=@name
             checked=@checked
             disabled=@disabled
-            class=None
+            class=""
         />
     </div>
 }
@@ -93,7 +93,7 @@
     @let label_classes = cn(vec![label_base, disabled_cls])
 
     <div class="flex items-center space-x-2">
-        <@apply name=@name checked=@checked disabled=@disabled class=None />
+        <@apply name=@name checked=@checked disabled=@disabled class="" />
         <label for="@name" class="@label_classes">
             @label
         </label>
@@ -102,15 +102,15 @@
 
 @* Simple switch, unchecked by default *@
 @fn simple(name: &str) {
-    <@apply name=@name checked=false disabled=false class=None />
+    <@apply name=@name checked=false disabled=false class="" />
 }
 
 @* Switch that's on by default *@
 @fn on(name: &str) {
-    <@apply name=@name checked=true disabled=false class=None />
+    <@apply name=@name checked=true disabled=false class="" />
 }
 
 @* Disabled switch *@
 @fn disabled(name: &str, checked: bool) {
-    <@apply name=@name checked=@checked disabled=true class=None />
+    <@apply name=@name checked=@checked disabled=true class="" />
 }

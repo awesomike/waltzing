@@ -96,7 +96,7 @@
         disabled=false
         required=false
         error=None
-        class=None
+        class=""
     />
 }
 
@@ -110,7 +110,7 @@
         disabled=false
         required=false
         error=None
-        class=None
+        class=""
     />
 }
 
@@ -124,6 +124,6 @@
         disabled=false
         required=false
         error=None
-        class=None
+        class=""
     />
 }
