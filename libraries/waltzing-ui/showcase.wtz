@@ -27,6 +27,10 @@
 @import /components/toggle.wtz
 
 @import /blocks/forms/contact.wtz as contact_form
+@import /blocks/forms/profile.wtz as profile_form
+@import /blocks/dialogs/confirm.wtz as confirm_dialog
+@import /blocks/dialogs/delete.wtz as delete_dialog
+@import /blocks/dialogs/share.wtz as share_dialog
 
 @* Section wrapper for consistent styling *@
 @fn section(title: &str, id: &str, content: @()) {
@@ -355,11 +359,14 @@
                             <@card::title>Base Layout</@>
                             <@card::description>Standard HTML page with Tailwind, Alpine.js, and theme support</@>
                             <p class="mt-2 text-xs text-muted-foreground">This showcase uses the base layout</p>
+                            <p class="mt-2"><code class="text-xs bg-muted px-1 py-0.5 rounded">/layouts/base.wtz</code></p>
                         </@>
                         <@card::simple>
                             <@card::title>Sidebar Layout</@>
                             <@card::description>Dashboard layout with collapsible navigation sidebar</@>
                             <p class="mt-2 text-xs text-muted-foreground">Supports NavItem and NavGroup for navigation</p>
+                            <p class="mt-2"><code class="text-xs bg-muted px-1 py-0.5 rounded">/layouts/sidebar.wtz</code></p>
+                            <a href="/sidebar-demo" class="mt-2 inline-flex text-xs text-primary hover:underline">View Demo &rarr;</a>
                         </@>
                     </div>
                 </@>
@@ -369,10 +376,11 @@
                 @* Blocks - Forms Section *@
                 <@section title="Blocks: Forms" id="blocks-forms">
                     <p class="text-muted-foreground mb-4">Complete form blocks for common use cases.</p>
-                    <div class="grid gap-8 lg:grid-cols-2">
+                    <div class="space-y-8">
                         <@card::simple>
                             <@card::title>Contact Form</@>
                             <@card::description>Standard contact form with validation support</@>
+                            <p class="mt-1"><code class="text-xs bg-muted px-1 py-0.5 rounded">/blocks/forms/contact.wtz</code></p>
                             <div class="mt-4">
                                 <@contact_form::apply
                                     action="#"
@@ -381,6 +389,66 @@
                                 />
                             </div>
                         </@>
+                        <@card::simple>
+                            <@card::title>Profile Form</@>
+                            <@card::description>Profile/account settings form with avatar, personal info, and social links</@>
+                            <p class="mt-1"><code class="text-xs bg-muted px-1 py-0.5 rounded">/blocks/forms/profile.wtz</code></p>
+                            <div class="mt-4">
+                                <@profile_form::apply
+                                    action="#"
+                                    method="post"
+                                    avatar_fallback="JD"
+                                    name_value=@Some("John Doe")
+                                    email_value=@Some("john@example.com")
+                                    bio_value=@Some("Software developer passionate about building great products")
+                                />
+                            </div>
+                        </@>
+                    </div>
+                </@>
+
+                <@separator::horizontal class="my-8" />
+
+                @* Blocks - Dialogs Section *@
+                <@section title="Blocks: Dialogs" id="blocks-dialogs">
+                    <p class="text-muted-foreground mb-4">Pre-built dialog patterns for common interactions.</p>
+                    <div class="flex flex-wrap gap-4">
+                        @* Confirm Dialog *@
+                        <div class="space-y-2">
+                            <p class="text-sm font-medium">Confirm Dialog</p>
+                            <p class="text-xs text-muted-foreground"><code class="bg-muted px-1 py-0.5 rounded">/blocks/dialogs/confirm.wtz</code></p>
+                            <@confirm_dialog::apply
+                                title="Confirm Action"
+                                message="Are you sure you want to proceed with this action?"
+                                trigger=@() {
+                                    <@button::outline>Open Confirm</@>
+                                }
+                            />
+                        </div>
+
+                        @* Delete Dialog *@
+                        <div class="space-y-2">
+                            <p class="text-sm font-medium">Delete Dialog</p>
+                            <p class="text-xs text-muted-foreground"><code class="bg-muted px-1 py-0.5 rounded">/blocks/dialogs/delete.wtz</code></p>
+                            <@delete_dialog::apply
+                                title="Delete Item"
+                                itemName="Example Document"
+                                message="This action cannot be undone. All associated data will be permanently removed."
+                                trigger=@() {
+                                    <@button::apply variant=button::Variant::Destructive size=button::Size::Default>Open Delete</@>
+                                }
+                            />
+                        </div>
+
+                        @* Share Dialog *@
+                        <div class="space-y-2">
+                            <p class="text-sm font-medium">Share Dialog</p>
+                            <p class="text-xs text-muted-foreground"><code class="bg-muted px-1 py-0.5 rounded">/blocks/dialogs/share.wtz</code></p>
+                            <@share_dialog::apply
+                                url="https://example.com/shared/item-123"
+                                title="Share This"
+                            />
+                        </div>
                     </div>
                 </@>
 
