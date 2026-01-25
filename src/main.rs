@@ -1059,46 +1059,418 @@ fn get_component_usage(component: &str) -> String {
     match component {
         "button" => r#"@import components/button.wtz as button
 
-// Primary button
-&lt;@button::primary&gt;Click me&lt;/@&gt;
+// Primary button (default)
+&lt;@button&gt;Click me&lt;/@&gt;
 
-// With variant and size
-&lt;@button
-    variant=button::Variant::Secondary
-    size=button::Size::Lg
-    disabled=false
-&gt;
-    Large Secondary
-&lt;/@&gt;"#.to_string(),
+// Variants
+&lt;@button variant=button::Variant::Secondary&gt;Secondary&lt;/@&gt;
+&lt;@button variant=button::Variant::Destructive&gt;Delete&lt;/@&gt;
+&lt;@button variant=button::Variant::Outline&gt;Outline&lt;/@&gt;
+&lt;@button variant=button::Variant::Ghost&gt;Ghost&lt;/@&gt;
+
+// Sizes
+&lt;@button size=button::Size::Sm&gt;Small&lt;/@&gt;
+&lt;@button size=button::Size::Lg&gt;Large&lt;/@&gt;
+
+// Disabled
+&lt;@button disabled=true&gt;Disabled&lt;/@&gt;"#.to_string(),
 
         "input" => r#"@import components/input.wtz as input
 
 // Basic input
-&lt;@input
-    name="email"
-    placeholder=Some("Enter email")
-    type_attr="email"
-/&gt;
+&lt;@input name="email" placeholder=Some("Enter email") /&gt;
 
-// With label
-&lt;@input::labeled
-    label="Email"
-    name="email"
-    required=true
-    error=None
-/&gt;"#.to_string(),
+// With type
+&lt;@input name="password" type_attr="password" /&gt;
+
+// Disabled
+&lt;@input name="readonly" disabled=true /&gt;"#.to_string(),
 
         "card" => r#"@import components/card.wtz as card
 
-// Simple card
 &lt;@card&gt;
     &lt;@card::header&gt;
         &lt;@card::title&gt;Card Title&lt;/@&gt;
         &lt;@card::description&gt;Card description&lt;/@&gt;
     &lt;/@&gt;
     &lt;@card::content&gt;
-        Content here
+        Your content here
     &lt;/@&gt;
+    &lt;@card::footer&gt;
+        &lt;@button&gt;Action&lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "checkbox" => r#"@import components/checkbox.wtz as checkbox
+
+// Basic checkbox
+&lt;@checkbox name="terms" /&gt;
+
+// With label
+&lt;div class="flex items-center gap-2"&gt;
+    &lt;@checkbox id="accept" name="accept" /&gt;
+    &lt;@label for_id="accept"&gt;Accept terms&lt;/@&gt;
+&lt;/div&gt;
+
+// Checked by default
+&lt;@checkbox name="newsletter" checked=true /&gt;"#.to_string(),
+
+        "switch" => r#"@import components/switch.wtz as switch
+
+// Basic switch
+&lt;@switch name="notifications" /&gt;
+
+// With label
+&lt;div class="flex items-center gap-2"&gt;
+    &lt;@switch id="airplane" name="airplane" /&gt;
+    &lt;@label for_id="airplane"&gt;Airplane Mode&lt;/@&gt;
+&lt;/div&gt;
+
+// Enabled by default
+&lt;@switch name="wifi" checked=true /&gt;"#.to_string(),
+
+        "badge" => r#"@import components/badge.wtz as badge
+
+// Default badge
+&lt;@badge&gt;Badge&lt;/@&gt;
+
+// Variants
+&lt;@badge variant=badge::Variant::Secondary&gt;Secondary&lt;/@&gt;
+&lt;@badge variant=badge::Variant::Destructive&gt;Error&lt;/@&gt;
+&lt;@badge variant=badge::Variant::Outline&gt;Outline&lt;/@&gt;"#.to_string(),
+
+        "alert" => r#"@import components/alert.wtz as alert
+
+// Default alert
+&lt;@alert&gt;
+    &lt;@alert::title&gt;Heads up!&lt;/@&gt;
+    &lt;@alert::description&gt;
+        You can add components using the CLI.
+    &lt;/@&gt;
+&lt;/@&gt;
+
+// Destructive alert
+&lt;@alert variant=alert::Variant::Destructive&gt;
+    &lt;@alert::title&gt;Error&lt;/@&gt;
+    &lt;@alert::description&gt;Something went wrong.&lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "avatar" => r#"@import components/avatar.wtz as avatar
+
+// With image
+&lt;@avatar src="https://github.com/user.png" alt="User" /&gt;
+
+// With fallback initials
+&lt;@avatar fallback="JD" /&gt;
+
+// Different sizes
+&lt;@avatar src="..." size=avatar::Size::Sm /&gt;
+&lt;@avatar src="..." size=avatar::Size::Lg /&gt;"#.to_string(),
+
+        "progress" => r#"@import components/progress.wtz as progress
+
+// Basic progress bar
+&lt;@progress value=60 /&gt;
+
+// With max value
+&lt;@progress value=30 max=50 /&gt;
+
+// Indeterminate (no value)
+&lt;@progress /&gt;"#.to_string(),
+
+        "skeleton" => r#"@import components/skeleton.wtz as skeleton
+
+// Basic skeleton
+&lt;@skeleton class="h-4 w-[200px]" /&gt;
+
+// Card skeleton
+&lt;div class="flex items-center space-x-4"&gt;
+    &lt;@skeleton class="h-12 w-12 rounded-full" /&gt;
+    &lt;div class="space-y-2"&gt;
+        &lt;@skeleton class="h-4 w-[200px]" /&gt;
+        &lt;@skeleton class="h-4 w-[150px]" /&gt;
+    &lt;/div&gt;
+&lt;/div&gt;"#.to_string(),
+
+        "separator" => r#"@import components/separator.wtz as separator
+
+// Horizontal (default)
+&lt;@separator /&gt;
+
+// Vertical
+&lt;@separator orientation=separator::Orientation::Vertical /&gt;
+
+// With custom class
+&lt;@separator class="my-4" /&gt;"#.to_string(),
+
+        "label" => r#"@import components/label.wtz as label
+
+// Basic label
+&lt;@label&gt;Email&lt;/@&gt;
+
+// Associated with input
+&lt;@label for_id="email"&gt;Email&lt;/@&gt;
+&lt;@input id="email" name="email" /&gt;"#.to_string(),
+
+        "textarea" => r#"@import components/textarea.wtz as textarea
+
+// Basic textarea
+&lt;@textarea
+    name="message"
+    placeholder=Some("Type your message...")
+/&gt;
+
+// With rows
+&lt;@textarea name="bio" rows=5 /&gt;"#.to_string(),
+
+        "select" => r#"@import components/select.wtz as select
+
+&lt;@select name="fruit" placeholder="Select a fruit"&gt;
+    &lt;@select::item value="apple"&gt;Apple&lt;/@&gt;
+    &lt;@select::item value="banana"&gt;Banana&lt;/@&gt;
+    &lt;@select::item value="orange"&gt;Orange&lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "tabs" => r#"@import components/tabs.wtz as tabs
+
+&lt;@tabs default="account"&gt;
+    &lt;@tabs::list&gt;
+        &lt;@tabs::trigger value="account"&gt;Account&lt;/@&gt;
+        &lt;@tabs::trigger value="password"&gt;Password&lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@tabs::content value="account"&gt;
+        Account settings here
+    &lt;/@&gt;
+    &lt;@tabs::content value="password"&gt;
+        Password settings here
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "accordion" => r#"@import components/accordion.wtz as accordion
+
+&lt;@accordion&gt;
+    &lt;@accordion::item value="item-1"&gt;
+        &lt;@accordion::trigger&gt;Is it accessible?&lt;/@&gt;
+        &lt;@accordion::content&gt;
+            Yes. It adheres to the WAI-ARIA pattern.
+        &lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@accordion::item value="item-2"&gt;
+        &lt;@accordion::trigger&gt;Is it styled?&lt;/@&gt;
+        &lt;@accordion::content&gt;
+            Yes. It comes with default styles.
+        &lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "dialog" => r#"@import components/dialog.wtz as dialog
+
+&lt;@dialog&gt;
+    &lt;@dialog::trigger&gt;
+        &lt;@button&gt;Open Dialog&lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@dialog::content&gt;
+        &lt;@dialog::header&gt;
+            &lt;@dialog::title&gt;Edit profile&lt;/@&gt;
+            &lt;@dialog::description&gt;
+                Make changes to your profile here.
+            &lt;/@&gt;
+        &lt;/@&gt;
+        &lt;@dialog::footer&gt;
+            &lt;@button variant=button::Variant::Outline&gt;Cancel&lt;/@&gt;
+            &lt;@button&gt;Save&lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "alert-dialog" => r#"@import components/alert_dialog.wtz as alert_dialog
+
+&lt;@alert_dialog&gt;
+    &lt;@alert_dialog::trigger&gt;
+        &lt;@button variant=button::Variant::Destructive&gt;
+            Delete Account
+        &lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@alert_dialog::content&gt;
+        &lt;@alert_dialog::header&gt;
+            &lt;@alert_dialog::title&gt;Are you sure?&lt;/@&gt;
+            &lt;@alert_dialog::description&gt;
+                This action cannot be undone.
+            &lt;/@&gt;
+        &lt;/@&gt;
+        &lt;@alert_dialog::footer&gt;
+            &lt;@alert_dialog::cancel&gt;Cancel&lt;/@&gt;
+            &lt;@alert_dialog::action&gt;Delete&lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "dropdown" => r#"@import components/dropdown.wtz as dropdown
+
+&lt;@dropdown&gt;
+    &lt;@dropdown::trigger&gt;
+        &lt;@button variant=button::Variant::Outline&gt;Open Menu&lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@dropdown::content&gt;
+        &lt;@dropdown::label&gt;My Account&lt;/@&gt;
+        &lt;@dropdown::separator /&gt;
+        &lt;@dropdown::item&gt;Profile&lt;/@&gt;
+        &lt;@dropdown::item&gt;Settings&lt;/@&gt;
+        &lt;@dropdown::separator /&gt;
+        &lt;@dropdown::item class="text-destructive"&gt;Log out&lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "popover" => r#"@import components/popover.wtz as popover
+
+&lt;@popover&gt;
+    &lt;@popover::trigger&gt;
+        &lt;@button variant=button::Variant::Outline&gt;Open&lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@popover::content&gt;
+        &lt;div class="grid gap-4"&gt;
+            &lt;h4 class="font-medium"&gt;Dimensions&lt;/h4&gt;
+            &lt;p class="text-sm text-muted-foreground"&gt;
+                Set the dimensions for the layer.
+            &lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "tooltip" => r#"@import components/tooltip.wtz as tooltip
+
+&lt;@tooltip&gt;
+    &lt;@tooltip::trigger&gt;
+        &lt;@button variant=button::Variant::Outline&gt;Hover me&lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@tooltip::content&gt;
+        Add to library
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "slider" => r#"@import components/slider.wtz as slider
+
+// Basic slider
+&lt;@slider name="volume" value=50 /&gt;
+
+// With min/max
+&lt;@slider name="price" min=0 max=1000 value=250 /&gt;
+
+// With step
+&lt;@slider name="rating" min=1 max=5 step=1 value=3 /&gt;"#.to_string(),
+
+        "radio-group" => r#"@import components/radio_group.wtz as radio_group
+
+&lt;@radio_group name="size" default="default"&gt;
+    &lt;div class="flex items-center space-x-2"&gt;
+        &lt;@radio_group::item value="default" id="r1" /&gt;
+        &lt;@label for_id="r1"&gt;Default&lt;/@&gt;
+    &lt;/div&gt;
+    &lt;div class="flex items-center space-x-2"&gt;
+        &lt;@radio_group::item value="comfortable" id="r2" /&gt;
+        &lt;@label for_id="r2"&gt;Comfortable&lt;/@&gt;
+    &lt;/div&gt;
+    &lt;div class="flex items-center space-x-2"&gt;
+        &lt;@radio_group::item value="compact" id="r3" /&gt;
+        &lt;@label for_id="r3"&gt;Compact&lt;/@&gt;
+    &lt;/div&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "toggle" => r#"@import components/toggle.wtz as toggle
+
+// Basic toggle
+&lt;@toggle&gt;
+    &lt;svg ...&gt;Bold icon&lt;/svg&gt;
+&lt;/@&gt;
+
+// With text
+&lt;@toggle&gt;Bold&lt;/@&gt;
+
+// Pressed by default
+&lt;@toggle pressed=true&gt;On&lt;/@&gt;"#.to_string(),
+
+        "table" => r#"@import components/table.wtz as table
+
+&lt;@table&gt;
+    &lt;@table::header&gt;
+        &lt;@table::row&gt;
+            &lt;@table::head&gt;Invoice&lt;/@&gt;
+            &lt;@table::head&gt;Status&lt;/@&gt;
+            &lt;@table::head class="text-right"&gt;Amount&lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@table::body&gt;
+        @for invoice in invoices {
+            &lt;@table::row&gt;
+                &lt;@table::cell&gt;@invoice.id&lt;/@&gt;
+                &lt;@table::cell&gt;@invoice.status&lt;/@&gt;
+                &lt;@table::cell class="text-right"&gt;
+                    @invoice.amount
+                &lt;/@&gt;
+            &lt;/@&gt;
+        }
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "breadcrumb" => r##"@import components/breadcrumb.wtz as breadcrumb
+
+&lt;@breadcrumb&gt;
+    &lt;@breadcrumb::list&gt;
+        &lt;@breadcrumb::item&gt;
+            &lt;@breadcrumb::link href="/"&gt;Home&lt;/@&gt;
+        &lt;/@&gt;
+        &lt;@breadcrumb::separator /&gt;
+        &lt;@breadcrumb::item&gt;
+            &lt;@breadcrumb::link href="/components"&gt;Components&lt;/@&gt;
+        &lt;/@&gt;
+        &lt;@breadcrumb::separator /&gt;
+        &lt;@breadcrumb::item&gt;
+            &lt;@breadcrumb::page&gt;Breadcrumb&lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"##.to_string(),
+
+        "form" => r#"@import components/form.wtz as form
+
+&lt;@form action="/submit" method="post"&gt;
+    &lt;@form::field&gt;
+        &lt;@form::label&gt;Username&lt;/@&gt;
+        &lt;@form::control&gt;
+            &lt;@input name="username" /&gt;
+        &lt;/@&gt;
+        &lt;@form::description&gt;
+            This is your public display name.
+        &lt;/@&gt;
+    &lt;/@&gt;
+    &lt;@button type="submit"&gt;Submit&lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "collapsible" => r#"@import components/collapsible.wtz as collapsible
+
+&lt;@collapsible&gt;
+    &lt;div class="flex items-center justify-between"&gt;
+        &lt;h4&gt;@peduarte starred 3 repositories&lt;/h4&gt;
+        &lt;@collapsible::trigger&gt;
+            &lt;@button variant=button::Variant::Ghost size=button::Size::Sm&gt;
+                Toggle
+            &lt;/@&gt;
+        &lt;/@&gt;
+    &lt;/div&gt;
+    &lt;@collapsible::content&gt;
+        &lt;div class="space-y-2"&gt;
+            &lt;div&gt;@radix-ui/colors&lt;/div&gt;
+            &lt;div&gt;@stitches/react&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/@&gt;
+&lt;/@&gt;"#.to_string(),
+
+        "combobox" => r#"@import components/combobox.wtz as combobox
+
+&lt;@combobox name="framework" placeholder="Select framework..."&gt;
+    &lt;@combobox::item value="next"&gt;Next.js&lt;/@&gt;
+    &lt;@combobox::item value="svelte"&gt;SvelteKit&lt;/@&gt;
+    &lt;@combobox::item value="nuxt"&gt;Nuxt&lt;/@&gt;
+    &lt;@combobox::item value="remix"&gt;Remix&lt;/@&gt;
 &lt;/@&gt;"#.to_string(),
 
         _ => {
@@ -1106,10 +1478,9 @@ fn get_component_usage(component: &str) -> String {
             format!(
                 r#"@import components/{}.wtz as {}
 
-// Basic usage
-&lt;@{} ... /&gt;
-
-// See component source for options"#,
+&lt;@{}&gt;
+    Content here
+&lt;/@&gt;"#,
                 component, comp_name, comp_name
             )
         }
