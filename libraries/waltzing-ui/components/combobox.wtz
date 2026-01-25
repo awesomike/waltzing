@@ -48,10 +48,11 @@
 
     @let selected_val = selected.unwrap_or("")
     <div
-        class="relative w-full"
+        class="w-full"
         x-data="{
             open: false,
             flipTop: false,
+            pos: { x: 0, y: 0, width: 0 },
             search: '@initial_label',
             selected: '@selected_val',
             highlightedIndex: -1,
@@ -62,15 +63,27 @@
                     return label.includes(searchLower);
                 }) : [];
             },
-            checkFlip() {
+            updatePos() {
                 const trigger = this.$refs.trigger;
-                const dropdown = this.$refs.options;
-                if (!trigger || !dropdown) return;
+                if (!trigger) return;
                 const rect = trigger.getBoundingClientRect();
-                const dropdownHeight = dropdown.offsetHeight || 240;
+                const dropdownHeight = 240;
                 const spaceBelow = window.innerHeight - rect.bottom;
                 const spaceAbove = rect.top;
                 this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+                this.pos.x = rect.left;
+                this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                this.pos.width = rect.width;
+            },
+            onScroll() { if (this.open) this.updatePos(); },
+            init() {
+                this._scrollHandler = () => this.onScroll();
+                window.addEventListener('scroll', this._scrollHandler, true);
+                window.addEventListener('resize', this._scrollHandler);
+            },
+            destroy() {
+                window.removeEventListener('scroll', this._scrollHandler, true);
+                window.removeEventListener('resize', this._scrollHandler);
             },
             selectOption(value, label) {
                 this.selected = value;
@@ -101,6 +114,8 @@
                 }
             }
         }"
+        x-init="init()"
+        @destroy="destroy()"
         @keydown.down.prevent="highlightNext()"
         @keydown.up.prevent="highlightPrev()"
         @keydown.enter.prevent="selectHighlighted()"
@@ -122,8 +137,8 @@
                 type="text"
                 class="@input_cls pr-8"
                 x-model="search"
-                @focus="open = true; highlightedIndex = -1; $nextTick(() => checkFlip())"
-                @click="open = true; $nextTick(() => checkFlip())"
+                @focus="open = true; highlightedIndex = -1; $nextTick(() => updatePos())"
+                @click="open = true; $nextTick(() => updatePos())"
                 @input="open = true; highlightedIndex = -1"
                 placeholder="@placeholder_text"
                 @if disabled { disabled }
@@ -137,7 +152,7 @@
             <button
                 type="button"
                 class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                @click="open = !open; if(open) { $refs.input?.focus(); $nextTick(() => checkFlip()); }"
+                @click="open = !open; if(open) { $refs.input?.focus(); $nextTick(() => updatePos()); }"
                 tabindex="-1"
                 @if disabled { disabled }
             >
@@ -147,22 +162,23 @@
             </button>
         </div>
 
-        @* Dropdown options *@
-        <div
-            x-show="open"
-            x-cloak
-            x-ref="options"
-            x-transition:enter="transition ease-out duration-100"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-75"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            @click.outside="open = false"
-            class="absolute z-50 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-            :class="flipTop ? 'bottom-full mb-1' : 'top-full mt-1'"
-            role="listbox"
-        >
+        @* Dropdown options (teleported to body) *@
+        <template x-teleport="body">
+            <div
+                x-show="open"
+                x-cloak
+                x-ref="options"
+                x-transition:enter="transition ease-out duration-100"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                @click.outside="open = false"
+                class="fixed z-[9999] max-h-60 overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`"
+                role="listbox"
+            >
             @for (idx, opt) in options.iter().enumerate() {
                 @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
                 @let option_disabled = class_if(opt.disabled, "pointer-events-none opacity-50")
@@ -211,7 +227,8 @@
             >
                 No results found.
             </div>
-        </div>
+            </div>
+        </template>
     </div>
 }
 

@@ -2,6 +2,7 @@
  * Dropdown component
  * A dropdown menu with trigger and items
  * Automatically flips to open above if not enough space below
+ * Follows trigger on scroll/resize using fixed positioning
  *@
 
 
@@ -16,51 +17,71 @@
     trigger: @(),
     content: @(),
 ) {
-    @let align_cls = match align {
-        Align::Start => { "left-0" }
-        Align::Center => { "left-1/2 -translate-x-1/2" }
-        Align::End => { "right-0" }
+    @let align_type = match align {
+        Align::Start => "start",
+        Align::Center => "center",
+        Align::End => "end",
     }
 
-    <div class="relative inline-block text-left" x-data="{
+    <div class="inline-block text-left" x-data="{
         open: false,
+        pos: { x: 0, y: 0, width: 0 },
         flipTop: false,
-        checkFlip() {
+        align: '@align_type',
+        updatePos() {
             const trigger = this.$refs.trigger;
-            const dropdown = this.$refs.dropdown;
-            if (!trigger || !dropdown) return;
+            if (!trigger) return;
             const rect = trigger.getBoundingClientRect();
-            const dropdownHeight = dropdown.offsetHeight || 200;
+            const dropdownHeight = 200;
             const spaceBelow = window.innerHeight - rect.bottom;
             const spaceAbove = rect.top;
             this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+            this.pos.width = rect.width;
+            if (this.align === 'start') {
+                this.pos.x = rect.left;
+            } else if (this.align === 'center') {
+                this.pos.x = rect.left + rect.width / 2;
+            } else {
+                this.pos.x = rect.right;
+            }
+            this.pos.y = this.flipTop ? rect.top : rect.bottom;
+        },
+        onScroll() { if (this.open) this.updatePos(); },
+        init() {
+            this._scrollHandler = () => this.onScroll();
+            window.addEventListener('scroll', this._scrollHandler, true);
+            window.addEventListener('resize', this._scrollHandler);
+        },
+        destroy() {
+            window.removeEventListener('scroll', this._scrollHandler, true);
+            window.removeEventListener('resize', this._scrollHandler);
         }
-    }">
+    }" x-init="init()" @destroy="destroy()">
         @* Trigger *@
-        <div x-ref="trigger" @click="open = !open; $nextTick(() => checkFlip())">
+        <div x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())">
             @trigger()
         </div>
 
-        @* Dropdown content *@
-        @let classes = vec!["absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md", @align_cls]
-        <div
-            x-ref="dropdown"
-            x-show="open"
-            x-transition:enter="transition ease-out duration-100"
-            x-transition:enter-start="transform opacity-0 scale-95"
-            x-transition:enter-end="transform opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-75"
-            x-transition:leave-start="transform opacity-100 scale-100"
-            x-transition:leave-end="transform opacity-0 scale-95"
-            @click.away="open = false"
-            @keydown.escape.window="open = false"
-            class="@cn(@classes)"
-            :class="flipTop ? 'bottom-full mb-2' : 'top-full mt-2'"
-            style="display: none;"
-            role="menu"
-        >
-            @content()
-        </div>
+        @* Dropdown content (teleported to body) *@
+        <template x-teleport="body">
+            <div
+                x-show="open"
+                x-cloak
+                x-transition:enter="transition ease-out duration-100"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                @click.away="open = false"
+                @keydown.escape.window="open = false"
+                class="fixed z-[9999] min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                :style="`left: ${align === 'end' ? 'auto' : pos.x + 'px'}; right: ${align === 'end' ? (window.innerWidth - pos.x) + 'px' : 'auto'}; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}; ${align === 'center' ? 'transform: translateX(-50%)' : ''}`"
+                role="menu"
+            >
+                @content()
+            </div>
+        </template>
     </div>
 }
 

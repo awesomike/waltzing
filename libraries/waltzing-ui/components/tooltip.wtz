@@ -44,88 +44,93 @@
     </@>
 }
 
-@* Rich content tooltip with alignment control and auto-flip *@
+@* Rich content tooltip with alignment control, auto-flip, and scroll tracking *@
 @fn rich(
     side: Side = Side::Top,
     align: Align = Align::Center,
     trigger: @() = @{},
     content: @() = @{},
 ) {
-    @let is_vertical = match side {
-        Side::Top => "true",
-        Side::Bottom => "true",
-        Side::Left => "false",
-        Side::Right => "false",
+    @let side_type = match side {
+        Side::Top => "top",
+        Side::Bottom => "bottom",
+        Side::Left => "left",
+        Side::Right => "right",
     }
 
-    @let preferred_top = match side {
-        Side::Top => "true",
-        Side::Bottom => "false",
-        Side::Left => "false",
-        Side::Right => "false",
+    @let align_type = match align {
+        Align::Start => "start",
+        Align::Center => "center",
+        Align::End => "end",
     }
 
-    @let align_cls = {
-        match align {
-            Align::Start => "left-0",
-            Align::Center => "left-1/2 -translate-x-1/2",
-            Align::End => "right-0",
-        }
-    }
-
-    @let side_cls = match side {
-        Side::Right => "left-full ml-2",
-        Side::Left => "right-full mr-2",
-        _ => "",
-    }
-
-    @let tooltip_cls = cn(&["absolute z-50 max-w-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs shadow-md pointer-events-none", side_cls, align_cls])
-
-    <div class="relative inline-block" x-data="{
+    <div class="inline-block" x-data="{
         show: false,
-        flipTop: @preferred_top,
-        isVertical: @is_vertical,
-        checkFlip() {
-            if (!this.isVertical) return;
+        pos: { x: 0, y: 0 },
+        flipTop: '@side_type' === 'top',
+        side: '@side_type',
+        align: '@align_type',
+        updatePos() {
             const trigger = this.$refs.trigger;
-            const tooltip = this.$refs.tooltip;
-            if (!trigger || !tooltip) return;
+            if (!trigger) return;
             const rect = trigger.getBoundingClientRect();
-            const tooltipHeight = tooltip.offsetHeight || 40;
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const spaceAbove = rect.top;
-            this.flipTop = spaceBelow < tooltipHeight + 10 && spaceAbove > spaceBelow;
+            const tooltipHeight = 40;
+            const isVertical = this.side === 'top' || this.side === 'bottom';
+            if (isVertical) {
+                const spaceBelow = window.innerHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                this.flipTop = (this.side === 'top') || (spaceBelow < tooltipHeight + 10 && spaceAbove > spaceBelow);
+                this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                if (this.align === 'start') this.pos.x = rect.left;
+                else if (this.align === 'center') this.pos.x = rect.left + rect.width / 2;
+                else this.pos.x = rect.right;
+            } else {
+                this.pos.y = rect.top + rect.height / 2;
+                this.pos.x = this.side === 'right' ? rect.right : rect.left;
+            }
+        },
+        onScroll() { if (this.show) this.updatePos(); },
+        init() {
+            this._scrollHandler = () => this.onScroll();
+            window.addEventListener('scroll', this._scrollHandler, true);
+            window.addEventListener('resize', this._scrollHandler);
+        },
+        destroy() {
+            window.removeEventListener('scroll', this._scrollHandler, true);
+            window.removeEventListener('resize', this._scrollHandler);
         }
-    }">
+    }" x-init="init()" @destroy="destroy()">
         <div
             x-ref="trigger"
-            @mouseenter="show = true; $nextTick(() => checkFlip())"
+            @mouseenter="show = true; $nextTick(() => updatePos())"
             @mouseleave="show = false"
-            @focus="show = true; $nextTick(() => checkFlip())"
+            @focus="show = true; $nextTick(() => updatePos())"
             @blur="show = false"
             aria-describedby="tooltip"
         >
             @trigger()
         </div>
 
-        <div
-            x-ref="tooltip"
-            x-show="show"
-            x-cloak
-            x-transition:enter="transition ease-out duration-150"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-100"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="@tooltip_cls"
-            :class="isVertical ? (flipTop ? 'bottom-full mb-2' : 'top-full mt-2') : ''"
-            role="tooltip"
-            id="tooltip"
-        >
-            @content()
-            <span class="absolute w-0 h-0 border-4" :class="flipTop ? 'top-full left-1/2 -translate-x-1/2 border-t-primary border-x-transparent border-b-transparent' : 'bottom-full left-1/2 -translate-x-1/2 border-b-primary border-x-transparent border-t-transparent'"></span>
-        </div>
+        <template x-teleport="body">
+            <div
+                x-show="show"
+                x-cloak
+                x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="fixed z-[9999] max-w-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs shadow-md pointer-events-none"
+                :style="(side === 'left' || side === 'right')
+                    ? `left: ${side === 'right' ? pos.x + 8 : 'auto'}px; right: ${side === 'left' ? (window.innerWidth - pos.x + 8) : 'auto'}px; top: ${pos.y}px; transform: translateY(-50%);`
+                    : `left: ${pos.x}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}; ${align === 'center' ? 'transform: translateX(-50%)' : (align === 'end' ? 'transform: translateX(-100%)' : '')}`"
+                role="tooltip"
+            >
+                @content()
+                <span class="absolute w-0 h-0 border-4" :class="(side === 'left' || side === 'right') ? (side === 'right' ? 'right-full top-1/2 -translate-y-1/2 border-r-primary border-y-transparent border-l-transparent' : 'left-full top-1/2 -translate-y-1/2 border-l-primary border-y-transparent border-r-transparent') : (flipTop ? 'top-full left-1/2 -translate-x-1/2 border-t-primary border-x-transparent border-b-transparent' : 'bottom-full left-1/2 -translate-x-1/2 border-b-primary border-x-transparent border-t-transparent')"></span>
+            </div>
+        </template>
     </div>
 }
 
