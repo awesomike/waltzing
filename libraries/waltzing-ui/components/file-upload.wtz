@@ -15,7 +15,7 @@
  *       disabled=false
  *       dropzone_text=None
  *       dropzone_hint=None
- *       class=""
+ *      
  *   />
  *
  *   Multiple images with preview:
@@ -28,7 +28,7 @@
  *       disabled=false
  *       dropzone_text=Some("Drop images here")
  *       dropzone_hint=Some("PNG, JPG, GIF up to 10MB")
- *       class=""
+ *      
  *   />
  *
  *   Edit mode with existing file:
@@ -43,7 +43,7 @@
  *       current_url=Some("/uploads/profile.jpg")
  *       dropzone_text=None
  *       dropzone_hint=None
- *       class=""
+ *      
  *   />
  **@
 

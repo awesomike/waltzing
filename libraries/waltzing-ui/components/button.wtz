@@ -58,21 +58,21 @@
 
 @* Shorthand for primary button *@
 @fn primary(content: @()) {
-    <@apply variant=Variant::Primary size=Size::Default disabled=false class="">
+    <@apply variant=Variant::Primary size=Size::Default disabled=false>
         @content()
     </@>
 }
 
 @* Shorthand for secondary button *@
 @fn secondary(content: @()) {
-    <@apply variant=Variant::Secondary size=Size::Default disabled=false class="">
+    <@apply variant=Variant::Secondary size=Size::Default disabled=false>
         @content()
     </@>
 }
 
 @* Shorthand for outline button *@
 @fn outline(content: @()) {
-    <@apply variant=Variant::Outline size=Size::Default disabled=false class="">
+    <@apply variant=Variant::Outline size=Size::Default disabled=false>
         @content()
     </@>
 }

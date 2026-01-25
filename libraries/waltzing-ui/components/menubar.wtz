@@ -5,7 +5,7 @@
  * @example
  * @import components/menubar.wtz as menubar
  *
- * <@menubar::apply class="">
+ * <@menubar::apply>
  *     <@menubar::menu label="File">
  *         <@menubar::item label="New File" shortcut=Some("Ctrl+N") disabled=false />
  *         <@menubar::item label="Open..." shortcut=Some("Ctrl+O") disabled=false />

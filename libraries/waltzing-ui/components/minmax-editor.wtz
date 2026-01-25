@@ -276,6 +276,6 @@
         min_allowed=None
         max_allowed=None
         step=1.0
-        class=""
+       
     />
 }

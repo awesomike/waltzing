@@ -78,15 +78,15 @@
                         <@button::primary>Primary</@>
                         <@button::secondary>Secondary</@>
                         <@button::outline>Outline</@>
-                        <@button::apply variant=button::Variant::Ghost size=button::Size::Default disabled=false class="">Ghost</@>
-                        <@button::apply variant=button::Variant::Destructive size=button::Size::Default disabled=false class="">Destructive</@>
-                        <@button::apply variant=button::Variant::Link size=button::Size::Default disabled=false class="">Link</@>
+                        <@button::apply variant=button::Variant::Ghost size=button::Size::Default disabled=false>Ghost</@>
+                        <@button::apply variant=button::Variant::Destructive size=button::Size::Default disabled=false>Destructive</@>
+                        <@button::apply variant=button::Variant::Link size=button::Size::Default disabled=false>Link</@>
                     </div>
                     <div class="flex flex-wrap gap-4 items-center mt-4">
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Sm disabled=false class="">Small</@>
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=false class="">Default</@>
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Lg disabled=false class="">Large</@>
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=true class="">Disabled</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Sm disabled=false>Small</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=false>Default</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Lg disabled=false>Large</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=true>Disabled</@>
                     </div>
                 </@>
 
@@ -118,7 +118,7 @@
                             disabled=false
                             required=true
                             error=None
-                            class=""
+                           
                         />
                         <@input::labeled
                             label="Password"
@@ -129,7 +129,7 @@
                             disabled=false
                             required=true
                             error=None
-                            class=""
+                           
                         />
                     </div>
                 </@>
@@ -149,7 +149,7 @@
                             disabled=false
                             required=false
                             error=None
-                            class=""
+                           
                         />
                     </div>
                 </@>
@@ -221,7 +221,7 @@
                             max=100.0
                             step=1.0
                             disabled=false
-                            class=""
+                           
                         />
                         <@slider::with_label
                             label="Brightness"
@@ -231,7 +231,7 @@
                             max=100.0
                             step=5.0
                             disabled=false
-                            class=""
+                           
                         />
                     </div>
                 </@>
@@ -242,10 +242,10 @@
                 <@section title="Progress" id="progress">
                     <p class="text-muted-foreground mb-4">Visual indicator of progress or loading state.</p>
                     <div class="space-y-4 max-w-md">
-                        <@progress::apply value=25.0 max=100.0 class="" />
-                        <@progress::apply value=50.0 max=100.0 class="" />
-                        <@progress::apply value=75.0 max=100.0 class="" />
-                        <@progress::with_label value=65.0 max=100.0 label="Progress" class="" />
+                        <@progress::apply value=25.0 max=100.0 />
+                        <@progress::apply value=50.0 max=100.0 />
+                        <@progress::apply value=75.0 max=100.0 />
+                        <@progress::with_label value=65.0 max=100.0 label="Progress" />
                     </div>
                 </@>
 
@@ -269,12 +269,12 @@
                 <@section title="Card" id="card">
                     <p class="text-muted-foreground mb-4">Container with optional header and footer.</p>
                     <div class="grid gap-6 md:grid-cols-2">
-                        <@card::simple class="">
-                            <@card::title class="">Card Title</@>
-                            <@card::description class="">Card description</@>
+                        <@card::simple>
+                            <@card::title>Card Title</@>
+                            <@card::description>Card description</@>
                             <p class="mt-4">This is the card content area.</p>
                         </@>
-                        <@card::simple class="">
+                        <@card::simple>
                             <h3 class="font-semibold mb-2">Simple Card</h3>
                             <p class="text-muted-foreground">Without header or footer.</p>
                         </@>
@@ -288,20 +288,20 @@
                     <p class="text-muted-foreground mb-4">Callouts for important messages.</p>
                     <div class="space-y-4">
                         <@alert::default>
-                            <@alert::title class="">Heads up!</@>
-                            <@alert::description class="">Important message here.</@>
+                            <@alert::title>Heads up!</@>
+                            <@alert::description>Important message here.</@>
                         </@>
                         <@alert::success>
-                            <@alert::title class="">Success!</@>
-                            <@alert::description class="">Changes saved.</@>
+                            <@alert::title>Success!</@>
+                            <@alert::description>Changes saved.</@>
                         </@>
                         <@alert::warning>
-                            <@alert::title class="">Warning</@>
-                            <@alert::description class="">Cannot be undone.</@>
+                            <@alert::title>Warning</@>
+                            <@alert::description>Cannot be undone.</@>
                         </@>
                         <@alert::destructive>
-                            <@alert::title class="">Error</@>
-                            <@alert::description class="">Something went wrong.</@>
+                            <@alert::title>Error</@>
+                            <@alert::description>Something went wrong.</@>
                         </@>
                     </div>
                 </@>
@@ -330,14 +330,14 @@
                     <p class="text-muted-foreground mb-4">Visual divider between sections.</p>
                     <div class="space-y-4">
                         <p class="text-sm">Content above</p>
-                        <@separator::horizontal class="" />
+                        <@separator::horizontal />
                         <p class="text-sm">Content below</p>
                     </div>
                     <div class="flex items-center gap-4 h-8 mt-4">
                         <span class="text-sm">Item 1</span>
-                        <@separator::vertical class="" />
+                        <@separator::vertical />
                         <span class="text-sm">Item 2</span>
-                        <@separator::vertical class="" />
+                        <@separator::vertical />
                         <span class="text-sm">Item 3</span>
                     </div>
                 </@>

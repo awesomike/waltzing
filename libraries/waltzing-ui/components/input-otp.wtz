@@ -6,16 +6,16 @@
  * @import components/input-otp.wtz as input_otp
  *
  * // Basic 6-digit OTP input
- * <@input_otp::apply name="otp" length=6 class="" />
+ * <@input_otp::apply name="otp" length=6 />
  *
  * // 4-digit PIN
- * <@input_otp::apply name="pin" length=4 class="" />
+ * <@input_otp::apply name="pin" length=4 />
  *
  * // With separator (XXX-XXX pattern)
  * <@input_otp::with_separator name="code" length=6 separator_after=3 />
  *
  * // Disabled state
- * <@input_otp::apply name="otp" length=6 class="" disabled=true />
+ * <@input_otp::apply name="otp" length=6 disabled=true />
  *@
 
 
@@ -196,20 +196,20 @@
 
 @* Simple 6-digit OTP input *@
 @fn simple(name: &str) {
-    <@apply name=@name length=6 disabled=false class="" />
+    <@apply name=@name length=6 disabled=false />
 }
 
 @* 4-digit PIN input *@
 @fn pin(name: &str) {
-    <@apply name=@name length=4 disabled=false class="" />
+    <@apply name=@name length=4 disabled=false />
 }
 
 @* 6-digit OTP with dash separator (XXX-XXX) *@
 @fn split(name: &str) {
-    <@with_separator name=@name length=6 separator_after=3 disabled=false class="" />
+    <@with_separator name=@name length=6 separator_after=3 disabled=false />
 }
 
 @* Disabled OTP input *@
 @fn disabled(name: &str, length: u32) {
-    <@apply name=@name length=@length disabled=true class="" />
+    <@apply name=@name length=@length disabled=true />
 }

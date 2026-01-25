@@ -5,7 +5,7 @@
  * @example
  * @import components/checkbox.wtz as checkbox
  *
- * <@checkbox::apply name="terms" checked=false disabled=false class="" />
+ * <@checkbox::apply name="terms" checked=false disabled=false />
  *
  * <@checkbox::labeled
  *     label="Accept terms and conditions"

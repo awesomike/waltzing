@@ -240,7 +240,7 @@
         description=@description
         trigger=@trigger
         content=@content
-        class=""
+       
     />
 }
 
@@ -257,7 +257,7 @@
         description=@description
         trigger=@trigger
         content=@content
-        class=""
+       
     />
 }
 
@@ -274,7 +274,7 @@
         description=@description
         trigger=@trigger
         content=@content
-        class=""
+       
     />
 }
 
@@ -291,6 +291,6 @@
         description=@description
         trigger=@trigger
         content=@content
-        class=""
+       
     />
 }

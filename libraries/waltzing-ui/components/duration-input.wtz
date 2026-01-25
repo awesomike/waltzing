@@ -566,7 +566,7 @@
             min=@min
             max=@max
             disabled=@disabled
-            class=""
+           
         />
     </div>
 }

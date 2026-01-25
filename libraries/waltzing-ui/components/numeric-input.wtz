@@ -269,7 +269,7 @@
         max=None
         step=1.0
         disabled=false
-        class=""
+       
     />
 }
 
@@ -282,6 +282,6 @@
         max=None
         step=1.0
         disabled=true
-        class=""
+       
     />
 }
