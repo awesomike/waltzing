@@ -2,19 +2,31 @@
 //!
 //! Libraries are discovered by scanning `libraries/` for directories containing
 //! a `waltzing-*.toml` or `library.toml` manifest file.
+//!
+//! Uses the `waltzing` CLI binary (from PATH or ~/.local/bin) for compilation.
 
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::env;
 use std::fs;
-use std::path::Path;
+use std::path::PathBuf;
+use std::process::Command;
+
+// Path separator differs between platforms
+#[cfg(windows)]
+const PATH_SEPARATOR: char = ';';
+#[cfg(not(windows))]
+const PATH_SEPARATOR: char = ':';
+
+// Executable name differs on Windows
+#[cfg(windows)]
+const WALTZING_EXE: &str = "waltzing.exe";
+#[cfg(not(windows))]
+const WALTZING_EXE: &str = "waltzing";
 
 #[derive(Debug, Deserialize)]
 struct LibraryManifest {
     library: LibraryInfo,
-    #[serde(default)]
-    tailwind: Option<TailwindConfig>,
-    #[serde(default)]
-    alpine: Option<AlpineConfig>,
     #[serde(default)]
     components: HashMap<String, ComponentEntry>,
     #[serde(default)]
@@ -26,22 +38,6 @@ struct LibraryInfo {
     name: String,
     version: String,
     description: String,
-    #[serde(default)]
-    repository: Option<String>,
-    #[serde(default)]
-    license: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct TailwindConfig {
-    #[serde(default)]
-    plugins: Vec<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct AlpineConfig {
-    #[serde(default)]
-    plugins: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -55,11 +51,41 @@ struct ComponentEntry {
 struct DiscoveredLibrary {
     dir_name: String,
     manifest: LibraryManifest,
-    manifest_path: String,
+}
+
+/// Find the waltzing binary in PATH or ~/.local/bin
+fn find_waltzing_binary() -> Option<PathBuf> {
+    // Check if waltzing is on the PATH
+    let path_var = env::var("PATH").ok()?;
+    let waltzing_path = path_var
+        .split(PATH_SEPARATOR)
+        .map(PathBuf::from)
+        .find(|path| path.join(WALTZING_EXE).exists())
+        .map(|path| path.join(WALTZING_EXE));
+
+    if let Some(path) = waltzing_path {
+        return Some(path);
+    }
+
+    // Fall back to ~/.local/bin/waltzing
+    let home_dir = env::var("HOME")
+        .or_else(|_| env::var("USERPROFILE"))
+        .ok()?;
+
+    let local_bin_path = PathBuf::from(home_dir)
+        .join(".local")
+        .join("bin")
+        .join(WALTZING_EXE);
+
+    if local_bin_path.exists() {
+        Some(local_bin_path)
+    } else {
+        None
+    }
 }
 
 fn discover_libraries() -> Vec<DiscoveredLibrary> {
-    let libraries_dir = Path::new("libraries");
+    let libraries_dir = PathBuf::from("libraries");
     let mut libraries = Vec::new();
 
     if !libraries_dir.exists() {
@@ -67,7 +93,7 @@ fn discover_libraries() -> Vec<DiscoveredLibrary> {
         return libraries;
     }
 
-    for entry in fs::read_dir(libraries_dir).expect("Failed to read libraries/") {
+    for entry in fs::read_dir(&libraries_dir).expect("Failed to read libraries/") {
         let entry = entry.expect("Failed to read directory entry");
         let path = entry.path();
 
@@ -96,11 +122,7 @@ fn discover_libraries() -> Vec<DiscoveredLibrary> {
         match toml::from_str::<LibraryManifest>(&manifest_content) {
             Ok(manifest) => {
                 println!("cargo:rerun-if-changed={}", manifest_path.display());
-                libraries.push(DiscoveredLibrary {
-                    dir_name,
-                    manifest,
-                    manifest_path: manifest_path.to_string_lossy().to_string(),
-                });
+                libraries.push(DiscoveredLibrary { dir_name, manifest });
             }
             Err(e) => {
                 println!(
@@ -115,24 +137,43 @@ fn discover_libraries() -> Vec<DiscoveredLibrary> {
     libraries
 }
 
-fn compile_library(library: &DiscoveredLibrary) {
-    let lib_dir = Path::new("libraries").join(&library.dir_name);
+fn compile_library(library: &DiscoveredLibrary, waltzing_bin: &PathBuf, out_dir: &str) -> bool {
+    let lib_dir = PathBuf::from("libraries").join(&library.dir_name);
+    let lib_out_dir = format!("{}/{}", out_dir, library.dir_name.replace("-", "_"));
 
     println!(
-        "cargo:warning=Discovered library: {} ({})",
-        library.manifest.library.name,
-        lib_dir.display()
+        "cargo:warning=Compiling library: {} -> {}",
+        library.manifest.library.name, lib_out_dir
     );
 
-    // TODO: Compile templates when waltzing crate is available
-    // waltzing::compile_templates(
-    //     lib_dir.to_str().unwrap(),
-    //     &format!("src/generated/{}", library.dir_name),
-    // )
-    // .expect(&format!(
-    //     "Failed to compile templates for {}",
-    //     library.manifest.library.name
-    // ));
+    // Create output directory
+    fs::create_dir_all(&lib_out_dir).expect("Failed to create output directory");
+
+    // Run waltzing compiler
+    let output = Command::new(waltzing_bin)
+        .args([
+            "-i",
+            lib_dir.to_str().unwrap(),
+            "--with-axum",
+            "-o",
+            &lib_out_dir,
+        ])
+        .output()
+        .expect("Failed to run waltzing compiler");
+
+    let success = output.status.success();
+
+    if !success {
+        println!(
+            "cargo:warning=Waltzing compiler failed for {} (some templates may have syntax errors)",
+            library.manifest.library.name
+        );
+        // Print stderr for debugging
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        for line in stderr.lines().take(10) {
+            println!("cargo:warning=  {}", line);
+        }
+    }
 
     // Watch for changes in the library directory
     println!("cargo:rerun-if-changed={}", lib_dir.display());
@@ -147,11 +188,13 @@ fn compile_library(library: &DiscoveredLibrary) {
             println!("cargo:rerun-if-changed={}", path.display());
         }
     }
+
+    success
 }
 
-fn generate_libraries_module(libraries: &[DiscoveredLibrary]) {
-    let out_dir = Path::new("src/generated");
-    fs::create_dir_all(out_dir).expect("Failed to create src/generated");
+fn generate_libraries_module(libraries: &[DiscoveredLibrary], out_dir: &str) {
+    let gen_dir = PathBuf::from("src/generated");
+    fs::create_dir_all(&gen_dir).expect("Failed to create src/generated");
 
     let mut code = String::new();
     code.push_str("//! Auto-generated module containing discovered libraries.\n");
@@ -184,20 +227,28 @@ fn generate_libraries_module(libraries: &[DiscoveredLibrary]) {
 
     code.push_str("];\n\n");
 
-    // Generate submodule declarations
+    // Include compiled templates from OUT_DIR
+    code.push_str(&format!(
+        "/// Path to compiled templates (set by build.rs)\n"
+    ));
+    code.push_str(&format!(
+        "pub const TEMPLATES_DIR: &str = \"{}\";\n\n",
+        out_dir.replace("\\", "\\\\")
+    ));
+
+    // Generate submodule info for each library
     for lib in libraries {
         let module_name = lib.dir_name.replace("-", "_");
         code.push_str(&format!("pub mod {};\n", module_name));
     }
 
-    fs::write(out_dir.join("mod.rs"), code).expect("Failed to write mod.rs");
+    fs::write(gen_dir.join("mod.rs"), code).expect("Failed to write mod.rs");
 
-    // Generate placeholder module file for each library
+    // Generate info module for each library
     for lib in libraries {
         let module_name = lib.dir_name.replace("-", "_");
-        let module_path = out_dir.join(format!("{}.rs", module_name));
+        let module_path = gen_dir.join(format!("{}.rs", module_name));
 
-        // Generate component list
         let components: Vec<&String> = lib.manifest.components.keys().collect();
         let layouts: Vec<&String> = lib.manifest.layouts.keys().collect();
 
@@ -222,9 +273,11 @@ fn generate_libraries_module(libraries: &[DiscoveredLibrary]) {
         }
         lib_code.push_str("];\n\n");
 
-        lib_code.push_str("// TODO: When waltzing crate is available, compiled templates will be included here\n");
-        lib_code.push_str("// pub mod components { ... }\n");
-        lib_code.push_str("// pub mod layouts { ... }\n");
+        // Include the compiled templates
+        lib_code.push_str(&format!(
+            "// Compiled templates are in: {}/{}\n",
+            out_dir, module_name
+        ));
 
         fs::write(module_path, lib_code).expect("Failed to write library module");
     }
@@ -234,16 +287,46 @@ fn main() {
     println!("cargo:rerun-if-changed=libraries");
     println!("cargo:rerun-if-changed=build.rs");
 
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+    let templates_out = format!("{}/templates", out_dir);
+
     let libraries = discover_libraries();
 
-    println!(
-        "cargo:warning=Discovered {} libraries",
-        libraries.len()
-    );
+    println!("cargo:warning=Discovered {} libraries", libraries.len());
 
-    for library in &libraries {
-        compile_library(library);
+    // Find waltzing binary
+    match find_waltzing_binary() {
+        Some(waltzing_bin) => {
+            println!(
+                "cargo:warning=Using waltzing at: {}",
+                waltzing_bin.display()
+            );
+
+            let mut compiled = 0;
+            let mut failed = 0;
+
+            for library in &libraries {
+                if compile_library(library, &waltzing_bin, &templates_out) {
+                    compiled += 1;
+                } else {
+                    failed += 1;
+                }
+            }
+
+            if failed > 0 {
+                println!(
+                    "cargo:warning=Compiled {}/{} libraries ({} had errors)",
+                    compiled,
+                    libraries.len(),
+                    failed
+                );
+            }
+        }
+        None => {
+            println!("cargo:warning=waltzing binary not found in PATH or ~/.local/bin");
+            println!("cargo:warning=Skipping template compilation - install waltzing to enable");
+        }
     }
 
-    generate_libraries_module(&libraries);
+    generate_libraries_module(&libraries, &templates_out);
 }

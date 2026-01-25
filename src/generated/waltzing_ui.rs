@@ -3,34 +3,34 @@
 
 /// List of components in this library
 pub const COMPONENTS: &[&str] = &[
-    "checkbox",
-    "dropdown",
-    "card",
-    "select",
-    "breadcrumb",
+    "textarea",
+    "tooltip",
+    "aspect-ratio",
+    "form",
     "validation-errors",
+    "dropdown",
+    "toggle",
+    "accordion",
+    "label",
+    "separator",
+    "breadcrumb",
+    "card",
+    "checkbox",
+    "badge",
+    "radio-group",
+    "select",
+    "button",
+    "table",
+    "tabs",
+    "input",
+    "dialog",
     "popover",
     "skeleton",
     "switch",
-    "dialog",
-    "tooltip",
-    "collapsible",
-    "aspect-ratio",
     "progress",
-    "label",
+    "collapsible",
     "avatar",
-    "textarea",
-    "form",
-    "input",
     "alert",
-    "separator",
-    "badge",
-    "table",
-    "tabs",
-    "toggle",
-    "button",
-    "radio-group",
-    "accordion",
 ];
 
 /// List of layouts in this library
@@ -39,6 +39,4 @@ pub const LAYOUTS: &[&str] = &[
     "sidebar",
 ];
 
-// TODO: When waltzing crate is available, compiled templates will be included here
-// pub mod components { ... }
-// pub mod layouts { ... }
+// Compiled templates are in: /Users/michael/awesomike/waltzing-runtime/target/debug/build/waltzing-showcase-48a663a65cdb5335/out/templates/waltzing_ui
