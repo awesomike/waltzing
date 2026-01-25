@@ -1,0 +1,454 @@
+@*
+ * Dashboard layout
+ * Complete dashboard with header, collapsible sidebar, main content area, and optional footer
+ * Mobile responsive with hamburger menu
+ *
+ * @example
+ * @import /layouts/dashboard.wtz as dashboard
+ *
+ * <@dashboard::apply
+ *     title="My App"
+ *     brand=@() { <span class="font-bold">MyApp</span> }
+ *     nav_groups=nav_groups
+ *     header_left=Some(@() { <@breadcrumb /> })
+ *     header_right=Some(@() { <@user_menu /> })
+ *     footer=None
+ *     content=@() { <div>Main content</div> }
+ * />
+ *@
+
+@import /layouts/base.wtz
+
+@struct NavItem {
+    label: String,
+    href: String,
+    icon: Option<String>,
+    active: bool,
+}
+
+@struct NavGroup {
+    label: Option<String>,
+    items: Vec<NavItem>,
+}
+
+@struct UserInfo {
+    name: String,
+    email: Option<String>,
+    avatar_src: Option<String>,
+    avatar_fallback: String,
+}
+
+@fn apply(
+    title: &str,
+    brand: @(),
+    nav_groups: Vec<NavGroup>,
+    header_left: Option<@()>,
+    header_right: Option<@()>,
+    footer: Option<@()>,
+    content: @(),
+) {
+    <@base::apply title=@title description=None head=None>
+        <div
+            x-data="{
+                sidebarOpen: true,
+                mobileMenuOpen: false,
+                isMobile: window.innerWidth < 768,
+                init() {
+                    this.checkMobile();
+                    window.addEventListener('resize', () => this.checkMobile());
+                },
+                checkMobile() {
+                    this.isMobile = window.innerWidth < 768;
+                    if (this.isMobile) {
+                        this.sidebarOpen = false;
+                    }
+                },
+                toggleSidebar() {
+                    if (this.isMobile) {
+                        this.mobileMenuOpen = !this.mobileMenuOpen;
+                    } else {
+                        this.sidebarOpen = !this.sidebarOpen;
+                    }
+                }
+            }"
+            class="flex h-screen overflow-hidden bg-background"
+        >
+            @* Mobile sidebar overlay *@
+            <template x-teleport="body">
+                <div
+                    x-show="mobileMenuOpen && isMobile"
+                    x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="fixed inset-0 z-40 md:hidden"
+                    style="display: none;"
+                >
+                    @* Backdrop *@
+                    <div
+                        class="fixed inset-0 bg-black/80"
+                        @click="mobileMenuOpen = false"
+                        aria-hidden="true"
+                    ></div>
+
+                    @* Mobile sidebar *@
+                    <aside
+                        x-show="mobileMenuOpen"
+                        x-transition:enter="ease-out duration-300"
+                        x-transition:enter-start="opacity-0 -translate-x-full"
+                        x-transition:enter-end="opacity-100 translate-x-0"
+                        x-transition:leave="ease-in duration-200"
+                        x-transition:leave-start="opacity-100 translate-x-0"
+                        x-transition:leave-end="opacity-0 -translate-x-full"
+                        class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-card"
+                        @keydown.escape.window="mobileMenuOpen = false"
+                    >
+                        @* Mobile sidebar header with close *@
+                        <div class="flex h-16 items-center justify-between border-b px-4">
+                            <div>@brand()</div>
+                            <button
+                                @click="mobileMenuOpen = false"
+                                class="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                aria-label="Close menu"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                    <path d="M18 6 6 18"></path>
+                                    <path d="m6 6 12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        @* Mobile navigation *@
+                        <nav class="flex-1 overflow-y-auto p-4">
+                            @for group in &nav_groups {
+                                <div class="mb-4">
+                                    @if let Some(label) = &group.label {
+                                        <h3 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                            @label
+                                        </h3>
+                                    }
+                                    <ul class="space-y-1">
+                                        @for item in &group.items {
+                                            <li>
+                                                @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
+                                                @let link_classes = vec!["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
+                                                <a
+                                                    href="@item.href"
+                                                    class="@cn(@link_classes)"
+                                                    @click="mobileMenuOpen = false"
+                                                >
+                                                    @if let Some(icon) = &item.icon {
+                                                        <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
+                                                    }
+                                                    <span>@item.label</span>
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </nav>
+                    </aside>
+                </div>
+            </template>
+
+            @* Desktop sidebar *@
+            <aside
+                x-show="!isMobile"
+                :class="sidebarOpen ? 'w-64' : 'w-16'"
+                class="hidden md:flex flex-col border-r bg-card transition-all duration-300"
+            >
+                @* Brand *@
+                <div class="flex h-16 items-center border-b px-4">
+                    <div x-show="sidebarOpen" x-transition x-cloak>
+                        @brand()
+                    </div>
+                    @* Collapsed brand icon placeholder *@
+                    <div x-show="!sidebarOpen" x-cloak class="flex w-full justify-center">
+                        <div class="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                            @* First letter or icon *@
+                        </div>
+                    </div>
+                </div>
+
+                @* Navigation *@
+                <nav class="flex-1 overflow-y-auto p-4">
+                    @for group in &nav_groups {
+                        <div class="mb-4">
+                            @if let Some(label) = &group.label {
+                                <h3
+                                    x-show="sidebarOpen"
+                                    x-cloak
+                                    class="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                                >
+                                    @label
+                                </h3>
+                            }
+                            <ul class="space-y-1">
+                                @for item in &group.items {
+                                    <li>
+                                        @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
+                                        @let collapsed_classes = vec!["flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
+                                        @let expanded_classes = vec!["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
+
+                                        @* Expanded view *@
+                                        <a
+                                            x-show="sidebarOpen"
+                                            x-cloak
+                                            href="@item.href"
+                                            class="@cn(@expanded_classes)"
+                                            title="@item.label"
+                                        >
+                                            @if let Some(icon) = &item.icon {
+                                                <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
+                                            }
+                                            <span>@item.label</span>
+                                        </a>
+
+                                        @* Collapsed view (icon only) *@
+                                        <a
+                                            x-show="!sidebarOpen"
+                                            x-cloak
+                                            href="@item.href"
+                                            class="@cn(@collapsed_classes)"
+                                            title="@item.label"
+                                        >
+                                            @if let Some(icon) = &item.icon {
+                                                <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
+                                            } else {
+                                                @* Show first letter if no icon *@
+                                                <span class="h-5 w-5 flex items-center justify-center text-xs font-medium">
+                                                    @(item.label.chars().next().unwrap_or(' '))
+                                                </span>
+                                            }
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </nav>
+
+                @* Collapse toggle *@
+                <div class="border-t p-4">
+                    <button
+                        @click="sidebarOpen = !sidebarOpen"
+                        class="flex w-full items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        :title="sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-5 w-5 transition-transform duration-300"
+                            :class="sidebarOpen ? '' : 'rotate-180'"
+                        >
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </aside>
+
+            @* Main content area *@
+            <div class="flex flex-1 flex-col overflow-hidden">
+                @* Header *@
+                <header class="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
+                    <div class="flex items-center gap-4">
+                        @* Mobile menu button *@
+                        <button
+                            @click="toggleSidebar()"
+                            class="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground md:hidden"
+                            aria-label="Toggle menu"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                <line x1="4" x2="20" y1="12" y2="12"></line>
+                                <line x1="4" x2="20" y1="6" y2="6"></line>
+                                <line x1="4" x2="20" y1="18" y2="18"></line>
+                            </svg>
+                        </button>
+
+                        @* Header left content (e.g., breadcrumbs, search) *@
+                        @if let Some(left) = header_left {
+                            <div class="hidden md:block">
+                                @left()
+                            </div>
+                        }
+                    </div>
+
+                    @* Header right content (e.g., user menu, notifications) *@
+                    @if let Some(right) = header_right {
+                        <div class="flex items-center gap-2">
+                            @right()
+                        </div>
+                    }
+                </header>
+
+                @* Main content *@
+                <main class="flex-1 overflow-y-auto p-4 md:p-6">
+                    @content()
+                </main>
+
+                @* Optional footer *@
+                @if let Some(f) = footer {
+                    <footer class="border-t bg-card px-4 py-3 md:px-6">
+                        @f()
+                    </footer>
+                }
+            </div>
+        </div>
+    </@>
+}
+
+@* Dashboard with user menu in header *@
+@fn with_user(
+    title: &str,
+    brand: @(),
+    nav_groups: Vec<NavGroup>,
+    user: UserInfo,
+    header_left: Option<@()>,
+    footer: Option<@()>,
+    content: @(),
+) {
+    @let user_menu = @() {
+        <div class="relative" x-data="{ userMenuOpen: false }">
+            <button
+                @click="userMenuOpen = !userMenuOpen"
+                class="flex items-center gap-2 rounded-md p-1 hover:bg-accent"
+            >
+                @* Avatar *@
+                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                    @if let Some(src) = &user.avatar_src {
+                        <img
+                            src="@src"
+                            alt="@user.name"
+                            class="aspect-square h-full w-full object-cover"
+                            x-data="{ failed: false }"
+                            x-on:error="failed = true"
+                            x-show="!failed"
+                        />
+                        <span
+                            class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs"
+                            x-show="failed"
+                            x-cloak
+                        >
+                            @user.avatar_fallback
+                        </span>
+                    } else {
+                        <span class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
+                            @user.avatar_fallback
+                        </span>
+                    }
+                </span>
+                <span class="hidden text-sm font-medium md:inline-block">@user.name</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-muted-foreground">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </button>
+
+            @* Dropdown menu *@
+            <div
+                x-show="userMenuOpen"
+                @click.away="userMenuOpen = false"
+                @keydown.escape.window="userMenuOpen = false"
+                x-transition:enter="transition ease-out duration-100"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="absolute right-0 top-full mt-2 w-56 origin-top-right rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                style="display: none;"
+                role="menu"
+            >
+                @* User info *@
+                <div class="px-2 py-1.5">
+                    <p class="text-sm font-medium">@user.name</p>
+                    @if let Some(email) = &user.email {
+                        <p class="text-xs text-muted-foreground">@email</p>
+                    }
+                </div>
+                <div class="-mx-1 my-1 h-px bg-muted" role="separator"></div>
+                @* Default menu items - users can customize by using apply() directly *@
+                <a href="/profile" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground" role="menuitem" @click="userMenuOpen = false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Profile
+                </a>
+                <a href="/settings" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground" role="menuitem" @click="userMenuOpen = false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Settings
+                </a>
+                <div class="-mx-1 my-1 h-px bg-muted" role="separator"></div>
+                <a href="/logout" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground text-destructive" role="menuitem" @click="userMenuOpen = false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" x2="9" y1="12" y2="12"></line>
+                    </svg>
+                    Log out
+                </a>
+            </div>
+        </div>
+    }
+
+    <@apply
+        title=@title
+        brand=@brand
+        nav_groups=@nav_groups
+        header_left=@header_left
+        header_right=@Some(user_menu)
+        footer=@footer
+        content=@content
+    />
+}
+
+@* Simple dashboard without header extras *@
+@fn simple(
+    title: &str,
+    brand: @(),
+    nav_groups: Vec<NavGroup>,
+    content: @(),
+) {
+    <@apply
+        title=@title
+        brand=@brand
+        nav_groups=@nav_groups
+        header_left=None
+        header_right=None
+        footer=None
+        content=@content
+    />
+}
+
+@* Dashboard with custom header content *@
+@fn with_header(
+    title: &str,
+    brand: @(),
+    nav_groups: Vec<NavGroup>,
+    header: @(),
+    footer: Option<@()>,
+    content: @(),
+) {
+    <@apply
+        title=@title
+        brand=@brand
+        nav_groups=@nav_groups
+        header_left=None
+        header_right=@Some(header)
+        footer=@footer
+        content=@content
+    />
+}

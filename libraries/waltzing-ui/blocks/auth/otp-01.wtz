@@ -1,0 +1,75 @@
+@*
+ * OTP-01 block
+ * OTP verification page with 6-digit input
+ *
+ * @example
+ * @import blocks/auth/otp-01.wtz as otp
+ *
+ * <@otp::apply action="/verify" />
+ *
+ * <@otp::apply
+ *     action="/verify"
+ *     title="Enter verification code"
+ *     description="We sent a 6-digit code to your email"
+ *     resend_url="/resend-code"
+ *     back_url="/login"
+ * />
+ *@
+
+@import /components/card.wtz as card
+@import /components/input-otp.wtz as input_otp
+@import /components/button.wtz as button
+
+
+@* OTP verification form *@
+@fn apply(
+    action: &str,
+    method: &str = "post",
+    title: &str = "Enter verification code",
+    description: &str = "We sent a 6-digit code to your email",
+    otp_error: Option<&str> = None,
+    submit_text: &str = "Verify",
+    resend_url: Option<&str> = None,
+    resend_text: &str = "Resend code",
+    back_url: Option<&str> = None,
+    class: &str = "",
+) {
+    @let container_cls = cn(&["flex min-h-screen items-center justify-center p-4", class])
+    @let header = Some(@() {
+        <@card::title class="text-center">@title</@>
+        <@card::description class="text-center">@description</@>
+    })
+
+    <div class="@container_cls">
+        <@card::apply header=@header footer=None class="w-full max-w-sm">
+            <form action="@action" method="@method" class="space-y-6">
+                <div class="flex justify-center">
+                    <@input_otp::with_separator name="otp" length=6 separator_after=3 />
+                </div>
+
+                @if let Some(error) = otp_error {
+                    <p class="text-center text-sm text-destructive">@error</p>
+                }
+
+                <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
+                    @submit_text
+                </@>
+
+                @if let Some(url) = resend_url {
+                    <p class="text-center text-sm text-muted-foreground">
+                        Didn't receive a code?
+                        <a href="@url" class="text-primary hover:underline">@resend_text</a>
+                    </p>
+                }
+
+                @if let Some(url) = back_url {
+                    <div class="text-center">
+                        <a href="@url" class="text-sm text-muted-foreground hover:text-foreground">
+                            Back to login
+                        </a>
+                    </div>
+                }
+            </form>
+        </@>
+    </div>
+}

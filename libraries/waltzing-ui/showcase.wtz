@@ -32,12 +32,44 @@
 @import /blocks/dialogs/delete.wtz as delete_dialog
 @import /blocks/dialogs/share.wtz as share_dialog
 
+@* Auth blocks *@
+@import /blocks/auth/login.wtz as login_block
+@import /blocks/auth/signup.wtz as signup_block
+@import /blocks/auth/login-01.wtz as login_01_block
+@import /blocks/auth/signup-01.wtz as signup_01_block
+
+@* Sidebar blocks *@
+@import /blocks/sidebar/sidebar-07.wtz as sidebar_07_block
+
+@* Dashboard blocks *@
+@import /blocks/dashboard/dashboard-01.wtz as dashboard_01_block
+
 @* Section wrapper for consistent styling *@
 @fn section(title: &str, id: &str, content: @()) {
     <section id="@id" class="scroll-mt-8">
         <h2 class="text-2xl font-semibold tracking-tight mb-4">@title</h2>
         @content()
     </section>
+}
+
+@* Subsection for block categories *@
+@fn subsection(title: &str, id: &str, content: @()) {
+    <div id="@id" class="scroll-mt-8">
+        <h3 class="text-xl font-semibold tracking-tight mb-3">@title</h3>
+        @content()
+    </div>
+}
+
+@* Block card for displaying block info *@
+@fn block_card(name: &str, description: &str, path: &str, demo_href: Option<&str>) {
+    <@card::simple>
+        <@card::title>@name</@>
+        <@card::description>@description</@>
+        <p class="mt-2"><code class="text-xs bg-muted px-1 py-0.5 rounded">@path</code></p>
+        @if let Some(href) = demo_href {
+            <a href="@href" class="mt-2 inline-flex text-xs text-primary hover:underline">View Demo &rarr;</a>
+        }
+    </@>
 }
 
 @fn apply() {
@@ -373,82 +405,168 @@
 
                 <@separator::horizontal class="my-8" />
 
-                @* Blocks - Forms Section *@
-                <@section title="Blocks: Forms" id="blocks-forms">
-                    <p class="text-muted-foreground mb-4">Complete form blocks for common use cases.</p>
-                    <div class="space-y-8">
-                        <@card::simple>
-                            <@card::title>Contact Form</@>
-                            <@card::description>Standard contact form with validation support</@>
-                            <p class="mt-1"><code class="text-xs bg-muted px-1 py-0.5 rounded">/blocks/forms/contact.wtz</code></p>
-                            <div class="mt-4">
-                                <@contact_form::apply
-                                    action="#"
-                                    method="post"
-                                    class="space-y-4"
+                @* Blocks Section - Main container for all blocks *@
+                <@section title="Blocks" id="blocks">
+                    <p class="text-muted-foreground mb-4">Pre-built, copy-paste page sections and patterns. Organized by category for easy discovery.</p>
+
+                    @* Blocks Navigation *@
+                    <nav class="mb-8 p-4 bg-muted/50 rounded-lg">
+                        <p class="text-sm font-medium mb-2">Jump to category:</p>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="#blocks-auth" class="text-sm text-primary hover:underline">Auth</a>
+                            <span class="text-muted-foreground">|</span>
+                            <a href="#blocks-sidebar" class="text-sm text-primary hover:underline">Sidebar</a>
+                            <span class="text-muted-foreground">|</span>
+                            <a href="#blocks-dashboard" class="text-sm text-primary hover:underline">Dashboard</a>
+                            <span class="text-muted-foreground">|</span>
+                            <a href="#blocks-forms" class="text-sm text-primary hover:underline">Forms</a>
+                            <span class="text-muted-foreground">|</span>
+                            <a href="#blocks-dialogs" class="text-sm text-primary hover:underline">Dialogs</a>
+                        </div>
+                    </nav>
+
+                    <div class="space-y-12">
+                        @* Auth Blocks *@
+                        <@subsection title="Auth" id="blocks-auth">
+                            <p class="text-muted-foreground mb-4">Authentication pages including login and signup forms with various layouts.</p>
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <@block_card
+                                    name="Login"
+                                    description="Simple centered login form with email and password"
+                                    path="/blocks/auth/login.wtz"
+                                    demo_href=@Some("/demo/blocks/auth/login")
+                                />
+                                <@block_card
+                                    name="Signup"
+                                    description="Simple centered signup form with name, email, and password"
+                                    path="/blocks/auth/signup.wtz"
+                                    demo_href=@Some("/demo/blocks/auth/signup")
+                                />
+                                <@block_card
+                                    name="Login 01"
+                                    description="Two-column login with image panel and social auth options"
+                                    path="/blocks/auth/login-01.wtz"
+                                    demo_href=@Some("/demo/blocks/auth/login-01")
+                                />
+                                <@block_card
+                                    name="Signup 01"
+                                    description="Two-column signup with image panel and social auth options"
+                                    path="/blocks/auth/signup-01.wtz"
+                                    demo_href=@Some("/demo/blocks/auth/signup-01")
                                 />
                             </div>
                         </@>
-                        <@card::simple>
-                            <@card::title>Profile Form</@>
-                            <@card::description>Profile/account settings form with avatar, personal info, and social links</@>
-                            <p class="mt-1"><code class="text-xs bg-muted px-1 py-0.5 rounded">/blocks/forms/profile.wtz</code></p>
-                            <div class="mt-4">
-                                <@profile_form::apply
-                                    action="#"
-                                    method="post"
-                                    avatar_fallback="JD"
-                                    name_value=@Some("John Doe")
-                                    email_value=@Some("john@example.com")
-                                    bio_value=@Some("Software developer passionate about building great products")
+
+                        <@separator::horizontal class="my-6" />
+
+                        @* Sidebar Blocks *@
+                        <@subsection title="Sidebar" id="blocks-sidebar">
+                            <p class="text-muted-foreground mb-4">Navigation sidebar patterns for dashboards and applications.</p>
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <@block_card
+                                    name="Sidebar 07"
+                                    description="Collapsible sidebar with icons, nested navigation groups, and user menu"
+                                    path="/blocks/sidebar/sidebar-07.wtz"
+                                    demo_href=@Some("/demo/blocks/sidebar/sidebar-07")
                                 />
                             </div>
                         </@>
-                    </div>
-                </@>
 
-                <@separator::horizontal class="my-8" />
+                        <@separator::horizontal class="my-6" />
 
-                @* Blocks - Dialogs Section *@
-                <@section title="Blocks: Dialogs" id="blocks-dialogs">
-                    <p class="text-muted-foreground mb-4">Pre-built dialog patterns for common interactions.</p>
-                    <div class="flex flex-wrap gap-4">
-                        @* Confirm Dialog *@
-                        <div class="space-y-2">
-                            <p class="text-sm font-medium">Confirm Dialog</p>
-                            <p class="text-xs text-muted-foreground"><code class="bg-muted px-1 py-0.5 rounded">/blocks/dialogs/confirm.wtz</code></p>
-                            <@confirm_dialog::apply
-                                title="Confirm Action"
-                                message="Are you sure you want to proceed with this action?"
-                                trigger=@() {
-                                    <@button::outline>Open Confirm</@>
-                                }
-                            />
-                        </div>
+                        @* Dashboard Blocks *@
+                        <@subsection title="Dashboard" id="blocks-dashboard">
+                            <p class="text-muted-foreground mb-4">Dashboard layouts with stats cards, charts, and data tables.</p>
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <@block_card
+                                    name="Dashboard 01"
+                                    description="Overview dashboard with stat cards, recent activity, and quick actions"
+                                    path="/blocks/dashboard/dashboard-01.wtz"
+                                    demo_href=@Some("/demo/blocks/dashboard/dashboard-01")
+                                />
+                            </div>
+                        </@>
 
-                        @* Delete Dialog *@
-                        <div class="space-y-2">
-                            <p class="text-sm font-medium">Delete Dialog</p>
-                            <p class="text-xs text-muted-foreground"><code class="bg-muted px-1 py-0.5 rounded">/blocks/dialogs/delete.wtz</code></p>
-                            <@delete_dialog::apply
-                                title="Delete Item"
-                                itemName="Example Document"
-                                message="This action cannot be undone. All associated data will be permanently removed."
-                                trigger=@() {
-                                    <@button::apply variant=button::Variant::Destructive size=button::Size::Default>Open Delete</@>
-                                }
-                            />
-                        </div>
+                        <@separator::horizontal class="my-6" />
 
-                        @* Share Dialog *@
-                        <div class="space-y-2">
-                            <p class="text-sm font-medium">Share Dialog</p>
-                            <p class="text-xs text-muted-foreground"><code class="bg-muted px-1 py-0.5 rounded">/blocks/dialogs/share.wtz</code></p>
-                            <@share_dialog::apply
-                                url="https://example.com/shared/item-123"
-                                title="Share This"
-                            />
-                        </div>
+                        @* Forms Blocks *@
+                        <@subsection title="Forms" id="blocks-forms">
+                            <p class="text-muted-foreground mb-4">Complete form blocks for common use cases.</p>
+                            <div class="space-y-8">
+                                <@card::simple>
+                                    <@card::title>Contact Form</@>
+                                    <@card::description>Standard contact form with validation support</@>
+                                    <p class="mt-1"><code class="text-xs bg-muted px-1 py-0.5 rounded">/blocks/forms/contact.wtz</code></p>
+                                    <div class="mt-4">
+                                        <@contact_form::apply
+                                            action="#"
+                                            method="post"
+                                            class="space-y-4"
+                                        />
+                                    </div>
+                                </@>
+                                <@card::simple>
+                                    <@card::title>Profile Form</@>
+                                    <@card::description>Profile/account settings form with avatar, personal info, and social links</@>
+                                    <p class="mt-1"><code class="text-xs bg-muted px-1 py-0.5 rounded">/blocks/forms/profile.wtz</code></p>
+                                    <div class="mt-4">
+                                        <@profile_form::apply
+                                            action="#"
+                                            method="post"
+                                            avatar_fallback="JD"
+                                            name_value=@Some("John Doe")
+                                            email_value=@Some("john@example.com")
+                                            bio_value=@Some("Software developer passionate about building great products")
+                                        />
+                                    </div>
+                                </@>
+                            </div>
+                        </@>
+
+                        <@separator::horizontal class="my-6" />
+
+                        @* Dialogs Blocks *@
+                        <@subsection title="Dialogs" id="blocks-dialogs">
+                            <p class="text-muted-foreground mb-4">Pre-built dialog patterns for common interactions.</p>
+                            <div class="flex flex-wrap gap-4">
+                                @* Confirm Dialog *@
+                                <div class="space-y-2">
+                                    <p class="text-sm font-medium">Confirm Dialog</p>
+                                    <p class="text-xs text-muted-foreground"><code class="bg-muted px-1 py-0.5 rounded">/blocks/dialogs/confirm.wtz</code></p>
+                                    <@confirm_dialog::apply
+                                        title="Confirm Action"
+                                        message="Are you sure you want to proceed with this action?"
+                                        trigger=@() {
+                                            <@button::outline>Open Confirm</@>
+                                        }
+                                    />
+                                </div>
+
+                                @* Delete Dialog *@
+                                <div class="space-y-2">
+                                    <p class="text-sm font-medium">Delete Dialog</p>
+                                    <p class="text-xs text-muted-foreground"><code class="bg-muted px-1 py-0.5 rounded">/blocks/dialogs/delete.wtz</code></p>
+                                    <@delete_dialog::apply
+                                        title="Delete Item"
+                                        itemName="Example Document"
+                                        message="This action cannot be undone. All associated data will be permanently removed."
+                                        trigger=@() {
+                                            <@button::apply variant=button::Variant::Destructive size=button::Size::Default>Open Delete</@>
+                                        }
+                                    />
+                                </div>
+
+                                @* Share Dialog *@
+                                <div class="space-y-2">
+                                    <p class="text-sm font-medium">Share Dialog</p>
+                                    <p class="text-xs text-muted-foreground"><code class="bg-muted px-1 py-0.5 rounded">/blocks/dialogs/share.wtz</code></p>
+                                    <@share_dialog::apply
+                                        url="https://example.com/shared/item-123"
+                                        title="Share This"
+                                    />
+                                </div>
+                            </div>
+                        </@>
                     </div>
                 </@>
 

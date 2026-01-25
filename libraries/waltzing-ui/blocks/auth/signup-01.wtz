@@ -1,0 +1,103 @@
+@*
+ * Signup form block (variant 01)
+ * A simple registration form with name, email, and password fields
+ *
+ * @example
+ * @import blocks/auth/signup-01.wtz as signup
+ *
+ * <@signup::apply action="/api/signup" />
+ *
+ * <@signup::apply
+ *     action="/api/signup"
+ *     method="post"
+ *     title="Create account"
+ *     description="Enter your details to get started"
+ *     name_error=Some("Name is required")
+ *     login_url=Some("/login")
+ * />
+ *@
+
+@import /components/card.wtz as card
+@import /components/input.wtz as input
+@import /components/button.wtz as button
+@import /components/field.wtz as field
+
+
+@* Main signup form *@
+@fn apply(
+    action: &str,
+    method: &str = "post",
+    title: &str = "Sign up",
+    description: &str = "Create your account to get started",
+    name_value: Option<&str> = None,
+    email_value: Option<&str> = None,
+    name_error: Option<&str> = None,
+    email_error: Option<&str> = None,
+    password_error: Option<&str> = None,
+    submit_text: &str = "Sign up",
+    login_url: Option<&str> = None,
+    login_text: &str = "Already have an account?",
+    class: &str = "",
+) {
+    @let wrapper_cls = cn(&["w-full max-w-md mx-auto", class])
+    @let name_ph = Some("John Doe")
+    @let email_ph = Some("you@example.com")
+    @let password_ph = Some("Enter your password")
+
+    <div class="@wrapper_cls">
+        <@card::apply header=@Some(@() { <@header title=@title description=@description /> }) footer=@None>
+            <form action="@action" method="@method" class="space-y-4">
+                <@field::apply label="Name" required=true error=@name_error>
+                    <@input::apply
+                        input_type=input::InputType::Text
+                        name="name"
+                        value=@name_value
+                        placeholder=@name_ph
+                        required=true
+                        error=@name_error
+                    />
+                </@>
+
+                <@field::apply label="Email" required=true error=@email_error>
+                    <@input::apply
+                        input_type=input::InputType::Email
+                        name="email"
+                        value=@email_value
+                        placeholder=@email_ph
+                        required=true
+                        error=@email_error
+                    />
+                </@>
+
+                <@field::apply label="Password" required=true error=@password_error>
+                    <@input::apply
+                        input_type=input::InputType::Password
+                        name="password"
+                        placeholder=@password_ph
+                        required=true
+                        error=@password_error
+                    />
+                </@>
+
+                <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
+                    @submit_text
+                </@>
+
+                @if let Some(url) = login_url {
+                    <p class="text-center text-sm text-muted-foreground">
+                        @login_text
+                        <a href="@url" class="text-primary underline-offset-4 hover:underline ml-1">
+                            Log in
+                        </a>
+                    </p>
+                }
+            </form>
+        </@>
+    </div>
+}
+
+@* Internal header helper *@
+@fn header(title: &str, description: &str) {
+    <h2 class="text-2xl font-semibold tracking-tight">@title</h2>
+    <p class="text-sm text-muted-foreground">@description</p>
+}

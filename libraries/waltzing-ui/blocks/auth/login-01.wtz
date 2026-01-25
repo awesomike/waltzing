@@ -1,0 +1,92 @@
+@*
+ * Login-01 block
+ * Simple centered login form with email and password
+ *
+ * @example
+ * @import blocks/auth/login-01.wtz as login
+ *
+ * <@login::apply action="/login" />
+ *
+ * <@login::apply
+ *     action="/login"
+ *     email_value=Some("user@example.com")
+ *     email_error=Some("Invalid email address")
+ *     forgot_password_url=Some("/forgot-password")
+ *     register_url=Some("/register")
+ * />
+ *@
+
+@import /components/card.wtz as card
+@import /components/input.wtz as input
+@import /components/button.wtz as button
+@import /components/field.wtz as field
+
+
+@* Simple login form *@
+@fn apply(
+    action: &str,
+    method: &str = "post",
+    title: &str = "Login",
+    description: &str = "Enter your email and password to sign in",
+    email_value: Option<&str> = None,
+    email_error: Option<&str> = None,
+    password_error: Option<&str> = None,
+    submit_text: &str = "Sign in",
+    forgot_password_url: Option<&str> = None,
+    register_url: Option<&str> = None,
+    class: &str = "",
+) {
+    @let container_cls = cn(&["flex min-h-screen items-center justify-center p-4", class])
+    @let email_ph = Some("you@example.com")
+    @let password_ph = Some("Enter your password")
+    @let header = Some(@() {
+        <@card::title>@title</@>
+        <@card::description>@description</@>
+    })
+
+    <div class="@container_cls">
+        <@card::apply header=@header footer=None class="w-full max-w-sm">
+            <form action="@action" method="@method" class="space-y-4">
+                <@field::apply label="Email" required=true error=@email_error>
+                    <@input::apply
+                        input_type=input::InputType::Email
+                        name="email"
+                        value=@email_value
+                        placeholder=@email_ph
+                        required=true
+                        error=@email_error
+                    />
+                </@>
+
+                <@field::apply label="Password" required=true error=@password_error>
+                    <@input::apply
+                        input_type=input::InputType::Password
+                        name="password"
+                        placeholder=@password_ph
+                        required=true
+                        error=@password_error
+                    />
+                </@>
+
+                @if let Some(url) = forgot_password_url {
+                    <div class="text-right">
+                        <a href="@url" class="text-sm text-primary hover:underline">
+                            Forgot password?
+                        </a>
+                    </div>
+                }
+
+                <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
+                    @submit_text
+                </@>
+
+                @if let Some(url) = register_url {
+                    <p class="text-center text-sm text-muted-foreground">
+                        Don't have an account?
+                        <a href="@url" class="text-primary hover:underline">Create account</a>
+                    </p>
+                }
+            </form>
+        </@>
+    </div>
+}

@@ -1,0 +1,438 @@
+@*
+ * Dashboard-01 block
+ * A complete dashboard page with sidebar, charts, and data table
+ * This is a full-page template that imports base.wtz
+ *
+ * @example
+ * @import blocks/dashboard/dashboard-01.wtz as dashboard
+ *
+ * <@dashboard::apply
+ *     title="Dashboard"
+ *     brand_name="Acme Inc"
+ *     user_name="John Doe"
+ *     user_email="john@example.com"
+ *     stats=vec![
+ *         dashboard::Stat { label: "Total Revenue", value: "$45,231.89", change: Some("+20.1%"), trend: dashboard::Trend::Up },
+ *         dashboard::Stat { label: "Subscriptions", value: "+2,350", change: Some("+180.1%"), trend: dashboard::Trend::Up },
+ *         dashboard::Stat { label: "Sales", value: "+12,234", change: Some("+19%"), trend: dashboard::Trend::Up },
+ *         dashboard::Stat { label: "Active Now", value: "+573", change: Some("+201"), trend: dashboard::Trend::Up },
+ *     ]
+ *     recent_sales=vec![
+ *         dashboard::Sale { name: "Olivia Martin", email: "olivia@example.com", amount: "+$1,999.00" },
+ *         dashboard::Sale { name: "Jackson Lee", email: "jackson@example.com", amount: "+$39.00" },
+ *     ]
+ * />
+ *@
+
+@import /layouts/base.wtz as base
+@import /components/card.wtz as card
+@import /components/table.wtz as table
+@import /components/button.wtz as button
+@import /components/dropdown.wtz as dropdown
+@import /components/input.wtz as input
+
+@* Trend direction for stat changes *@
+@enum Trend {
+    Up,
+    Down,
+    Neutral,
+}
+
+@* A statistic card item *@
+@struct Stat {
+    label: String,
+    value: String,
+    change: Option<String>,
+    trend: Trend,
+}
+
+@* Navigation item *@
+@struct NavItem {
+    label: String,
+    href: String,
+    icon: Option<String>,
+    active: bool,
+}
+
+@* Recent sale item for the table *@
+@struct Sale {
+    name: String,
+    email: String,
+    amount: String,
+}
+
+@* Main dashboard page *@
+@fn apply(
+    title: &str,
+    brand_name: &str,
+    user_name: &str,
+    user_email: &str,
+    nav_items: Vec<NavItem>,
+    stats: Vec<Stat>,
+    recent_sales: Vec<Sale>,
+) {
+    <@base::apply title=@title description=None head=None>
+        <div
+            x-data="{ sidebarOpen: true, sidebarCollapsed: false }"
+            class="flex h-screen overflow-hidden"
+        >
+            @* Sidebar *@
+            <aside
+                :class="sidebarCollapsed ? 'w-16' : 'w-64'"
+                class="flex flex-col border-r bg-card transition-all duration-300"
+            >
+                @* Brand *@
+                <div class="flex h-16 items-center border-b px-4">
+                    <div class="flex items-center gap-2">
+                        @* Logo placeholder *@
+                        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
+                            </svg>
+                        </div>
+                        <span x-show="!sidebarCollapsed" x-transition class="font-semibold">@brand_name</span>
+                    </div>
+                </div>
+
+                @* Navigation *@
+                <nav class="flex-1 overflow-y-auto p-4">
+                    <ul class="space-y-1">
+                        @for item in &nav_items {
+                            <li>
+                                @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
+                                @let link_classes = vec!["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
+                                <a
+                                    href="@item.href"
+                                    class="@cn(@link_classes)"
+                                >
+                                    @if let Some(icon) = &item.icon {
+                                        <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
+                                    }
+                                    <span x-show="!sidebarCollapsed" x-transition>@item.label</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+
+                @* Collapse toggle *@
+                <div class="border-t p-4">
+                    <button
+                        @click="sidebarCollapsed = !sidebarCollapsed"
+                        class="flex w-full items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-5 w-5 transition-transform"
+                            :class="sidebarCollapsed ? 'rotate-180' : ''"
+                        >
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </aside>
+
+            @* Main content area *@
+            <div class="flex flex-1 flex-col overflow-hidden">
+                @* Header *@
+                <header class="flex h-16 items-center justify-between border-b bg-card px-6">
+                    <div class="flex items-center gap-4">
+                        <h1 class="text-xl font-semibold">@title</h1>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        @* Search *@
+                        <div class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.3-4.3"/>
+                            </svg>
+                            <@input::apply
+                                input_type=input::InputType::Search
+                                name="search"
+                                placeholder=@Some("Search...")
+                                class="w-64 pl-9"
+                            />
+                        </div>
+
+                        @* User menu *@
+                        <@dropdown::apply align=dropdown::Align::End trigger=@() {
+                            <button class="flex items-center gap-2 rounded-full border p-1 pr-3 hover:bg-accent">
+                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                                    @(user_name.chars().next().unwrap_or('U'))
+                                </div>
+                                <span class="text-sm font-medium">@user_name</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m6 9 6 6 6-6"/>
+                                </svg>
+                            </button>
+                        }>
+                            <@dropdown::label>
+                                <div>
+                                    <p class="font-medium">@user_name</p>
+                                    <p class="text-xs text-muted-foreground">@user_email</p>
+                                </div>
+                            </@>
+                            <@dropdown::separator />
+                            <@dropdown::link href="/profile".to_string()>Profile</@>
+                            <@dropdown::link href="/settings".to_string()>Settings</@>
+                            <@dropdown::separator />
+                            <@dropdown::item>Sign out</@>
+                        </@>
+                    </div>
+                </header>
+
+                @* Content *@
+                <main class="flex-1 overflow-y-auto bg-muted/40 p-6">
+                    <div class="space-y-6">
+                        @* Stats grid *@
+                        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            @for stat in &stats {
+                                <@stat_card stat=@stat />
+                            }
+                        </div>
+
+                        @* Chart and recent sales *@
+                        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                            @* Chart area *@
+                            <@card::apply
+                                header=@Some(@() {
+                                    <@card::title>Overview</@>
+                                    <@card::description>Revenue over the last 6 months</@>
+                                })
+                                footer=None
+                                class="lg:col-span-4"
+                            >
+                                @* Placeholder chart using CSS *@
+                                <div class="h-[300px] w-full">
+                                    <@chart_placeholder />
+                                </div>
+                            </@>
+
+                            @* Recent sales *@
+                            <@card::apply
+                                header=@Some(@() {
+                                    <@card::title>Recent Sales</@>
+                                    <@card::description>You made @(recent_sales.len()) sales this month.</@>
+                                })
+                                footer=None
+                                class="lg:col-span-3"
+                            >
+                                <div class="space-y-4">
+                                    @for sale in &recent_sales {
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-sm font-medium">
+                                                @(sale.name.chars().next().unwrap_or('?'))
+                                            </div>
+                                            <div class="flex-1 space-y-1">
+                                                <p class="text-sm font-medium leading-none">@sale.name</p>
+                                                <p class="text-sm text-muted-foreground">@sale.email</p>
+                                            </div>
+                                            <div class="font-medium">@sale.amount</div>
+                                        </div>
+                                    }
+                                </div>
+                            </@>
+                        </div>
+
+                        @* Data table *@
+                        <@card::apply header=@Some(@() {
+                            <@card::title>Recent Transactions</@>
+                            <@card::description>A list of your recent transactions.</@>
+                        }) footer=None>
+                            <@table::apply
+                                header=@() {
+                                    <@table::header_row>
+                                        <@table::th>Customer</@>
+                                        <@table::th>Email</@>
+                                        <@table::th>Amount</@>
+                                        <@table::th class="text-right">Status</@>
+                                    </@>
+                                }
+                                body=@() {
+                                    @for sale in &recent_sales {
+                                        <@table::row>
+                                            <@table::td class="font-medium">@sale.name</@>
+                                            <@table::td>@sale.email</@>
+                                            <@table::td>@sale.amount</@>
+                                            <@table::td class="text-right">
+                                                <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+                                                    Completed
+                                                </span>
+                                            </@>
+                                        </@>
+                                    }
+                                }
+                            />
+                        </@>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </@>
+}
+
+@* Stat card component *@
+@fn stat_card(stat: &Stat) {
+    @let trend_color = match stat.trend {
+        Trend::Up => "text-green-600",
+        Trend::Down => "text-red-600",
+        Trend::Neutral => "text-muted-foreground",
+    }
+    @let trend_icon = match stat.trend {
+        Trend::Up => "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m18 15-6-6-6 6\"/></svg>",
+        Trend::Down => "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m6 9 6 6 6-6\"/></svg>",
+        Trend::Neutral => "",
+    }
+
+    <@card::simple>
+        <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <h3 class="text-sm font-medium tracking-tight">@stat.label</h3>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        </div>
+        <div class="text-2xl font-bold">@stat.value</div>
+        @if let Some(change) = &stat.change {
+            <p class="text-xs @trend_color flex items-center gap-1">
+                @safe(trend_icon)
+                @change from last month
+            </p>
+        }
+    </@>
+}
+
+@* Placeholder bar chart using CSS *@
+@fn chart_placeholder() {
+    <div class="flex h-full w-full items-end justify-between gap-2 px-4 pb-4 pt-8">
+        @let heights = vec!["45%", "65%", "40%", "80%", "55%", "75%", "60%", "90%", "70%", "85%", "50%", "95%"]
+        @let months = vec!["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        @for (i, height) in heights.iter().enumerate() {
+            <div class="flex flex-1 flex-col items-center gap-2">
+                <div
+                    class="w-full rounded-t bg-primary/80 transition-all hover:bg-primary"
+                    style="height: @height"
+                ></div>
+                <span class="text-xs text-muted-foreground">@months[i]</span>
+            </div>
+        }
+    </div>
+}
+
+@* Default navigation items *@
+@fn default_nav_items() -> Vec<NavItem> {
+    vec![
+        NavItem {
+            label: "Dashboard".to_string(),
+            href: "/".to_string(),
+            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\"/></svg>".to_string()),
+            active: true,
+        },
+        NavItem {
+            label: "Analytics".to_string(),
+            href: "/analytics".to_string(),
+            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 3v18h18\"/><path d=\"m19 9-5 5-4-4-3 3\"/></svg>".to_string()),
+            active: false,
+        },
+        NavItem {
+            label: "Customers".to_string(),
+            href: "/customers".to_string(),
+            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/></svg>".to_string()),
+            active: false,
+        },
+        NavItem {
+            label: "Products".to_string(),
+            href: "/products".to_string(),
+            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m7.5 4.27 9 5.15\"/><path d=\"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z\"/><path d=\"m3.3 7 8.7 5 8.7-5\"/><path d=\"M12 22V12\"/></svg>".to_string()),
+            active: false,
+        },
+        NavItem {
+            label: "Settings".to_string(),
+            href: "/settings".to_string(),
+            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>".to_string()),
+            active: false,
+        },
+    ]
+}
+
+@* Default stats data *@
+@fn default_stats() -> Vec<Stat> {
+    vec![
+        Stat {
+            label: "Total Revenue".to_string(),
+            value: "$45,231.89".to_string(),
+            change: Some("+20.1%".to_string()),
+            trend: Trend::Up,
+        },
+        Stat {
+            label: "Subscriptions".to_string(),
+            value: "+2,350".to_string(),
+            change: Some("+180.1%".to_string()),
+            trend: Trend::Up,
+        },
+        Stat {
+            label: "Sales".to_string(),
+            value: "+12,234".to_string(),
+            change: Some("+19%".to_string()),
+            trend: Trend::Up,
+        },
+        Stat {
+            label: "Active Now".to_string(),
+            value: "+573".to_string(),
+            change: Some("+201".to_string()),
+            trend: Trend::Up,
+        },
+    ]
+}
+
+@* Default recent sales data *@
+@fn default_recent_sales() -> Vec<Sale> {
+    vec![
+        Sale {
+            name: "Olivia Martin".to_string(),
+            email: "olivia.martin@email.com".to_string(),
+            amount: "+$1,999.00".to_string(),
+        },
+        Sale {
+            name: "Jackson Lee".to_string(),
+            email: "jackson.lee@email.com".to_string(),
+            amount: "+$39.00".to_string(),
+        },
+        Sale {
+            name: "Isabella Nguyen".to_string(),
+            email: "isabella.nguyen@email.com".to_string(),
+            amount: "+$299.00".to_string(),
+        },
+        Sale {
+            name: "William Kim".to_string(),
+            email: "will@email.com".to_string(),
+            amount: "+$99.00".to_string(),
+        },
+        Sale {
+            name: "Sofia Davis".to_string(),
+            email: "sofia.davis@email.com".to_string(),
+            amount: "+$39.00".to_string(),
+        },
+    ]
+}
+
+@* Demo version with default data *@
+@fn demo() {
+    <@apply
+        title="Dashboard"
+        brand_name="Acme Inc"
+        user_name="John Doe"
+        user_email="john@example.com"
+        nav_items=@default_nav_items()
+        stats=@default_stats()
+        recent_sales=@default_recent_sales()
+    />
+}

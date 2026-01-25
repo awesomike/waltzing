@@ -25,6 +25,7 @@ button-group = { path = "components/button-group.wtz", deps = ["button", "lib/ut
 calendar = { path = "components/calendar.wtz", deps = ["button", "lib/utils"] }
 card = { path = "components/card.wtz", deps = ["lib/utils"] }
 carousel = { path = "components/carousel.wtz", deps = ["button", "lib/utils"] }
+chart = { path = "components/chart.wtz", deps = ["lib/utils"] }
 checkbox = { path = "components/checkbox.wtz", deps = ["lib/utils"] }
 collapsible = { path = "components/collapsible.wtz", deps = ["lib/utils"] }
 combobox = { path = "components/combobox.wtz", deps = ["popover", "lib/utils"] }
@@ -85,7 +86,11 @@ typography = { path = "components/typography.wtz", deps = ["lib/utils"] }
 validation-errors = { path = "components/validation-errors.wtz", deps = ["lib/utils"] }
 
 [layouts]
+auth = { path = "layouts/auth.wtz", deps = ["base"] }
 base = { path = "layouts/base.wtz", deps = [] }
+dashboard = { path = "layouts/dashboard.wtz", deps = ["base"] }
+marketing = { path = "layouts/marketing.wtz", deps = ["base"] }
+settings = { path = "layouts/settings.wtz", deps = ["base"] }
 sidebar = { path = "layouts/sidebar.wtz", deps = ["base"] }
 
 [blocks]
@@ -94,3 +99,21 @@ profile-form = { path = "blocks/forms/profile.wtz", deps = ["avatar", "button", 
 confirm-dialog = { path = "blocks/dialogs/confirm.wtz", deps = ["dialog", "button"] }
 delete-dialog = { path = "blocks/dialogs/delete.wtz", deps = ["dialog"] }
 share-dialog = { path = "blocks/dialogs/share.wtz", deps = ["dialog", "button", "input"] }
+login-01 = { path = "blocks/auth/login-01.wtz", deps = ["card", "input", "button", "field"] }
+login-02 = { path = "blocks/auth/login-02.wtz", deps = ["input", "button", "field"] }
+login-03 = { path = "blocks/auth/login-03.wtz", deps = ["card", "input", "button", "field", "checkbox", "separator"] }
+login-04 = { path = "blocks/auth/login-04.wtz", deps = ["card", "input", "button", "field"] }
+login-05 = { path = "blocks/auth/login-05.wtz", deps = ["card", "input", "button", "field"] }
+login = { path = "blocks/auth/login.wtz", deps = ["card", "input", "button", "field", "checkbox", "separator"] }
+signup = { path = "blocks/auth/signup.wtz", deps = ["card", "input", "button", "field", "checkbox", "separator"] }
+signup-01 = { path = "blocks/auth/signup-01.wtz", deps = ["card", "input", "button", "field"] }
+otp-01 = { path = "blocks/auth/otp-01.wtz", deps = ["card", "input-otp", "button", "field"] }
+dashboard-01 = { path = "blocks/dashboard/dashboard-01.wtz", deps = ["base", "card", "table", "button", "dropdown", "input"] }
+sidebar-01 = { path = "blocks/sidebar/sidebar-01.wtz", deps = ["lib/utils"] }
+sidebar-02 = { path = "blocks/sidebar/sidebar-02.wtz", deps = ["lib/utils"] }
+sidebar-03 = { path = "blocks/sidebar/sidebar-03.wtz", deps = ["lib/utils"] }
+sidebar-07 = { path = "blocks/sidebar/sidebar-07.wtz", deps = ["lib/utils"] }
+sidebar-11 = { path = "blocks/sidebar/sidebar-11.wtz", deps = ["lib/utils"] }
+sidebar-12 = { path = "blocks/sidebar/sidebar-12.wtz", deps = ["lib/utils", "calendar"] }
+sidebar-15 = { path = "blocks/sidebar/sidebar-15.wtz", deps = ["lib/utils"] }
+calendar-01 = { path = "blocks/calendar/calendar-01.wtz", deps = ["button", "card"] }

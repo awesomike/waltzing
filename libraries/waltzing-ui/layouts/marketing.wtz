@@ -1,0 +1,427 @@
+@*
+ * Marketing layout
+ * Landing page layout with sticky header, hero section, and footer
+ *@
+
+@import /layouts/base.wtz
+
+@struct NavItem {
+    label: String,
+    href: String,
+    active: bool,
+}
+
+@struct FooterLinkGroup {
+    title: String,
+    links: Vec<FooterLink>,
+}
+
+@struct FooterLink {
+    label: String,
+    href: String,
+}
+
+@struct SocialLink {
+    name: String,
+    href: String,
+    icon: String,
+}
+
+@*
+ * Full marketing layout with hero section
+ * Use for landing pages with prominent hero area
+ *@
+@fn apply(
+    title: &str,
+    description: Option<&str>,
+    brand: @(),
+    nav_items: Vec<NavItem>,
+    cta_button: Option<@()>,
+    hero: @(),
+    footer_groups: Option<Vec<FooterLinkGroup>>,
+    social_links: Option<Vec<SocialLink>>,
+    copyright: Option<&str>,
+    content: @(),
+) {
+    <@base::apply title=@title description=@description head=None>
+        <div class="flex min-h-screen flex-col">
+            @* Sticky header *@
+            <@header
+                brand=@brand
+                nav_items=@nav_items
+                cta_button=@cta_button
+            />
+
+            @* Hero section *@
+            <section class="relative">
+                @hero()
+            </section>
+
+            @* Main content *@
+            <main class="flex-1">
+                @content()
+            </main>
+
+            @* Footer *@
+            <@footer
+                brand=@brand
+                footer_groups=@footer_groups
+                social_links=@social_links
+                copyright=@copyright
+            />
+        </div>
+    </@>
+}
+
+@*
+ * Simple marketing layout without hero
+ * Use for secondary pages (about, pricing, etc.)
+ *@
+@fn simple(
+    title: &str,
+    description: Option<&str>,
+    brand: @(),
+    nav_items: Vec<NavItem>,
+    cta_button: Option<@()>,
+    footer_groups: Option<Vec<FooterLinkGroup>>,
+    social_links: Option<Vec<SocialLink>>,
+    copyright: Option<&str>,
+    content: @(),
+) {
+    <@base::apply title=@title description=@description head=None>
+        <div class="flex min-h-screen flex-col">
+            @* Sticky header *@
+            <@header
+                brand=@brand
+                nav_items=@nav_items
+                cta_button=@cta_button
+            />
+
+            @* Main content *@
+            <main class="flex-1">
+                @content()
+            </main>
+
+            @* Footer *@
+            <@footer
+                brand=@brand
+                footer_groups=@footer_groups
+                social_links=@social_links
+                copyright=@copyright
+            />
+        </div>
+    </@>
+}
+
+@*
+ * Sticky header with navigation and CTA
+ *@
+@fn header(
+    brand: @(),
+    nav_items: Vec<NavItem>,
+    cta_button: Option<@()>,
+) {
+    <header
+        x-data="{ mobileMenuOpen: false, scrolled: false }"
+        x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 10 })"
+        :class="scrolled ? 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm' : 'bg-background'"
+        class="sticky top-0 z-50 w-full border-b transition-all duration-200"
+    >
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between">
+                @* Brand/Logo *@
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center gap-2 font-semibold">
+                        @brand()
+                    </a>
+                </div>
+
+                @* Desktop navigation *@
+                <nav class="hidden md:flex md:items-center md:gap-6">
+                    @for item in &nav_items {
+                        @let active_cls = class_if(item.active, "text-foreground")
+                        @let inactive_cls = class_if(!item.active, "text-muted-foreground")
+                        <a
+                            href="@item.href"
+                            class="text-sm font-medium transition-colors hover:text-foreground @active_cls @inactive_cls"
+                            @if item.active { aria-current="page" }
+                        >
+                            @item.label
+                        </a>
+                    }
+                </nav>
+
+                @* Desktop CTA button *@
+                <div class="hidden md:flex md:items-center md:gap-4">
+                    @if let Some(cta) = cta_button {
+                        @cta()
+                    }
+                </div>
+
+                @* Mobile menu button *@
+                <button
+                    type="button"
+                    class="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground md:hidden"
+                    @click="mobileMenuOpen = !mobileMenuOpen"
+                    :aria-expanded="mobileMenuOpen"
+                    aria-label="Toggle navigation menu"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-6 w-6"
+                        x-show="!mobileMenuOpen"
+                    >
+                        <line x1="4" x2="20" y1="12" y2="12"/>
+                        <line x1="4" x2="20" y1="6" y2="6"/>
+                        <line x1="4" x2="20" y1="18" y2="18"/>
+                    </svg>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-6 w-6"
+                        x-show="mobileMenuOpen"
+                        x-cloak
+                    >
+                        <path d="M18 6 6 18"/>
+                        <path d="m6 6 12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        @* Mobile menu *@
+        <div
+            x-show="mobileMenuOpen"
+            x-cloak
+            x-collapse
+            class="border-t md:hidden"
+        >
+            <div class="space-y-1 px-4 py-4">
+                @for item in nav_items {
+                    @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
+                    @let inactive_cls = class_if(!item.active, "text-muted-foreground")
+                    <a
+                        href="@item.href"
+                        class="block rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground @active_cls @inactive_cls"
+                        @if item.active { aria-current="page" }
+                    >
+                        @item.label
+                    </a>
+                }
+                @if let Some(cta) = cta_button {
+                    <div class="mt-4 pt-4 border-t">
+                        @cta()
+                    </div>
+                }
+            </div>
+        </div>
+    </header>
+}
+
+@*
+ * Footer with link groups, social icons, and copyright
+ *@
+@fn footer(
+    brand: @(),
+    footer_groups: Option<Vec<FooterLinkGroup>>,
+    social_links: Option<Vec<SocialLink>>,
+    copyright: Option<&str>,
+) {
+    <footer class="border-t bg-muted/40">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+            @if let Some(groups) = &footer_groups {
+                @if !groups.is_empty() {
+                    <div class="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
+                        @* Brand column *@
+                        <div class="col-span-2 md:col-span-4 lg:col-span-1">
+                            <a href="/" class="flex items-center gap-2 font-semibold">
+                                @brand()
+                            </a>
+                            @if let Some(links) = social_links {
+                                @if !links.is_empty() {
+                                    <div class="mt-4 flex gap-4">
+                                        @for link in links {
+                                            <a
+                                                href="@link.href"
+                                                class="text-muted-foreground hover:text-foreground transition-colors"
+                                                aria-label="@link.name"
+                                            >
+                                                <span class="h-5 w-5 block">@safe(&link.icon)</span>
+                                            </a>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        @* Link groups *@
+                        @for group in groups {
+                            <div>
+                                <h3 class="text-sm font-semibold text-foreground">@group.title</h3>
+                                <ul class="mt-4 space-y-3">
+                                    @for link in &group.links {
+                                        <li>
+                                            <a
+                                                href="@link.href"
+                                                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                            >
+                                                @link.label
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                }
+            } else {
+                @* Simple footer without link groups *@
+                <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between">
+                    <a href="/" class="flex items-center gap-2 font-semibold">
+                        @brand()
+                    </a>
+                    @if let Some(links) = social_links {
+                        @if !links.is_empty() {
+                            <div class="flex gap-4">
+                                @for link in links {
+                                    <a
+                                        href="@link.href"
+                                        class="text-muted-foreground hover:text-foreground transition-colors"
+                                        aria-label="@link.name"
+                                    >
+                                        <span class="h-5 w-5 block">@safe(&link.icon)</span>
+                                    </a>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            }
+
+            @* Copyright *@
+            @if let Some(copy) = copyright {
+                <div class="mt-8 pt-8 border-t">
+                    <p class="text-center text-sm text-muted-foreground">
+                        @copy
+                    </p>
+                </div>
+            }
+        </div>
+    </footer>
+}
+
+@*
+ * Hero section component for common hero patterns
+ *@
+@fn hero_section(
+    class: &str = "",
+    content: @(),
+) {
+    <div class=@cn(&["relative overflow-hidden", class])>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+            @content()
+        </div>
+    </div>
+}
+
+@*
+ * Centered hero variant
+ *@
+@fn hero_centered(
+    title: &str,
+    description: Option<&str>,
+    actions: Option<@()>,
+) {
+    <@hero_section class="text-center">
+        <div class="mx-auto max-w-3xl">
+            <h1 class="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                @title
+            </h1>
+            @if let Some(desc) = description {
+                <p class="mt-6 text-lg leading-8 text-muted-foreground">
+                    @desc
+                </p>
+            }
+            @if let Some(act) = actions {
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    @act()
+                </div>
+            }
+        </div>
+    </@>
+}
+
+@*
+ * Split hero with content and image
+ *@
+@fn hero_split(
+    content: @(),
+    media: @(),
+    reverse: bool = false,
+) {
+    <@hero_section>
+        @let order_cls = class_if(reverse, "lg:flex-row-reverse")
+        <div class="flex flex-col gap-12 lg:flex-row lg:items-center lg:gap-16 @order_cls">
+            <div class="flex-1">
+                @content()
+            </div>
+            <div class="flex-1">
+                @media()
+            </div>
+        </div>
+    </@>
+}
+
+@*
+ * Section component for page sections
+ *@
+@fn section(
+    id: Option<&str>,
+    class: &str = "",
+    content: @(),
+) {
+    <section
+        @if let Some(section_id) = id { id="@section_id" }
+        class=@cn(&["py-16 lg:py-24", class])
+    >
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            @content()
+        </div>
+    </section>
+}
+
+@*
+ * Section header for consistent section titles
+ *@
+@fn section_header(
+    title: &str,
+    description: Option<&str>,
+    centered: bool = true,
+) {
+    @let align_cls = class_if(centered, "text-center mx-auto")
+    <div class="max-w-2xl @align_cls">
+        <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            @title
+        </h2>
+        @if let Some(desc) = description {
+            <p class="mt-4 text-lg text-muted-foreground">
+                @desc
+            </p>
+        }
+    </div>
+}

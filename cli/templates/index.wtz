@@ -1,0 +1,61 @@
+@*
+ * Index page template
+ * The main landing page for your Waltzing project
+ *@
+
+@import templates/base.wtz as base
+
+@struct IndexTemplate {
+    title: String,
+    message: String,
+}
+
+@fn apply(data: IndexTemplate) {
+    <@base::apply title=@data.title description=@Some("A Waltzing project")>
+        <div class="min-h-screen flex items-center justify-center">
+            <div class="text-center space-y-6 p-8">
+                @* Logo *@
+                <div class="flex justify-center">
+                    <svg class="w-20 h-20 text-primary" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="4" />
+                        <path d="M30 50 L45 65 L70 35" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+
+                @* Title *@
+                <h1 class="text-4xl font-bold tracking-tight text-foreground">
+                    @data.title
+                </h1>
+
+                @* Message *@
+                <p class="text-xl text-muted-foreground max-w-md">
+                    @data.message
+                </p>
+
+                @* Quick links *@
+                <div class="flex flex-wrap justify-center gap-4 pt-4">
+                    <a
+                        href="https://waltzing.dev/docs"
+                        class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-colors"
+                    >
+                        Documentation
+                    </a>
+                    <a
+                        href="https://waltzing.dev/components"
+                        class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                    >
+                        Components
+                    </a>
+                </div>
+
+                @* Getting started hint *@
+                <div class="pt-8 text-sm text-muted-foreground">
+                    <p>Add components with:</p>
+                    <code class="mt-2 inline-block bg-muted px-3 py-1 rounded-md font-mono">
+                        waltzing add button card dialog
+                    </code>
+                </div>
+            </div>
+        </div>
+    </@>
+}

@@ -1,0 +1,23 @@
+[package]
+name = "{{project_name}}"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Web framework
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+
+# Waltzing template engine
+waltzing = "0.2"
+
+# Static file serving
+tower-http = { version = "0.6", features = ["fs"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+# Hot reload during development
+listenfd = "1"
