@@ -49,10 +49,10 @@
     }
 
     @let container_classes = vec![@base, @size_cls, @cls]
-    @let container_cls = utils::cn(@container_classes)
+    @let container_cls = cn(@container_classes)
     @let fallback_base = "flex h-full w-full items-center justify-center rounded-full bg-muted"
     @let fallback_classes = vec![@fallback_base, @fallback_text_size]
-    @let fallback_cls = utils::cn(@fallback_classes)
+    @let fallback_cls = cn(@fallback_classes)
 
     <span class="@container_cls">
         @if let Some(image_src) = src {

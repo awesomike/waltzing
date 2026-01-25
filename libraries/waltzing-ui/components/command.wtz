@@ -32,7 +32,7 @@
     class: Option<&str> = None,
     content: @() = @{},
 ) {
-    @let container_cls = utils::cn(&[
+    @let container_cls = cn(&[
         "flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground",
         class.unwrap_or("")
     ])
@@ -88,7 +88,7 @@
     class: Option<&str> = None,
 ) {
     @let ph = placeholder.unwrap_or("Type a command or search...")
-    @let input_cls = utils::cn(&[
+    @let input_cls = cn(&[
         "flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
         class.unwrap_or("")
     ])
@@ -116,7 +116,7 @@
     class: Option<&str> = None,
     content: @() = @{},
 ) {
-    @let list_cls = utils::cn(&[
+    @let list_cls = cn(&[
         "max-h-[300px] overflow-y-auto overflow-x-hidden",
         class.unwrap_or("")
     ])
@@ -132,7 +132,7 @@
     class: Option<&str> = None,
     content: @() = @{},
 ) {
-    @let group_cls = utils::cn(&[
+    @let group_cls = cn(&[
         "overflow-hidden p-1 text-foreground",
         class.unwrap_or("")
     ])
@@ -153,9 +153,9 @@
     disabled: bool = false,
     class: Option<&str> = None,
 ) {
-    @let item_cls = utils::cn(&[
+    @let item_cls = cn(&[
         "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground",
-        utils::class_if(disabled, "pointer-events-none opacity-50"),
+        class_if(disabled, "pointer-events-none opacity-50"),
         class.unwrap_or("")
     ])
 
@@ -187,7 +187,7 @@
     class: Option<&str> = None,
 ) {
     @let msg = message.unwrap_or("No results found.")
-    @let empty_cls = utils::cn(&[
+    @let empty_cls = cn(&[
         "py-6 text-center text-sm text-muted-foreground",
         class.unwrap_or("")
     ])
@@ -199,7 +199,7 @@
 
 @** Command separator **@
 @fn separator(class: Option<&str> = None) {
-    @let sep_cls = utils::cn(&[
+    @let sep_cls = cn(&[
         "-mx-1 h-px bg-border",
         class.unwrap_or("")
     ])
@@ -209,7 +209,7 @@
 
 @** Command shortcut display **@
 @fn shortcut(keys: &str, class: Option<&str> = None) {
-    @let shortcut_cls = utils::cn(&[
+    @let shortcut_cls = cn(&[
         "ml-auto text-xs tracking-widest text-muted-foreground",
         class.unwrap_or("")
     ])
@@ -223,7 +223,7 @@
     class: Option<&str> = None,
     content: @() = @{},
 ) {
-    @let dialog_cls = utils::cn(&[
+    @let dialog_cls = cn(&[
         "fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg border bg-popover shadow-lg",
         class.unwrap_or("")
     ])

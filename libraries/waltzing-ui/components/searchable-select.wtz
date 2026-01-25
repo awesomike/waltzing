@@ -75,7 +75,7 @@
     @let trigger_base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
     @let cls = class.unwrap_or("")
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @cls])
+    @let trigger_cls = cn(&[@trigger_base, @error_cls, @cls])
 
     @let initial_label = {
         match selected {
@@ -224,7 +224,7 @@
             >
                 @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
-                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
+                    @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"
@@ -300,7 +300,7 @@
     @let error_cls = if error.is_some() { "border-destructive focus-within:ring-destructive" } else { "" }
     @let disabled_cls = if disabled { "cursor-not-allowed opacity-50" } else { "" }
     @let cls = class.unwrap_or("")
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @disabled_cls, @cls])
+    @let trigger_cls = cn(&[@trigger_base, @error_cls, @disabled_cls, @cls])
 
     @let ph = placeholder.unwrap_or("Select...")
     @let search_ph = search_placeholder.unwrap_or("Search...")
@@ -491,7 +491,7 @@
             >
                 @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
-                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
+                    @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"
@@ -565,7 +565,7 @@
     @let trigger_base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
     @let cls = class.unwrap_or("")
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @cls])
+    @let trigger_cls = cn(&[@trigger_base, @error_cls, @cls])
 
     @let initial_label = {
         match selected {
@@ -679,7 +679,7 @@
             <div x-ref="optionsList" role="listbox">
                 @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
-                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
+                    @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"
@@ -744,7 +744,7 @@
     @let trigger_base = "flex h-8 w-full items-center justify-between rounded border-0 border-transparent bg-transparent px-2 py-1 text-sm hover:bg-muted/50 focus:bg-background focus:ring-1 focus:ring-ring"
     @let error_cls = if error.is_some() { "ring-1 ring-destructive" } else { "" }
     @let cls = class.unwrap_or("")
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @cls])
+    @let trigger_cls = cn(&[@trigger_base, @error_cls, @cls])
 
     @let initial_label = {
         match selected {
@@ -892,7 +892,7 @@
             >
                 @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
-                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
+                    @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"
@@ -957,7 +957,7 @@
     @let trigger_base = "flex min-h-8 w-full flex-wrap items-center gap-1 rounded border-0 border-transparent bg-transparent px-2 py-1 text-sm hover:bg-muted/50 focus-within:bg-background focus-within:ring-1 focus-within:ring-ring"
     @let error_cls = if error.is_some() { "ring-1 ring-destructive" } else { "" }
     @let cls = class.unwrap_or("")
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @cls])
+    @let trigger_cls = cn(&[@trigger_base, @error_cls, @cls])
 
     @let ph = placeholder.unwrap_or("Select...")
     @let search_ph = search_placeholder.unwrap_or("Search...")
@@ -1146,7 +1146,7 @@
             >
                 @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
-                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
+                    @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"

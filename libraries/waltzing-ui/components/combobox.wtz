@@ -41,7 +41,7 @@
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
     @let cls = class.unwrap_or("")
     @let input_classes = vec![@base, @error_cls, @cls]
-    @let input_cls = utils::cn(@input_classes)
+    @let input_cls = cn(@input_classes)
 
     @* Find the initial label for the selected value *@
     @let initial_label = selected.and_then(|sel| options.iter().find(|o| o.value == sel).map(|o| o.label.as_str())).unwrap_or("")
@@ -153,9 +153,9 @@
         >
             @for (idx, opt) in options.iter().enumerate() {
                 @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
-                @let option_disabled = utils::class_if(opt.disabled, "pointer-events-none opacity-50")
+                @let option_disabled = class_if(opt.disabled, "pointer-events-none opacity-50")
                 @let option_classes = vec![@option_base, @option_disabled]
-                @let option_cls = utils::cn(@option_classes)
+                @let option_cls = cn(@option_classes)
                 <div
                     data-option
                     data-value="@opt.value"

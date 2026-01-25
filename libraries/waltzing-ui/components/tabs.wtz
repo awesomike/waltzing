@@ -69,7 +69,7 @@
     class: Option<&str>,
 ) {
     @let cls = class.unwrap_or("")
-    @let classes = utils::cn(&["flex gap-4", @cls])
+    @let classes = cn(&["flex gap-4", @cls])
     <div
         x-data=@```json { activeTab: "@default_tab" } ```@
         class="@classes"

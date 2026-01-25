@@ -57,8 +57,8 @@
     class: Option<&str> = None,
 ) {
     @let base_cls = "inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-    @let active_cls = utils::class_if(active, "bg-accent/50 text-accent-foreground")
-    @let item_cls = utils::cn(&[base_cls, active_cls, class.unwrap_or("")])
+    @let active_cls = class_if(active, "bg-accent/50 text-accent-foreground")
+    @let item_cls = cn(&[base_cls, active_cls, class.unwrap_or("")])
 
     <li role="none">
         @if let Some(url) = href {
@@ -86,8 +86,8 @@
     content: @(),
 ) {
     @let trigger_cls = "inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 group"
-    @let active_cls = utils::class_if(active, "bg-accent/50 text-accent-foreground")
-    @let btn_cls = utils::cn(&[trigger_cls, active_cls, class.unwrap_or("")])
+    @let active_cls = class_if(active, "bg-accent/50 text-accent-foreground")
+    @let btn_cls = cn(&[trigger_cls, active_cls, class.unwrap_or("")])
 
     <li
         role="none"
@@ -150,7 +150,7 @@
     class: Option<&str> = None,
     content: @(),
 ) {
-    @let item_cls = utils::cn(&["block w-full select-none rounded-sm px-3 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground", class.unwrap_or("")])
+    @let item_cls = cn(&["block w-full select-none rounded-sm px-3 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground", class.unwrap_or("")])
 
     <a
         href="@href"

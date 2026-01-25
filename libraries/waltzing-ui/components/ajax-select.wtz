@@ -63,7 +63,7 @@
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
     @let class_str = class.unwrap_or("")
     @let classes = vec![@trigger_base, @error_cls, @class_str]
-    @let trigger_cls = utils::cn(&@classes)
+    @let trigger_cls = cn(&@classes)
 
     @let ph = placeholder.unwrap_or("Select...")
     @let search_ph = search_placeholder.unwrap_or("Search...")

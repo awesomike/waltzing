@@ -45,7 +45,7 @@
 
     @let extra_cls = class.unwrap_or("")
     @let cls_parts = vec!["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, extra_cls]
-    @let container_cls = utils::cn(cls_parts)
+    @let container_cls = cn(cls_parts)
 
     <div
         id="toast-container"
@@ -147,7 +147,7 @@
 
     @let extra_cls = class.unwrap_or("")
     @let cls_parts = vec![base, variant_cls, extra_cls]
-    @let toast_cls = utils::cn(cls_parts)
+    @let toast_cls = cn(cls_parts)
 
     @let duration_ms = duration.unwrap_or(5000)
 

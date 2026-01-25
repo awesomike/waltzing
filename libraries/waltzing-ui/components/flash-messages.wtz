@@ -72,7 +72,7 @@
         }
     }
 
-    @let container_cls = utils::cn(&["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, class.unwrap_or("")])
+    @let container_cls = cn(&["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, class.unwrap_or("")])
 
     @let display_messages = {
         if let Some(max) = max_messages {
@@ -128,7 +128,7 @@
         }
     }
 
-    @let flash_cls = utils::cn(&[base, variant_cls, class.unwrap_or("")])
+    @let flash_cls = cn(&[base, variant_cls, class.unwrap_or("")])
 
     @let stagger_delay = (index * 100)
     @let total_duration = (duration + stagger_delay as u32)
@@ -270,7 +270,7 @@
         }
     }
 
-    @let container_cls = utils::cn(&["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, class.unwrap_or("")])
+    @let container_cls = cn(&["fixed z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden pointer-events-none", position_cls, class.unwrap_or("")])
 
     <div
         id="flash-container"

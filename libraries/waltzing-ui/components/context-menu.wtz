@@ -34,7 +34,7 @@
     trigger: @() = @{},
     content: @() = @{},
 ) {
-    @let cls = utils::cn(&["relative", class.unwrap_or("")])
+    @let cls = cn(&["relative", class.unwrap_or("")])
     <div
         class="@cls"
         x-data="{ open: false, x: 0, y: 0 }"
@@ -75,8 +75,8 @@
     class: Option<&str> = None,
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-    @let disabled_cls = utils::class_if(disabled, "pointer-events-none opacity-50")
-    @let cls = utils::cn(&[base, disabled_cls, class.unwrap_or("")])
+    @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
+    @let cls = cn(&[base, disabled_cls, class.unwrap_or("")])
     <button
         class="@cls"
         role="menuitem"
@@ -97,8 +97,8 @@
     content: @() = @{},
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-    @let disabled_cls = utils::class_if(disabled, "pointer-events-none opacity-50")
-    @let cls = utils::cn(&[base, disabled_cls, class.unwrap_or("")])
+    @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
+    @let cls = cn(&[base, disabled_cls, class.unwrap_or("")])
     <button
         class="@cls"
         role="menuitem"
@@ -119,7 +119,7 @@
     class: Option<&str> = None,
     content: @() = @{},
 ) {
-    @let cls = utils::cn(&["px-2 py-1.5 text-sm font-semibold", class.unwrap_or("")])
+    @let cls = cn(&["px-2 py-1.5 text-sm font-semibold", class.unwrap_or("")])
     <div class="@cls">
         @content()
     </div>
@@ -131,7 +131,7 @@
     class: Option<&str> = None,
     content: @() = @{},
 ) {
-    @let btn_cls = utils::cn(&["relative flex w-full cursor-default select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", class.unwrap_or("")])
+    @let btn_cls = cn(&["relative flex w-full cursor-default select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", class.unwrap_or("")])
     <div
         class="relative"
         x-data="{ subOpen: false }"
@@ -177,8 +177,8 @@
     class: Option<&str> = None,
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-    @let disabled_cls = utils::class_if(disabled, "pointer-events-none opacity-50")
-    @let cls = utils::cn(&[base, disabled_cls, class.unwrap_or("")])
+    @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
+    @let cls = cn(&[base, disabled_cls, class.unwrap_or("")])
     <button
         class="@cls"
         role="menuitemcheckbox"

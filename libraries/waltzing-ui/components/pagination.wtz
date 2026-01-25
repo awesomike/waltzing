@@ -72,8 +72,8 @@
     content: @(),
 ) {
     @let base = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 w-9"
-    @let active_cls = utils::class_if(is_active, "border border-input bg-background shadow-sm pointer-events-none")
-    @let inactive_cls = utils::class_if(!is_active, "hover:bg-accent hover:text-accent-foreground")
+    @let active_cls = class_if(is_active, "border border-input bg-background shadow-sm pointer-events-none")
+    @let inactive_cls = class_if(!is_active, "hover:bg-accent hover:text-accent-foreground")
 
     <@item>
         <a

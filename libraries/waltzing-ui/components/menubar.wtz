@@ -37,7 +37,7 @@
     @let empty = ""
     @let cls = class.unwrap_or(@empty)
     @let parts = vec![@base, @cls]
-    @let classes = utils::cn(@parts)
+    @let classes = cn(@parts)
 
     <div
         class=@classes
@@ -105,9 +105,9 @@
     disabled: bool,
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-    @let disabled_cls = utils::class_if(disabled, "pointer-events-none opacity-50")
+    @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
     @let parts = vec![@base, @disabled_cls]
-    @let classes = utils::cn(@parts)
+    @let classes = cn(@parts)
 
     <button
         type="button"
@@ -172,9 +172,9 @@
     content: @(),
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-    @let disabled_cls = utils::class_if(disabled, "pointer-events-none opacity-50")
+    @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
     @let parts = vec![@base, @disabled_cls]
-    @let classes = utils::cn(@parts)
+    @let classes = cn(@parts)
 
     <button
         type="button"

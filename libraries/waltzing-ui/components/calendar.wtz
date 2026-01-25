@@ -33,7 +33,7 @@
     @let initial_selected = selected.unwrap_or("")
     @let select_handler = on_select.unwrap_or("null")
 
-    @let container_cls = utils::cn(&["p-3", class.unwrap_or("")])
+    @let container_cls = cn(&["p-3", class.unwrap_or("")])
 
     <div
         class="@container_cls"
@@ -229,7 +229,7 @@
     @let initial_end = end.unwrap_or("")
     @let select_handler = on_select.unwrap_or("null")
 
-    @let container_cls = utils::cn(&["p-3", class.unwrap_or("")])
+    @let container_cls = cn(&["p-3", class.unwrap_or("")])
 
     <div
         class="@container_cls"
@@ -451,7 +451,7 @@
     year: u32,
     class: Option<&str> = None,
 ) {
-    @let container_cls = utils::cn(&["p-3", class.unwrap_or("")])
+    @let container_cls = cn(&["p-3", class.unwrap_or("")])
 
     <div
         class="@container_cls"

@@ -9,22 +9,22 @@
  * <@showcase::apply />
  *@
 
-@import layouts/base.wtz as base
-@import components/alert.wtz as alert
-@import components/avatar.wtz as avatar
-@import components/badge.wtz as badge
-@import components/button.wtz as button
-@import components/card.wtz as card
-@import components/checkbox.wtz as checkbox
-@import components/input.wtz as input
-@import components/label.wtz as label
-@import components/progress.wtz as progress
-@import components/separator.wtz as separator
-@import components/skeleton.wtz as skeleton
-@import components/slider.wtz as slider
-@import components/switch.wtz as switch
-@import components/textarea.wtz as textarea
-@import components/toggle.wtz as toggle
+@import /layouts/base.wtz
+@import /components/alert.wtz
+@import /components/avatar.wtz
+@import /components/badge.wtz
+@import /components/button.wtz
+@import /components/card.wtz
+@import /components/checkbox.wtz
+@import /components/input.wtz
+@import /components/label.wtz
+@import /components/progress.wtz
+@import /components/separator.wtz
+@import /components/skeleton.wtz
+@import /components/slider.wtz
+@import /components/switch.wtz
+@import /components/textarea.wtz
+@import /components/toggle.wtz
 
 @* Section wrapper for consistent styling *@
 @fn section(title: &str, id: &str, content: @()) {

@@ -79,7 +79,7 @@
 
     @let cls = class.unwrap_or("")
     @let input_classes = vec![@input_base, @error_cls, @prefix_cls, @suffix_cls, @cls]
-    @let input_cls = utils::cn(@input_classes)
+    @let input_cls = cn(@input_classes)
 
     @* Calculate display value (divide by multiplier for display) *@
     @let display_value = if let Some(v) = value { (v / multiplier) } else { 0.0 }

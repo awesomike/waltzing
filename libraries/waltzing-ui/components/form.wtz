@@ -46,7 +46,7 @@
     @let base = "space-y-6"
     @let class_val = class.unwrap_or("")
     @let class_vec = vec![base, class_val]
-    @let classes = utils::cn(class_vec)
+    @let classes = cn(class_vec)
 
     <form
         @if let Some(a) = action { action="@a" }
@@ -72,7 +72,7 @@
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
     @let class_val = class.unwrap_or("")
     @let field_vec = vec!["space-y-2", class_val]
-    @let field_cls = utils::cn(field_vec)
+    @let field_cls = cn(field_vec)
 
     <div class="@field_cls">
         @if let Some(l) = label {
@@ -109,7 +109,7 @@
 ) {
     @let class_val = class.unwrap_or("")
     @let section_vec = vec!["space-y-4", class_val]
-    @let section_cls = utils::cn(section_vec)
+    @let section_cls = cn(section_vec)
 
     <div class="@section_cls">
         @if title.is_some() || description.is_some() {
@@ -135,7 +135,7 @@
 ) {
     @let class_val = class.unwrap_or("")
     @let row_vec = vec!["grid gap-4 sm:grid-cols-2", class_val]
-    @let row_cls = utils::cn(row_vec)
+    @let row_cls = cn(row_vec)
 
     <div class="@row_cls">
         @content()
@@ -158,7 +158,7 @@
     }
     @let class_val = class.unwrap_or("")
     @let actions_vec = vec!["flex flex-col-reverse gap-2 sm:flex-row", align_cls, class_val]
-    @let actions_cls = utils::cn(actions_vec)
+    @let actions_cls = cn(actions_vec)
 
     <div class="@actions_cls">
         @content()
