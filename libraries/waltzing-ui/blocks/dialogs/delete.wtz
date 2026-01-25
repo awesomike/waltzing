@@ -1,10 +1,10 @@
 @*
  * Delete confirmation dialog block
  * A destructive action confirmation dialog with warning icon/styling
- * Requires: dialog component, button component, @alpinejs/focus plugin
+ * Requires: dialog component, @alpinejs/focus plugin
  *@
 
-@import /components/dialog.wtz
+@import /components/dialog.wtz as dialog
 
 @*
  * Delete confirmation dialog with trigger element
@@ -23,37 +23,9 @@
     confirmLabel: &str = "Delete",
     cancelLabel: &str = "Cancel",
     trigger: @(),
-    onConfirm: &str = "",
+    onConfirm: Option<&str> = None,
 ) {
-    @let dialog_content = @() {
-        <div class="flex flex-col gap-4">
-            @* Warning icon *@
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-destructive">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-            </div>
-
-            @* Item name *@
-            <div class="text-center">
-                <p class="text-sm text-muted-foreground">
-                    You are about to delete:
-                </p>
-                <p class="mt-1 font-semibold text-foreground">
-                    @itemName
-                </p>
-            </div>
-
-            @* Warning message *@
-            <p class="text-center text-sm text-muted-foreground">
-                @message
-            </p>
-        </div>
-    }
-
-    @let dialog_footer = Some(@() {
+    @let dialog_footer = @() {
         <button
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
             @click="open = false"
@@ -62,19 +34,34 @@
         </button>
         <button
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
-            @if !onConfirm.is_empty() { @click="@onConfirm; open = false" }
+            @if let Some(action) = onConfirm { @click=@format("{}; open = false", action) }
             @else { @click="open = false" }
         >
             @confirmLabel
         </button>
-    })
+    }
 
     <@dialog::apply
         title=@title
-        description=None
+        description=@None
         trigger=@trigger
-        content=@dialog_content
-        footer=@dialog_footer
+        content=@() {
+            <div class="flex flex-col gap-4">
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-destructive">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-muted-foreground">You are about to delete:</p>
+                    <p class="mt-1 font-semibold text-foreground">@itemName</p>
+                </div>
+                <p class="text-center text-sm text-muted-foreground">@message</p>
+            </div>
+        }
+        footer=@Some(dialog_footer)
     />
 }
 
@@ -95,57 +82,44 @@
     message: &str,
     confirmLabel: &str = "Delete",
     cancelLabel: &str = "Cancel",
-    onConfirm: &str = "",
+    onConfirm: Option<&str> = None,
 ) {
-    @let dialog_content = @() {
-        <div class="flex flex-col gap-4">
-            @* Warning icon *@
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-destructive">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-            </div>
-
-            @* Item name *@
-            <div class="text-center">
-                <p class="text-sm text-muted-foreground">
-                    You are about to delete:
-                </p>
-                <p class="mt-1 font-semibold text-foreground">
-                    @itemName
-                </p>
-            </div>
-
-            @* Warning message *@
-            <p class="text-center text-sm text-muted-foreground">
-                @message
-            </p>
-        </div>
-    }
-
-    @let dialog_footer = Some(@() {
+    @let dialog_footer = @() {
         <button
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
-            @click="@openVar = false"
+            @click=@format("{} = false", openVar)
         >
             @cancelLabel
         </button>
         <button
             class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
-            @if !onConfirm.is_empty() { @click="@onConfirm; @openVar = false" }
-            @else { @click="@openVar = false" }
+            @if let Some(action) = onConfirm { @click=@format("{}; {} = false", action, openVar) }
+            @else { @click=@format("{} = false", openVar) }
         >
             @confirmLabel
         </button>
-    })
+    }
 
     <@dialog::controlled
         open_var=@openVar
         title=@title
-        description=None
-        content=@dialog_content
-        footer=@dialog_footer
+        description=@None
+        content=@() {
+            <div class="flex flex-col gap-4">
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-destructive">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-muted-foreground">You are about to delete:</p>
+                    <p class="mt-1 font-semibold text-foreground">@itemName</p>
+                </div>
+                <p class="text-center text-sm text-muted-foreground">@message</p>
+            </div>
+        }
+        footer=@Some(dialog_footer)
     />
 }
