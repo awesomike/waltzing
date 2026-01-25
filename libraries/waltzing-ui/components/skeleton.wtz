@@ -11,14 +11,13 @@
  *   <@skeleton::text lines=3 />
  *@
 
-@import lib/utils.wtz as utils
 
 @fn apply(class: Option<&str>) {
     @let base = "animate-pulse rounded-md bg-muted"
     @let extra = class.unwrap_or("")
     @let classes = vec![@base, @extra]
 
-    <div class="@utils::cn(@classes)"></div>
+    <div class="@cn(@classes)"></div>
 }
 
 @* Circular skeleton (for avatars, icons) *@
@@ -26,7 +25,7 @@
     @let base = "animate-pulse rounded-full bg-muted"
     @let classes = vec![@base, @size]
 
-    <div class="@utils::cn(@classes)"></div>
+    <div class="@cn(@classes)"></div>
 }
 
 @* Multiple line text skeleton *@

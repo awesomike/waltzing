@@ -47,7 +47,6 @@
  *   />
  **@
 
-@import lib/utils.wtz as utils
 
 @* Create variant - for new file uploads *@
 @fn create(
@@ -67,7 +66,7 @@
 
     @let base = "flex flex-col gap-2"
 
-    <div class=@utils::cn(&[base, class.unwrap_or("")])>
+    <div class=@cn(&[base, class.unwrap_or("")])>
         @if let Some(lbl) = label {
             <label for=@input_id class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 @lbl
@@ -242,7 +241,7 @@
 
     @let base = "flex flex-col gap-2"
 
-    <div class=@utils::cn(&[base, class.unwrap_or("")])>
+    <div class=@cn(&[base, class.unwrap_or("")])>
         @if let Some(lbl) = label {
             <label for=@input_id class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 @lbl
@@ -492,7 +491,7 @@
 
     <div
         x-data="{ dragging: false }"
-        class=@utils::cn(&["relative rounded-lg border-2 border-dashed border-input bg-background transition-colors", class.unwrap_or("")])
+        class=@cn(&["relative rounded-lg border-2 border-dashed border-input bg-background transition-colors", class.unwrap_or("")])
         :class="{ 'border-primary bg-primary/5': dragging }"
     >
         <input

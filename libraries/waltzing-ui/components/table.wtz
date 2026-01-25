@@ -3,7 +3,6 @@
  * Responsive data table with header and row rendering
  *@
 
-@import lib/utils.wtz as utils
 
 @fn apply(
     header: @(),
@@ -14,7 +13,7 @@
     @let base = "w-full caption-bottom text-sm"
     @let classes = &[base, cls]
     <div class="relative w-full overflow-auto">
-        <table class="@utils::cn(@classes)">
+        <table class="@cn(@classes)">
             <thead class="[&_tr]:border-b">
                 @header()
             </thead>
@@ -37,7 +36,7 @@
     @let cls = class.unwrap_or("")
     @let base = "h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
     @let classes = &[base, cls]
-    <th class="@utils::cn(@classes)">
+    <th class="@cn(@classes)">
         @content()
     </th>
 }
@@ -47,7 +46,7 @@
     @let cls = class.unwrap_or("")
     @let base = "border-b transition-colors hover:bg-muted/50"
     @let classes = &[base, cls]
-    <tr class="@utils::cn(@classes)">
+    <tr class="@cn(@classes)">
         @content()
     </tr>
 }
@@ -57,7 +56,7 @@
     @let cls = class.unwrap_or("")
     @let base = "p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
     @let classes = &[base, cls]
-    <td class="@utils::cn(@classes)">
+    <td class="@cn(@classes)">
         @content()
     </td>
 }

@@ -21,7 +21,6 @@
  * </@>
  *@
 
-@import lib/utils.wtz as utils
 
 @enum Variant {
     Default,
@@ -46,7 +45,7 @@
 
     @let extra = class.unwrap_or("")
     @let classes = vec![@base, @variant_cls, @extra]
-    <div role="alert" class="@utils::cn(classes)">
+    <div role="alert" class="@cn(classes)">
         @content()
     </div>
 }
@@ -55,7 +54,7 @@
 @fn title(class: Option<&str>, content: @()) {
     @let extra = class.unwrap_or("")
     @let classes = vec!["mb-1 font-medium leading-none tracking-tight", @extra]
-    <h5 class="@utils::cn(classes)">
+    <h5 class="@cn(classes)">
         @content()
     </h5>
 }
@@ -64,7 +63,7 @@
 @fn description(class: Option<&str>, content: @()) {
     @let extra = class.unwrap_or("")
     @let classes = vec!["text-sm [&_p]:leading-relaxed", @extra]
-    <div class="@utils::cn(classes)">
+    <div class="@cn(classes)">
         @content()
     </div>
 }

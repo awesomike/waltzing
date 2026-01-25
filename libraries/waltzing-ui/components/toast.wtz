@@ -22,7 +22,6 @@
  * <@toast::warning title="Warning" description=Some("Please review your input.") />
  *@
 
-@import lib/utils.wtz as utils
 
 @enum Variant {
     Default,

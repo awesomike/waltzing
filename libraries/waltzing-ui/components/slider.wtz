@@ -21,7 +21,6 @@
  *   <@slider::apply name="locked" value=50.0 disabled=true />
  *@
 
-@import lib/utils.wtz as utils
 
 @* Main slider with single handle *@
 @fn apply(
@@ -46,7 +45,7 @@
     @let container_classes = vec![@container_base, @disabled_cls, @extra_class]
 
     <div
-        class="@utils::cn(@container_classes)"
+        class="@cn(@container_classes)"
         x-data=@```json { value: @value, min: @min, max: @max, step: @step, percentage: @clamped } ```@
         x-init="$watch('value', v => { percentage = ((v - min) / (max - min)) * 100; $dispatch('input', { name: '@name', value: v }) })"
     >
@@ -114,7 +113,7 @@
 
     <div class="space-y-2" x-data=@```json { displayValue: @value } ```@>
         <div class="flex justify-between">
-            <label for="@name" class="@utils::cn(@label_classes)">@label</label>
+            <label for="@name" class="@cn(@label_classes)">@label</label>
             <span class="text-sm text-muted-foreground" x-text="displayValue"></span>
         </div>
         <div @input.camel="displayValue = $event.detail.value">
@@ -155,7 +154,7 @@
     @let container_classes = vec![@container_base, @disabled_cls, @extra_class]
 
     <div
-        class="@utils::cn(@container_classes)"
+        class="@cn(@container_classes)"
         x-data=@```json {
             minValue: @value_min,
             maxValue: @value_max,
@@ -257,7 +256,7 @@
 
     <div class="space-y-2" x-data=@```json { displayMin: @value_min, displayMax: @value_max } ```@>
         <div class="flex justify-between">
-            <label for="@name" class="@utils::cn(@label_classes)">@label</label>
+            <label for="@name" class="@cn(@label_classes)">@label</label>
             <span class="text-sm text-muted-foreground" x-text="displayMin + ' - ' + displayMax"></span>
         </div>
         <div @input.camel="displayMin = $event.detail.valueMin; displayMax = $event.detail.valueMax">

@@ -21,7 +21,6 @@
  *   <@progress::with_label value=65.0 />
  *@
 
-@import lib/utils.wtz as utils
 
 @* Main progress bar with determinate value *@
 @fn apply(
@@ -42,7 +41,7 @@
         aria-valuenow="@value"
         aria-valuemin="0"
         aria-valuemax="@max"
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
     >
         <div class="@indicator" style="width: @(clamped)%"></div>
     </div>
@@ -59,7 +58,7 @@
         role="progressbar"
         aria-busy="true"
         aria-valuetext="Loading..."
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
     >
         <div class="@indicator"></div>
     </div>

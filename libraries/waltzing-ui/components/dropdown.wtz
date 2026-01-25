@@ -3,7 +3,6 @@
  * A dropdown menu with trigger and items
  *@
 
-@import lib/utils.wtz as utils
 
 @enum Align {
     Start,
@@ -40,7 +39,7 @@
             x-transition:leave-end="transform opacity-0 scale-95"
             @click.away="open = false"
             @keydown.escape.window="open = false"
-            class="@utils::cn(@classes)"
+            class="@cn(@classes)"
             style="display: none;"
             role="menu"
         >
@@ -58,7 +57,7 @@
     @let extra_class = class.unwrap_or_default()
     @let classes = vec!["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @utils::class_if(@disabled, "pointer-events-none opacity-50"), @extra_class]
     <button
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
         role="menuitem"
         @if disabled { disabled }
         @click="open = false"
@@ -77,7 +76,7 @@
     @let classes = vec!["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @extra_class]
     <a
         href="@href"
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
         role="menuitem"
         @click="open = false"
     >

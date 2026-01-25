@@ -29,7 +29,6 @@
  * </@>
  *@
 
-@import lib/utils.wtz as utils
 
 @* Vertical scroll area *@
 @fn apply(
@@ -42,14 +41,14 @@
 
     @if fade {
         <div class="relative">
-            <div class=@utils::cn(&[base, scrollbar, class.unwrap_or("")])>
+            <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
                 @content()
             </div>
             <div class="pointer-events-none absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-background to-transparent"></div>
             <div class="pointer-events-none absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-background to-transparent"></div>
         </div>
     } else {
-        <div class=@utils::cn(&[base, scrollbar, class.unwrap_or("")])>
+        <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
             @content()
         </div>
     }
@@ -66,14 +65,14 @@
 
     @if fade {
         <div class="relative">
-            <div class=@utils::cn(&[base, scrollbar, class.unwrap_or("")])>
+            <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
                 @content()
             </div>
             <div class="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent"></div>
             <div class="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent"></div>
         </div>
     } else {
-        <div class=@utils::cn(&[base, scrollbar, class.unwrap_or("")])>
+        <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
             @content()
         </div>
     }
@@ -90,7 +89,7 @@
 
     @if fade {
         <div class="relative">
-            <div class=@utils::cn(&[base, scrollbar, class.unwrap_or("")])>
+            <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
                 @content()
             </div>
             <div class="pointer-events-none absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-background to-transparent"></div>
@@ -99,7 +98,7 @@
             <div class="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent"></div>
         </div>
     } else {
-        <div class=@utils::cn(&[base, scrollbar, class.unwrap_or("")])>
+        <div class=@cn(&[base, scrollbar, class.unwrap_or("")])>
             @content()
         </div>
     }
@@ -110,7 +109,7 @@
     class: Option<&str> = None,
     content: @(),
 ) {
-    <div class=@utils::cn(&["h-full w-full rounded-[inherit]", class.unwrap_or("")])>
+    <div class=@cn(&["h-full w-full rounded-[inherit]", class.unwrap_or("")])>
         @content()
     </div>
 }

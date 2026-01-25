@@ -34,7 +34,6 @@
  *   />
  *@
 
-@import lib/utils.wtz as utils
 
 @enum Direction {
     Horizontal,
@@ -62,7 +61,7 @@
     <div
         x-data="resizableGroup(@is_horizontal)"
         x-ref="container"
-        class="@utils::cn(@container_classes)"
+        class="@cn(@container_classes)"
         data-resizable-group
     >
         @content()
@@ -84,7 +83,7 @@
     @let cls = class.unwrap_or("")
     @let panel_classes = vec![base, cls]
     <div
-        class="@utils::cn(@panel_classes)"
+        class="@cn(@panel_classes)"
         style=@format!("flex-basis: {}%; flex-shrink: 0; flex-grow: 0;", default_size)
         data-resizable-panel
         data-min-size=@min_val
@@ -101,7 +100,7 @@
     @let cls = class.unwrap_or("")
     @let handle_classes = vec![base, cls]
     <div
-        class="@utils::cn(@handle_classes)"
+        class="@cn(@handle_classes)"
         :data-horizontal="isHorizontal"
         :data-vertical="!isHorizontal"
         :class="isHorizontal ? 'w-px cursor-col-resize' : 'h-px cursor-row-resize'"

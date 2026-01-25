@@ -27,7 +27,6 @@
  * </@>
  *@
 
-@import lib/utils.wtz as utils
 
 @* Menubar container *@
 @fn apply(

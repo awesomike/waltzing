@@ -21,7 +21,6 @@
  * <@radio::horizontal name="size" options=&options selected=Some("md") />
  *@
 
-@import lib/utils.wtz as utils
 
 @struct RadioOption {
     value: String,
@@ -41,7 +40,7 @@
 
     <div
         role="radiogroup"
-        class="@utils::cn(&[@group_base, @cls])"
+        class="@cn(&[@group_base, @cls])"
     >
         @for opt in options {
             @let is_checked = (selected == Some(opt.value.as_str()))
@@ -96,7 +95,7 @@
 
     <div
         role="radiogroup"
-        class="@utils::cn(&[@group_base, @cls])"
+        class="@cn(&[@group_base, @cls])"
     >
         @for opt in options {
             @let is_checked = (selected == Some(opt.value.as_str()))

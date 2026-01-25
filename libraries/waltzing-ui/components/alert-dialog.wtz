@@ -20,7 +20,6 @@
  * ```
  *@
 
-@import lib/utils.wtz as utils
 
 @fn apply(
     title: &str,
@@ -90,7 +89,7 @@
                             @cancel_label
                         </button>
                         <button
-                            class="@utils::cn(@confirm_classes)"
+                            class="@cn(@confirm_classes)"
                             @if let Some(handler) = on_confirm {
                                 @click="@handler; open = false"
                             }
@@ -159,7 +158,7 @@
                         @cancel_label
                     </button>
                     <button
-                        class="@utils::cn(@confirm_classes)"
+                        class="@cn(@confirm_classes)"
                         @if let Some(handler) = on_confirm {
                             @click="@handler; @open_var = false"
                         }

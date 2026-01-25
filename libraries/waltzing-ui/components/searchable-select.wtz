@@ -49,7 +49,6 @@
  *   />
  **@
 
-@import lib/utils.wtz as utils
 
 @struct SelectOption {
     value: String,

@@ -27,7 +27,6 @@
  * />
  *@
 
-@import lib/utils.wtz as utils
 
 @* Main context menu wrapper *@
 @fn apply(

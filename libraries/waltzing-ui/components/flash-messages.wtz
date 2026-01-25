@@ -35,7 +35,6 @@
  * <@flash::info message="New features available." />
  *@
 
-@import lib/utils.wtz as utils
 
 @* Flash message data structure *@
 @struct FlashMessage {

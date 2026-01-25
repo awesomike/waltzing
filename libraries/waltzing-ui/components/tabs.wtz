@@ -3,7 +3,6 @@
  * Tabbed interface with Alpine.js state management
  *@
 
-@import lib/utils.wtz as utils
 
 @struct Tab {
     id: String,

@@ -23,7 +23,6 @@
  *   <@calendar::display month=3 year=2024 />
  *@
 
-@import lib/utils.wtz as utils
 
 @* Main calendar with single date selection *@
 @fn apply(

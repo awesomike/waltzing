@@ -3,7 +3,6 @@
  * A clickable button with multiple variants and sizes
  *@
 
-@import lib/utils.wtz as utils
 
 @enum Variant {
     Primary,
@@ -50,7 +49,7 @@
     @let classes = vec![@base, @variant_cls, @size_cls, @extra_class]
 
     <button
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
         @if disabled { disabled }
     >
         @content()

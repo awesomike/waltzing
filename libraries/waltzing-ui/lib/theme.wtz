@@ -24,7 +24,6 @@
  *   window.themeManager.effective()   // Get effective theme (resolves 'system')
  *@
 
-@import lib/utils.wtz as utils
 
 @* Script to read/set theme from localStorage and handle system preference *@
 @* Place this in <head> before body to prevent flash of wrong theme *@
@@ -103,7 +102,7 @@
 
     <button
         type="button"
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
         x-data="{ dark: document.documentElement.classList.contains('dark') }"
         x-init="window.addEventListener('theme-change', () => dark = document.documentElement.classList.contains('dark'))"
         @@click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"
@@ -162,7 +161,7 @@
     @let classes = vec![@base, @cls]
 
     <div
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
         x-data="{
             open: false,
             theme: window.themeManager ? window.themeManager.current() : 'system',

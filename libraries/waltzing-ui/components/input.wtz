@@ -3,7 +3,6 @@
  * Text input field with optional label and error state
  *@
 
-@import lib/utils.wtz as utils
 
 @enum InputType {
     Text,
@@ -45,7 +44,7 @@
     <input
         type="@type_str"
         name="@name"
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
         @if let Some(v) = value { value="@v" }
         @if let Some(p) = placeholder { placeholder="@p" }
         @if disabled { disabled }

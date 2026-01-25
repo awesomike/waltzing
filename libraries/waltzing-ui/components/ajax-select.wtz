@@ -35,7 +35,6 @@
  *   />
  **@
 
-@import lib/utils.wtz as utils
 
 @** Main ajax select component **@
 @fn create(

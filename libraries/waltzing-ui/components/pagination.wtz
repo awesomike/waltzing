@@ -29,7 +29,6 @@
  *   </@>
  *@
 
-@import lib/utils.wtz as utils
 
 @* Root pagination container *@
 @fn root(
@@ -39,7 +38,7 @@
     <nav
         role="navigation"
         aria-label="pagination"
-        class=@utils::cn(&["mx-auto flex w-full justify-center", class.unwrap_or("")])
+        class=@cn(&["mx-auto flex w-full justify-center", class.unwrap_or("")])
     >
         @content()
     </nav>
@@ -50,7 +49,7 @@
     class: Option<&str> = None,
     content: @(),
 ) {
-    <ul class=@utils::cn(&["flex flex-row items-center gap-1", class.unwrap_or("")])>
+    <ul class=@cn(&["flex flex-row items-center gap-1", class.unwrap_or("")])>
         @content()
     </ul>
 }
@@ -79,7 +78,7 @@
     <@item>
         <a
             href=@href
-            class=@utils::cn(&[base, active_cls, inactive_cls, class.unwrap_or("")])
+            class=@cn(&[base, active_cls, inactive_cls, class.unwrap_or("")])
             @if is_active { aria-current="page" }
         >
             @content()
@@ -97,7 +96,7 @@
     <@item>
         <a
             href=@href
-            class=@utils::cn(&[base, class.unwrap_or("")])
+            class=@cn(&[base, class.unwrap_or("")])
             aria-label="Go to previous page"
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
@@ -116,7 +115,7 @@
 
     <@item>
         <span
-            class=@utils::cn(&[base, class.unwrap_or("")])
+            class=@cn(&[base, class.unwrap_or("")])
             aria-disabled="true"
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
@@ -137,7 +136,7 @@
     <@item>
         <a
             href=@href
-            class=@utils::cn(&[base, class.unwrap_or("")])
+            class=@cn(&[base, class.unwrap_or("")])
             aria-label="Go to next page"
         >
             <span>Next</span>
@@ -156,7 +155,7 @@
 
     <@item>
         <span
-            class=@utils::cn(&[base, class.unwrap_or("")])
+            class=@cn(&[base, class.unwrap_or("")])
             aria-disabled="true"
         >
             <span>Next</span>
@@ -174,7 +173,7 @@
     <@item>
         <span
             aria-hidden="true"
-            class=@utils::cn(&["flex h-9 w-9 items-center justify-center", class.unwrap_or("")])
+            class=@cn(&["flex h-9 w-9 items-center justify-center", class.unwrap_or("")])
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4">
                 <circle cx="12" cy="12" r="1"/>

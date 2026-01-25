@@ -48,7 +48,6 @@
  *   </div>
  *@
 
-@import lib/utils.wtz as utils
 
 @enum Orientation {
     Horizontal,
@@ -155,7 +154,7 @@
         x-init="init()"
         @mouseenter="if (autoPlay) stopAutoPlay()"
         @mouseleave="if (autoPlay && total > 1) startAutoPlay()"
-        class=@utils::cn(&[container_cls, class.unwrap_or("")])
+        class=@cn(&[container_cls, class.unwrap_or("")])
         role="region"
         aria-roledescription="carousel"
         aria-label="Carousel"
@@ -255,7 +254,7 @@
     @let base = "w-full flex-shrink-0"
 
     <div
-        class=@utils::cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class.unwrap_or("")])
         role="group"
         aria-roledescription="slide"
     >
@@ -308,7 +307,7 @@
     <button
         type="button"
         @click=@format!("$dispatch('carousel-goto', {{ index: {} }}); activeThumb = {}", index, index)
-        class=@utils::cn(&["h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring", class.unwrap_or("")])
+        class=@cn(&["h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring", class.unwrap_or("")])
         :class=@format!("activeThumb === {} ? 'border-primary' : 'border-transparent'", index)
     >
         <img src=@src alt=@alt class="h-full w-full object-cover" />
@@ -321,7 +320,7 @@
     content: @(),
 ) {
     <div
-        class=@utils::cn(&["flex gap-2 justify-center overflow-x-auto", class.unwrap_or("")])
+        class=@cn(&["flex gap-2 justify-center overflow-x-auto", class.unwrap_or("")])
         x-data="{ activeThumb: 0 }"
         @carousel-goto.window="activeThumb = $event.detail.index"
     >
@@ -337,7 +336,7 @@
     @let base = "w-full flex-shrink-0 p-4"
 
     <div
-        class=@utils::cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class.unwrap_or("")])
         role="group"
         aria-roledescription="slide"
     >

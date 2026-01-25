@@ -3,7 +3,6 @@
  * A dropdown select input with custom styling
  *@
 
-@import lib/utils.wtz as utils
 
 @struct SelectOption {
     value: String,

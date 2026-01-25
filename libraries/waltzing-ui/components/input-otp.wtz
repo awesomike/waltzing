@@ -18,7 +18,6 @@
  * <@input_otp::apply name="otp" length=6 class=None disabled=true />
  *@
 
-@import lib/utils.wtz as utils
 
 @fn apply(
     name: &str,
@@ -30,7 +29,7 @@
     @let input_base = "h-10 w-10 text-center text-sm font-medium rounded-md border border-input bg-transparent shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 
     <div
-        class=@utils::cn(&[container_base, class.unwrap_or("")])
+        class=@cn(&[container_base, class.unwrap_or("")])
         x-data=@```json {
             digits: Array(@length).fill(''),
             get value() { return this.digits.join(''); },
@@ -117,7 +116,7 @@
     @let separator_cls = "text-muted-foreground text-xl font-light"
 
     <div
-        class=@utils::cn(&[container_base, class.unwrap_or("")])
+        class=@cn(&[container_base, class.unwrap_or("")])
         x-data=@```json {
             digits: Array(@length).fill(''),
             get value() { return this.digits.join(''); },

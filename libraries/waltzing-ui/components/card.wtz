@@ -3,7 +3,6 @@
  * A container with optional header and footer slots
  *@
 
-@import lib/utils.wtz as utils
 
 @fn apply(
     header: Option<@()>,
@@ -13,7 +12,7 @@
 ) {
     @let extra = class.unwrap_or("")
     @let classes = vec!["rounded-xl border bg-card text-card-foreground shadow", extra]
-    <div class="@utils::cn(classes)">
+    <div class="@cn(classes)">
         @if let Some(h) = header {
             <div class="flex flex-col space-y-1.5 p-6">
                 @h()
@@ -34,7 +33,7 @@
 @fn simple(class: Option<&str>, content: @()) {
     @let extra = class.unwrap_or("")
     @let classes = vec!["rounded-xl border bg-card text-card-foreground shadow p-6", extra]
-    <div class="@utils::cn(classes)">
+    <div class="@cn(classes)">
         @content()
     </div>
 }
@@ -43,7 +42,7 @@
 @fn header(class: Option<&str>, content: @()) {
     @let extra = class.unwrap_or("")
     @let classes = vec!["flex flex-col space-y-1.5 p-6", extra]
-    <div class="@utils::cn(classes)">
+    <div class="@cn(classes)">
         @content()
     </div>
 }
@@ -52,7 +51,7 @@
 @fn title(class: Option<&str>, content: @()) {
     @let extra = class.unwrap_or("")
     @let classes = vec!["font-semibold leading-none tracking-tight", extra]
-    <h3 class="@utils::cn(classes)">
+    <h3 class="@cn(classes)">
         @content()
     </h3>
 }
@@ -61,7 +60,7 @@
 @fn description(class: Option<&str>, content: @()) {
     @let extra = class.unwrap_or("")
     @let classes = vec!["text-sm text-muted-foreground", extra]
-    <p class="@utils::cn(classes)">
+    <p class="@cn(classes)">
         @content()
     </p>
 }
@@ -70,7 +69,7 @@
 @fn content(class: Option<&str>, content: @()) {
     @let extra = class.unwrap_or("")
     @let classes = vec!["p-6 pt-0", extra]
-    <div class="@utils::cn(classes)">
+    <div class="@cn(classes)">
         @content()
     </div>
 }
@@ -79,7 +78,7 @@
 @fn footer(class: Option<&str>, content: @()) {
     @let extra = class.unwrap_or("")
     @let classes = vec!["flex items-center p-6 pt-0", extra]
-    <div class="@utils::cn(classes)">
+    <div class="@cn(classes)">
         @content()
     </div>
 }

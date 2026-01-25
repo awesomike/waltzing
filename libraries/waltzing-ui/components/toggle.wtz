@@ -11,7 +11,6 @@
  *   <@toggle::icon name="star">★</@>
  *@
 
-@import lib/utils.wtz as utils
 
 @enum Variant {
     Default,
@@ -58,7 +57,7 @@
         id="@name"
         name="@name"
         role="button"
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
         aria-pressed="@aria_pressed_val"
         data-state="@data_state_val"
         @if disabled { disabled aria-disabled="true" }
@@ -164,7 +163,7 @@
     @let extra_class = class.unwrap_or_default()
     @let classes = vec![@base, @extra_class]
     <div
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
         role="group"
     >
         @content()

@@ -22,7 +22,6 @@
  * </@>
  *@
 
-@import lib/utils.wtz as utils
 
 @* Main aspect ratio container *@
 @fn apply(
@@ -33,7 +32,7 @@
     @let base = "relative w-full"
 
     <div
-        class=@utils::cn(&[base, class.unwrap_or("")])
+        class=@cn(&[base, class.unwrap_or("")])
         style="aspect-ratio: @ratio;"
     >
         <div class="absolute inset-0">

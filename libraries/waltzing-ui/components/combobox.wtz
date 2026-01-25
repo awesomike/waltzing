@@ -20,7 +20,6 @@
  *   />
  *@
 
-@import lib/utils.wtz as utils
 
 @struct ComboboxOption {
     value: String,

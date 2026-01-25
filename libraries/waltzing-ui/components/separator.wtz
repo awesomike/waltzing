@@ -21,7 +21,6 @@
     Vertical,
 }
 
-@import lib/utils.wtz as utils
 
 @fn apply(
     orientation: Orientation = Orientation::Horizontal,
@@ -44,7 +43,7 @@
     <div
         role="separator"
         aria-orientation="@aria_orientation"
-        class="@utils::cn(@classes)"
+        class="@cn(@classes)"
     ></div>
 }
 

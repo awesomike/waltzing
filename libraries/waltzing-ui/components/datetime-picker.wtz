@@ -37,7 +37,6 @@
  *   />
  **@
 
-@import lib/utils.wtz as utils
 
 @fn apply(
     name: &str,

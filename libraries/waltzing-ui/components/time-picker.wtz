@@ -29,7 +29,6 @@
  *   )
  **@
 
-@import lib/utils.wtz as utils
 
 @enum Precision {
     HoursOnly,
@@ -216,7 +215,7 @@
         @* Trigger button *@
         <button
             type="button"
-            class="@utils::cn(@classes) cursor-pointer text-left flex items-center justify-between"
+            class="@cn(@classes) cursor-pointer text-left flex items-center justify-between"
             @click="open = !open"
             @if disabled { disabled }
             @if error.is_some() { aria-invalid="true" }

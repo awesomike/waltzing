@@ -13,7 +13,6 @@
  *   command::dialog with trigger and content slots
  **@
 
-@import lib/utils.wtz as utils
 
 @struct CommandItem {
     id: String,

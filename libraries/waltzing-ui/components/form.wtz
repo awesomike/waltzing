@@ -34,7 +34,6 @@
  * </@>
  *@
 
-@import lib/utils.wtz as utils
 
 @* Main form wrapper *@
 @fn apply(

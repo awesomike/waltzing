@@ -17,7 +17,6 @@
  *   />
  *@
 
-@import lib/utils.wtz as utils
 
 @fn apply(
     title: &str,

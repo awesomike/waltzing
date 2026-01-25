@@ -27,7 +27,6 @@
  *   <@duration_input::compact_bound label="Time" name="time" value=Some(60) format="mm:ss" />
  *@
 
-@import lib/utils.wtz as utils
 
 @* Main duration input component - hh:mm:ss format *@
 @fn create(

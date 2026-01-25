@@ -19,7 +19,6 @@
  *   </@>
  *@
 
-@import lib/utils.wtz as utils
 
 @struct NavMenuItem {
     label: String,
@@ -33,7 +32,7 @@
     content: @(),
 ) {
     <nav
-        class=@utils::cn(&["relative z-10", class.unwrap_or("")])
+        class=@cn(&["relative z-10", class.unwrap_or("")])
         aria-label="Main navigation"
     >
         @content()
@@ -45,7 +44,7 @@
     class: Option<&str> = None,
     content: @(),
 ) {
-    <ul class=@utils::cn(&["flex items-center gap-1", class.unwrap_or("")]) role="menubar">
+    <ul class=@cn(&["flex items-center gap-1", class.unwrap_or("")]) role="menubar">
         @content()
     </ul>
 }
@@ -165,7 +164,7 @@
 @* Separator within a dropdown menu *@
 @fn dropdown_separator(class: Option<&str> = None) {
     <div
-        class=@utils::cn(&["-mx-1 my-1 h-px bg-border", class.unwrap_or("")])
+        class=@cn(&["-mx-1 my-1 h-px bg-border", class.unwrap_or("")])
         role="separator"
     ></div>
 }
@@ -175,7 +174,7 @@
     class: Option<&str> = None,
     content: @(),
 ) {
-    <div class=@utils::cn(&["px-3 py-2 text-xs font-semibold text-muted-foreground", class.unwrap_or("")])>
+    <div class=@cn(&["px-3 py-2 text-xs font-semibold text-muted-foreground", class.unwrap_or("")])>
         @content()
     </div>
 }
@@ -183,7 +182,7 @@
 @* Viewport indicator that shows below active dropdown (optional visual enhancement) *@
 @fn viewport_indicator(class: Option<&str> = None) {
     <div
-        class=@utils::cn(&["absolute left-0 top-full flex justify-center", class.unwrap_or("")])
+        class=@cn(&["absolute left-0 top-full flex justify-center", class.unwrap_or("")])
         style="perspective: 2000px;"
     >
         <div class="relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full origin-[top_center] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg transition-[width,height] duration-300"></div>

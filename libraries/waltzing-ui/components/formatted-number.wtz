@@ -49,7 +49,6 @@
  *   <@formatted_number::edit name="amount" value=1234.56 prefix=Some("$") decimals=2 />
  *@
 
-@import lib/utils.wtz as utils
 
 @* Main formatted number input *@
 @fn apply(
