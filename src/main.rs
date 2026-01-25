@@ -165,6 +165,30 @@ fn head_common() -> &'static str {
                 transparent 20px
             );
         }
+
+        /* Scrollbar styling */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: hsl(var(--border)) transparent;
+        }
+
+        *::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background-color: hsl(var(--border));
+            border-radius: 4px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background-color: hsl(var(--muted-foreground));
+        }
     </style>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
