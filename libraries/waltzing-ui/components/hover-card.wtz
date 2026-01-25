@@ -158,12 +158,12 @@
 
     @let card_cls = cn(&["absolute z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", side_cls, align_cls, class])
 
-    <div class="relative inline-block" x-data="{ open: false }">
+    <div class="relative inline-block" x-data="{ open: false, closeTimer: null }">
         <div
-            @mouseenter="open = true"
-            @mouseleave="open = false"
-            @focus="open = true"
-            @blur="open = false"
+            @mouseenter="clearTimeout(closeTimer); open = true"
+            @mouseleave="closeTimer = setTimeout(() => open = false, 150)"
+            @focus="clearTimeout(closeTimer); open = true"
+            @blur="closeTimer = setTimeout(() => open = false, 150)"
         >
             @trigger()
         </div>
@@ -177,8 +177,8 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            @mouseenter="open = true"
-            @mouseleave="open = false"
+            @mouseenter="clearTimeout(closeTimer); open = true"
+            @mouseleave="closeTimer = setTimeout(() => open = false, 150)"
             class="@card_cls"
         >
             @content()

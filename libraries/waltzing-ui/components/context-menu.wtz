@@ -134,9 +134,9 @@
     @let btn_cls = cn(&["relative flex w-full cursor-default select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", class])
     <div
         class="relative"
-        x-data="{ subOpen: false }"
-        @@mouseenter="subOpen = true"
-        @@mouseleave="subOpen = false"
+        x-data="{ subOpen: false, closeTimer: null }"
+        @@mouseenter="clearTimeout(closeTimer); subOpen = true"
+        @@mouseleave="closeTimer = setTimeout(() => subOpen = false, 150)"
     >
         @* Submenu trigger *@
         <button
@@ -160,6 +160,8 @@
             x-transition:leave="transition ease-in duration-75"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
+            @@mouseenter="clearTimeout(closeTimer); subOpen = true"
+            @@mouseleave="closeTimer = setTimeout(() => subOpen = false, 150)"
             class="absolute left-full top-0 ml-1 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
             role="menu"
             style="display: none;"

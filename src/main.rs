@@ -2164,14 +2164,14 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "navigation-menu" => r##"
-            <nav x-data="{ activeNav: null }" class="relative flex items-center gap-1">
+            <nav x-data="{ activeNav: null, closeTimer: null }" class="relative flex items-center gap-1">
                 <div class="relative">
-                    <button @mouseenter="activeNav = 'getting-started'" @mouseleave="activeNav = null" class="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                    <button @mouseenter="clearTimeout(closeTimer); activeNav = 'getting-started'" @mouseleave="closeTimer = setTimeout(() => activeNav = null, 150)" class="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
                         Getting Started
                         <svg class="relative top-[1px] ml-1 h-3 w-3 transition duration-200" :class="activeNav === 'getting-started' ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
                     <template x-teleport="body">
-                        <div x-show="activeNav === 'getting-started'" @mouseenter="activeNav = 'getting-started'" @mouseleave="activeNav = null" x-cloak class="fixed left-1/2 z-50 w-[400px] -translate-x-1/2 rounded-md border bg-popover p-4 text-popover-foreground shadow-lg" :style="`top: ${$el.previousElementSibling?.getBoundingClientRect().bottom + 4}px;`" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+                        <div x-show="activeNav === 'getting-started'" @mouseenter="clearTimeout(closeTimer); activeNav = 'getting-started'" @mouseleave="closeTimer = setTimeout(() => activeNav = null, 150)" x-cloak class="fixed left-1/2 z-50 w-[400px] -translate-x-1/2 rounded-md border bg-popover p-4 text-popover-foreground shadow-lg" :style="`top: ${$el.previousElementSibling?.getBoundingClientRect().bottom + 4}px;`" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
                             <div class="grid gap-3 md:grid-cols-2">
                                 <a href="#" class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                                     <div class="text-sm font-medium leading-none">Introduction</div>
@@ -2190,12 +2190,12 @@ fn get_component_preview(component: &str) -> &'static str {
                     </template>
                 </div>
                 <div class="relative">
-                    <button @mouseenter="activeNav = 'components'" @mouseleave="activeNav = null" class="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                    <button @mouseenter="clearTimeout(closeTimer); activeNav = 'components'" @mouseleave="closeTimer = setTimeout(() => activeNav = null, 150)" class="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
                         Components
                         <svg class="relative top-[1px] ml-1 h-3 w-3 transition duration-200" :class="activeNav === 'components' ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
                     <template x-teleport="body">
-                        <div x-show="activeNav === 'components'" @mouseenter="activeNav = 'components'" @mouseleave="activeNav = null" x-cloak class="fixed left-1/2 z-50 w-[500px] -translate-x-1/2 rounded-md border bg-popover p-4 text-popover-foreground shadow-lg" :style="`top: ${$el.previousElementSibling?.getBoundingClientRect().bottom + 4}px;`" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+                        <div x-show="activeNav === 'components'" @mouseenter="clearTimeout(closeTimer); activeNav = 'components'" @mouseleave="closeTimer = setTimeout(() => activeNav = null, 150)" x-cloak class="fixed left-1/2 z-50 w-[500px] -translate-x-1/2 rounded-md border bg-popover p-4 text-popover-foreground shadow-lg" :style="`top: ${$el.previousElementSibling?.getBoundingClientRect().bottom + 4}px;`" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
                             <div class="grid gap-3 md:grid-cols-2">
                                 <a href="#" class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                                     <div class="text-sm font-medium leading-none">Alert Dialog</div>

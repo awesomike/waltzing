@@ -92,9 +92,9 @@
     <li
         role="none"
         class="relative"
-        x-data="{ open: false }"
-        @@mouseenter="open = true"
-        @@mouseleave="open = false"
+        x-data="{ open: false, closeTimer: null }"
+        @@mouseenter="clearTimeout(closeTimer); open = true"
+        @@mouseleave="closeTimer = setTimeout(() => open = false, 100)"
     >
         <button
             type="button"
@@ -138,6 +138,7 @@
             class="absolute left-0 top-full mt-1.5 min-w-[12rem] rounded-md border bg-popover p-1 text-popover-foreground shadow-lg"
             role="menu"
             aria-orientation="vertical"
+            @@mouseenter="clearTimeout(closeTimer); open = true"
         >
             @content()
         </div>
