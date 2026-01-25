@@ -157,13 +157,9 @@ fn head_common() -> &'static str {
         }
 
         .component-preview {
-            background: repeating-linear-gradient(
-                45deg,
-                hsl(var(--muted) / 0.3),
-                hsl(var(--muted) / 0.3) 10px,
-                transparent 10px,
-                transparent 20px
-            );
+            background-color: hsl(var(--background));
+            background-image: radial-gradient(hsl(var(--border)) 1px, transparent 1px);
+            background-size: 16px 16px;
         }
 
         /* Scrollbar styling */
@@ -660,8 +656,15 @@ fn generate_component_detail(component: &str) -> String {
 fn get_component_preview(component: &str) -> &'static str {
     match component {
         "button" => r#"
-            <div class="flex gap-2">
-                <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">Button</button>
+            <div class="flex flex-wrap gap-4">
+                <button class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-colors">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    Primary
+                </button>
+                <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 transition-colors">Secondary</button>
+                <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">Outline</button>
+                <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 hover:bg-accent hover:text-accent-foreground transition-colors">Ghost</button>
+                <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 transition-colors">Destructive</button>
             </div>
         "#,
 
@@ -670,18 +673,45 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "card" => r#"
-            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm w-full max-w-sm">
-                <div class="p-4">
-                    <h4 class="font-semibold">Card Title</h4>
-                    <p class="text-sm text-muted-foreground">Card description</p>
+            <div class="rounded-xl border border-border bg-card text-card-foreground shadow w-full max-w-sm">
+                <div class="flex flex-col space-y-1.5 p-6">
+                    <h3 class="font-semibold leading-none tracking-tight">Create project</h3>
+                    <p class="text-sm text-muted-foreground">Deploy your new project in one-click.</p>
+                </div>
+                <div class="p-6 pt-0 space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium leading-none">Name</label>
+                        <input type="text" placeholder="Name of your project" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium leading-none">Framework</label>
+                        <div class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm">
+                            <span>Select</span>
+                            <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center p-6 pt-0 justify-between">
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors">Cancel</button>
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-colors">Deploy</button>
                 </div>
             </div>
         "#,
 
         "checkbox" => r#"
-            <div class="flex items-center space-x-2">
-                <input type="checkbox" id="preview-cb" class="h-4 w-4 rounded border border-primary">
-                <label for="preview-cb" class="text-sm">Accept terms</label>
+            <div class="space-y-4">
+                <div x-data="{ checked: true }" class="flex items-center space-x-3">
+                    <button type="button" @click="checked = !checked" :class="checked ? 'bg-primary border-primary' : 'border-input'" class="h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors flex items-center justify-center">
+                        <svg x-show="checked" class="h-3 w-3 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Accept terms and conditions</label>
+                </div>
+                <div x-data="{ checked: false }" class="flex items-center space-x-3">
+                    <button type="button" @click="checked = !checked" :class="checked ? 'bg-primary border-primary' : 'border-input'" class="h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors flex items-center justify-center">
+                        <svg x-show="checked" class="h-3 w-3 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                    <label class="text-sm font-medium leading-none">Send me marketing emails</label>
+                </div>
             </div>
         "#,
 
@@ -695,37 +725,70 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "badge" => r#"
-            <div class="flex gap-2">
-                <span class="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold bg-primary text-primary-foreground">Default</span>
-                <span class="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">Secondary</span>
-                <span class="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold bg-destructive text-destructive-foreground">Destructive</span>
+            <div class="flex flex-wrap gap-2">
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-primary text-primary-foreground">Default</span>
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">Secondary</span>
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-destructive text-destructive-foreground">Destructive</span>
+                <span class="inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold">Outline</span>
             </div>
         "#,
 
         "alert" => r#"
-            <div class="relative w-full max-w-md rounded-lg border border-border p-4">
-                <h5 class="mb-1 font-medium leading-none">Heads up!</h5>
-                <div class="text-sm text-muted-foreground">You can add components to your app using the cli.</div>
+            <div class="space-y-4 w-full max-w-md">
+                <div class="relative rounded-lg border border-border bg-background p-4 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg+div]:translate-y-[-3px] [&:has(svg)]:pl-11">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16h.01"/><path d="M12 8v4"/><circle cx="12" cy="12" r="10"/></svg>
+                    <h5 class="mb-1 font-medium leading-none tracking-tight">Heads up!</h5>
+                    <div class="text-sm text-muted-foreground">You can add components to your app using the CLI.</div>
+                </div>
+                <div class="relative rounded-lg border border-destructive/50 bg-destructive/10 text-destructive p-4 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg+div]:translate-y-[-3px] [&:has(svg)]:pl-11">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <h5 class="mb-1 font-medium leading-none tracking-tight">Error</h5>
+                    <div class="text-sm opacity-90">Your session has expired. Please log in again.</div>
+                </div>
             </div>
         "#,
 
         "avatar" => r#"
-            <div class="flex gap-2">
-                <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
-                    <span class="flex h-full w-full items-center justify-center text-sm">JD</span>
-                </div>
+            <div class="flex items-center gap-4">
                 <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                    <img src="https://github.com/shadcn.png" alt="Avatar" class="aspect-square h-full w-full">
+                    <img src="https://github.com/shadcn.png" alt="@shadcn" class="aspect-square h-full w-full object-cover">
+                </div>
+                <div class="relative flex h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500">
+                    <span class="flex h-full w-full items-center justify-center text-sm font-medium text-white">JD</span>
+                </div>
+                <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
+                    <span class="flex h-full w-full items-center justify-center text-sm font-medium">CN</span>
+                </div>
+                <div class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full ring-2 ring-primary ring-offset-2 ring-offset-background">
+                    <img src="https://github.com/vercel.png" alt="@vercel" class="aspect-square h-full w-full object-cover">
                 </div>
             </div>
         "#,
 
         "progress" => r#"
-            <div class="w-full max-w-xs">
-                <div class="relative h-2 w-full overflow-hidden rounded-full bg-primary/20">
-                    <div class="h-full w-[60%] bg-primary transition-all"></div>
+            <div x-data="{ progress: 60 }" x-init="setInterval(() => { progress = progress >= 100 ? 0 : progress + 10 }, 800)" class="w-full max-w-xs space-y-4">
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-muted-foreground">Progress</span>
+                        <span x-text="progress + '%'" class="font-medium"></span>
+                    </div>
+                    <div class="relative h-2 w-full overflow-hidden rounded-full bg-primary/20">
+                        <div class="h-full bg-primary transition-all duration-500 ease-out" :style="`width: ${progress}%`"></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="text-sm text-muted-foreground">Indeterminate</div>
+                    <div class="relative h-2 w-full overflow-hidden rounded-full bg-primary/20">
+                        <div class="h-full w-1/3 bg-primary animate-[progress_1s_ease-in-out_infinite] absolute"></div>
+                    </div>
                 </div>
             </div>
+            <style>
+                @keyframes progress {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(400%); }
+                }
+            </style>
         "#,
 
         "skeleton" => r#"
@@ -932,25 +995,34 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "table" => r#"
-            <div class="w-full max-w-lg rounded-md border">
+            <div class="w-full max-w-lg rounded-lg border bg-card">
                 <table class="w-full caption-bottom text-sm">
                     <thead class="[&_tr]:border-b">
-                        <tr class="border-b transition-colors hover:bg-muted/50">
-                            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Invoice</th>
-                            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                            <th class="h-10 px-4 text-right align-middle font-medium text-muted-foreground">Amount</th>
+                        <tr class="border-b transition-colors">
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Invoice</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Method</th>
+                            <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Amount</th>
                         </tr>
                     </thead>
                     <tbody class="[&_tr:last-child]:border-0">
                         <tr class="border-b transition-colors hover:bg-muted/50">
-                            <td class="p-4 align-middle">INV001</td>
-                            <td class="p-4 align-middle">Paid</td>
-                            <td class="p-4 align-middle text-right">$250.00</td>
+                            <td class="p-4 align-middle font-medium">INV001</td>
+                            <td class="p-4 align-middle"><span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">Paid</span></td>
+                            <td class="p-4 align-middle text-muted-foreground">Credit Card</td>
+                            <td class="p-4 align-middle text-right font-medium">$250.00</td>
                         </tr>
                         <tr class="border-b transition-colors hover:bg-muted/50">
-                            <td class="p-4 align-middle">INV002</td>
-                            <td class="p-4 align-middle">Pending</td>
-                            <td class="p-4 align-middle text-right">$150.00</td>
+                            <td class="p-4 align-middle font-medium">INV002</td>
+                            <td class="p-4 align-middle"><span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">Pending</span></td>
+                            <td class="p-4 align-middle text-muted-foreground">PayPal</td>
+                            <td class="p-4 align-middle text-right font-medium">$150.00</td>
+                        </tr>
+                        <tr class="border-b transition-colors hover:bg-muted/50">
+                            <td class="p-4 align-middle font-medium">INV003</td>
+                            <td class="p-4 align-middle"><span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">Unpaid</span></td>
+                            <td class="p-4 align-middle text-muted-foreground">Bank Transfer</td>
+                            <td class="p-4 align-middle text-right font-medium">$350.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1071,24 +1143,51 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "carousel" => r#"
-            <div class="relative w-full max-w-xs overflow-hidden">
-                <div class="flex transition-transform duration-300">
-                    <div class="w-full flex-shrink-0 p-4">
-                        <div class="rounded-lg border bg-card p-6 text-center">
-                            <span class="text-2xl">1</span>
+            <div x-data="{ current: 0, total: 5 }" class="relative w-full max-w-sm">
+                <div class="overflow-hidden rounded-lg">
+                    <div class="flex transition-transform duration-500 ease-out" :style="`transform: translateX(-${current * 100}%)`">
+                        <div class="w-full flex-shrink-0 p-1">
+                            <div class="rounded-xl border bg-card p-6 aspect-square flex flex-col items-center justify-center">
+                                <span class="text-4xl font-semibold">1</span>
+                                <span class="text-sm text-muted-foreground mt-2">Slide content</span>
+                            </div>
+                        </div>
+                        <div class="w-full flex-shrink-0 p-1">
+                            <div class="rounded-xl border bg-card p-6 aspect-square flex flex-col items-center justify-center">
+                                <span class="text-4xl font-semibold">2</span>
+                                <span class="text-sm text-muted-foreground mt-2">Slide content</span>
+                            </div>
+                        </div>
+                        <div class="w-full flex-shrink-0 p-1">
+                            <div class="rounded-xl border bg-card p-6 aspect-square flex flex-col items-center justify-center">
+                                <span class="text-4xl font-semibold">3</span>
+                                <span class="text-sm text-muted-foreground mt-2">Slide content</span>
+                            </div>
+                        </div>
+                        <div class="w-full flex-shrink-0 p-1">
+                            <div class="rounded-xl border bg-card p-6 aspect-square flex flex-col items-center justify-center">
+                                <span class="text-4xl font-semibold">4</span>
+                                <span class="text-sm text-muted-foreground mt-2">Slide content</span>
+                            </div>
+                        </div>
+                        <div class="w-full flex-shrink-0 p-1">
+                            <div class="rounded-xl border bg-card p-6 aspect-square flex flex-col items-center justify-center">
+                                <span class="text-4xl font-semibold">5</span>
+                                <span class="text-sm text-muted-foreground mt-2">Slide content</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <button class="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 border flex items-center justify-center">
+                <button @click="current = (current - 1 + total) % total" class="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/90 border shadow-sm flex items-center justify-center hover:bg-accent transition-colors">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
                 </button>
-                <button class="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/80 border flex items-center justify-center">
+                <button @click="current = (current + 1) % total" class="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/90 border shadow-sm flex items-center justify-center hover:bg-accent transition-colors">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
-                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                    <div class="h-2 w-2 rounded-full bg-primary"></div>
-                    <div class="h-2 w-2 rounded-full bg-primary/30"></div>
-                    <div class="h-2 w-2 rounded-full bg-primary/30"></div>
+                <div class="flex justify-center gap-1.5 mt-4">
+                    <template x-for="i in total" :key="i">
+                        <button @click="current = i - 1" :class="current === i - 1 ? 'bg-primary' : 'bg-primary/30'" class="h-2 w-2 rounded-full transition-colors"></button>
+                    </template>
                 </div>
             </div>
         "#,
@@ -1109,8 +1208,38 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "context-menu" => r#"
-            <div class="flex h-[150px] w-[200px] items-center justify-center rounded-md border border-dashed text-sm">
-                Right click here
+            <div x-data="{ open: false, pos: { x: 0, y: 0 } }" class="relative">
+                <div @contextmenu.prevent="pos = { x: $event.clientX, y: $event.clientY }; open = true" class="flex h-[150px] w-[300px] items-center justify-center rounded-lg border border-dashed border-border bg-muted/20 text-sm text-muted-foreground select-none cursor-context-menu transition-colors hover:bg-muted/40">
+                    Right click here
+                </div>
+                <template x-teleport="body">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-50 min-w-[160px] rounded-md border bg-popover p-1 text-popover-foreground shadow-md" :style="`left: ${pos.x}px; top: ${pos.y}px;`">
+                        <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer flex items-center gap-2">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            New File
+                        </div>
+                        <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer flex items-center gap-2">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="M3 15h6"/><path d="M6 12v6"/></svg>
+                            New Folder
+                        </div>
+                        <div class="h-px bg-border my-1"></div>
+                        <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer flex items-center gap-2">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            Copy
+                            <span class="ml-auto text-xs text-muted-foreground">⌘C</span>
+                        </div>
+                        <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer flex items-center gap-2">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15V6"/><path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path d="M12 12H3"/><path d="M16 6H3"/><path d="M12 18H3"/></svg>
+                            Paste
+                            <span class="ml-auto text-xs text-muted-foreground">⌘V</span>
+                        </div>
+                        <div class="h-px bg-border my-1"></div>
+                        <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer flex items-center gap-2 text-destructive">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            Delete
+                        </div>
+                    </div>
+                </template>
             </div>
         "#,
 
@@ -1340,11 +1469,47 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "menubar" => r#"
-            <div class="flex h-9 items-center space-x-1 rounded-md border bg-background p-1">
-                <button class="px-3 py-1 text-sm rounded-sm hover:bg-accent">File</button>
-                <button class="px-3 py-1 text-sm rounded-sm hover:bg-accent">Edit</button>
-                <button class="px-3 py-1 text-sm rounded-sm hover:bg-accent">View</button>
-                <button class="px-3 py-1 text-sm rounded-sm hover:bg-accent">Help</button>
+            <div x-data="{ activeMenu: null }" class="flex h-10 items-center space-x-1 rounded-md border bg-background p-1">
+                <div class="relative">
+                    <button @click="activeMenu = activeMenu === 'file' ? null : 'file'" @mouseenter="activeMenu && (activeMenu = 'file')" :class="activeMenu === 'file' ? 'bg-accent' : ''" class="px-3 py-1.5 text-sm font-medium rounded-sm hover:bg-accent transition-colors">File</button>
+                    <template x-teleport="body">
+                        <div x-show="activeMenu === 'file'" @click.away="activeMenu = null" x-cloak class="fixed z-50 min-w-[180px] rounded-md border bg-popover p-1 text-popover-foreground shadow-md" :style="`left: ${$el.previousElementSibling?.getBoundingClientRect().left}px; top: ${$el.previousElementSibling?.getBoundingClientRect().bottom + 4}px;`" x-init="$watch('activeMenu', () => { if (activeMenu === 'file') { const rect = $refs.fileBtn?.getBoundingClientRect(); if (rect) { $el.style.left = rect.left + 'px'; $el.style.top = (rect.bottom + 4) + 'px'; } } })">
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">New Tab <span class="float-right text-muted-foreground text-xs">⌘T</span></div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">New Window <span class="float-right text-muted-foreground text-xs">⌘N</span></div>
+                            <div class="h-px bg-border my-1"></div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Share</div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Print <span class="float-right text-muted-foreground text-xs">⌘P</span></div>
+                        </div>
+                    </template>
+                </div>
+                <div class="relative">
+                    <button @click="activeMenu = activeMenu === 'edit' ? null : 'edit'" @mouseenter="activeMenu && (activeMenu = 'edit')" :class="activeMenu === 'edit' ? 'bg-accent' : ''" class="px-3 py-1.5 text-sm font-medium rounded-sm hover:bg-accent transition-colors">Edit</button>
+                    <template x-teleport="body">
+                        <div x-show="activeMenu === 'edit'" @click.away="activeMenu = null" x-cloak class="fixed z-50 min-w-[180px] rounded-md border bg-popover p-1 text-popover-foreground shadow-md" :style="`left: ${$el.previousElementSibling?.getBoundingClientRect().left}px; top: ${$el.previousElementSibling?.getBoundingClientRect().bottom + 4}px;`">
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Undo <span class="float-right text-muted-foreground text-xs">⌘Z</span></div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Redo <span class="float-right text-muted-foreground text-xs">⇧⌘Z</span></div>
+                            <div class="h-px bg-border my-1"></div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Cut <span class="float-right text-muted-foreground text-xs">⌘X</span></div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Copy <span class="float-right text-muted-foreground text-xs">⌘C</span></div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Paste <span class="float-right text-muted-foreground text-xs">⌘V</span></div>
+                        </div>
+                    </template>
+                </div>
+                <div class="relative">
+                    <button @click="activeMenu = activeMenu === 'view' ? null : 'view'" @mouseenter="activeMenu && (activeMenu = 'view')" :class="activeMenu === 'view' ? 'bg-accent' : ''" class="px-3 py-1.5 text-sm font-medium rounded-sm hover:bg-accent transition-colors">View</button>
+                    <template x-teleport="body">
+                        <div x-show="activeMenu === 'view'" @click.away="activeMenu = null" x-cloak class="fixed z-50 min-w-[180px] rounded-md border bg-popover p-1 text-popover-foreground shadow-md" :style="`left: ${$el.previousElementSibling?.getBoundingClientRect().left}px; top: ${$el.previousElementSibling?.getBoundingClientRect().bottom + 4}px;`">
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer flex items-center gap-2"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Always Show Bookmarks Bar</div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Always Show Full URLs</div>
+                            <div class="h-px bg-border my-1"></div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Reload <span class="float-right text-muted-foreground text-xs">⌘R</span></div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer opacity-50 cursor-not-allowed">Force Reload</div>
+                            <div class="h-px bg-border my-1"></div>
+                            <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Toggle Fullscreen</div>
+                        </div>
+                    </template>
+                </div>
+                <button class="px-3 py-1.5 text-sm font-medium rounded-sm hover:bg-accent transition-colors">Help</button>
             </div>
         "#,
 
@@ -1368,10 +1533,62 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "navigation-menu" => r##"
-            <nav class="flex items-center space-x-4">
-                <a href="#" class="text-sm font-medium transition-colors hover:text-primary">Getting Started</a>
-                <a href="#" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">Components</a>
-                <a href="#" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">Documentation</a>
+            <nav x-data="{ activeNav: null }" class="relative flex items-center gap-1">
+                <div class="relative">
+                    <button @mouseenter="activeNav = 'getting-started'" @mouseleave="activeNav = null" class="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                        Getting Started
+                        <svg class="relative top-[1px] ml-1 h-3 w-3 transition duration-200" :class="activeNav === 'getting-started' ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <template x-teleport="body">
+                        <div x-show="activeNav === 'getting-started'" @mouseenter="activeNav = 'getting-started'" @mouseleave="activeNav = null" x-cloak class="fixed left-1/2 z-50 w-[400px] -translate-x-1/2 rounded-md border bg-popover p-4 text-popover-foreground shadow-lg" :style="`top: ${$el.previousElementSibling?.getBoundingClientRect().bottom + 4}px;`" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+                            <div class="grid gap-3 md:grid-cols-2">
+                                <a href="#" class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                    <div class="text-sm font-medium leading-none">Introduction</div>
+                                    <p class="line-clamp-2 text-sm leading-snug text-muted-foreground">Re-usable components built using Radix UI and Tailwind CSS.</p>
+                                </a>
+                                <a href="#" class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                    <div class="text-sm font-medium leading-none">Installation</div>
+                                    <p class="line-clamp-2 text-sm leading-snug text-muted-foreground">How to install dependencies and structure your app.</p>
+                                </a>
+                                <a href="#" class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                    <div class="text-sm font-medium leading-none">Typography</div>
+                                    <p class="line-clamp-2 text-sm leading-snug text-muted-foreground">Styles for headings, paragraphs, lists...etc</p>
+                                </a>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="relative">
+                    <button @mouseenter="activeNav = 'components'" @mouseleave="activeNav = null" class="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                        Components
+                        <svg class="relative top-[1px] ml-1 h-3 w-3 transition duration-200" :class="activeNav === 'components' ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <template x-teleport="body">
+                        <div x-show="activeNav === 'components'" @mouseenter="activeNav = 'components'" @mouseleave="activeNav = null" x-cloak class="fixed left-1/2 z-50 w-[500px] -translate-x-1/2 rounded-md border bg-popover p-4 text-popover-foreground shadow-lg" :style="`top: ${$el.previousElementSibling?.getBoundingClientRect().bottom + 4}px;`" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+                            <div class="grid gap-3 md:grid-cols-2">
+                                <a href="#" class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                    <div class="text-sm font-medium leading-none">Alert Dialog</div>
+                                    <p class="line-clamp-2 text-sm leading-snug text-muted-foreground">A modal dialog that interrupts the user.</p>
+                                </a>
+                                <a href="#" class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                    <div class="text-sm font-medium leading-none">Hover Card</div>
+                                    <p class="line-clamp-2 text-sm leading-snug text-muted-foreground">For sighted users to preview content.</p>
+                                </a>
+                                <a href="#" class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                    <div class="text-sm font-medium leading-none">Progress</div>
+                                    <p class="line-clamp-2 text-sm leading-snug text-muted-foreground">Displays progress visually.</p>
+                                </a>
+                                <a href="#" class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                                    <div class="text-sm font-medium leading-none">Scroll-area</div>
+                                    <p class="line-clamp-2 text-sm leading-snug text-muted-foreground">Augments native scroll functionality.</p>
+                                </a>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <a href="#" class="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                    Documentation
+                </a>
             </nav>
         "##,
 
