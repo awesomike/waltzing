@@ -1512,6 +1512,9 @@ fn get_component_preview(component: &str) -> &'static str {
                 incSecond() { this.second = this.second >= 59 ? 0 : this.second + 1; },
                 decSecond() { this.second = this.second <= 0 ? 59 : this.second - 1; },
                 togglePeriod() { this.period = this.period === 'AM' ? 'PM' : 'AM'; },
+                setHour(val) { const n = parseInt(val, 10); if (!isNaN(n)) this.hour = Math.max(this.minHour, Math.min(this.maxHour, n)); },
+                setMinute(val) { const n = parseInt(val, 10); if (!isNaN(n)) this.minute = Math.max(0, Math.min(59, n)); },
+                setSecond(val) { const n = parseInt(val, 10); if (!isNaN(n)) this.second = Math.max(0, Math.min(59, n)); },
                 updateDatePos() {
                     const trigger = this.$refs.dateBtn;
                     if (!trigger) return;
@@ -1587,13 +1590,13 @@ fn get_component_preview(component: &str) -> &'static str {
                             <div class="flex items-center gap-1">
                                 <div class="flex flex-col items-center">
                                     <button type="button" @click="incHour()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
-                                    <span class="text-lg font-mono w-10 text-center" x-text="displayHour"></span>
+                                    <input type="text" :value="displayHour" @input="setHour($event.target.value)" @keydown.up.prevent="incHour()" @keydown.down.prevent="decHour()" @focus="$event.target.select()" class="w-10 h-8 text-lg font-mono text-center bg-transparent border rounded focus:outline-none focus:ring-1 focus:ring-ring" maxlength="2" />
                                     <button type="button" @click="decHour()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
                                 </div>
                                 <span class="text-lg font-bold">:</span>
                                 <div class="flex flex-col items-center">
                                     <button type="button" @click="incMinute()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
-                                    <span class="text-lg font-mono w-10 text-center" x-text="displayMinute"></span>
+                                    <input type="text" :value="displayMinute" @input="setMinute($event.target.value)" @keydown.up.prevent="incMinute()" @keydown.down.prevent="decMinute()" @focus="$event.target.select()" class="w-10 h-8 text-lg font-mono text-center bg-transparent border rounded focus:outline-none focus:ring-1 focus:ring-ring" maxlength="2" />
                                     <button type="button" @click="decMinute()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
                                 </div>
                                 <template x-if="showSeconds">
@@ -1602,7 +1605,7 @@ fn get_component_preview(component: &str) -> &'static str {
                                 <template x-if="showSeconds">
                                     <div class="flex flex-col items-center">
                                         <button type="button" @click="incSecond()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
-                                        <span class="text-lg font-mono w-10 text-center" x-text="displaySecond"></span>
+                                        <input type="text" :value="displaySecond" @input="setSecond($event.target.value)" @keydown.up.prevent="incSecond()" @keydown.down.prevent="decSecond()" @focus="$event.target.select()" class="w-10 h-8 text-lg font-mono text-center bg-transparent border rounded focus:outline-none focus:ring-1 focus:ring-ring" maxlength="2" />
                                         <button type="button" @click="decSecond()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
                                     </div>
                                 </template>
@@ -2066,6 +2069,9 @@ fn get_component_preview(component: &str) -> &'static str {
                 incSecond() { this.second = this.second >= 59 ? 0 : this.second + 1; },
                 decSecond() { this.second = this.second <= 0 ? 59 : this.second - 1; },
                 togglePeriod() { this.period = this.period === 'AM' ? 'PM' : 'AM'; },
+                setHour(val) { const n = parseInt(val, 10); if (!isNaN(n)) this.hour = Math.max(this.minHour, Math.min(this.maxHour, n)); },
+                setMinute(val) { const n = parseInt(val, 10); if (!isNaN(n)) this.minute = Math.max(0, Math.min(59, n)); },
+                setSecond(val) { const n = parseInt(val, 10); if (!isNaN(n)) this.second = Math.max(0, Math.min(59, n)); },
                 updatePos() {
                     const trigger = this.$refs.trigger;
                     if (!trigger) return;
@@ -2101,13 +2107,13 @@ fn get_component_preview(component: &str) -> &'static str {
                         <div class="flex items-center gap-1">
                             <div class="flex flex-col items-center">
                                 <button type="button" @click="incHour()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
-                                <span class="text-lg font-mono w-10 text-center" x-text="displayHour"></span>
+                                <input type="text" :value="displayHour" @input="setHour($event.target.value)" @keydown.up.prevent="incHour()" @keydown.down.prevent="decHour()" @focus="$event.target.select()" class="w-10 h-8 text-lg font-mono text-center bg-transparent border rounded focus:outline-none focus:ring-1 focus:ring-ring" maxlength="2" />
                                 <button type="button" @click="decHour()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
                             </div>
                             <span class="text-lg font-bold">:</span>
                             <div class="flex flex-col items-center">
                                 <button type="button" @click="incMinute()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
-                                <span class="text-lg font-mono w-10 text-center" x-text="displayMinute"></span>
+                                <input type="text" :value="displayMinute" @input="setMinute($event.target.value)" @keydown.up.prevent="incMinute()" @keydown.down.prevent="decMinute()" @focus="$event.target.select()" class="w-10 h-8 text-lg font-mono text-center bg-transparent border rounded focus:outline-none focus:ring-1 focus:ring-ring" maxlength="2" />
                                 <button type="button" @click="decMinute()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
                             </div>
                             <template x-if="showSeconds">
@@ -2116,7 +2122,7 @@ fn get_component_preview(component: &str) -> &'static str {
                             <template x-if="showSeconds">
                                 <div class="flex flex-col items-center">
                                     <button type="button" @click="incSecond()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg></button>
-                                    <span class="text-lg font-mono w-10 text-center" x-text="displaySecond"></span>
+                                    <input type="text" :value="displaySecond" @input="setSecond($event.target.value)" @keydown.up.prevent="incSecond()" @keydown.down.prevent="decSecond()" @focus="$event.target.select()" class="w-10 h-8 text-lg font-mono text-center bg-transparent border rounded focus:outline-none focus:ring-1 focus:ring-ring" maxlength="2" />
                                     <button type="button" @click="decSecond()" class="h-6 w-10 flex items-center justify-center rounded hover:bg-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
                                 </div>
                             </template>
