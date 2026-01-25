@@ -1248,17 +1248,30 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "hover-card" => r##"
-            <div x-data="{ open: false }" class="relative inline-block">
-                <a href="#" @mouseenter="open = true" @mouseleave="open = false" class="text-sm underline">@nextjs</a>
-                <div x-show="open" x-cloak class="absolute top-full mt-2 w-64 rounded-md border bg-popover text-popover-foreground p-4 shadow-md z-50">
-                    <div class="flex gap-4">
-                        <div class="h-12 w-12 rounded-full bg-muted"></div>
-                        <div class="space-y-1">
-                            <h4 class="text-sm font-semibold">Next.js</h4>
-                            <p class="text-xs text-muted-foreground">The React Framework for the Web</p>
+            <div x-data="{
+                open: false,
+                pos: { x: 0, y: 0 },
+                updatePos() {
+                    const rect = this.$refs.trigger.getBoundingClientRect();
+                    this.pos.x = rect.left + rect.width / 2;
+                    this.pos.y = rect.bottom + 8;
+                }
+            }" class="inline-block">
+                <a href="#" x-ref="trigger" @mouseenter="updatePos(); open = true" @mouseleave="open = false" class="text-sm underline">@nextjs</a>
+                <template x-teleport="body">
+                    <div x-show="open" x-cloak
+                         :style="`left: ${pos.x}px; top: ${pos.y}px; transform: translateX(-50%);`"
+                         class="fixed w-64 rounded-md border bg-popover text-popover-foreground p-4 shadow-md z-[9999]"
+                         @mouseenter="open = true" @mouseleave="open = false">
+                        <div class="flex gap-4">
+                            <div class="h-12 w-12 rounded-full bg-muted"></div>
+                            <div class="space-y-1">
+                                <h4 class="text-sm font-semibold">Next.js</h4>
+                                <p class="text-xs text-muted-foreground">The React Framework for the Web</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </template>
             </div>
         "##,
 
