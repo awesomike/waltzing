@@ -1,6 +1,7 @@
 @*
  * Dropdown component
  * A dropdown menu with trigger and items
+ * Automatically flips to open above if not enough space below
  *@
 
 
@@ -21,15 +22,29 @@
         Align::End => { "right-0" }
     }
 
-    <div class="relative inline-block text-left" x-data="{ open: false }">
+    <div class="relative inline-block text-left" x-data="{
+        open: false,
+        flipTop: false,
+        checkFlip() {
+            const trigger = this.$refs.trigger;
+            const dropdown = this.$refs.dropdown;
+            if (!trigger || !dropdown) return;
+            const rect = trigger.getBoundingClientRect();
+            const dropdownHeight = dropdown.offsetHeight || 200;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+        }
+    }">
         @* Trigger *@
-        <div @click="open = !open">
+        <div x-ref="trigger" @click="open = !open; $nextTick(() => checkFlip())">
             @trigger()
         </div>
 
         @* Dropdown content *@
-        @let classes = vec!["absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md", @align_cls]
+        @let classes = vec!["absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md", @align_cls]
         <div
+            x-ref="dropdown"
             x-show="open"
             x-transition:enter="transition ease-out duration-100"
             x-transition:enter-start="transform opacity-0 scale-95"
@@ -40,6 +55,7 @@
             @click.away="open = false"
             @keydown.escape.window="open = false"
             class="@cn(@classes)"
+            :class="flipTop ? 'bottom-full mb-2' : 'top-full mt-2'"
             style="display: none;"
             role="menu"
         >

@@ -51,6 +51,7 @@
         class="relative w-full"
         x-data="{
             open: false,
+            flipTop: false,
             search: '@initial_label',
             selected: '@selected_val',
             highlightedIndex: -1,
@@ -60,6 +61,16 @@
                     const label = el.dataset.label.toLowerCase();
                     return label.includes(searchLower);
                 }) : [];
+            },
+            checkFlip() {
+                const trigger = this.$refs.trigger;
+                const dropdown = this.$refs.options;
+                if (!trigger || !dropdown) return;
+                const rect = trigger.getBoundingClientRect();
+                const dropdownHeight = dropdown.offsetHeight || 240;
+                const spaceBelow = window.innerHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
             },
             selectOption(value, label) {
                 this.selected = value;
@@ -106,13 +117,13 @@
 
         @* Search input *@
         @let placeholder_text = placeholder.unwrap_or("Search...")
-        <div class="relative">
+        <div class="relative" x-ref="trigger">
             <input
                 type="text"
                 class="@input_cls pr-8"
                 x-model="search"
-                @focus="open = true; highlightedIndex = -1"
-                @click="open = true"
+                @focus="open = true; highlightedIndex = -1; $nextTick(() => checkFlip())"
+                @click="open = true; $nextTick(() => checkFlip())"
                 @input="open = true; highlightedIndex = -1"
                 placeholder="@placeholder_text"
                 @if disabled { disabled }
@@ -126,7 +137,7 @@
             <button
                 type="button"
                 class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                @click="open = !open; if(open) $refs.input?.focus()"
+                @click="open = !open; if(open) { $refs.input?.focus(); $nextTick(() => checkFlip()); }"
                 tabindex="-1"
                 @if disabled { disabled }
             >
@@ -148,7 +159,8 @@
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
             @click.outside="open = false"
-            class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+            class="absolute z-50 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+            :class="flipTop ? 'bottom-full mb-1' : 'top-full mt-1'"
             role="listbox"
         >
             @for (idx, opt) in options.iter().enumerate() {

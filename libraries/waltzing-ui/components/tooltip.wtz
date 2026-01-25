@@ -44,20 +44,25 @@
     </@>
 }
 
-@* Rich content tooltip with alignment control *@
+@* Rich content tooltip with alignment control and auto-flip *@
 @fn rich(
     side: Side = Side::Top,
     align: Align = Align::Center,
     trigger: @() = @{},
     content: @() = @{},
 ) {
-    @let side_cls = {
-        match side {
-            Side::Top => "bottom-full mb-2",
-            Side::Right => "left-full ml-2",
-            Side::Bottom => "top-full mt-2",
-            Side::Left => "right-full mr-2",
-        }
+    @let is_vertical = match side {
+        Side::Top => "true",
+        Side::Bottom => "true",
+        Side::Left => "false",
+        Side::Right => "false",
+    }
+
+    @let preferred_top = match side {
+        Side::Top => "true",
+        Side::Bottom => "false",
+        Side::Left => "false",
+        Side::Right => "false",
     }
 
     @let align_cls = {
@@ -68,24 +73,35 @@
         }
     }
 
-    @let arrow_side_cls = {
-        match side {
-            Side::Top => "top-full left-1/2 -translate-x-1/2 border-t-primary border-x-transparent border-b-transparent",
-            Side::Right => "right-full top-1/2 -translate-y-1/2 border-r-primary border-y-transparent border-l-transparent",
-            Side::Bottom => "bottom-full left-1/2 -translate-x-1/2 border-b-primary border-x-transparent border-t-transparent",
-            Side::Left => "left-full top-1/2 -translate-y-1/2 border-l-primary border-y-transparent border-r-transparent",
-        }
+    @let side_cls = match side {
+        Side::Right => "left-full ml-2",
+        Side::Left => "right-full mr-2",
+        _ => "",
     }
 
     @let tooltip_cls = cn(&["absolute z-50 max-w-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs shadow-md pointer-events-none", side_cls, align_cls])
 
-    @let arrow_cls = cn(&["absolute w-0 h-0 border-4", arrow_side_cls])
-
-    <div class="relative inline-block" x-data="{ show: false }">
+    <div class="relative inline-block" x-data="{
+        show: false,
+        flipTop: @preferred_top,
+        isVertical: @is_vertical,
+        checkFlip() {
+            if (!this.isVertical) return;
+            const trigger = this.$refs.trigger;
+            const tooltip = this.$refs.tooltip;
+            if (!trigger || !tooltip) return;
+            const rect = trigger.getBoundingClientRect();
+            const tooltipHeight = tooltip.offsetHeight || 40;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            this.flipTop = spaceBelow < tooltipHeight + 10 && spaceAbove > spaceBelow;
+        }
+    }">
         <div
-            @mouseenter="show = true"
+            x-ref="trigger"
+            @mouseenter="show = true; $nextTick(() => checkFlip())"
             @mouseleave="show = false"
-            @focus="show = true"
+            @focus="show = true; $nextTick(() => checkFlip())"
             @blur="show = false"
             aria-describedby="tooltip"
         >
@@ -93,6 +109,7 @@
         </div>
 
         <div
+            x-ref="tooltip"
             x-show="show"
             x-cloak
             x-transition:enter="transition ease-out duration-150"
@@ -102,11 +119,12 @@
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
             class="@tooltip_cls"
+            :class="isVertical ? (flipTop ? 'bottom-full mb-2' : 'top-full mt-2') : ''"
             role="tooltip"
             id="tooltip"
         >
             @content()
-            <span class="@arrow_cls"></span>
+            <span class="absolute w-0 h-0 border-4" :class="flipTop ? 'top-full left-1/2 -translate-x-1/2 border-t-primary border-x-transparent border-b-transparent' : 'bottom-full left-1/2 -translate-x-1/2 border-b-primary border-x-transparent border-t-transparent'"></span>
         </div>
     </div>
 }
