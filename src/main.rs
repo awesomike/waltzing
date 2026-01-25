@@ -1415,14 +1415,25 @@ fn get_component_preview(component: &str) -> &'static str {
         "date-picker" => r#"
             <div x-data="{
                 open: false,
-                selected: '',
+                value: '',
+                displayValue: '',
+                currentMonth: new Date().getMonth(),
+                currentYear: new Date().getFullYear(),
+                currentView: 'days',
+                yearInput: '',
+                minYear: new Date().getFullYear() - 100,
+                maxYear: new Date().getFullYear() + 20,
+                days: [],
+                weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+                months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 pos: { x: 0, y: 0 },
                 flipTop: false,
                 updatePos() {
                     const trigger = this.$refs.trigger;
                     if (!trigger) return;
                     const rect = trigger.getBoundingClientRect();
-                    const calendarHeight = 300;
+                    const calendarHeight = 380;
                     const spaceBelow = window.innerHeight - rect.bottom;
                     const spaceAbove = rect.top;
                     this.flipTop = spaceBelow < calendarHeight && spaceAbove > spaceBelow;
@@ -1434,31 +1445,183 @@ fn get_component_preview(component: &str) -> &'static str {
                     this._scrollHandler = () => this.onScroll();
                     window.addEventListener('scroll', this._scrollHandler, true);
                     window.addEventListener('resize', this._scrollHandler);
+                    this.yearInput = this.currentYear;
+                    this.buildCalendar();
                 },
                 destroy() {
                     window.removeEventListener('scroll', this._scrollHandler, true);
                     window.removeEventListener('resize', this._scrollHandler);
+                },
+                formatISODate(date) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return year + '-' + month + '-' + day;
+                },
+                formatDisplayValue(date) {
+                    this.displayValue = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                },
+                setView(view) {
+                    this.currentView = view;
+                    if (view === 'years') {
+                        this.yearInput = this.currentYear;
+                        this.updateYearRange();
+                    }
+                },
+                prevPeriod() {
+                    if (this.currentView === 'days') { this.prevMonth(); }
+                    else if (this.currentView === 'months') { this.currentYear--; this.yearInput = this.currentYear; }
+                    else if (this.currentView === 'years') { this.minYear -= 20; this.maxYear -= 20; }
+                },
+                nextPeriod() {
+                    if (this.currentView === 'days') { this.nextMonth(); }
+                    else if (this.currentView === 'months') { this.currentYear++; this.yearInput = this.currentYear; }
+                    else if (this.currentView === 'years') { this.minYear += 20; this.maxYear += 20; }
+                },
+                prevMonth() {
+                    if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; }
+                    else { this.currentMonth--; }
+                    this.buildCalendar();
+                },
+                nextMonth() {
+                    if (this.currentMonth === 11) { this.currentMonth = 0; this.currentYear++; }
+                    else { this.currentMonth++; }
+                    this.buildCalendar();
+                },
+                buildCalendar() {
+                    this.days = [];
+                    const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                    const startDate = new Date(firstDay);
+                    startDate.setDate(startDate.getDate() - firstDay.getDay());
+                    for (let i = 0; i < 42; i++) {
+                        const date = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + i);
+                        const isoDate = this.formatISODate(date);
+                        const isCurrentMonth = date.getMonth() === this.currentMonth;
+                        const isSelected = this.value === isoDate;
+                        const isToday = this.formatISODate(new Date()) === isoDate;
+                        this.days.push({ day: date.getDate(), date: isoDate, selected: isSelected, today: isToday, currentMonth: isCurrentMonth });
+                    }
+                },
+                selectDate(day) {
+                    this.value = day.date;
+                    const date = new Date(day.date + 'T00:00:00');
+                    this.currentMonth = date.getMonth();
+                    this.currentYear = date.getFullYear();
+                    this.formatDisplayValue(date);
+                    this.buildCalendar();
+                    this.open = false;
+                },
+                selectMonth(monthIndex) {
+                    this.currentMonth = monthIndex;
+                    this.buildCalendar();
+                    this.setView('days');
+                },
+                selectYear(year) {
+                    this.currentYear = year;
+                    this.yearInput = year;
+                    this.buildCalendar();
+                    this.setView('months');
+                },
+                selectYearFromInput() {
+                    const year = parseInt(this.yearInput);
+                    if (this.isValidYearInput()) { this.selectYear(year); }
+                },
+                clearYearInput() { this.yearInput = ''; },
+                isValidYearInput() {
+                    const year = parseInt(this.yearInput);
+                    return year && year >= 1000 && year <= 9999 && !isNaN(year);
+                },
+                validateYearKeypress(event) {
+                    const char = String.fromCharCode(event.which);
+                    if (!/[0-9]/.test(char)) { event.preventDefault(); }
+                },
+                handleYearInput(event) {
+                    const value = event.target.value.replace(/[^0-9]/g, '');
+                    this.yearInput = value;
+                    this.updateYearRange();
+                },
+                updateYearRange() {
+                    const inputYear = parseInt(this.yearInput);
+                    if (inputYear && (inputYear < this.minYear || inputYear > this.maxYear)) {
+                        this.minYear = Math.max(1000, inputYear - 10);
+                        this.maxYear = Math.min(9999, inputYear + 10);
+                    }
+                },
+                getYearOptions() {
+                    const years = [];
+                    for (let year = this.minYear; year <= this.maxYear; year++) { years.push(year); }
+                    return years;
+                },
+                selectToday() {
+                    const today = new Date();
+                    const isoDate = this.formatISODate(today);
+                    this.value = isoDate;
+                    this.currentMonth = today.getMonth();
+                    this.currentYear = today.getFullYear();
+                    this.formatDisplayValue(today);
+                    this.buildCalendar();
+                    this.open = false;
                 }
             }" x-init="init()" @destroy="destroy()" class="inline-block">
-                <button x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())" class="flex h-9 w-[200px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
-                    <span :class="selected ? '' : 'text-muted-foreground'" x-text="selected || 'Pick a date'"></span>
+                <button x-ref="trigger" @click="open = !open; currentView = 'days'; $nextTick(() => updatePos())" class="flex h-9 w-[200px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+                    <span :class="displayValue ? '' : 'text-muted-foreground'" x-text="displayValue || 'Pick a date'"></span>
                     <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                 </button>
                 <template x-teleport="body">
-                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-[9999] p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${pos.x}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}`">
-                        <div class="flex items-center justify-between mb-3">
-                            <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-                            <div class="text-sm font-medium">January 2026</div>
-                            <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-[9999] w-80 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${pos.x}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}`">
+                        <!-- Header with navigation -->
+                        <div class="flex items-center justify-between p-3 border-b">
+                            <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent opacity-50 hover:opacity-100" @click="prevPeriod()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+                            <div class="flex items-center gap-1">
+                                <button type="button" class="px-2 py-1 text-sm font-medium rounded hover:bg-accent transition-colors" :class="{ 'bg-accent': currentView === 'years' }" @click="setView('years')" x-text="currentYear"></button>
+                                <button type="button" class="px-2 py-1 text-sm font-medium rounded hover:bg-accent transition-colors" :class="{ 'bg-accent': currentView === 'months' }" @click="setView('months')" x-text="monthsShort[currentMonth]"></button>
+                                <button type="button" class="p-1 rounded hover:bg-accent transition-colors" :class="{ 'bg-accent': currentView === 'days' }" @click="setView('days')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></button>
+                            </div>
+                            <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent opacity-50 hover:opacity-100" @click="nextPeriod()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
                         </div>
-                        <div class="grid grid-cols-7 gap-1 text-center text-xs mb-1">
-                            <div class="text-muted-foreground p-1">Su</div><div class="text-muted-foreground p-1">Mo</div><div class="text-muted-foreground p-1">Tu</div><div class="text-muted-foreground p-1">We</div><div class="text-muted-foreground p-1">Th</div><div class="text-muted-foreground p-1">Fr</div><div class="text-muted-foreground p-1">Sa</div>
+                        <div class="p-3">
+                            <!-- Days View -->
+                            <div x-show="currentView === 'days'">
+                                <div class="grid grid-cols-7 gap-1 mb-1">
+                                    <template x-for="weekday in weekdays" :key="weekday">
+                                        <div class="text-center text-xs text-muted-foreground font-medium h-8 flex items-center justify-center" x-text="weekday"></div>
+                                    </template>
+                                </div>
+                                <div class="grid grid-cols-7 gap-1">
+                                    <template x-for="(day, index) in days" :key="index">
+                                        <button type="button" class="h-8 w-8 text-sm rounded-md flex items-center justify-center transition-colors" :class="{ 'bg-primary text-primary-foreground': day.selected, 'bg-accent': day.today && !day.selected, 'text-muted-foreground opacity-50': !day.currentMonth, 'hover:bg-accent': !day.selected && day.currentMonth }" @click="selectDate(day)" x-text="day.day"></button>
+                                    </template>
+                                </div>
+                            </div>
+                            <!-- Months View -->
+                            <div x-show="currentView === 'months'">
+                                <div class="grid grid-cols-3 gap-2">
+                                    <template x-for="(month, index) in monthsShort" :key="index">
+                                        <button type="button" class="px-3 py-2 text-sm font-medium rounded-md transition-colors" :class="{ 'bg-primary text-primary-foreground': index === currentMonth, 'hover:bg-accent': index !== currentMonth }" @click="selectMonth(index)" x-text="month"></button>
+                                    </template>
+                                </div>
+                            </div>
+                            <!-- Years View -->
+                            <div x-show="currentView === 'years'">
+                                <div class="space-y-3">
+                                    <div class="relative">
+                                        <input type="text" x-model="yearInput" @keydown.enter="selectYearFromInput()" @input="handleYearInput($event)" @keypress="validateYearKeypress($event)" placeholder="Enter year" maxlength="4" class="w-full px-3 py-2 pr-16 border border-input rounded-md text-center font-medium bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
+                                        <div x-show="yearInput && yearInput.toString().length > 0" class="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1">
+                                            <button type="button" @click="clearYearInput()" class="p-1 hover:bg-accent rounded transition-colors" title="Clear"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                                            <button type="button" @click="selectYearFromInput()" :disabled="!isValidYearInput()" class="p-1 hover:bg-accent rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="{ 'text-primary': isValidYearInput(), 'text-muted-foreground': !isValidYearInput() }" title="Select year"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></button>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+                                        <template x-for="year in getYearOptions()" :key="year">
+                                            <button type="button" class="px-2 py-1.5 text-sm font-medium rounded-md transition-colors" :class="{ 'bg-primary text-primary-foreground': year === currentYear, 'hover:bg-accent': year !== currentYear }" @click="selectYear(year)" x-text="year"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-7 gap-1 text-center text-sm">
-                            <div class="p-2"></div><div class="p-2"></div><div class="p-2"></div><button type="button" @click="selected = 'Jan 1, 2026'; open = false" class="p-2 rounded hover:bg-accent">1</button><button type="button" @click="selected = 'Jan 2, 2026'; open = false" class="p-2 rounded hover:bg-accent">2</button><button type="button" @click="selected = 'Jan 3, 2026'; open = false" class="p-2 rounded hover:bg-accent">3</button><button type="button" @click="selected = 'Jan 4, 2026'; open = false" class="p-2 rounded hover:bg-accent">4</button>
-                            <button type="button" @click="selected = 'Jan 5, 2026'; open = false" class="p-2 rounded hover:bg-accent">5</button><button type="button" @click="selected = 'Jan 6, 2026'; open = false" class="p-2 rounded hover:bg-accent">6</button><button type="button" @click="selected = 'Jan 7, 2026'; open = false" class="p-2 rounded hover:bg-accent">7</button><button type="button" @click="selected = 'Jan 8, 2026'; open = false" class="p-2 rounded bg-primary text-primary-foreground">8</button><button type="button" @click="selected = 'Jan 9, 2026'; open = false" class="p-2 rounded hover:bg-accent">9</button><button type="button" @click="selected = 'Jan 10, 2026'; open = false" class="p-2 rounded hover:bg-accent">10</button><button type="button" @click="selected = 'Jan 11, 2026'; open = false" class="p-2 rounded hover:bg-accent">11</button>
-                            <button type="button" @click="selected = 'Jan 12, 2026'; open = false" class="p-2 rounded hover:bg-accent">12</button><button type="button" @click="selected = 'Jan 13, 2026'; open = false" class="p-2 rounded hover:bg-accent">13</button><button type="button" @click="selected = 'Jan 14, 2026'; open = false" class="p-2 rounded hover:bg-accent">14</button><button type="button" @click="selected = 'Jan 15, 2026'; open = false" class="p-2 rounded hover:bg-accent">15</button><button type="button" @click="selected = 'Jan 16, 2026'; open = false" class="p-2 rounded hover:bg-accent">16</button><button type="button" @click="selected = 'Jan 17, 2026'; open = false" class="p-2 rounded hover:bg-accent">17</button><button type="button" @click="selected = 'Jan 18, 2026'; open = false" class="p-2 rounded hover:bg-accent">18</button>
-                            <button type="button" @click="selected = 'Jan 19, 2026'; open = false" class="p-2 rounded hover:bg-accent">19</button><button type="button" @click="selected = 'Jan 20, 2026'; open = false" class="p-2 rounded hover:bg-accent">20</button><button type="button" @click="selected = 'Jan 21, 2026'; open = false" class="p-2 rounded hover:bg-accent">21</button><button type="button" @click="selected = 'Jan 22, 2026'; open = false" class="p-2 rounded hover:bg-accent">22</button><button type="button" @click="selected = 'Jan 23, 2026'; open = false" class="p-2 rounded hover:bg-accent">23</button><button type="button" @click="selected = 'Jan 24, 2026'; open = false" class="p-2 rounded hover:bg-accent">24</button><button type="button" @click="selected = 'Jan 25, 2026'; open = false" class="p-2 rounded hover:bg-accent">25</button>
+                        <!-- Today Button -->
+                        <div class="p-3 pt-0">
+                            <button type="button" class="w-full h-8 px-3 text-sm font-medium rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors" @click="selectToday()">Today</button>
                         </div>
                     </div>
                 </template>
@@ -1469,7 +1632,18 @@ fn get_component_preview(component: &str) -> &'static str {
             <div x-data="{
                 dateOpen: false,
                 timeOpen: false,
-                selectedDate: '',
+                dateValue: '',
+                displayDate: '',
+                currentMonth: new Date().getMonth(),
+                currentYear: new Date().getFullYear(),
+                currentView: 'days',
+                yearInput: '',
+                minYear: new Date().getFullYear() - 100,
+                maxYear: new Date().getFullYear() + 20,
+                days: [],
+                weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+                months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 hour: 9,
                 minute: 0,
                 second: 0,
@@ -1515,11 +1689,121 @@ fn get_component_preview(component: &str) -> &'static str {
                 setHour(val) { const n = parseInt(val, 10); if (!isNaN(n) && n >= this.minHour && n <= this.maxHour) this.hour = n; },
                 setMinute(val) { const n = parseInt(val, 10); if (!isNaN(n) && n >= 0 && n <= 59) this.minute = n; },
                 setSecond(val) { const n = parseInt(val, 10); if (!isNaN(n) && n >= 0 && n <= 59) this.second = n; },
+                formatISODate(date) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return year + '-' + month + '-' + day;
+                },
+                formatDisplayDate(date) {
+                    this.displayDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                },
+                setView(view) {
+                    this.currentView = view;
+                    if (view === 'years') {
+                        this.yearInput = this.currentYear;
+                        this.updateYearRange();
+                    }
+                },
+                prevPeriod() {
+                    if (this.currentView === 'days') { this.prevMonth(); }
+                    else if (this.currentView === 'months') { this.currentYear--; this.yearInput = this.currentYear; }
+                    else if (this.currentView === 'years') { this.minYear -= 20; this.maxYear -= 20; }
+                },
+                nextPeriod() {
+                    if (this.currentView === 'days') { this.nextMonth(); }
+                    else if (this.currentView === 'months') { this.currentYear++; this.yearInput = this.currentYear; }
+                    else if (this.currentView === 'years') { this.minYear += 20; this.maxYear += 20; }
+                },
+                prevMonth() {
+                    if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; }
+                    else { this.currentMonth--; }
+                    this.buildCalendar();
+                },
+                nextMonth() {
+                    if (this.currentMonth === 11) { this.currentMonth = 0; this.currentYear++; }
+                    else { this.currentMonth++; }
+                    this.buildCalendar();
+                },
+                buildCalendar() {
+                    this.days = [];
+                    const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                    const startDate = new Date(firstDay);
+                    startDate.setDate(startDate.getDate() - firstDay.getDay());
+                    for (let i = 0; i < 42; i++) {
+                        const date = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + i);
+                        const isoDate = this.formatISODate(date);
+                        const isCurrentMonth = date.getMonth() === this.currentMonth;
+                        const isSelected = this.dateValue === isoDate;
+                        const isToday = this.formatISODate(new Date()) === isoDate;
+                        this.days.push({ day: date.getDate(), date: isoDate, selected: isSelected, today: isToday, currentMonth: isCurrentMonth });
+                    }
+                },
+                selectDate(day) {
+                    this.dateValue = day.date;
+                    const date = new Date(day.date + 'T00:00:00');
+                    this.currentMonth = date.getMonth();
+                    this.currentYear = date.getFullYear();
+                    this.formatDisplayDate(date);
+                    this.buildCalendar();
+                    this.dateOpen = false;
+                },
+                selectMonth(monthIndex) {
+                    this.currentMonth = monthIndex;
+                    this.buildCalendar();
+                    this.setView('days');
+                },
+                selectYear(year) {
+                    this.currentYear = year;
+                    this.yearInput = year;
+                    this.buildCalendar();
+                    this.setView('months');
+                },
+                selectYearFromInput() {
+                    const year = parseInt(this.yearInput);
+                    if (this.isValidYearInput()) { this.selectYear(year); }
+                },
+                clearYearInput() { this.yearInput = ''; },
+                isValidYearInput() {
+                    const year = parseInt(this.yearInput);
+                    return year && year >= 1000 && year <= 9999 && !isNaN(year);
+                },
+                validateYearKeypress(event) {
+                    const char = String.fromCharCode(event.which);
+                    if (!/[0-9]/.test(char)) { event.preventDefault(); }
+                },
+                handleYearInput(event) {
+                    const value = event.target.value.replace(/[^0-9]/g, '');
+                    this.yearInput = value;
+                    this.updateYearRange();
+                },
+                updateYearRange() {
+                    const inputYear = parseInt(this.yearInput);
+                    if (inputYear && (inputYear < this.minYear || inputYear > this.maxYear)) {
+                        this.minYear = Math.max(1000, inputYear - 10);
+                        this.maxYear = Math.min(9999, inputYear + 10);
+                    }
+                },
+                getYearOptions() {
+                    const years = [];
+                    for (let year = this.minYear; year <= this.maxYear; year++) { years.push(year); }
+                    return years;
+                },
+                selectToday() {
+                    const today = new Date();
+                    const isoDate = this.formatISODate(today);
+                    this.dateValue = isoDate;
+                    this.currentMonth = today.getMonth();
+                    this.currentYear = today.getFullYear();
+                    this.formatDisplayDate(today);
+                    this.buildCalendar();
+                    this.dateOpen = false;
+                },
                 updateDatePos() {
                     const trigger = this.$refs.dateBtn;
                     if (!trigger) return;
                     const rect = trigger.getBoundingClientRect();
-                    const height = 340;
+                    const height = 400;
                     const spaceBelow = window.innerHeight - rect.bottom;
                     const spaceAbove = rect.top;
                     this.dateFlipTop = spaceBelow < height && spaceAbove > spaceBelow;
@@ -1545,6 +1829,8 @@ fn get_component_preview(component: &str) -> &'static str {
                     this._scrollHandler = () => this.onScroll();
                     window.addEventListener('scroll', this._scrollHandler, true);
                     window.addEventListener('resize', this._scrollHandler);
+                    this.yearInput = this.currentYear;
+                    this.buildCalendar();
                 },
                 destroy() {
                     window.removeEventListener('scroll', this._scrollHandler, true);
@@ -1552,26 +1838,65 @@ fn get_component_preview(component: &str) -> &'static str {
                 }
             }" x-init="init()" @destroy="destroy()" class="flex gap-2">
                 <div>
-                    <button x-ref="dateBtn" @click="dateOpen = !dateOpen; timeOpen = false; $nextTick(() => updateDatePos())" class="flex h-9 w-[140px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
-                        <span :class="selectedDate ? '' : 'text-muted-foreground'" x-text="selectedDate || 'Date'"></span>
+                    <button x-ref="dateBtn" @click="dateOpen = !dateOpen; timeOpen = false; currentView = 'days'; $nextTick(() => updateDatePos())" class="flex h-9 w-[160px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+                        <span :class="displayDate ? '' : 'text-muted-foreground'" x-text="displayDate || 'Date'"></span>
                         <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                     </button>
                     <template x-teleport="body">
-                        <div x-show="dateOpen" @click.away="dateOpen = false" x-cloak class="fixed z-[9999] p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${datePos.x}px; ${dateFlipTop ? 'bottom: ' + (window.innerHeight - datePos.y + 8) + 'px' : 'top: ' + (datePos.y + 8) + 'px'}`">
-                            <div class="flex items-center justify-between mb-3">
-                                <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-                                <div class="text-sm font-medium">January 2026</div>
-                                <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+                        <div x-show="dateOpen" @click.away="dateOpen = false" x-cloak class="fixed z-[9999] w-80 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${datePos.x}px; ${dateFlipTop ? 'bottom: ' + (window.innerHeight - datePos.y + 8) + 'px' : 'top: ' + (datePos.y + 8) + 'px'}`">
+                            <!-- Header with navigation -->
+                            <div class="flex items-center justify-between p-3 border-b">
+                                <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent opacity-50 hover:opacity-100" @click="prevPeriod()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+                                <div class="flex items-center gap-1">
+                                    <button type="button" class="px-2 py-1 text-sm font-medium rounded hover:bg-accent transition-colors" :class="{ 'bg-accent': currentView === 'years' }" @click="setView('years')" x-text="currentYear"></button>
+                                    <button type="button" class="px-2 py-1 text-sm font-medium rounded hover:bg-accent transition-colors" :class="{ 'bg-accent': currentView === 'months' }" @click="setView('months')" x-text="monthsShort[currentMonth]"></button>
+                                    <button type="button" class="p-1 rounded hover:bg-accent transition-colors" :class="{ 'bg-accent': currentView === 'days' }" @click="setView('days')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></button>
+                                </div>
+                                <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent opacity-50 hover:opacity-100" @click="nextPeriod()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
                             </div>
-                            <div class="grid grid-cols-7 gap-1 text-center text-xs mb-1">
-                                <div class="text-muted-foreground p-1">Su</div><div class="text-muted-foreground p-1">Mo</div><div class="text-muted-foreground p-1">Tu</div><div class="text-muted-foreground p-1">We</div><div class="text-muted-foreground p-1">Th</div><div class="text-muted-foreground p-1">Fr</div><div class="text-muted-foreground p-1">Sa</div>
+                            <div class="p-3">
+                                <!-- Days View -->
+                                <div x-show="currentView === 'days'">
+                                    <div class="grid grid-cols-7 gap-1 mb-1">
+                                        <template x-for="weekday in weekdays" :key="weekday">
+                                            <div class="text-center text-xs text-muted-foreground font-medium h-8 flex items-center justify-center" x-text="weekday"></div>
+                                        </template>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-1">
+                                        <template x-for="(day, index) in days" :key="index">
+                                            <button type="button" class="h-8 w-8 text-sm rounded-md flex items-center justify-center transition-colors" :class="{ 'bg-primary text-primary-foreground': day.selected, 'bg-accent': day.today && !day.selected, 'text-muted-foreground opacity-50': !day.currentMonth, 'hover:bg-accent': !day.selected && day.currentMonth }" @click="selectDate(day)" x-text="day.day"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <!-- Months View -->
+                                <div x-show="currentView === 'months'">
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <template x-for="(month, index) in monthsShort" :key="index">
+                                            <button type="button" class="px-3 py-2 text-sm font-medium rounded-md transition-colors" :class="{ 'bg-primary text-primary-foreground': index === currentMonth, 'hover:bg-accent': index !== currentMonth }" @click="selectMonth(index)" x-text="month"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <!-- Years View -->
+                                <div x-show="currentView === 'years'">
+                                    <div class="space-y-3">
+                                        <div class="relative">
+                                            <input type="text" x-model="yearInput" @keydown.enter="selectYearFromInput()" @input="handleYearInput($event)" @keypress="validateYearKeypress($event)" placeholder="Enter year" maxlength="4" class="w-full px-3 py-2 pr-16 border border-input rounded-md text-center font-medium bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
+                                            <div x-show="yearInput && yearInput.toString().length > 0" class="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1">
+                                                <button type="button" @click="clearYearInput()" class="p-1 hover:bg-accent rounded transition-colors" title="Clear"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted-foreground"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                                                <button type="button" @click="selectYearFromInput()" :disabled="!isValidYearInput()" class="p-1 hover:bg-accent rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed" :class="{ 'text-primary': isValidYearInput(), 'text-muted-foreground': !isValidYearInput() }" title="Select year"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></button>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+                                            <template x-for="year in getYearOptions()" :key="year">
+                                                <button type="button" class="px-2 py-1.5 text-sm font-medium rounded-md transition-colors" :class="{ 'bg-primary text-primary-foreground': year === currentYear, 'hover:bg-accent': year !== currentYear }" @click="selectYear(year)" x-text="year"></button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="grid grid-cols-7 gap-1 text-center text-sm">
-                                <div class="p-2"></div><div class="p-2"></div><div class="p-2"></div><button type="button" @click="selectedDate = 'Jan 1'; dateOpen = false" class="p-2 rounded hover:bg-accent">1</button><button type="button" @click="selectedDate = 'Jan 2'; dateOpen = false" class="p-2 rounded hover:bg-accent">2</button><button type="button" @click="selectedDate = 'Jan 3'; dateOpen = false" class="p-2 rounded hover:bg-accent">3</button><button type="button" @click="selectedDate = 'Jan 4'; dateOpen = false" class="p-2 rounded hover:bg-accent">4</button>
-                                <button type="button" @click="selectedDate = 'Jan 5'; dateOpen = false" class="p-2 rounded hover:bg-accent">5</button><button type="button" @click="selectedDate = 'Jan 6'; dateOpen = false" class="p-2 rounded hover:bg-accent">6</button><button type="button" @click="selectedDate = 'Jan 7'; dateOpen = false" class="p-2 rounded hover:bg-accent">7</button><button type="button" @click="selectedDate = 'Jan 8'; dateOpen = false" class="p-2 rounded bg-primary text-primary-foreground">8</button><button type="button" @click="selectedDate = 'Jan 9'; dateOpen = false" class="p-2 rounded hover:bg-accent">9</button><button type="button" @click="selectedDate = 'Jan 10'; dateOpen = false" class="p-2 rounded hover:bg-accent">10</button><button type="button" @click="selectedDate = 'Jan 11'; dateOpen = false" class="p-2 rounded hover:bg-accent">11</button>
-                                <button type="button" @click="selectedDate = 'Jan 12'; dateOpen = false" class="p-2 rounded hover:bg-accent">12</button><button type="button" @click="selectedDate = 'Jan 13'; dateOpen = false" class="p-2 rounded hover:bg-accent">13</button><button type="button" @click="selectedDate = 'Jan 14'; dateOpen = false" class="p-2 rounded hover:bg-accent">14</button><button type="button" @click="selectedDate = 'Jan 15'; dateOpen = false" class="p-2 rounded hover:bg-accent">15</button><button type="button" @click="selectedDate = 'Jan 16'; dateOpen = false" class="p-2 rounded hover:bg-accent">16</button><button type="button" @click="selectedDate = 'Jan 17'; dateOpen = false" class="p-2 rounded hover:bg-accent">17</button><button type="button" @click="selectedDate = 'Jan 18'; dateOpen = false" class="p-2 rounded hover:bg-accent">18</button>
-                                <button type="button" @click="selectedDate = 'Jan 19'; dateOpen = false" class="p-2 rounded hover:bg-accent">19</button><button type="button" @click="selectedDate = 'Jan 20'; dateOpen = false" class="p-2 rounded hover:bg-accent">20</button><button type="button" @click="selectedDate = 'Jan 21'; dateOpen = false" class="p-2 rounded hover:bg-accent">21</button><button type="button" @click="selectedDate = 'Jan 22'; dateOpen = false" class="p-2 rounded hover:bg-accent">22</button><button type="button" @click="selectedDate = 'Jan 23'; dateOpen = false" class="p-2 rounded hover:bg-accent">23</button><button type="button" @click="selectedDate = 'Jan 24'; dateOpen = false" class="p-2 rounded hover:bg-accent">24</button><button type="button" @click="selectedDate = 'Jan 25'; dateOpen = false" class="p-2 rounded hover:bg-accent">25</button>
-                                <button type="button" @click="selectedDate = 'Jan 26'; dateOpen = false" class="p-2 rounded hover:bg-accent">26</button><button type="button" @click="selectedDate = 'Jan 27'; dateOpen = false" class="p-2 rounded hover:bg-accent">27</button><button type="button" @click="selectedDate = 'Jan 28'; dateOpen = false" class="p-2 rounded hover:bg-accent">28</button><button type="button" @click="selectedDate = 'Jan 29'; dateOpen = false" class="p-2 rounded hover:bg-accent">29</button><button type="button" @click="selectedDate = 'Jan 30'; dateOpen = false" class="p-2 rounded hover:bg-accent">30</button><button type="button" @click="selectedDate = 'Jan 31'; dateOpen = false" class="p-2 rounded hover:bg-accent">31</button>
+                            <!-- Today Button -->
+                            <div class="p-3 pt-0">
+                                <button type="button" class="w-full h-8 px-3 text-sm font-medium rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors" @click="selectToday()">Today</button>
                             </div>
                         </div>
                     </template>
