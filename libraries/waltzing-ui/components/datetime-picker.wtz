@@ -1,6 +1,7 @@
 @**
  * DateTime Picker component
  * Combined date and time selection with calendar and time picker
+ * Supports year, month, and day selection views
  * Uses Alpine.js for interactive picking with popover
  *
  * Usage:
@@ -63,8 +64,8 @@
     ])
 
     <div
-        class="relative inline-block w-full"
-        x-data=@```json {
+        class="inline-block w-full"
+        x-data="{
             open: false,
             value: '@initial_value',
             displayValue: '',
@@ -77,13 +78,39 @@
             minHour: @min_hour,
             currentMonth: null,
             currentYear: null,
+            currentView: 'days',
+            yearInput: '',
+            minYear: new Date().getFullYear() - 100,
+            maxYear: new Date().getFullYear() + 20,
             days: [],
             weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
             months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
             min: '@min_datetime',
             max: '@max_datetime',
+            pos: { x: 0, y: 0, width: 0 },
+            flipTop: false,
+
+            updatePos() {
+                const trigger = this.$refs.trigger;
+                if (!trigger) return;
+                const rect = trigger.getBoundingClientRect();
+                const calendarHeight = 480;
+                const spaceBelow = window.innerHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                this.flipTop = spaceBelow < calendarHeight && spaceAbove > spaceBelow;
+                this.pos.x = rect.left;
+                this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                this.pos.width = rect.width;
+            },
+
+            onScroll() { if (this.open) this.updatePos(); },
 
             init() {
+                this._scrollHandler = () => this.onScroll();
+                window.addEventListener('scroll', this._scrollHandler, true);
+                window.addEventListener('resize', this._scrollHandler);
+
                 if (this.value) {
                     this.parseDateTime(this.value);
                 } else {
@@ -92,7 +119,13 @@
                     this.currentYear = now.getFullYear();
                     this.hour = this.use12h ? 12 : 0;
                 }
+                this.yearInput = this.currentYear;
                 this.buildCalendar();
+            },
+
+            destroy() {
+                window.removeEventListener('scroll', this._scrollHandler, true);
+                window.removeEventListener('resize', this._scrollHandler);
             },
 
             parseDateTime(datetimeStr) {
@@ -178,45 +211,36 @@
                 this.displayValue = dateStr + ', ' + this.formatDisplayTime();
             },
 
-            buildCalendar() {
-                this.days = [];
-                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
-                const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
-                const startingDay = firstDay.getDay();
-                const totalDays = lastDay.getDate();
-
-                for (let i = 0; i < startingDay; i++) {
-                    this.days.push({ day: '', date: null, disabled: true, outside: true });
-                }
-
-                for (let day = 1; day <= totalDays; day++) {
-                    const date = new Date(this.currentYear, this.currentMonth, day);
-                    const isoDate = this.formatISODate(date);
-                    const isDisabled = this.isDateDisabled(isoDate);
-                    const isSelected = this.dateValue === isoDate;
-                    const isToday = this.formatISODate(new Date()) === isoDate;
-
-                    this.days.push({
-                        day,
-                        date: isoDate,
-                        disabled: isDisabled,
-                        selected: isSelected,
-                        today: isToday,
-                        outside: false
-                    });
+            setView(view) {
+                this.currentView = view;
+                if (view === 'years') {
+                    this.yearInput = this.currentYear;
+                    this.updateYearRange();
                 }
             },
 
-            isDateDisabled(isoDate) {
-                if (this.min) {
-                    const minDate = this.min.split('T')[0];
-                    if (isoDate < minDate) return true;
+            prevPeriod() {
+                if (this.currentView === 'days') {
+                    this.prevMonth();
+                } else if (this.currentView === 'months') {
+                    this.currentYear--;
+                    this.yearInput = this.currentYear;
+                } else if (this.currentView === 'years') {
+                    this.minYear -= 20;
+                    this.maxYear -= 20;
                 }
-                if (this.max) {
-                    const maxDate = this.max.split('T')[0];
-                    if (isoDate > maxDate) return true;
+            },
+
+            nextPeriod() {
+                if (this.currentView === 'days') {
+                    this.nextMonth();
+                } else if (this.currentView === 'months') {
+                    this.currentYear++;
+                    this.yearInput = this.currentYear;
+                } else if (this.currentView === 'years') {
+                    this.minYear += 20;
+                    this.maxYear += 20;
                 }
-                return false;
             },
 
             prevMonth() {
@@ -239,11 +263,109 @@
                 this.buildCalendar();
             },
 
+            buildCalendar() {
+                this.days = [];
+                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                const startDate = new Date(firstDay);
+                startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+                for (let i = 0; i < 42; i++) {
+                    const date = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + i);
+                    const isoDate = this.formatISODate(date);
+                    const isCurrentMonth = date.getMonth() === this.currentMonth;
+                    const isDisabled = this.isDateDisabled(isoDate);
+                    const isSelected = this.dateValue === isoDate;
+                    const isToday = this.formatISODate(new Date()) === isoDate;
+
+                    this.days.push({
+                        day: date.getDate(),
+                        date: isoDate,
+                        disabled: isDisabled,
+                        selected: isSelected,
+                        today: isToday,
+                        currentMonth: isCurrentMonth
+                    });
+                }
+            },
+
+            isDateDisabled(isoDate) {
+                if (this.min) {
+                    const minDate = this.min.split('T')[0];
+                    if (isoDate < minDate) return true;
+                }
+                if (this.max) {
+                    const maxDate = this.max.split('T')[0];
+                    if (isoDate > maxDate) return true;
+                }
+                return false;
+            },
+
             selectDate(day) {
-                if (day.disabled || day.outside) return;
+                if (day.disabled) return;
                 this.dateValue = day.date;
+                const date = new Date(day.date + 'T00:00:00');
+                this.currentMonth = date.getMonth();
+                this.currentYear = date.getFullYear();
                 this.buildCalendar();
                 this.updateValue();
+            },
+
+            selectMonth(monthIndex) {
+                this.currentMonth = monthIndex;
+                this.buildCalendar();
+                this.setView('days');
+            },
+
+            selectYear(year) {
+                this.currentYear = year;
+                this.yearInput = year;
+                this.buildCalendar();
+                this.setView('months');
+            },
+
+            selectYearFromInput() {
+                const year = parseInt(this.yearInput);
+                if (this.isValidYearInput()) {
+                    this.selectYear(year);
+                }
+            },
+
+            clearYearInput() {
+                this.yearInput = '';
+            },
+
+            isValidYearInput() {
+                const year = parseInt(this.yearInput);
+                return year && year >= 1000 && year <= 9999 && !isNaN(year);
+            },
+
+            validateYearKeypress(event) {
+                const char = String.fromCharCode(event.which);
+                if (!/[0-9]/.test(char)) {
+                    event.preventDefault();
+                }
+            },
+
+            handleYearInput(event) {
+                const value = event.target.value.replace(/[^0-9]/g, '');
+                this.yearInput = value;
+                this.updateYearRange();
+            },
+
+            updateYearRange() {
+                const inputYear = parseInt(this.yearInput);
+                if (inputYear && (inputYear < this.minYear || inputYear > this.maxYear)) {
+                    this.minYear = Math.max(1000, inputYear - 10);
+                    this.maxYear = Math.min(9999, inputYear + 10);
+                }
+            },
+
+            getYearOptions() {
+                const years = [];
+                for (let year = this.minYear; year <= this.maxYear; year++) {
+                    years.push(year);
+                }
+                return years;
             },
 
             selectNow() {
@@ -355,13 +477,16 @@
                     });
                 }
             }
-        } ```@
+        }"
+        x-init="init()"
+        @@destroy="destroy()"
     >
         <input type="hidden" name="@name" x-model="value" />
 
         <div
             class="relative"
-            @@click="if (!$el.querySelector('input[type=text]').disabled) { open = !open }"
+            x-ref="trigger"
+            @@click="if (!$el.querySelector('input[type=text]').disabled) { open = !open; currentView = 'days'; $nextTick(() => updatePos()); }"
         >
             <input
                 type="text"
@@ -385,164 +510,283 @@
             </div>
         </div>
 
-        <div
-            x-show="open"
-            x-cloak
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            @@click.outside="open = false"
-            @@keydown.escape.window="open = false"
-            class="absolute z-50 mt-2 p-3 rounded-md border bg-popover text-popover-foreground shadow-md"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Choose date and time"
-            x-ref="calendar"
-        >
-            @* Calendar header *@
-            <div class="flex items-center justify-between mb-2">
-                <button
-                    type="button"
-                    class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-                    @@click="prevMonth()"
-                    aria-label="Previous month"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m15 18-6-6 6-6"></path>
-                    </svg>
-                </button>
-
-                <div class="text-sm font-medium" x-text="months[currentMonth] + ' ' + currentYear"></div>
-
-                <button
-                    type="button"
-                    class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-                    @@click="nextMonth()"
-                    aria-label="Next month"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m9 18 6-6-6-6"></path>
-                    </svg>
-                </button>
-            </div>
-
-            @* Weekday headers *@
-            <div class="grid grid-cols-7 gap-1 mb-1">
-                <template x-for="weekday in weekdays" :key="weekday">
-                    <div class="text-center text-xs text-muted-foreground font-medium h-8 flex items-center justify-center" x-text="weekday"></div>
-                </template>
-            </div>
-
-            @* Calendar grid *@
-            <div class="grid grid-cols-7 gap-1" role="grid">
-                <template x-for="(day, index) in days" :key="index">
+        <template x-teleport="body">
+            <div
+                x-show="open"
+                x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                @@click.outside="open = false"
+                @@keydown.escape.window="open = false"
+                class="fixed z-[9999] w-80 rounded-md border bg-popover text-popover-foreground shadow-md"
+                :style="`left: ${pos.x}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}`"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Choose date and time"
+                x-ref="calendar"
+            >
+                @* Header with navigation *@
+                <div class="flex items-center justify-between p-3 border-b">
                     <button
                         type="button"
-                        class="inline-flex items-center justify-center rounded-md text-sm h-8 w-8 p-0 font-normal transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        :class="{
-                            'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground': day.selected,
-                            'bg-accent': day.today && !day.selected,
-                            'text-muted-foreground opacity-50 cursor-not-allowed hover:bg-transparent': day.disabled || day.outside,
-                            'invisible': day.outside
-                        }"
-                        :disabled="day.disabled || day.outside"
-                        @@click="selectDate(day)"
-                        @@keydown="handleKeydown($event, index)"
-                        x-text="day.day"
-                        data-day
-                        :aria-selected="day.selected"
-                        :aria-disabled="day.disabled"
-                    ></button>
-                </template>
-            </div>
+                        class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+                        @@click="prevPeriod()"
+                        aria-label="Previous"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m15 18-6-6 6-6"></path>
+                        </svg>
+                    </button>
 
-            @* Time picker section *@
-            <div class="mt-3 pt-3 border-t">
-                <div class="text-xs text-muted-foreground mb-2 text-center">Time</div>
-                <div class="flex items-center justify-center gap-2">
-                    @* Hours *@
-                    <div class="flex flex-col items-center">
+                    <div class="flex items-center gap-1">
+                        @* Year button *@
                         <button
                             type="button"
-                            @@click="incrementHour()"
-                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m18 15-6-6-6 6"/>
-                            </svg>
-                        </button>
-                        <div class="w-10 h-8 flex items-center justify-center rounded border bg-background text-sm font-mono font-medium" x-text="hour.toString().padStart(2, '0')"></div>
+                            class="px-2 py-1 text-sm font-medium rounded hover:bg-accent transition-colors"
+                            :class="{ 'bg-accent': currentView === 'years' }"
+                            @@click="setView('years')"
+                            x-text="currentYear"
+                        ></button>
+                        @* Month button *@
                         <button
                             type="button"
-                            @@click="decrementHour()"
-                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                            class="px-2 py-1 text-sm font-medium rounded hover:bg-accent transition-colors"
+                            :class="{ 'bg-accent': currentView === 'months' }"
+                            @@click="setView('months')"
+                            x-text="monthsShort[currentMonth]"
+                        ></button>
+                        @* Calendar icon button *@
+                        <button
+                            type="button"
+                            class="p-1 rounded hover:bg-accent transition-colors"
+                            :class="{ 'bg-accent': currentView === 'days' }"
+                            @@click="setView('days')"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m6 9 6 6 6-6"/>
+                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                                <line x1="16" x2="16" y1="2" y2="6"></line>
+                                <line x1="8" x2="8" y1="2" y2="6"></line>
+                                <line x1="3" x2="21" y1="10" y2="10"></line>
                             </svg>
                         </button>
                     </div>
 
-                    <span class="text-lg font-bold text-muted-foreground">:</span>
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+                        @@click="nextPeriod()"
+                        aria-label="Next"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m9 18 6-6-6-6"></path>
+                        </svg>
+                    </button>
+                </div>
 
-                    @* Minutes *@
-                    <div class="flex flex-col items-center">
-                        <button
-                            type="button"
-                            @@click="incrementMinute()"
-                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m18 15-6-6-6 6"/>
-                            </svg>
-                        </button>
-                        <div class="w-10 h-8 flex items-center justify-center rounded border bg-background text-sm font-mono font-medium" x-text="minute.toString().padStart(2, '0')"></div>
-                        <button
-                            type="button"
-                            @@click="decrementMinute()"
-                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m6 9 6 6 6-6"/>
-                            </svg>
-                        </button>
+                <div class="p-3">
+                    @* Days View *@
+                    <div x-show="currentView === 'days'">
+                        <div class="grid grid-cols-7 gap-1 mb-1">
+                            <template x-for="weekday in weekdays" :key="weekday">
+                                <div class="text-center text-xs text-muted-foreground font-medium h-8 flex items-center justify-center" x-text="weekday"></div>
+                            </template>
+                        </div>
+
+                        <div class="grid grid-cols-7 gap-1" role="grid">
+                            <template x-for="(day, index) in days" :key="index">
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center justify-center rounded-md text-sm h-8 w-8 p-0 font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    :class="{
+                                        'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground': day.selected,
+                                        'bg-accent': day.today && !day.selected,
+                                        'text-muted-foreground opacity-50': !day.currentMonth,
+                                        'cursor-not-allowed opacity-30': day.disabled,
+                                        'hover:bg-accent hover:text-accent-foreground': !day.selected && !day.disabled && day.currentMonth
+                                    }"
+                                    :disabled="day.disabled"
+                                    @@click="selectDate(day)"
+                                    @@keydown="handleKeydown($event, index)"
+                                    x-text="day.day"
+                                    data-day
+                                    :aria-selected="day.selected"
+                                    :aria-disabled="day.disabled"
+                                ></button>
+                            </template>
+                        </div>
                     </div>
 
-                    @* AM/PM toggle for 12-hour format *@
-                    @if use_12h {
-                        <div class="flex flex-col items-center ml-1">
+                    @* Months View *@
+                    <div x-show="currentView === 'months'">
+                        <div class="grid grid-cols-3 gap-2">
+                            <template x-for="(month, index) in monthsShort" :key="index">
+                                <button
+                                    type="button"
+                                    class="px-3 py-2 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                    :class="{
+                                        'bg-primary text-primary-foreground': index === currentMonth,
+                                        'hover:bg-accent hover:text-accent-foreground': index !== currentMonth
+                                    }"
+                                    @@click="selectMonth(index)"
+                                    x-text="month"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    @* Years View *@
+                    <div x-show="currentView === 'years'">
+                        <div class="space-y-3">
+                            @* Year Input *@
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    x-model="yearInput"
+                                    @@keydown.enter="selectYearFromInput()"
+                                    @@input="handleYearInput($event)"
+                                    @@keypress="validateYearKeypress($event)"
+                                    placeholder="Enter year"
+                                    maxlength="4"
+                                    class="w-full px-3 py-2 pr-16 border border-input rounded-md text-center font-medium bg-transparent text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                />
+                                <div
+                                    x-show="yearInput && yearInput.toString().length > 0"
+                                    class="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1"
+                                >
+                                    <button
+                                        type="button"
+                                        @@click="clearYearInput()"
+                                        class="p-1 hover:bg-accent rounded transition-colors"
+                                        title="Clear"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground">
+                                            <path d="M18 6 6 18"></path>
+                                            <path d="m6 6 12 12"></path>
+                                        </svg>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @@click="selectYearFromInput()"
+                                        :disabled="!isValidYearInput()"
+                                        class="p-1 hover:bg-accent rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        :class="{ 'text-primary': isValidYearInput(), 'text-muted-foreground': !isValidYearInput() }"
+                                        title="Select year"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 6 9 17l-5-5"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            @* Year Grid *@
+                            <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+                                <template x-for="year in getYearOptions()" :key="year">
+                                    <button
+                                        type="button"
+                                        class="px-2 py-1.5 text-sm font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                        :class="{
+                                            'bg-primary text-primary-foreground': year === currentYear,
+                                            'hover:bg-accent hover:text-accent-foreground': year !== currentYear
+                                        }"
+                                        @@click="selectYear(year)"
+                                        x-text="year"
+                                    ></button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* Time picker section *@
+                <div class="p-3 pt-0 border-t mt-3">
+                    <div class="text-xs text-muted-foreground mb-2 text-center pt-3">Time</div>
+                    <div class="flex items-center justify-center gap-2">
+                        @* Hours *@
+                        <div class="flex flex-col items-center">
                             <button
                                 type="button"
-                                @@click="togglePeriod()"
-                                class="w-10 h-8 flex items-center justify-center rounded border bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
-                                x-text="period"
-                            ></button>
+                                @@click="incrementHour()"
+                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m18 15-6-6-6 6"/>
+                                </svg>
+                            </button>
+                            <div class="w-10 h-8 flex items-center justify-center rounded border bg-background text-sm font-mono font-medium" x-text="hour.toString().padStart(2, '0')"></div>
+                            <button
+                                type="button"
+                                @@click="decrementHour()"
+                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m6 9 6 6 6-6"/>
+                                </svg>
+                            </button>
                         </div>
-                    }
+
+                        <span class="text-lg font-bold text-muted-foreground">:</span>
+
+                        @* Minutes *@
+                        <div class="flex flex-col items-center">
+                            <button
+                                type="button"
+                                @@click="incrementMinute()"
+                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m18 15-6-6-6 6"/>
+                                </svg>
+                            </button>
+                            <div class="w-10 h-8 flex items-center justify-center rounded border bg-background text-sm font-mono font-medium" x-text="minute.toString().padStart(2, '0')"></div>
+                            <button
+                                type="button"
+                                @@click="decrementMinute()"
+                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m6 9 6 6 6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        @* AM/PM toggle for 12-hour format *@
+                        @if use_12h {
+                            <div class="flex flex-col items-center ml-1">
+                                <button
+                                    type="button"
+                                    @@click="togglePeriod()"
+                                    class="w-10 h-8 flex items-center justify-center rounded border bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+                                    x-text="period"
+                                ></button>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @* Action buttons *@
+                <div class="p-3 pt-0 flex gap-2">
+                    <button
+                        type="button"
+                        class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        @@click="selectNow()"
+                    >
+                        Now
+                    </button>
+                    <button
+                        type="button"
+                        class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        @@click="open = false"
+                    >
+                        Done
+                    </button>
                 </div>
             </div>
-
-            @* Action buttons *@
-            <div class="mt-3 pt-3 border-t flex gap-2">
-                <button
-                    type="button"
-                    class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    @@click="selectNow()"
-                >
-                    Now
-                </button>
-                <button
-                    type="button"
-                    class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    @@click="open = false"
-                >
-                    Done
-                </button>
-            </div>
-        </div>
+        </template>
     </div>
 }
 

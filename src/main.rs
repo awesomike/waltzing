@@ -894,13 +894,40 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "select" => r#"
-            <div x-data="{ open: false, selected: 'Select a fruit', pos: { top: 0, left: 0, width: 0 } }" class="relative w-[180px]">
-                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY, left: r.left + window.scrollX, width: r.width }; open = !open" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+            <div x-data="{
+                open: false,
+                selected: 'Select a fruit',
+                pos: { x: 0, y: 0, width: 0 },
+                flipTop: false,
+                updatePos() {
+                    const trigger = this.$refs.trigger;
+                    if (!trigger) return;
+                    const rect = trigger.getBoundingClientRect();
+                    const dropdownHeight = 150;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+                    this.pos.x = rect.left;
+                    this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                    this.pos.width = rect.width;
+                },
+                onScroll() { if (this.open) this.updatePos(); },
+                init() {
+                    this._scrollHandler = () => this.onScroll();
+                    window.addEventListener('scroll', this._scrollHandler, true);
+                    window.addEventListener('resize', this._scrollHandler);
+                },
+                destroy() {
+                    window.removeEventListener('scroll', this._scrollHandler, true);
+                    window.removeEventListener('resize', this._scrollHandler);
+                }
+            }" x-init="init()" @destroy="destroy()" class="w-[180px]">
+                <button x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring">
                     <span x-text="selected"></span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-50"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
                 <template x-teleport="body">
-                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-50 rounded-md border border-border bg-popover text-popover-foreground p-1 shadow-md" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px; width: ' + pos.width + 'px;'">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-[9999] rounded-md border border-border bg-popover text-popover-foreground p-1 shadow-md" :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`">
                         <div @click="selected = 'Apple'; open = false" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground">Apple</div>
                         <div @click="selected = 'Banana'; open = false" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground">Banana</div>
                         <div @click="selected = 'Orange'; open = false" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground">Orange</div>
@@ -961,13 +988,38 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "dropdown" => r#"
-            <div x-data="{ open: false, pos: { top: 0, left: 0 } }" class="relative inline-block">
-                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY, left: r.left + window.scrollX }; open = !open" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">
+            <div x-data="{
+                open: false,
+                pos: { x: 0, y: 0 },
+                flipTop: false,
+                updatePos() {
+                    const trigger = this.$refs.trigger;
+                    if (!trigger) return;
+                    const rect = trigger.getBoundingClientRect();
+                    const dropdownHeight = 200;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+                    this.pos.x = rect.left;
+                    this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                },
+                onScroll() { if (this.open) this.updatePos(); },
+                init() {
+                    this._scrollHandler = () => this.onScroll();
+                    window.addEventListener('scroll', this._scrollHandler, true);
+                    window.addEventListener('resize', this._scrollHandler);
+                },
+                destroy() {
+                    window.removeEventListener('scroll', this._scrollHandler, true);
+                    window.removeEventListener('resize', this._scrollHandler);
+                }
+            }" x-init="init()" @destroy="destroy()" class="inline-block">
+                <button x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">
                     Open Menu
                     <svg class="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <template x-teleport="body">
-                    <div x-show="open" @click.away="open = false" x-cloak class="fixed w-56 rounded-md border border-border bg-popover text-popover-foreground p-1 shadow-md z-50" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px;'">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed w-56 rounded-md border border-border bg-popover text-popover-foreground p-1 shadow-md z-[9999]" :style="`left: ${pos.x}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`">
                         <div class="px-2 py-1.5 text-sm font-semibold">My Account</div>
                         <div class="h-px bg-border my-1"></div>
                         <button class="w-full text-left px-2 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground">Profile</button>
@@ -980,10 +1032,35 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "popover" => r#"
-            <div x-data="{ open: false, pos: { top: 0, left: 0 } }" class="relative inline-block">
-                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY, left: r.left + window.scrollX }; open = !open" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Open Popover</button>
+            <div x-data="{
+                open: false,
+                pos: { x: 0, y: 0 },
+                flipTop: false,
+                updatePos() {
+                    const trigger = this.$refs.trigger;
+                    if (!trigger) return;
+                    const rect = trigger.getBoundingClientRect();
+                    const popoverHeight = 200;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    this.flipTop = spaceBelow < popoverHeight && spaceAbove > spaceBelow;
+                    this.pos.x = rect.left;
+                    this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                },
+                onScroll() { if (this.open) this.updatePos(); },
+                init() {
+                    this._scrollHandler = () => this.onScroll();
+                    window.addEventListener('scroll', this._scrollHandler, true);
+                    window.addEventListener('resize', this._scrollHandler);
+                },
+                destroy() {
+                    window.removeEventListener('scroll', this._scrollHandler, true);
+                    window.removeEventListener('resize', this._scrollHandler);
+                }
+            }" x-init="init()" @destroy="destroy()" class="inline-block">
+                <button x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Open Popover</button>
                 <template x-teleport="body">
-                    <div x-show="open" @click.away="open = false" x-cloak class="fixed w-80 rounded-md border border-border bg-popover text-popover-foreground p-4 shadow-md z-50" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px;'">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed w-80 rounded-md border border-border bg-popover text-popover-foreground p-4 shadow-md z-[9999]" :style="`left: ${pos.x}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}`">
                         <div class="grid gap-4">
                             <div class="space-y-2">
                                 <h4 class="font-medium leading-none">Dimensions</h4>
@@ -1133,13 +1210,41 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "combobox" => r#"
-            <div x-data="{ open: false, search: '', selected: '', pos: { top: 0, left: 0, width: 0 } }" class="relative w-[200px]">
-                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY, left: r.left + window.scrollX, width: r.width }; open = !open" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
+            <div x-data="{
+                open: false,
+                search: '',
+                selected: '',
+                pos: { x: 0, y: 0, width: 0 },
+                flipTop: false,
+                updatePos() {
+                    const trigger = this.$refs.trigger;
+                    if (!trigger) return;
+                    const rect = trigger.getBoundingClientRect();
+                    const dropdownHeight = 150;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+                    this.pos.x = rect.left;
+                    this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                    this.pos.width = rect.width;
+                },
+                onScroll() { if (this.open) this.updatePos(); },
+                init() {
+                    this._scrollHandler = () => this.onScroll();
+                    window.addEventListener('scroll', this._scrollHandler, true);
+                    window.addEventListener('resize', this._scrollHandler);
+                },
+                destroy() {
+                    window.removeEventListener('scroll', this._scrollHandler, true);
+                    window.removeEventListener('resize', this._scrollHandler);
+                }
+            }" x-init="init()" @destroy="destroy()" class="w-[200px]">
+                <button x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
                     <span x-text="selected || 'Select framework...'"></span>
                     <svg class="h-4 w-4 opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <template x-teleport="body">
-                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-50 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px; width: ' + pos.width + 'px;'">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-[9999] rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`">
                         <input x-model="search" placeholder="Search..." class="w-full border-b border-border px-3 py-2 text-sm outline-none bg-transparent placeholder:text-muted-foreground">
                         <div class="p-1">
                             <div @click="selected = 'Next.js'; open = false" x-show="'next.js'.includes(search.toLowerCase())" class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground cursor-pointer">Next.js</div>
@@ -1308,13 +1413,39 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "date-picker" => r#"
-            <div x-data="{ open: false, selected: '', pos: { top: 0, left: 0 } }" class="relative">
-                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX }; open = !open" class="flex h-9 w-[200px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+            <div x-data="{
+                open: false,
+                selected: '',
+                pos: { x: 0, y: 0 },
+                flipTop: false,
+                updatePos() {
+                    const trigger = this.$refs.trigger;
+                    if (!trigger) return;
+                    const rect = trigger.getBoundingClientRect();
+                    const calendarHeight = 300;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    this.flipTop = spaceBelow < calendarHeight && spaceAbove > spaceBelow;
+                    this.pos.x = rect.left;
+                    this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                },
+                onScroll() { if (this.open) this.updatePos(); },
+                init() {
+                    this._scrollHandler = () => this.onScroll();
+                    window.addEventListener('scroll', this._scrollHandler, true);
+                    window.addEventListener('resize', this._scrollHandler);
+                },
+                destroy() {
+                    window.removeEventListener('scroll', this._scrollHandler, true);
+                    window.removeEventListener('resize', this._scrollHandler);
+                }
+            }" x-init="init()" @destroy="destroy()" class="inline-block">
+                <button x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())" class="flex h-9 w-[200px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
                     <span :class="selected ? '' : 'text-muted-foreground'" x-text="selected || 'Pick a date'"></span>
                     <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                 </button>
                 <template x-teleport="body">
-                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-50 p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px;'">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-[9999] p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${pos.x}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}`">
                         <div class="flex items-center justify-between mb-3">
                             <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
                             <div class="text-sm font-medium">January 2026</div>
@@ -1335,14 +1466,58 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "datetime-picker" => r#"
-            <div x-data="{ dateOpen: false, timeOpen: false, selectedDate: '', selectedTime: '', datePos: { top: 0, left: 0 }, timePos: { top: 0, left: 0 } }" class="flex gap-2">
-                <div class="relative">
-                    <button x-ref="dateBtn" @click="let r = $refs.dateBtn.getBoundingClientRect(); datePos = { top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX }; dateOpen = !dateOpen; timeOpen = false" class="flex h-9 w-[140px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+            <div x-data="{
+                dateOpen: false,
+                timeOpen: false,
+                selectedDate: '',
+                selectedTime: '',
+                datePos: { x: 0, y: 0 },
+                timePos: { x: 0, y: 0 },
+                dateFlipTop: false,
+                timeFlipTop: false,
+                updateDatePos() {
+                    const trigger = this.$refs.dateBtn;
+                    if (!trigger) return;
+                    const rect = trigger.getBoundingClientRect();
+                    const height = 340;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    this.dateFlipTop = spaceBelow < height && spaceAbove > spaceBelow;
+                    this.datePos.x = rect.left;
+                    this.datePos.y = this.dateFlipTop ? rect.top : rect.bottom;
+                },
+                updateTimePos() {
+                    const trigger = this.$refs.timeBtn;
+                    if (!trigger) return;
+                    const rect = trigger.getBoundingClientRect();
+                    const height = 150;
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const spaceAbove = rect.top;
+                    this.timeFlipTop = spaceBelow < height && spaceAbove > spaceBelow;
+                    this.timePos.x = rect.left;
+                    this.timePos.y = this.timeFlipTop ? rect.top : rect.bottom;
+                },
+                onScroll() {
+                    if (this.dateOpen) this.updateDatePos();
+                    if (this.timeOpen) this.updateTimePos();
+                },
+                init() {
+                    this._scrollHandler = () => this.onScroll();
+                    window.addEventListener('scroll', this._scrollHandler, true);
+                    window.addEventListener('resize', this._scrollHandler);
+                },
+                destroy() {
+                    window.removeEventListener('scroll', this._scrollHandler, true);
+                    window.removeEventListener('resize', this._scrollHandler);
+                }
+            }" x-init="init()" @destroy="destroy()" class="flex gap-2">
+                <div>
+                    <button x-ref="dateBtn" @click="dateOpen = !dateOpen; timeOpen = false; $nextTick(() => updateDatePos())" class="flex h-9 w-[140px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
                         <span :class="selectedDate ? '' : 'text-muted-foreground'" x-text="selectedDate || 'Date'"></span>
                         <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                     </button>
                     <template x-teleport="body">
-                        <div x-show="dateOpen" @click.away="dateOpen = false" x-cloak class="fixed z-50 p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="'top: ' + datePos.top + 'px; left: ' + datePos.left + 'px;'">
+                        <div x-show="dateOpen" @click.away="dateOpen = false" x-cloak class="fixed z-[9999] p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${datePos.x}px; ${dateFlipTop ? 'bottom: ' + (window.innerHeight - datePos.y + 8) + 'px' : 'top: ' + (datePos.y + 8) + 'px'}`">
                             <div class="flex items-center justify-between mb-3">
                                 <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
                                 <div class="text-sm font-medium">January 2026</div>
@@ -1354,17 +1529,20 @@ fn get_component_preview(component: &str) -> &'static str {
                             <div class="grid grid-cols-7 gap-1 text-center text-sm">
                                 <div class="p-2"></div><div class="p-2"></div><div class="p-2"></div><button type="button" @click="selectedDate = 'Jan 1'; dateOpen = false" class="p-2 rounded hover:bg-accent">1</button><button type="button" @click="selectedDate = 'Jan 2'; dateOpen = false" class="p-2 rounded hover:bg-accent">2</button><button type="button" @click="selectedDate = 'Jan 3'; dateOpen = false" class="p-2 rounded hover:bg-accent">3</button><button type="button" @click="selectedDate = 'Jan 4'; dateOpen = false" class="p-2 rounded hover:bg-accent">4</button>
                                 <button type="button" @click="selectedDate = 'Jan 5'; dateOpen = false" class="p-2 rounded hover:bg-accent">5</button><button type="button" @click="selectedDate = 'Jan 6'; dateOpen = false" class="p-2 rounded hover:bg-accent">6</button><button type="button" @click="selectedDate = 'Jan 7'; dateOpen = false" class="p-2 rounded hover:bg-accent">7</button><button type="button" @click="selectedDate = 'Jan 8'; dateOpen = false" class="p-2 rounded bg-primary text-primary-foreground">8</button><button type="button" @click="selectedDate = 'Jan 9'; dateOpen = false" class="p-2 rounded hover:bg-accent">9</button><button type="button" @click="selectedDate = 'Jan 10'; dateOpen = false" class="p-2 rounded hover:bg-accent">10</button><button type="button" @click="selectedDate = 'Jan 11'; dateOpen = false" class="p-2 rounded hover:bg-accent">11</button>
+                                <button type="button" @click="selectedDate = 'Jan 12'; dateOpen = false" class="p-2 rounded hover:bg-accent">12</button><button type="button" @click="selectedDate = 'Jan 13'; dateOpen = false" class="p-2 rounded hover:bg-accent">13</button><button type="button" @click="selectedDate = 'Jan 14'; dateOpen = false" class="p-2 rounded hover:bg-accent">14</button><button type="button" @click="selectedDate = 'Jan 15'; dateOpen = false" class="p-2 rounded hover:bg-accent">15</button><button type="button" @click="selectedDate = 'Jan 16'; dateOpen = false" class="p-2 rounded hover:bg-accent">16</button><button type="button" @click="selectedDate = 'Jan 17'; dateOpen = false" class="p-2 rounded hover:bg-accent">17</button><button type="button" @click="selectedDate = 'Jan 18'; dateOpen = false" class="p-2 rounded hover:bg-accent">18</button>
+                                <button type="button" @click="selectedDate = 'Jan 19'; dateOpen = false" class="p-2 rounded hover:bg-accent">19</button><button type="button" @click="selectedDate = 'Jan 20'; dateOpen = false" class="p-2 rounded hover:bg-accent">20</button><button type="button" @click="selectedDate = 'Jan 21'; dateOpen = false" class="p-2 rounded hover:bg-accent">21</button><button type="button" @click="selectedDate = 'Jan 22'; dateOpen = false" class="p-2 rounded hover:bg-accent">22</button><button type="button" @click="selectedDate = 'Jan 23'; dateOpen = false" class="p-2 rounded hover:bg-accent">23</button><button type="button" @click="selectedDate = 'Jan 24'; dateOpen = false" class="p-2 rounded hover:bg-accent">24</button><button type="button" @click="selectedDate = 'Jan 25'; dateOpen = false" class="p-2 rounded hover:bg-accent">25</button>
+                                <button type="button" @click="selectedDate = 'Jan 26'; dateOpen = false" class="p-2 rounded hover:bg-accent">26</button><button type="button" @click="selectedDate = 'Jan 27'; dateOpen = false" class="p-2 rounded hover:bg-accent">27</button><button type="button" @click="selectedDate = 'Jan 28'; dateOpen = false" class="p-2 rounded hover:bg-accent">28</button><button type="button" @click="selectedDate = 'Jan 29'; dateOpen = false" class="p-2 rounded hover:bg-accent">29</button><button type="button" @click="selectedDate = 'Jan 30'; dateOpen = false" class="p-2 rounded hover:bg-accent">30</button><button type="button" @click="selectedDate = 'Jan 31'; dateOpen = false" class="p-2 rounded hover:bg-accent">31</button>
                             </div>
                         </div>
                     </template>
                 </div>
-                <div class="relative">
-                    <button x-ref="timeBtn" @click="let r = $refs.timeBtn.getBoundingClientRect(); timePos = { top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX }; timeOpen = !timeOpen; dateOpen = false" class="flex h-9 w-[100px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+                <div>
+                    <button x-ref="timeBtn" @click="timeOpen = !timeOpen; dateOpen = false; $nextTick(() => updateTimePos())" class="flex h-9 w-[100px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
                         <span :class="selectedTime ? '' : 'text-muted-foreground'" x-text="selectedTime || 'Time'"></span>
                         <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </button>
                     <template x-teleport="body">
-                        <div x-show="timeOpen" @click.away="timeOpen = false" x-cloak class="fixed z-50 p-2 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="'top: ' + timePos.top + 'px; left: ' + timePos.left + 'px;'">
+                        <div x-show="timeOpen" @click.away="timeOpen = false" x-cloak class="fixed z-[9999] p-2 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="`left: ${timePos.x}px; ${timeFlipTop ? 'bottom: ' + (window.innerHeight - timePos.y + 8) + 'px' : 'top: ' + (timePos.y + 8) + 'px'}`">
                             <div class="grid grid-cols-4 gap-1 text-sm">
                                 <button type="button" @click="selectedTime = '9:00 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">9:00</button>
                                 <button type="button" @click="selectedTime = '9:30 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">9:30</button>
