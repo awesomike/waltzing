@@ -879,11 +879,23 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "tooltip" => r#"
-            <div x-data="{ show: false }" class="relative inline-block">
-                <button @mouseenter="show = true" @mouseleave="show = false" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Hover me</button>
-                <div x-show="show" x-cloak class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md shadow-md whitespace-nowrap">
-                    Add to library
-                </div>
+            <div x-data="{
+                show: false,
+                pos: { x: 0, y: 0 },
+                updatePos() {
+                    const rect = this.$refs.trigger.getBoundingClientRect();
+                    this.pos.x = rect.left + rect.width / 2;
+                    this.pos.y = rect.top - 8;
+                }
+            }" class="inline-block">
+                <button x-ref="trigger" @mouseenter="updatePos(); show = true" @mouseleave="show = false" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Hover me</button>
+                <template x-teleport="body">
+                    <div x-show="show" x-cloak
+                         :style="`left: ${pos.x}px; top: ${pos.y}px; transform: translate(-50%, -100%);`"
+                         class="fixed px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md shadow-md whitespace-nowrap z-[9999]">
+                        Add to library
+                    </div>
+                </template>
             </div>
         "#,
 
