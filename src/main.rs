@@ -1805,20 +1805,20 @@ fn get_component_usage(component: &str) -> String {
         "button" => r#"@import components/button.wtz as button
 
 // Primary button (default)
-&lt;@button&gt;Click me&lt;/@&gt;
+&lt;@button&gt;Click me&lt;/@button&gt;
 
 // Variants
-&lt;@button variant=button::Variant::Secondary&gt;Secondary&lt;/@&gt;
-&lt;@button variant=button::Variant::Destructive&gt;Delete&lt;/@&gt;
-&lt;@button variant=button::Variant::Outline&gt;Outline&lt;/@&gt;
-&lt;@button variant=button::Variant::Ghost&gt;Ghost&lt;/@&gt;
+&lt;@button variant=button::Variant::Secondary&gt;Secondary&lt;/@button&gt;
+&lt;@button variant=button::Variant::Destructive&gt;Delete&lt;/@button&gt;
+&lt;@button variant=button::Variant::Outline&gt;Outline&lt;/@button&gt;
+&lt;@button variant=button::Variant::Ghost&gt;Ghost&lt;/@button&gt;
 
 // Sizes
-&lt;@button size=button::Size::Sm&gt;Small&lt;/@&gt;
-&lt;@button size=button::Size::Lg&gt;Large&lt;/@&gt;
+&lt;@button size=button::Size::Sm&gt;Small&lt;/@button&gt;
+&lt;@button size=button::Size::Lg&gt;Large&lt;/@button&gt;
 
 // Disabled
-&lt;@button disabled=true&gt;Disabled&lt;/@&gt;"#.to_string(),
+&lt;@button disabled=true&gt;Disabled&lt;/@button&gt;"#.to_string(),
 
         "input" => r#"@import components/input.wtz as input
 
@@ -1835,16 +1835,16 @@ fn get_component_usage(component: &str) -> String {
 
 &lt;@card&gt;
     &lt;@card::header&gt;
-        &lt;@card::title&gt;Card Title&lt;/@&gt;
-        &lt;@card::description&gt;Card description&lt;/@&gt;
-    &lt;/@&gt;
+        &lt;@card::title&gt;Card Title&lt;/@card::title&gt;
+        &lt;@card::description&gt;Card description&lt;/@card::description&gt;
+    &lt;/@card::header&gt;
     &lt;@card::content&gt;
         Your content here
-    &lt;/@&gt;
+    &lt;/@card::content&gt;
     &lt;@card::footer&gt;
-        &lt;@button&gt;Action&lt;/@&gt;
-    &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+        &lt;@button&gt;Action&lt;/@button&gt;
+    &lt;/@card::footer&gt;
+&lt;/@card&gt;"#.to_string(),
 
         "checkbox" => r#"@import components/checkbox.wtz as checkbox
 
@@ -1854,7 +1854,7 @@ fn get_component_usage(component: &str) -> String {
 // With label
 &lt;div class="flex items-center gap-2"&gt;
     &lt;@checkbox id="accept" name="accept" /&gt;
-    &lt;@label for_id="accept"&gt;Accept terms&lt;/@&gt;
+    &lt;@label for_id="accept"&gt;Accept terms&lt;/@label&gt;
 &lt;/div&gt;
 
 // Checked by default
@@ -1868,7 +1868,7 @@ fn get_component_usage(component: &str) -> String {
 // With label
 &lt;div class="flex items-center gap-2"&gt;
     &lt;@switch id="airplane" name="airplane" /&gt;
-    &lt;@label for_id="airplane"&gt;Airplane Mode&lt;/@&gt;
+    &lt;@label for_id="airplane"&gt;Airplane Mode&lt;/@label&gt;
 &lt;/div&gt;
 
 // Enabled by default
@@ -1877,28 +1877,28 @@ fn get_component_usage(component: &str) -> String {
         "badge" => r#"@import components/badge.wtz as badge
 
 // Default badge
-&lt;@badge&gt;Badge&lt;/@&gt;
+&lt;@badge&gt;Badge&lt;/@badge&gt;
 
 // Variants
-&lt;@badge variant=badge::Variant::Secondary&gt;Secondary&lt;/@&gt;
-&lt;@badge variant=badge::Variant::Destructive&gt;Error&lt;/@&gt;
-&lt;@badge variant=badge::Variant::Outline&gt;Outline&lt;/@&gt;"#.to_string(),
+&lt;@badge variant=badge::Variant::Secondary&gt;Secondary&lt;/@badge&gt;
+&lt;@badge variant=badge::Variant::Destructive&gt;Error&lt;/@badge&gt;
+&lt;@badge variant=badge::Variant::Outline&gt;Outline&lt;/@badge&gt;"#.to_string(),
 
         "alert" => r#"@import components/alert.wtz as alert
 
 // Default alert
 &lt;@alert&gt;
-    &lt;@alert::title&gt;Heads up!&lt;/@&gt;
+    &lt;@alert::title&gt;Heads up!&lt;/@alert::title&gt;
     &lt;@alert::description&gt;
         You can add components using the CLI.
-    &lt;/@&gt;
-&lt;/@&gt;
+    &lt;/@alert::description&gt;
+&lt;/@alert&gt;
 
 // Destructive alert
 &lt;@alert variant=alert::Variant::Destructive&gt;
-    &lt;@alert::title&gt;Error&lt;/@&gt;
-    &lt;@alert::description&gt;Something went wrong.&lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+    &lt;@alert::title&gt;Error&lt;/@alert::title&gt;
+    &lt;@alert::description&gt;Something went wrong.&lt;/@alert::description&gt;
+&lt;/@alert&gt;"#.to_string(),
 
         "avatar" => r#"@import components/avatar.wtz as avatar
 
@@ -1951,10 +1951,10 @@ fn get_component_usage(component: &str) -> String {
         "label" => r#"@import components/label.wtz as label
 
 // Basic label
-&lt;@label&gt;Email&lt;/@&gt;
+&lt;@label&gt;Email&lt;/@label&gt;
 
 // Associated with input
-&lt;@label for_id="email"&gt;Email&lt;/@&gt;
+&lt;@label for_id="email"&gt;Email&lt;/@label&gt;
 &lt;@input id="email" name="email" /&gt;"#.to_string(),
 
         "textarea" => r#"@import components/textarea.wtz as textarea
@@ -1971,62 +1971,62 @@ fn get_component_usage(component: &str) -> String {
         "select" => r#"@import components/select.wtz as select
 
 &lt;@select name="fruit" placeholder="Select a fruit"&gt;
-    &lt;@select::item value="apple"&gt;Apple&lt;/@&gt;
-    &lt;@select::item value="banana"&gt;Banana&lt;/@&gt;
-    &lt;@select::item value="orange"&gt;Orange&lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+    &lt;@select::item value="apple"&gt;Apple&lt;/@select::item&gt;
+    &lt;@select::item value="banana"&gt;Banana&lt;/@select::item&gt;
+    &lt;@select::item value="orange"&gt;Orange&lt;/@select::item&gt;
+&lt;/@select&gt;"#.to_string(),
 
         "tabs" => r#"@import components/tabs.wtz as tabs
 
 &lt;@tabs default="account"&gt;
     &lt;@tabs::list&gt;
-        &lt;@tabs::trigger value="account"&gt;Account&lt;/@&gt;
-        &lt;@tabs::trigger value="password"&gt;Password&lt;/@&gt;
-    &lt;/@&gt;
+        &lt;@tabs::trigger value="account"&gt;Account&lt;/@tabs::trigger&gt;
+        &lt;@tabs::trigger value="password"&gt;Password&lt;/@tabs::trigger&gt;
+    &lt;/@tabs::list&gt;
     &lt;@tabs::content value="account"&gt;
         Account settings here
-    &lt;/@&gt;
+    &lt;/@tabs::content&gt;
     &lt;@tabs::content value="password"&gt;
         Password settings here
-    &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+    &lt;/@tabs::content&gt;
+&lt;/@tabs&gt;"#.to_string(),
 
         "accordion" => r#"@import components/accordion.wtz as accordion
 
 &lt;@accordion&gt;
     &lt;@accordion::item value="item-1"&gt;
-        &lt;@accordion::trigger&gt;Is it accessible?&lt;/@&gt;
+        &lt;@accordion::trigger&gt;Is it accessible?&lt;/@accordion::trigger&gt;
         &lt;@accordion::content&gt;
             Yes. It adheres to the WAI-ARIA pattern.
-        &lt;/@&gt;
-    &lt;/@&gt;
+        &lt;/@accordion::content&gt;
+    &lt;/@accordion::item&gt;
     &lt;@accordion::item value="item-2"&gt;
-        &lt;@accordion::trigger&gt;Is it styled?&lt;/@&gt;
+        &lt;@accordion::trigger&gt;Is it styled?&lt;/@accordion::trigger&gt;
         &lt;@accordion::content&gt;
             Yes. It comes with default styles.
-        &lt;/@&gt;
-    &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+        &lt;/@accordion::content&gt;
+    &lt;/@accordion::item&gt;
+&lt;/@accordion&gt;"#.to_string(),
 
         "dialog" => r#"@import components/dialog.wtz as dialog
 
 &lt;@dialog&gt;
     &lt;@dialog::trigger&gt;
-        &lt;@button&gt;Open Dialog&lt;/@&gt;
-    &lt;/@&gt;
+        &lt;@button&gt;Open Dialog&lt;/@button&gt;
+    &lt;/@dialog::trigger&gt;
     &lt;@dialog::content&gt;
         &lt;@dialog::header&gt;
-            &lt;@dialog::title&gt;Edit profile&lt;/@&gt;
+            &lt;@dialog::title&gt;Edit profile&lt;/@dialog::title&gt;
             &lt;@dialog::description&gt;
                 Make changes to your profile here.
-            &lt;/@&gt;
-        &lt;/@&gt;
+            &lt;/@dialog::description&gt;
+        &lt;/@dialog::header&gt;
         &lt;@dialog::footer&gt;
-            &lt;@button variant=button::Variant::Outline&gt;Cancel&lt;/@&gt;
-            &lt;@button&gt;Save&lt;/@&gt;
-        &lt;/@&gt;
-    &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+            &lt;@button variant=button::Variant::Outline&gt;Cancel&lt;/@button&gt;
+            &lt;@button&gt;Save&lt;/@button&gt;
+        &lt;/@dialog::footer&gt;
+    &lt;/@dialog::content&gt;
+&lt;/@dialog&gt;"#.to_string(),
 
         "alert-dialog" => r#"@import components/alert_dialog.wtz as alert_dialog
 
@@ -2034,44 +2034,44 @@ fn get_component_usage(component: &str) -> String {
     &lt;@alert_dialog::trigger&gt;
         &lt;@button variant=button::Variant::Destructive&gt;
             Delete Account
-        &lt;/@&gt;
-    &lt;/@&gt;
+        &lt;/@button&gt;
+    &lt;/@alert_dialog::trigger&gt;
     &lt;@alert_dialog::content&gt;
         &lt;@alert_dialog::header&gt;
-            &lt;@alert_dialog::title&gt;Are you sure?&lt;/@&gt;
+            &lt;@alert_dialog::title&gt;Are you sure?&lt;/@alert_dialog::title&gt;
             &lt;@alert_dialog::description&gt;
                 This action cannot be undone.
-            &lt;/@&gt;
-        &lt;/@&gt;
+            &lt;/@alert_dialog::description&gt;
+        &lt;/@alert_dialog::header&gt;
         &lt;@alert_dialog::footer&gt;
-            &lt;@alert_dialog::cancel&gt;Cancel&lt;/@&gt;
-            &lt;@alert_dialog::action&gt;Delete&lt;/@&gt;
-        &lt;/@&gt;
-    &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+            &lt;@alert_dialog::cancel&gt;Cancel&lt;/@alert_dialog::cancel&gt;
+            &lt;@alert_dialog::action&gt;Delete&lt;/@alert_dialog::action&gt;
+        &lt;/@alert_dialog::footer&gt;
+    &lt;/@alert_dialog::content&gt;
+&lt;/@alert_dialog&gt;"#.to_string(),
 
         "dropdown" => r#"@import components/dropdown.wtz as dropdown
 
 &lt;@dropdown&gt;
     &lt;@dropdown::trigger&gt;
-        &lt;@button variant=button::Variant::Outline&gt;Open Menu&lt;/@&gt;
-    &lt;/@&gt;
+        &lt;@button variant=button::Variant::Outline&gt;Open Menu&lt;/@button&gt;
+    &lt;/@dropdown::trigger&gt;
     &lt;@dropdown::content&gt;
-        &lt;@dropdown::label&gt;My Account&lt;/@&gt;
+        &lt;@dropdown::label&gt;My Account&lt;/@dropdown::label&gt;
         &lt;@dropdown::separator /&gt;
-        &lt;@dropdown::item&gt;Profile&lt;/@&gt;
-        &lt;@dropdown::item&gt;Settings&lt;/@&gt;
+        &lt;@dropdown::item&gt;Profile&lt;/@dropdown::item&gt;
+        &lt;@dropdown::item&gt;Settings&lt;/@dropdown::item&gt;
         &lt;@dropdown::separator /&gt;
-        &lt;@dropdown::item class="text-destructive"&gt;Log out&lt;/@&gt;
-    &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+        &lt;@dropdown::item class="text-destructive"&gt;Log out&lt;/@dropdown::item&gt;
+    &lt;/@dropdown::content&gt;
+&lt;/@dropdown&gt;"#.to_string(),
 
         "popover" => r#"@import components/popover.wtz as popover
 
 &lt;@popover&gt;
     &lt;@popover::trigger&gt;
-        &lt;@button variant=button::Variant::Outline&gt;Open&lt;/@&gt;
-    &lt;/@&gt;
+        &lt;@button variant=button::Variant::Outline&gt;Open&lt;/@button&gt;
+    &lt;/@popover::trigger&gt;
     &lt;@popover::content&gt;
         &lt;div class="grid gap-4"&gt;
             &lt;h4 class="font-medium"&gt;Dimensions&lt;/h4&gt;
@@ -2079,19 +2079,19 @@ fn get_component_usage(component: &str) -> String {
                 Set the dimensions for the layer.
             &lt;/p&gt;
         &lt;/div&gt;
-    &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+    &lt;/@popover::content&gt;
+&lt;/@popover&gt;"#.to_string(),
 
         "tooltip" => r#"@import components/tooltip.wtz as tooltip
 
 &lt;@tooltip&gt;
     &lt;@tooltip::trigger&gt;
-        &lt;@button variant=button::Variant::Outline&gt;Hover me&lt;/@&gt;
-    &lt;/@&gt;
+        &lt;@button variant=button::Variant::Outline&gt;Hover me&lt;/@button&gt;
+    &lt;/@tooltip::trigger&gt;
     &lt;@tooltip::content&gt;
         Add to library
-    &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+    &lt;/@tooltip::content&gt;
+&lt;/@tooltip&gt;"#.to_string(),
 
         "slider" => r#"@import components/slider.wtz as slider
 
