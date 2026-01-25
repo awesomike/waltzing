@@ -1103,24 +1103,76 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "date-picker" => r#"
-            <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" class="flex h-9 w-[200px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
-                    <span class="text-muted-foreground">Pick a date</span>
+            <div x-data="{ open: false, selected: '', pos: { top: 0, left: 0 } }" class="relative">
+                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX }; open = !open" class="flex h-9 w-[200px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+                    <span :class="selected ? '' : 'text-muted-foreground'" x-text="selected || 'Pick a date'"></span>
                     <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                 </button>
+                <template x-teleport="body">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-50 p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px;'">
+                        <div class="flex items-center justify-between mb-3">
+                            <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+                            <div class="text-sm font-medium">January 2026</div>
+                            <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-xs mb-1">
+                            <div class="text-muted-foreground p-1">Su</div><div class="text-muted-foreground p-1">Mo</div><div class="text-muted-foreground p-1">Tu</div><div class="text-muted-foreground p-1">We</div><div class="text-muted-foreground p-1">Th</div><div class="text-muted-foreground p-1">Fr</div><div class="text-muted-foreground p-1">Sa</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                            <div class="p-2"></div><div class="p-2"></div><div class="p-2"></div><button type="button" @click="selected = 'Jan 1, 2026'; open = false" class="p-2 rounded hover:bg-accent">1</button><button type="button" @click="selected = 'Jan 2, 2026'; open = false" class="p-2 rounded hover:bg-accent">2</button><button type="button" @click="selected = 'Jan 3, 2026'; open = false" class="p-2 rounded hover:bg-accent">3</button><button type="button" @click="selected = 'Jan 4, 2026'; open = false" class="p-2 rounded hover:bg-accent">4</button>
+                            <button type="button" @click="selected = 'Jan 5, 2026'; open = false" class="p-2 rounded hover:bg-accent">5</button><button type="button" @click="selected = 'Jan 6, 2026'; open = false" class="p-2 rounded hover:bg-accent">6</button><button type="button" @click="selected = 'Jan 7, 2026'; open = false" class="p-2 rounded hover:bg-accent">7</button><button type="button" @click="selected = 'Jan 8, 2026'; open = false" class="p-2 rounded bg-primary text-primary-foreground">8</button><button type="button" @click="selected = 'Jan 9, 2026'; open = false" class="p-2 rounded hover:bg-accent">9</button><button type="button" @click="selected = 'Jan 10, 2026'; open = false" class="p-2 rounded hover:bg-accent">10</button><button type="button" @click="selected = 'Jan 11, 2026'; open = false" class="p-2 rounded hover:bg-accent">11</button>
+                            <button type="button" @click="selected = 'Jan 12, 2026'; open = false" class="p-2 rounded hover:bg-accent">12</button><button type="button" @click="selected = 'Jan 13, 2026'; open = false" class="p-2 rounded hover:bg-accent">13</button><button type="button" @click="selected = 'Jan 14, 2026'; open = false" class="p-2 rounded hover:bg-accent">14</button><button type="button" @click="selected = 'Jan 15, 2026'; open = false" class="p-2 rounded hover:bg-accent">15</button><button type="button" @click="selected = 'Jan 16, 2026'; open = false" class="p-2 rounded hover:bg-accent">16</button><button type="button" @click="selected = 'Jan 17, 2026'; open = false" class="p-2 rounded hover:bg-accent">17</button><button type="button" @click="selected = 'Jan 18, 2026'; open = false" class="p-2 rounded hover:bg-accent">18</button>
+                            <button type="button" @click="selected = 'Jan 19, 2026'; open = false" class="p-2 rounded hover:bg-accent">19</button><button type="button" @click="selected = 'Jan 20, 2026'; open = false" class="p-2 rounded hover:bg-accent">20</button><button type="button" @click="selected = 'Jan 21, 2026'; open = false" class="p-2 rounded hover:bg-accent">21</button><button type="button" @click="selected = 'Jan 22, 2026'; open = false" class="p-2 rounded hover:bg-accent">22</button><button type="button" @click="selected = 'Jan 23, 2026'; open = false" class="p-2 rounded hover:bg-accent">23</button><button type="button" @click="selected = 'Jan 24, 2026'; open = false" class="p-2 rounded hover:bg-accent">24</button><button type="button" @click="selected = 'Jan 25, 2026'; open = false" class="p-2 rounded hover:bg-accent">25</button>
+                        </div>
+                    </div>
+                </template>
             </div>
         "#,
 
         "datetime-picker" => r#"
-            <div class="flex gap-2">
-                <button class="flex h-9 w-[140px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
-                    <span class="text-muted-foreground">Date</span>
-                    <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                </button>
-                <button class="flex h-9 w-[100px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
-                    <span class="text-muted-foreground">Time</span>
-                    <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                </button>
+            <div x-data="{ dateOpen: false, timeOpen: false, selectedDate: '', selectedTime: '', datePos: { top: 0, left: 0 }, timePos: { top: 0, left: 0 } }" class="flex gap-2">
+                <div class="relative">
+                    <button x-ref="dateBtn" @click="let r = $refs.dateBtn.getBoundingClientRect(); datePos = { top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX }; dateOpen = !dateOpen; timeOpen = false" class="flex h-9 w-[140px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+                        <span :class="selectedDate ? '' : 'text-muted-foreground'" x-text="selectedDate || 'Date'"></span>
+                        <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                    </button>
+                    <template x-teleport="body">
+                        <div x-show="dateOpen" @click.away="dateOpen = false" x-cloak class="fixed z-50 p-3 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="'top: ' + datePos.top + 'px; left: ' + datePos.left + 'px;'">
+                            <div class="flex items-center justify-between mb-3">
+                                <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+                                <div class="text-sm font-medium">January 2026</div>
+                                <button type="button" class="h-7 w-7 flex items-center justify-center rounded hover:bg-accent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-xs mb-1">
+                                <div class="text-muted-foreground p-1">Su</div><div class="text-muted-foreground p-1">Mo</div><div class="text-muted-foreground p-1">Tu</div><div class="text-muted-foreground p-1">We</div><div class="text-muted-foreground p-1">Th</div><div class="text-muted-foreground p-1">Fr</div><div class="text-muted-foreground p-1">Sa</div>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                                <div class="p-2"></div><div class="p-2"></div><div class="p-2"></div><button type="button" @click="selectedDate = 'Jan 1'; dateOpen = false" class="p-2 rounded hover:bg-accent">1</button><button type="button" @click="selectedDate = 'Jan 2'; dateOpen = false" class="p-2 rounded hover:bg-accent">2</button><button type="button" @click="selectedDate = 'Jan 3'; dateOpen = false" class="p-2 rounded hover:bg-accent">3</button><button type="button" @click="selectedDate = 'Jan 4'; dateOpen = false" class="p-2 rounded hover:bg-accent">4</button>
+                                <button type="button" @click="selectedDate = 'Jan 5'; dateOpen = false" class="p-2 rounded hover:bg-accent">5</button><button type="button" @click="selectedDate = 'Jan 6'; dateOpen = false" class="p-2 rounded hover:bg-accent">6</button><button type="button" @click="selectedDate = 'Jan 7'; dateOpen = false" class="p-2 rounded hover:bg-accent">7</button><button type="button" @click="selectedDate = 'Jan 8'; dateOpen = false" class="p-2 rounded bg-primary text-primary-foreground">8</button><button type="button" @click="selectedDate = 'Jan 9'; dateOpen = false" class="p-2 rounded hover:bg-accent">9</button><button type="button" @click="selectedDate = 'Jan 10'; dateOpen = false" class="p-2 rounded hover:bg-accent">10</button><button type="button" @click="selectedDate = 'Jan 11'; dateOpen = false" class="p-2 rounded hover:bg-accent">11</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="relative">
+                    <button x-ref="timeBtn" @click="let r = $refs.timeBtn.getBoundingClientRect(); timePos = { top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX }; timeOpen = !timeOpen; dateOpen = false" class="flex h-9 w-[100px] items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm hover:bg-accent">
+                        <span :class="selectedTime ? '' : 'text-muted-foreground'" x-text="selectedTime || 'Time'"></span>
+                        <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </button>
+                    <template x-teleport="body">
+                        <div x-show="timeOpen" @click.away="timeOpen = false" x-cloak class="fixed z-50 p-2 rounded-md border border-border bg-popover text-popover-foreground shadow-md" :style="'top: ' + timePos.top + 'px; left: ' + timePos.left + 'px;'">
+                            <div class="grid grid-cols-4 gap-1 text-sm">
+                                <button type="button" @click="selectedTime = '9:00 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">9:00</button>
+                                <button type="button" @click="selectedTime = '9:30 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">9:30</button>
+                                <button type="button" @click="selectedTime = '10:00 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">10:00</button>
+                                <button type="button" @click="selectedTime = '10:30 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">10:30</button>
+                                <button type="button" @click="selectedTime = '11:00 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">11:00</button>
+                                <button type="button" @click="selectedTime = '11:30 AM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">11:30</button>
+                                <button type="button" @click="selectedTime = '12:00 PM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">12:00</button>
+                                <button type="button" @click="selectedTime = '12:30 PM'; timeOpen = false" class="px-3 py-2 rounded hover:bg-accent">12:30</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         "#,
 
@@ -1339,8 +1391,24 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "toast" => r#"
-            <div class="flex gap-2">
-                <button onclick="if(window.showToast) showToast({title:'Success!',description:'Your message was sent.',variant:'success'})" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">Show Toast</button>
+            <div class="flex flex-col items-center gap-4">
+                <div class="flex gap-2">
+                    <button @click="$dispatch('toast', { title: 'Success!', description: 'Your changes have been saved.', variant: 'success', duration: 3000 })" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-green-600 text-white hover:bg-green-700">Success</button>
+                    <button @click="$dispatch('toast', { title: 'Error', description: 'Something went wrong.', variant: 'error', duration: 3000 })" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90">Error</button>
+                    <button @click="$dispatch('toast', { title: 'Info', description: 'Here is some information.', variant: 'default', duration: 3000 })" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">Info</button>
+                </div>
+                <div id="toast-container-preview" class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none" x-data="{ toasts: [] }" @toast.window="const id = Date.now(); toasts.push({ id, ...$event.detail }); setTimeout(() => { toasts = toasts.filter(t => t.id !== id) }, $event.detail.duration || 3000)">
+                    <template x-for="toast in toasts" :key="toast.id">
+                        <div class="pointer-events-auto w-80 rounded-lg border p-4 shadow-lg transition-all duration-300" :class="{ 'border-green-500/50 bg-green-50 dark:bg-green-950 text-green-900 dark:text-green-100': toast.variant === 'success', 'border-destructive/50 bg-red-50 dark:bg-red-950 text-red-900 dark:text-red-100': toast.variant === 'error', 'border-border bg-background': toast.variant === 'default' }" x-transition:enter="transform ease-out duration-300" x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100" x-transition:leave="transform ease-in duration-200" x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0">
+                            <div class="flex items-start gap-3">
+                                <template x-if="toast.variant === 'success'"><svg class="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></template>
+                                <template x-if="toast.variant === 'error'"><svg class="h-5 w-5 text-red-600 dark:text-red-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></template>
+                                <div class="flex-1"><p class="text-sm font-semibold" x-text="toast.title"></p><p class="mt-1 text-sm opacity-90" x-text="toast.description"></p></div>
+                                <button @click="toasts = toasts.filter(t => t.id !== toast.id)" class="shrink-0 rounded p-1 opacity-70 hover:opacity-100"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         "#,
 
