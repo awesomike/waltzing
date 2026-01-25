@@ -2,26 +2,21 @@
  * Radio Group component
  * Single selection from a list of options with custom styled radio buttons
  *
- * @example
- * @import components/radio-group.wtz as radio
+ * Two usage patterns:
  *
- * @let options = vec![
- *     RadioOption { value: "light".into(), label: "Light".into(), description: None, disabled: false },
- *     RadioOption { value: "dark".into(), label: "Dark".into(), description: None, disabled: false },
- *     RadioOption { value: "system".into(), label: "System".into(), description: Some("Use system preference".into()), disabled: false },
- * ];
+ * 1. Declarative (for static options):
+ * <@radio::group name="theme" selected=Some("light")>
+ *     <@radio::option value="light">Light</@>
+ *     <@radio::option value="dark">Dark</@>
+ *     <@radio::option value="system" description="Use system preference">System</@>
+ * </@>
  *
- * <@radio::apply
- *     name="theme"
- *     options=&options
- *     selected=Some("light")
- *    
- * />
- *
- * <@radio::horizontal name="size" options=&options selected=Some("md") />
+ * 2. Data-driven (for dynamic options from database/API):
+ * <@radio::from_vec name="theme" options=@options selected=Some("light") />
  *@
 
 
+@* Option struct for data-driven usage *@
 @struct RadioOption {
     value: String,
     label: String,
@@ -29,19 +24,89 @@
     disabled: bool,
 }
 
-@fn apply(
+@* Radio group container - provides context for child options *@
+@fn group(
+    name: &str,
+    selected: Option<&str> = None,
+    class: &str = "",
+    content: @(),
+) {
+    @let sel = selected.unwrap_or("")
+    <div
+        role="radiogroup"
+        class="grid gap-2 @class"
+        x-data="{ radioName: '@name', radioSelected: '@sel' }"
+    >
+        @content()
+    </div>
+}
+
+@* Horizontal radio group layout *@
+@fn horizontal(
+    name: &str,
+    selected: Option<&str> = None,
+    class: &str = "",
+    content: @(),
+) {
+    @let sel = selected.unwrap_or("")
+    <div
+        role="radiogroup"
+        class="flex flex-wrap gap-4 @class"
+        x-data="{ radioName: '@name', radioSelected: '@sel' }"
+    >
+        @content()
+    </div>
+}
+
+@* Individual radio option - must be used inside a group *@
+@fn option(
+    value: &str,
+    description: Option<&str> = None,
+    disabled: bool = false,
+    content: @(),
+) {
+    @let radio_base = "aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+
+    <div class="flex items-start space-x-2">
+        <div class="grid place-items-center">
+            <input
+                type="radio"
+                :id="radioName + '_@value'"
+                :name="radioName"
+                value="@value"
+                class="@radio_base peer col-start-1 row-start-1"
+                :checked="radioSelected === '@value'"
+                @if disabled { disabled }
+            />
+            <div class="col-start-1 row-start-1 h-2 w-2 rounded-full bg-primary hidden peer-checked:block"></div>
+        </div>
+        @if description.is_some() {
+            <div class="grid gap-1.5 leading-none">
+                <label :for="radioName + '_@value'" class="@label_cls">
+                    @content()
+                </label>
+                @if let Some(desc) = description {
+                    <p class="text-sm text-muted-foreground">@desc</p>
+                }
+            </div>
+        } else {
+            <label :for="radioName + '_@value'" class="@label_cls">
+                @content()
+            </label>
+        }
+    </div>
+}
+
+@* Data-driven radio group from Vec<RadioOption> *@
+@fn from_vec(
     name: &str,
     options: Vec<RadioOption>,
-    selected: Option<&str>,
+    selected: Option<&str> = None,
     class: &str = "",
 ) {
     @let group_base = "grid gap-2"
-    @let cls = class
-
-    <div
-        role="radiogroup"
-        class="@cn(&[@group_base, @cls])"
-    >
+    <div role="radiogroup" class="@cn(&[@group_base, @class])">
         @for opt in options {
             @let is_checked = (selected == Some(opt.value.as_str()))
             @let item_id = format!("{}_{}", name, opt.value)
@@ -50,7 +115,6 @@
 
             <div class="flex items-start space-x-2">
                 <div class="grid place-items-center">
-                    @* Native radio input styled as custom circle *@
                     <input
                         type="radio"
                         id="@item_id"
@@ -60,43 +124,32 @@
                         @if is_checked { checked }
                         @if opt.disabled { disabled }
                     />
-                    @* Filled circle indicator when selected *@
                     <div class="col-start-1 row-start-1 h-2 w-2 rounded-full bg-primary @if is_checked { block } else { hidden } peer-checked:block"></div>
                 </div>
-                @* Label and optional description *@
                 @if opt.description.is_some() {
                     <div class="grid gap-1.5 leading-none">
-                        <label for="@item_id" class="@label_cls">
-                            @opt.label
-                        </label>
+                        <label for="@item_id" class="@label_cls">@opt.label</label>
                         @if let Some(desc) = &opt.description {
                             <p class="text-sm text-muted-foreground">@desc</p>
                         }
                     </div>
                 } else {
-                    <label for="@item_id" class="@label_cls">
-                        @opt.label
-                    </label>
+                    <label for="@item_id" class="@label_cls">@opt.label</label>
                 }
             </div>
         }
     </div>
 }
 
-@* Radio group with horizontal layout *@
-@fn horizontal(
+@* Horizontal data-driven radio group *@
+@fn horizontal_from_vec(
     name: &str,
     options: Vec<RadioOption>,
-    selected: Option<&str>,
+    selected: Option<&str> = None,
     class: &str = "",
 ) {
     @let group_base = "flex flex-wrap gap-4"
-    @let cls = class
-
-    <div
-        role="radiogroup"
-        class="@cn(&[@group_base, @cls])"
-    >
+    <div role="radiogroup" class="@cn(&[@group_base, @class])">
         @for opt in options {
             @let is_checked = (selected == Some(opt.value.as_str()))
             @let item_id = format!("{}_{}", name, opt.value)
@@ -116,37 +169,52 @@
                     />
                     <div class="col-start-1 row-start-1 h-2 w-2 rounded-full bg-primary @if is_checked { block } else { hidden } peer-checked:block"></div>
                 </div>
-                <label for="@item_id" class="@label_cls">
-                    @opt.label
-                </label>
+                <label for="@item_id" class="@label_cls">@opt.label</label>
             </div>
         }
     </div>
 }
 
-@* Radio group with label *@
+@* Labeled radio group with children *@
 @fn labeled(
     label: &str,
     name: &str,
-    options: Vec<RadioOption>,
-    selected: Option<&str>,
+    selected: Option<&str> = None,
     required: bool = false,
     error: Option<&str> = None,
     class: &str = "",
+    content: @(),
 ) {
-    @let cls = class
-
     <fieldset class="space-y-3 @if error.is_some() { [&_input]:border-destructive }">
         <legend class="text-sm font-medium leading-none">
             @label
             @if required { <span class="text-destructive ml-0.5">*</span> }
         </legend>
-        <@apply
-            name=@name
-            options=@options
-            selected=@selected
-            class=@cls
-        />
+        <@group name=@name selected=@selected class=@class>
+            @content()
+        </@>
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </fieldset>
+}
+
+@* Labeled data-driven radio group *@
+@fn labeled_from_vec(
+    label: &str,
+    name: &str,
+    options: Vec<RadioOption>,
+    selected: Option<&str> = None,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: &str = "",
+) {
+    <fieldset class="space-y-3 @if error.is_some() { [&_input]:border-destructive }">
+        <legend class="text-sm font-medium leading-none">
+            @label
+            @if required { <span class="text-destructive ml-0.5">*</span> }
+        </legend>
+        <@from_vec name=@name options=@options selected=@selected class=@class />
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>
         }
