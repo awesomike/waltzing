@@ -1694,13 +1694,53 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "resizable" => r#"
-            <div class="flex h-[150px] w-full max-w-md rounded-lg border">
-                <div class="flex-1 p-4 flex items-center justify-center">
-                    <span class="text-sm text-muted-foreground">Panel 1</span>
+            <div class="flex h-[200px] w-full max-w-lg rounded-lg border overflow-hidden"
+                x-data="{
+                    dragging: false,
+                    startX: 0,
+                    startWidth: 0,
+                    leftWidth: 50,
+                    startDrag(e) {
+                        this.dragging = true;
+                        this.startX = e.clientX;
+                        this.startWidth = this.leftWidth;
+                        document.body.style.cursor = 'col-resize';
+                        document.body.style.userSelect = 'none';
+                    },
+                    onDrag(e) {
+                        if (!this.dragging) return;
+                        const container = this.$refs.container;
+                        const delta = e.clientX - this.startX;
+                        const deltaPercent = (delta / container.offsetWidth) * 100;
+                        this.leftWidth = Math.max(10, Math.min(90, this.startWidth + deltaPercent));
+                    },
+                    stopDrag() {
+                        this.dragging = false;
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                    }
+                }"
+                x-ref="container"
+                @mousemove.window="onDrag($event)"
+                @mouseup.window="stopDrag()"
+            >
+                <div class="p-4 flex items-center justify-center bg-muted/30" :style="'width: ' + leftWidth + '%'">
+                    <span class="text-sm font-medium" x-text="Math.round(leftWidth) + '%'"></span>
                 </div>
-                <div class="w-1 bg-border cursor-col-resize hover:bg-primary/50"></div>
-                <div class="flex-1 p-4 flex items-center justify-center">
-                    <span class="text-sm text-muted-foreground">Panel 2</span>
+                <div class="w-px bg-border cursor-col-resize hover:bg-primary/50 flex items-center justify-center relative group"
+                    @mousedown.prevent="startDrag($event)"
+                    tabindex="0"
+                    @keydown.left.prevent="leftWidth = Math.max(10, leftWidth - 1)"
+                    @keydown.right.prevent="leftWidth = Math.min(90, leftWidth + 1)"
+                >
+                    <div class="absolute z-10 h-8 w-3 rounded-sm border bg-border flex items-center justify-center group-hover:bg-primary/20 group-focus:ring-1 group-focus:ring-ring">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-2.5 w-2.5">
+                            <circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex-1 p-4 flex items-center justify-center bg-muted/10">
+                    <span class="text-sm font-medium" x-text="Math.round(100 - leftWidth) + '%'"></span>
                 </div>
             </div>
         "#,
