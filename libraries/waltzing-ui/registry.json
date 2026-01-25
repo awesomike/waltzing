@@ -1,15 +1,71 @@
 {
   "$schema": "https://waltzing.awesomike.com/schema/registry.json",
   "name": "waltzing-ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A shadcn-inspired component library for Waltzing",
   "repository": "https://github.com/awesomike/waltzing-runtime",
   "license": "MIT",
   "components": [
     {
+      "name": "accordion",
+      "path": "components/accordion.wtz",
+      "description": "Collapsible content sections using Alpine.js collapse plugin",
+      "dependencies": [],
+      "alpine": ["@alpinejs/collapse"]
+    },
+    {
+      "name": "ajax-select",
+      "path": "components/ajax-select.wtz",
+      "description": "A searchable select that fetches options from an API endpoint",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "alert",
+      "path": "components/alert.wtz",
+      "description": "Callout for important messages",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "alert-dialog",
+      "path": "components/alert-dialog.wtz",
+      "description": "Modal confirmation dialog for destructive actions",
+      "dependencies": ["lib/utils"],
+      "alpine": ["@alpinejs/focus"]
+    },
+    {
+      "name": "aspect-ratio",
+      "path": "components/aspect-ratio.wtz",
+      "description": "Displays content within a desired aspect ratio using CSS aspect-ratio property",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "avatar",
+      "path": "components/avatar.wtz",
+      "description": "User avatar with image and fallback support",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "badge",
+      "path": "components/badge.wtz",
+      "description": "Small status indicator or tag",
+      "dependencies": []
+    },
+    {
+      "name": "breadcrumb",
+      "path": "components/breadcrumb.wtz",
+      "description": "Navigation path indicator showing the current page location",
+      "dependencies": ["lib/utils"]
+    },
+    {
       "name": "button",
       "path": "components/button.wtz",
       "description": "A clickable button with multiple variants and sizes",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "calendar",
+      "path": "components/calendar.wtz",
+      "description": "Month calendar grid with date selection and navigation",
       "dependencies": ["lib/utils"]
     },
     {
@@ -19,15 +75,52 @@
       "dependencies": ["lib/utils"]
     },
     {
-      "name": "input",
-      "path": "components/input.wtz",
-      "description": "Text input field with optional label and error state",
+      "name": "carousel",
+      "path": "components/carousel.wtz",
+      "description": "Image/content slider with navigation, dots, and touch support",
       "dependencies": ["lib/utils"]
     },
     {
-      "name": "select",
-      "path": "components/select.wtz",
-      "description": "A dropdown select input with custom styling",
+      "name": "checkbox",
+      "path": "components/checkbox.wtz",
+      "description": "Custom styled checkbox with SVG checkmark icon",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "collapsible",
+      "path": "components/collapsible.wtz",
+      "description": "Simple show/hide section with smooth collapse animation",
+      "dependencies": [],
+      "alpine": ["@alpinejs/collapse"]
+    },
+    {
+      "name": "combobox",
+      "path": "components/combobox.wtz",
+      "description": "A searchable select dropdown with autocomplete",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "command",
+      "path": "components/command.wtz",
+      "description": "Command palette / search interface with keyboard navigation",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "context-menu",
+      "path": "components/context-menu.wtz",
+      "description": "Right-click menu that positions at cursor location",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "date-picker",
+      "path": "components/date-picker.wtz",
+      "description": "Date selection input with calendar dropdown popup",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "datetime-picker",
+      "path": "components/datetime-picker.wtz",
+      "description": "Combined date and time selection with calendar and time picker",
       "dependencies": ["lib/utils"]
     },
     {
@@ -38,10 +131,180 @@
       "alpine": ["@alpinejs/focus"]
     },
     {
+      "name": "drawer",
+      "path": "components/drawer.wtz",
+      "description": "Mobile-friendly bottom sheet drawer (similar to Vaul)",
+      "dependencies": ["lib/utils"],
+      "alpine": ["@alpinejs/focus"]
+    },
+    {
       "name": "dropdown",
       "path": "components/dropdown.wtz",
       "description": "A dropdown menu with trigger and items",
       "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "duration-input",
+      "path": "components/duration-input.wtz",
+      "description": "Input for time durations with configurable format (hh:mm:ss, mm:ss, hh:mm)",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "file-upload",
+      "path": "components/file-upload.wtz",
+      "description": "Generic file upload with drag-and-drop support",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "flash-messages",
+      "path": "components/flash-messages.wtz",
+      "description": "Server-rendered notification messages with auto-dismiss",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "form",
+      "path": "components/form.wtz",
+      "description": "Form wrapper with validation display and field layouts",
+      "dependencies": ["lib/utils", "components/input", "components/button"]
+    },
+    {
+      "name": "formatted-number",
+      "path": "components/formatted-number.wtz",
+      "description": "Input field for numbers with configurable prefix, suffix, and formatting",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "hover-card",
+      "path": "components/hover-card.wtz",
+      "description": "Rich content card shown on hover, like GitHub user hover cards",
+      "dependencies": []
+    },
+    {
+      "name": "input",
+      "path": "components/input.wtz",
+      "description": "Text input field with optional label and error state",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "input-otp",
+      "path": "components/input-otp.wtz",
+      "description": "One-time password input with individual digit boxes",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "label",
+      "path": "components/label.wtz",
+      "description": "Basic label for form inputs with shadcn/ui styling",
+      "dependencies": []
+    },
+    {
+      "name": "menubar",
+      "path": "components/menubar.wtz",
+      "description": "Application menu bar with dropdown menus (File, Edit, View style)",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "minmax-editor",
+      "path": "components/minmax-editor.wtz",
+      "description": "A collapsible range input that shows a single value when min equals max",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "navigation-menu",
+      "path": "components/navigation-menu.wtz",
+      "description": "Horizontal navigation bar with dropdown menus for nested items",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "numeric-input",
+      "path": "components/numeric-input.wtz",
+      "description": "Number input with increment/decrement buttons and optional unit selector",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "pagination",
+      "path": "components/pagination.wtz",
+      "description": "Page navigation controls with prev/next and page numbers",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "password-input",
+      "path": "components/password-input.wtz",
+      "description": "Password input field with show/hide visibility toggle",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "popover",
+      "path": "components/popover.wtz",
+      "description": "Floating content anchored to a trigger element",
+      "dependencies": []
+    },
+    {
+      "name": "progress",
+      "path": "components/progress.wtz",
+      "description": "Visual indicator of progress or loading state with determinate and indeterminate modes",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "radio-group",
+      "path": "components/radio-group.wtz",
+      "description": "Single selection from a list of options with custom styled radio buttons",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "resizable",
+      "path": "components/resizable.wtz",
+      "description": "Resizable panels with drag handles using Alpine.js",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "scroll-area",
+      "path": "components/scroll-area.wtz",
+      "description": "Custom styled scrollable container with styled scrollbars",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "searchable-select",
+      "path": "components/searchable-select.wtz",
+      "description": "A dropdown select with optional search/filter functionality",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "select",
+      "path": "components/select.wtz",
+      "description": "A dropdown select input with custom styling",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "separator",
+      "path": "components/separator.wtz",
+      "description": "Visual divider between sections",
+      "dependencies": []
+    },
+    {
+      "name": "sheet",
+      "path": "components/sheet.wtz",
+      "description": "Slide-out panel from edge of screen with backdrop",
+      "dependencies": ["lib/utils"],
+      "alpine": ["@alpinejs/focus"]
+    },
+    {
+      "name": "skeleton",
+      "path": "components/skeleton.wtz",
+      "description": "Loading placeholder for content",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "slider",
+      "path": "components/slider.wtz",
+      "description": "Range input with custom track and thumb styling",
+      "dependencies": []
+    },
+    {
+      "name": "switch",
+      "path": "components/switch.wtz",
+      "description": "Toggle switch for boolean values with animated thumb",
+      "dependencies": []
     },
     {
       "name": "table",
@@ -54,6 +317,48 @@
       "path": "components/tabs.wtz",
       "description": "Tabbed interface with Alpine.js state management",
       "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "textarea",
+      "path": "components/textarea.wtz",
+      "description": "Multi-line text input field with optional label and error state",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "time-picker",
+      "path": "components/time-picker.wtz",
+      "description": "A time input with hour, minute, and optional seconds selection",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "toast",
+      "path": "components/toast.wtz",
+      "description": "Temporary notification messages with auto-dismiss",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "toggle",
+      "path": "components/toggle.wtz",
+      "description": "A two-state button that can be toggled on or off",
+      "dependencies": []
+    },
+    {
+      "name": "toggle-group",
+      "path": "components/toggle-group.wtz",
+      "description": "A group of toggle buttons with single or multiple selection",
+      "dependencies": ["lib/utils"]
+    },
+    {
+      "name": "tooltip",
+      "path": "components/tooltip.wtz",
+      "description": "Hover information popup for providing contextual hints",
+      "dependencies": []
+    },
+    {
+      "name": "validation-errors",
+      "path": "components/validation-errors.wtz",
+      "description": "Display a list of form validation errors with destructive styling",
+      "dependencies": []
     }
   ],
   "layouts": [
@@ -70,6 +375,11 @@
     }
   ],
   "lib": [
+    {
+      "name": "theme",
+      "path": "lib/theme.wtz",
+      "description": "Theme utilities: dark mode toggle, persistence, and system preference detection"
+    },
     {
       "name": "utils",
       "path": "lib/utils.wtz",

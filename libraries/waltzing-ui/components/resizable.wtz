@@ -1,0 +1,288 @@
+@*
+ * Resizable component
+ * Resizable panels with drag handles using Alpine.js
+ *
+ * Usage:
+ *   @import ui/components/resizable.wtz as resizable
+ *
+ *   // Horizontal layout (side-by-side panels)
+ *   <@resizable::panel_group direction=resizable::Direction::Horizontal>
+ *       <@resizable::panel default_size=30.0>
+ *           <p>Sidebar content (30%)</p>
+ *       </@>
+ *       <@resizable::handle />
+ *       <@resizable::panel default_size=70.0>
+ *           <p>Main content (70%)</p>
+ *       </@>
+ *   </@>
+ *
+ *   // Vertical layout (stacked panels)
+ *   <@resizable::panel_group direction=resizable::Direction::Vertical>
+ *       <@resizable::panel default_size=50.0 min_size=Some(20.0)>
+ *           <p>Top panel</p>
+ *       </@>
+ *       <@resizable::handle />
+ *       <@resizable::panel default_size=50.0 max_size=Some(80.0)>
+ *           <p>Bottom panel</p>
+ *       </@>
+ *   </@>
+ *
+ *   // Simple two-panel layouts
+ *   <@resizable::horizontal left_size=30.0
+ *       left=@{ <p>Left panel</p> }
+ *       right=@{ <p>Right panel</p> }
+ *   />
+ *@
+
+@import lib/utils.wtz as utils
+
+@enum Direction {
+    Horizontal,
+    Vertical,
+}
+
+@* Main container for resizable panels *@
+@fn panel_group(
+    direction: Direction = Direction::Horizontal,
+    class: Option<&str> = None,
+    content: @(),
+) {
+    @let is_horizontal = @match direction {
+        Direction::Horizontal => { "true" }
+        Direction::Vertical => { "false" }
+    }
+
+    @let container_cls = @match direction {
+        Direction::Horizontal => { "flex h-full w-full" }
+        Direction::Vertical => { "flex flex-col h-full w-full" }
+    }
+
+    <div
+        x-data=@format!("resizableGroup({})", is_horizontal)
+        x-ref="container"
+        class=@cn(&[container_cls, class.unwrap_or("")])
+        data-resizable-group
+    >
+        @content()
+    </div>
+}
+
+@* Individual resizable panel *@
+@fn panel(
+    default_size: f64,
+    min_size: Option<f64> = None,
+    max_size: Option<f64> = None,
+    class: Option<&str> = None,
+    content: @(),
+) {
+    @let base = "overflow-auto"
+    @let min_val = min_size.unwrap_or(0.0)
+    @let max_val = max_size.unwrap_or(100.0)
+
+    <div
+        class=@cn(&[base, class.unwrap_or("")])
+        style=@format!("flex-basis: {}%; flex-shrink: 0; flex-grow: 0;", default_size)
+        data-resizable-panel
+        data-min-size=@min_val
+        data-max-size=@max_val
+    >
+        @content()
+    </div>
+}
+
+@* Drag handle between panels *@
+@fn handle(class: Option<&str> = None) {
+    @let base = "relative flex items-center justify-center bg-border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1"
+
+    <div
+        class=@cn(&[base, class.unwrap_or("")])
+        :data-horizontal="isHorizontal"
+        :data-vertical="!isHorizontal"
+        :class="isHorizontal ? 'w-px cursor-col-resize' : 'h-px cursor-row-resize'"
+        data-resizable-handle
+        tabindex="0"
+        role="separator"
+        aria-valuenow="50"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        @@mousedown="startResize($event, handles.indexOf($el))"
+        @@keydown.left.prevent="if (isHorizontal) keyboardResize(handles.indexOf($el), -1)"
+        @@keydown.right.prevent="if (isHorizontal) keyboardResize(handles.indexOf($el), 1)"
+        @@keydown.up.prevent="if (!isHorizontal) keyboardResize(handles.indexOf($el), -1)"
+        @@keydown.down.prevent="if (!isHorizontal) keyboardResize(handles.indexOf($el), 1)"
+    >
+        <div
+            class="z-10 flex items-center justify-center rounded-sm border bg-border"
+            :class="isHorizontal ? 'h-4 w-3' : 'h-3 w-4'"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="10"
+                height="10"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-2.5 w-2.5"
+                :class="isHorizontal ? '' : 'rotate-90'"
+            >
+                <circle cx="9" cy="12" r="1"/>
+                <circle cx="15" cy="12" r="1"/>
+            </svg>
+        </div>
+    </div>
+}
+
+@* Simple horizontal two-panel layout *@
+@fn horizontal(
+    left_size: f64 = 50.0,
+    left: @(),
+    right: @(),
+    class: Option<&str> = None,
+) {
+    @let right_size = (100.0 - left_size)
+
+    <@panel_group direction=Direction::Horizontal class=@class>
+        <@panel default_size=@left_size content=@left />
+        <@handle />
+        <@panel default_size=@right_size content=@right />
+    </@>
+}
+
+@* Simple vertical two-panel layout *@
+@fn vertical_layout(
+    top_size: f64 = 50.0,
+    top: @(),
+    bottom: @(),
+    class: Option<&str> = None,
+) {
+    @let bottom_size = (100.0 - top_size)
+
+    <@panel_group direction=Direction::Vertical class=@class>
+        <@panel default_size=@top_size content=@top />
+        <@handle />
+        <@panel default_size=@bottom_size content=@bottom />
+    </@>
+}
+
+@* Three-panel horizontal layout *@
+@fn three_column(
+    left_size: f64 = 20.0,
+    right_size: f64 = 20.0,
+    left: @(),
+    center: @(),
+    right: @(),
+    class: Option<&str> = None,
+) {
+    @let center_size = (100.0 - left_size - right_size)
+
+    <@panel_group direction=Direction::Horizontal class=@class>
+        <@panel default_size=@left_size content=@left />
+        <@handle />
+        <@panel default_size=@center_size content=@center />
+        <@handle />
+        <@panel default_size=@right_size content=@right />
+    </@>
+}
+
+@* Alpine.js component definition - include once in your page *@
+@fn script() {
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('resizableGroup', (isHorizontal) => ({
+                isHorizontal,
+                panels: [],
+                handles: [],
+                activeHandle: null,
+                startPos: 0,
+                startSizes: [],
+                containerSize: 0,
+
+                init() {
+                    this.$nextTick(() => {
+                        this.panels = Array.from(this.$refs.container.querySelectorAll('[data-resizable-panel]'));
+                        this.handles = Array.from(this.$refs.container.querySelectorAll('[data-resizable-handle]'));
+                    });
+                },
+
+                startResize(e, handleIndex) {
+                    this.activeHandle = handleIndex;
+                    this.startPos = this.isHorizontal ? e.clientX : e.clientY;
+                    this.containerSize = this.isHorizontal
+                        ? this.$refs.container.offsetWidth
+                        : this.$refs.container.offsetHeight;
+                    this.startSizes = this.panels.map(p => parseFloat(p.style.flexBasis) || 0);
+
+                    const onMouseMove = (e) => this.onMouseMove(e);
+                    const onMouseUp = () => {
+                        this.activeHandle = null;
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                    };
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                    document.body.style.cursor = this.isHorizontal ? 'col-resize' : 'row-resize';
+                    document.body.style.userSelect = 'none';
+                },
+
+                onMouseMove(e) {
+                    if (this.activeHandle === null) return;
+
+                    const currentPos = this.isHorizontal ? e.clientX : e.clientY;
+                    const delta = currentPos - this.startPos;
+                    const deltaPercent = (delta / this.containerSize) * 100;
+
+                    this.resizePanels(this.activeHandle, deltaPercent);
+                },
+
+                resizePanels(handleIndex, deltaPercent) {
+                    const prevPanel = this.panels[handleIndex];
+                    const nextPanel = this.panels[handleIndex + 1];
+                    if (!prevPanel || !nextPanel) return;
+
+                    const prevMin = parseFloat(prevPanel.dataset.minSize) || 0;
+                    const prevMax = parseFloat(prevPanel.dataset.maxSize) || 100;
+                    const nextMin = parseFloat(nextPanel.dataset.minSize) || 0;
+                    const nextMax = parseFloat(nextPanel.dataset.maxSize) || 100;
+
+                    let newPrevSize = this.startSizes[handleIndex] + deltaPercent;
+                    let newNextSize = this.startSizes[handleIndex + 1] - deltaPercent;
+
+                    newPrevSize = Math.max(prevMin, Math.min(prevMax, newPrevSize));
+                    newNextSize = Math.max(nextMin, Math.min(nextMax, newNextSize));
+
+                    prevPanel.style.flexBasis = newPrevSize + '%';
+                    nextPanel.style.flexBasis = newNextSize + '%';
+                },
+
+                keyboardResize(handleIndex, direction) {
+                    const prevPanel = this.panels[handleIndex];
+                    const nextPanel = this.panels[handleIndex + 1];
+                    if (!prevPanel || !nextPanel) return;
+
+                    const prevMin = parseFloat(prevPanel.dataset.minSize) || 0;
+                    const prevMax = parseFloat(prevPanel.dataset.maxSize) || 100;
+                    const nextMin = parseFloat(nextPanel.dataset.minSize) || 0;
+                    const nextMax = parseFloat(nextPanel.dataset.maxSize) || 100;
+
+                    const prevSize = parseFloat(prevPanel.style.flexBasis) || 0;
+                    const nextSize = parseFloat(nextPanel.style.flexBasis) || 0;
+
+                    let newPrevSize = prevSize + direction;
+                    let newNextSize = nextSize - direction;
+
+                    if (newPrevSize >= prevMin && newPrevSize <= prevMax &&
+                        newNextSize >= nextMin && newNextSize <= nextMax) {
+                        prevPanel.style.flexBasis = newPrevSize + '%';
+                        nextPanel.style.flexBasis = newNextSize + '%';
+                    }
+                }
+            }));
+        });
+    </script>
+}

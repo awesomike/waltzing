@@ -1,0 +1,398 @@
+@*
+ * Formatted Number component
+ * Input field for numbers with configurable prefix, suffix, and formatting
+ *
+ * Usage:
+ *   @import components/formatted-number.wtz as formatted_number
+ *
+ *   // Basic number input
+ *   <@formatted_number::apply name="amount" value=Some(1234.56) />
+ *
+ *   // Currency-style with prefix
+ *   <@formatted_number::apply
+ *       name="price"
+ *       value=Some(99.99)
+ *       prefix=Some("$")
+ *       decimals=2
+ *   />
+ *
+ *   // Weight input with suffix
+ *   <@formatted_number::apply
+ *       name="weight"
+ *       value=Some(5.5)
+ *       suffix=Some("kg")
+ *       decimals=1
+ *   />
+ *
+ *   // Percentage input
+ *   <@formatted_number::apply
+ *       name="rate"
+ *       value=Some(25.0)
+ *       suffix=Some("%")
+ *       min=Some(0.0)
+ *       max=Some(100.0)
+ *   />
+ *
+ *   // Cents input with multiplier (stores 100 for $1.00)
+ *   <@formatted_number::apply
+ *       name="amount_cents"
+ *       value=Some(1250.0)
+ *       prefix=Some("$")
+ *       multiplier=100.0
+ *       decimals=2
+ *   />
+ *
+ *   // Create form variant (no initial value)
+ *   <@formatted_number::create name="amount" prefix=Some("$") decimals=2 />
+ *
+ *   // Edit form variant (with initial value)
+ *   <@formatted_number::edit name="amount" value=1234.56 prefix=Some("$") decimals=2 />
+ *@
+
+@import lib/utils.wtz as utils
+
+@* Main formatted number input *@
+@fn apply(
+    name: &str,
+    value: Option<f64>,
+    prefix: Option<&str> = None,
+    suffix: Option<&str> = None,
+    decimals: u32 = 2,
+    multiplier: f64 = 1.0,
+    thousand_separator: &str = ",",
+    decimal_separator: &str = ".",
+    min: Option<f64> = None,
+    max: Option<f64> = None,
+    step: Option<f64> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    @let input_base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    @let error_cls = @if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
+
+    @let has_prefix = prefix.is_some()
+    @let has_suffix = suffix.is_some()
+    @let prefix_cls = @if has_prefix { "pl-7" } else { "" }
+    @let suffix_cls = @if has_suffix { "pr-8" } else { "" }
+
+    @let input_cls = utils::cn(&[@input_base, @error_cls, @prefix_cls, @suffix_cls, @class.unwrap_or("")])
+
+    @* Calculate display value (divide by multiplier for display) *@
+    @let display_value = @if let Some(v) = value { @(v / multiplier) } else { 0.0 }
+    @let has_value = value.is_some()
+    @let initial_raw = @if has_value { @display_value } else { "null" }
+
+    <div class="relative flex items-center">
+        @if has_prefix {
+            <span class="absolute left-3 text-sm text-muted-foreground pointer-events-none">@prefix.unwrap()</span>
+        }
+
+        <div
+            class="w-full"
+            x-data="{
+                rawValue: @initial_raw,
+                displayValue: '',
+                multiplier: @multiplier,
+                decimals: @decimals,
+                thousandSep: '@thousand_separator',
+                decimalSep: '@decimal_separator',
+                minVal: @if let Some(m) = min { @m } else { null },
+                maxVal: @if let Some(m) = max { @m } else { null },
+                validationError: null,
+                init() {
+                    if (this.rawValue !== null) {
+                        this.displayValue = this.formatNumber(this.rawValue);
+                    }
+                },
+                formatNumber(num) {
+                    if (num === null || num === undefined || isNaN(num)) return '';
+                    const fixed = num.toFixed(this.decimals);
+                    const parts = fixed.split('.');
+                    const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, this.thousandSep);
+                    return parts[1] ? intPart + this.decimalSep + parts[1] : intPart;
+                },
+                parseNumber(str) {
+                    if (!str || str.trim() === '') return null;
+                    const cleaned = str.split(this.thousandSep).join('').replace(this.decimalSep, '.');
+                    const num = parseFloat(cleaned);
+                    return isNaN(num) ? null : num;
+                },
+                validate(num) {
+                    if (num === null) { this.validationError = null; return true; }
+                    if (this.minVal !== null && num < this.minVal) {
+                        this.validationError = 'Value must be at least ' + this.minVal;
+                        return false;
+                    }
+                    if (this.maxVal !== null && num > this.maxVal) {
+                        this.validationError = 'Value must be at most ' + this.maxVal;
+                        return false;
+                    }
+                    this.validationError = null;
+                    return true;
+                },
+                onInput(e) {
+                    const parsed = this.parseNumber(e.target.value);
+                    this.validate(parsed);
+                    this.rawValue = parsed;
+                },
+                onBlur() {
+                    if (this.rawValue !== null) {
+                        this.displayValue = this.formatNumber(this.rawValue);
+                    }
+                },
+                getStoredValue() {
+                    if (this.rawValue === null) return '';
+                    return (this.rawValue * this.multiplier).toString();
+                }
+            }"
+        >
+            @* Hidden input stores the actual value (multiplied) *@
+            <input type="hidden" name="@name" :value="getStoredValue()" />
+
+            @* Visible formatted input *@
+            <input
+                type="text"
+                inputmode="decimal"
+                class="@input_cls"
+                x-model="displayValue"
+                @input="onInput($event)"
+                @blur="onBlur()"
+                @if let Some(p) = placeholder { placeholder="@p" }
+                @if disabled { disabled }
+                @if required { required }
+                @if let Some(s) = step { step="@s" }
+                @if error.is_some() { aria-invalid="true" }
+            />
+
+            @* Inline validation error from Alpine *@
+            <template x-if="validationError">
+                <p class="text-sm text-destructive mt-1" x-text="validationError"></p>
+            </template>
+        </div>
+
+        @if has_suffix {
+            <span class="absolute right-3 text-sm text-muted-foreground pointer-events-none">@suffix.unwrap()</span>
+        }
+    </div>
+
+    @* Server-side validation error *@
+    @if let Some(e) = error {
+        <p class="text-sm text-destructive mt-1" role="alert">@e</p>
+    }
+}
+
+@* Create form variant - no initial value *@
+@fn create(
+    name: &str,
+    prefix: Option<&str> = None,
+    suffix: Option<&str> = None,
+    decimals: u32 = 2,
+    multiplier: f64 = 1.0,
+    thousand_separator: &str = ",",
+    decimal_separator: &str = ".",
+    min: Option<f64> = None,
+    max: Option<f64> = None,
+    step: Option<f64> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    <@apply
+        name=@name
+        value=None
+        prefix=@prefix
+        suffix=@suffix
+        decimals=@decimals
+        multiplier=@multiplier
+        thousand_separator=@thousand_separator
+        decimal_separator=@decimal_separator
+        min=@min
+        max=@max
+        step=@step
+        placeholder=@placeholder
+        disabled=@disabled
+        required=@required
+        error=@error
+        class=@class
+    />
+}
+
+@* Edit form variant - with initial value *@
+@fn edit(
+    name: &str,
+    value: f64,
+    prefix: Option<&str> = None,
+    suffix: Option<&str> = None,
+    decimals: u32 = 2,
+    multiplier: f64 = 1.0,
+    thousand_separator: &str = ",",
+    decimal_separator: &str = ".",
+    min: Option<f64> = None,
+    max: Option<f64> = None,
+    step: Option<f64> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    <@apply
+        name=@name
+        value=Some(@value)
+        prefix=@prefix
+        suffix=@suffix
+        decimals=@decimals
+        multiplier=@multiplier
+        thousand_separator=@thousand_separator
+        decimal_separator=@decimal_separator
+        min=@min
+        max=@max
+        step=@step
+        placeholder=@placeholder
+        disabled=@disabled
+        required=@required
+        error=@error
+        class=@class
+    />
+}
+
+@* Currency shorthand - common use case with $ prefix *@
+@fn currency(
+    name: &str,
+    value: Option<f64> = None,
+    symbol: &str = "$",
+    decimals: u32 = 2,
+    multiplier: f64 = 1.0,
+    min: Option<f64> = None,
+    max: Option<f64> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    <@apply
+        name=@name
+        value=@value
+        prefix=Some(@symbol)
+        suffix=None
+        decimals=@decimals
+        multiplier=@multiplier
+        thousand_separator=","
+        decimal_separator="."
+        min=@min
+        max=@max
+        step=None
+        placeholder=@placeholder
+        disabled=@disabled
+        required=@required
+        error=@error
+        class=@class
+    />
+}
+
+@* Percentage shorthand - with % suffix and 0-100 range *@
+@fn percent(
+    name: &str,
+    value: Option<f64> = None,
+    decimals: u32 = 0,
+    min: f64 = 0.0,
+    max: f64 = 100.0,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    <@apply
+        name=@name
+        value=@value
+        prefix=None
+        suffix=Some("%")
+        decimals=@decimals
+        multiplier=1.0
+        thousand_separator=","
+        decimal_separator="."
+        min=Some(@min)
+        max=Some(@max)
+        step=None
+        placeholder=@placeholder
+        disabled=@disabled
+        required=@required
+        error=@error
+        class=@class
+    />
+}
+
+@* Weight input with unit suffix *@
+@fn weight(
+    name: &str,
+    value: Option<f64> = None,
+    unit: &str = "kg",
+    decimals: u32 = 2,
+    min: Option<f64> = None,
+    max: Option<f64> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    <@apply
+        name=@name
+        value=@value
+        prefix=None
+        suffix=Some(@unit)
+        decimals=@decimals
+        multiplier=1.0
+        thousand_separator=","
+        decimal_separator="."
+        min=@min
+        max=@max
+        step=None
+        placeholder=@placeholder
+        disabled=@disabled
+        required=@required
+        error=@error
+        class=@class
+    />
+}
+
+@* Integer input - no decimals *@
+@fn integer(
+    name: &str,
+    value: Option<f64> = None,
+    prefix: Option<&str> = None,
+    suffix: Option<&str> = None,
+    min: Option<f64> = None,
+    max: Option<f64> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    <@apply
+        name=@name
+        value=@value
+        prefix=@prefix
+        suffix=@suffix
+        decimals=0
+        multiplier=1.0
+        thousand_separator=","
+        decimal_separator="."
+        min=@min
+        max=@max
+        step=Some(1.0)
+        placeholder=@placeholder
+        disabled=@disabled
+        required=@required
+        error=@error
+        class=@class
+    />
+}

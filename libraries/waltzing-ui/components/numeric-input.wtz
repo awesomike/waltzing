@@ -1,0 +1,277 @@
+@*
+ * Numeric Input component
+ * Number input with increment/decrement buttons and optional unit selector
+ *
+ * Usage:
+ *   @import ui/components/numeric-input.wtz as numeric_input
+ *
+ *   // Basic numeric input for forms
+ *   <@numeric_input::create name="quantity" value=Some(1.0) />
+ *
+ *   // With min/max constraints
+ *   <@numeric_input::create name="count" value=Some(5.0) min=Some(0.0) max=Some(100.0) step=1.0 />
+ *
+ *   // Inline variant for Alpine.js x-model binding
+ *   <@numeric_input::inline x_model="formData.price" value=Some(29.99) step=0.01 />
+ *
+ *   // Disabled state
+ *   <@numeric_input::create name="locked" value=Some(42.0) disabled=true />
+ *
+ *   // With label
+ *   <@numeric_input::labeled label="Quantity" name="qty" value=Some(1.0) min=Some(1.0) max=Some(99.0) />
+ *@
+
+@import lib/utils.wtz as utils
+
+@* Main numeric input for forms (creates hidden input for form submission) *@
+@fn create(
+    name: &str,
+    value: Option<f64>,
+    min: Option<f64> = None,
+    max: Option<f64> = None,
+    step: f64 = 1.0,
+    disabled: bool = false,
+    class: Option<&str> = None,
+) {
+    @let initial_value = value.unwrap_or(0.0)
+    @let min_str = @if let Some(m) = min { @m.to_string() } else { "null" }
+    @let max_str = @if let Some(m) = max { @m.to_string() } else { "null" }
+
+    @let container_base = "flex items-center"
+    @let disabled_cls = @if disabled { "opacity-50 cursor-not-allowed" } else { "" }
+
+    @let input_base = "h-9 w-full text-center text-sm border-y border-input bg-transparent focus:outline-none focus:ring-1 focus:ring-ring [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+    @let input_disabled = @if disabled { "cursor-not-allowed" } else { "" }
+
+    @let btn_base = "inline-flex h-9 w-9 items-center justify-center border border-input bg-background text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+    @let btn_left = "rounded-l-md border-r-0"
+    @let btn_right = "rounded-r-md border-l-0"
+
+    <div
+        class=@utils::cn(&[container_base, disabled_cls, class.unwrap_or("")])
+        x-data=@```json {
+            value: @initial_value,
+            min: @min_str,
+            max: @max_str,
+            step: @step,
+            increment() {
+                let newVal = this.value + this.step;
+                if (this.max !== null && newVal > this.max) newVal = this.max;
+                this.value = Math.round(newVal * 1000000) / 1000000;
+            },
+            decrement() {
+                let newVal = this.value - this.step;
+                if (this.min !== null && newVal < this.min) newVal = this.min;
+                this.value = Math.round(newVal * 1000000) / 1000000;
+            },
+            handleInput(e) {
+                let v = parseFloat(e.target.value) || 0;
+                if (this.min !== null && v < this.min) v = this.min;
+                if (this.max !== null && v > this.max) v = this.max;
+                this.value = Math.round(v * 1000000) / 1000000;
+            }
+        } ```@
+    >
+        @* Hidden input for form submission *@
+        <input type="hidden" name="@name" :value="value" />
+
+        @* Decrement button *@
+        <button
+            type="button"
+            class=@utils::cn(&[btn_base, btn_left])
+            @@click="decrement()"
+            :disabled="min !== null && value <= min"
+            @if disabled { disabled }
+            aria-label="Decrease value"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+            </svg>
+        </button>
+
+        @* Number input *@
+        <input
+            type="number"
+            class=@utils::cn(&[input_base, input_disabled])
+            :value="value"
+            @@change="handleInput($event)"
+            @@keydown.up.prevent="increment()"
+            @@keydown.down.prevent="decrement()"
+            @if let Some(m) = min { min="@m" }
+            @if let Some(m) = max { max="@m" }
+            step="@step"
+            @if disabled { disabled }
+            aria-label="@name"
+        />
+
+        @* Increment button *@
+        <button
+            type="button"
+            class=@utils::cn(&[btn_base, btn_right])
+            @@click="increment()"
+            :disabled="max !== null && value >= max"
+            @if disabled { disabled }
+            aria-label="Increase value"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/><path d="M12 5v14"/>
+            </svg>
+        </button>
+    </div>
+}
+
+@* Inline variant for Alpine.js x-model binding (no hidden inputs) *@
+@fn inline(
+    x_model: &str,
+    value: Option<f64>,
+    min: Option<f64> = None,
+    max: Option<f64> = None,
+    step: f64 = 1.0,
+    disabled: bool = false,
+    class: Option<&str> = None,
+) {
+    @let initial_value = value.unwrap_or(0.0)
+    @let min_str = @if let Some(m) = min { @m.to_string() } else { "null" }
+    @let max_str = @if let Some(m) = max { @m.to_string() } else { "null" }
+
+    @let container_base = "flex items-center"
+    @let disabled_cls = @if disabled { "opacity-50 cursor-not-allowed" } else { "" }
+
+    @let input_base = "h-9 w-full text-center text-sm border-y border-input bg-transparent focus:outline-none focus:ring-1 focus:ring-ring [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+    @let input_disabled = @if disabled { "cursor-not-allowed" } else { "" }
+
+    @let btn_base = "inline-flex h-9 w-9 items-center justify-center border border-input bg-background text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+    @let btn_left = "rounded-l-md border-r-0"
+    @let btn_right = "rounded-r-md border-l-0"
+
+    <div
+        class=@utils::cn(&[container_base, disabled_cls, class.unwrap_or("")])
+        x-data=@```json {
+            min: @min_str,
+            max: @max_str,
+            step: @step,
+            increment() {
+                let current = @x_model || 0;
+                let newVal = current + this.step;
+                if (this.max !== null && newVal > this.max) newVal = this.max;
+                @x_model = Math.round(newVal * 1000000) / 1000000;
+            },
+            decrement() {
+                let current = @x_model || 0;
+                let newVal = current - this.step;
+                if (this.min !== null && newVal < this.min) newVal = this.min;
+                @x_model = Math.round(newVal * 1000000) / 1000000;
+            },
+            clamp(val) {
+                let v = parseFloat(val) || 0;
+                if (this.min !== null && v < this.min) v = this.min;
+                if (this.max !== null && v > this.max) v = this.max;
+                return Math.round(v * 1000000) / 1000000;
+            }
+        } ```@
+    >
+        @* Decrement button *@
+        <button
+            type="button"
+            class=@utils::cn(&[btn_base, btn_left])
+            @@click="decrement()"
+            :disabled="min !== null && @x_model <= min"
+            @if disabled { disabled }
+            aria-label="Decrease value"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+            </svg>
+        </button>
+
+        @* Number input with x-model binding *@
+        <input
+            type="number"
+            class=@utils::cn(&[input_base, input_disabled])
+            x-model.number="@x_model"
+            @@change="@x_model = clamp($event.target.value)"
+            @@keydown.up.prevent="increment()"
+            @@keydown.down.prevent="decrement()"
+            @if let Some(m) = min { min="@m" }
+            @if let Some(m) = max { max="@m" }
+            step="@step"
+            @if disabled { disabled }
+        />
+
+        @* Increment button *@
+        <button
+            type="button"
+            class=@utils::cn(&[btn_base, btn_right])
+            @@click="increment()"
+            :disabled="max !== null && @x_model >= max"
+            @if disabled { disabled }
+            aria-label="Increase value"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/><path d="M12 5v14"/>
+            </svg>
+        </button>
+    </div>
+}
+
+@* Numeric input with label *@
+@fn labeled(
+    label: &str,
+    name: &str,
+    value: Option<f64>,
+    min: Option<f64> = None,
+    max: Option<f64> = None,
+    step: f64 = 1.0,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    @let label_cls = "text-sm font-medium leading-none"
+    @let disabled_label = @if disabled { "opacity-70" } else { "" }
+
+    <div class="space-y-2">
+        <label for="@name" class=@utils::cn(&[label_cls, disabled_label])>
+            @label
+            @if required { <span class="text-destructive">*</span> }
+        </label>
+        <@create
+            name=@name
+            value=@value
+            min=@min
+            max=@max
+            step=@step
+            disabled=@disabled
+            class=@class
+        />
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </div>
+}
+
+@* Simple numeric input with defaults *@
+@fn simple(name: &str, value: f64) {
+    <@create
+        name=@name
+        value=Some(@value)
+        min=None
+        max=None
+        step=1.0
+        disabled=false
+        class=None
+    />
+}
+
+@* Disabled numeric input *@
+@fn disabled(name: &str, value: f64) {
+    <@create
+        name=@name
+        value=Some(@value)
+        min=None
+        max=None
+        step=1.0
+        disabled=true
+        class=None
+    />
+}

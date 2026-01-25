@@ -1,0 +1,530 @@
+@**
+ * File Upload component
+ * Generic file upload with drag-and-drop support
+ *
+ * Usage:
+ *   @import components/file-upload.wtz as file_upload
+ *
+ *   Basic file upload:
+ *   <@file_upload::create
+ *       name="document"
+ *       label=Some("Upload Document")
+ *       accept=None
+ *       multiple=false
+ *       required=false
+ *       disabled=false
+ *       dropzone_text=None
+ *       dropzone_hint=None
+ *       class=None
+ *   />
+ *
+ *   Multiple images with preview:
+ *   <@file_upload::create
+ *       name="photos"
+ *       label=Some("Upload Photos")
+ *       accept=Some("image/*")
+ *       multiple=true
+ *       required=true
+ *       disabled=false
+ *       dropzone_text=Some("Drop images here")
+ *       dropzone_hint=Some("PNG, JPG, GIF up to 10MB")
+ *       class=None
+ *   />
+ *
+ *   Edit mode with existing file:
+ *   <@file_upload::edit
+ *       name="avatar"
+ *       label=Some("Profile Picture")
+ *       accept=Some("image/*")
+ *       multiple=false
+ *       required=false
+ *       disabled=false
+ *       current_file=Some("profile.jpg")
+ *       current_url=Some("/uploads/profile.jpg")
+ *       dropzone_text=None
+ *       dropzone_hint=None
+ *       class=None
+ *   />
+ **@
+
+@import lib/utils.wtz as utils
+
+@* Create variant - for new file uploads *@
+@fn create(
+    name: &str,
+    label: Option<&str>,
+    accept: Option<&str>,
+    multiple: bool,
+    required: bool,
+    disabled: bool,
+    dropzone_text: Option<&str>,
+    dropzone_hint: Option<&str>,
+    class: Option<&str>,
+) {
+    @let input_id = unique_id("file-upload")
+    @let dropzone_label = dropzone_text.unwrap_or("Click to upload or drag and drop")
+    @let hint_text = dropzone_hint.unwrap_or("Any file type accepted")
+
+    @let base = "flex flex-col gap-2"
+
+    <div class=@utils::cn(&[base, class.unwrap_or("")])>
+        @if let Some(lbl) = label {
+            <label for=@input_id class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                @lbl
+                @if required { <span class="text-destructive">*</span> }
+            </label>
+        }
+
+        <div
+            class="w-full"
+            x-data="{
+                files: [],
+                dragging: false,
+                formatSize(bytes) {
+                    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                    let size = bytes;
+                    let unitIndex = 0;
+                    while (size >= 1024 && unitIndex < units.length - 1) {
+                        size /= 1024;
+                        unitIndex++;
+                    }
+                    return size.toFixed(1) + ' ' + units[unitIndex];
+                },
+                handleFiles(event) {
+                    const input = event.target || this.$refs.fileInput;
+                    this.files = Array.from(input.files).map(file => ({
+                        name: file.name,
+                        type: file.type || 'unknown',
+                        size: this.formatSize(file.size),
+                        lastModified: new Date(file.lastModified).toLocaleDateString(),
+                        isImage: file.type.startsWith('image/'),
+                        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+                    }));
+                },
+                clearFiles() {
+                    this.files.forEach(f => { if (f.preview) URL.revokeObjectURL(f.preview); });
+                    this.files = [];
+                    this.$refs.fileInput.value = '';
+                },
+                removeFile(index) {
+                    if (this.files[index].preview) URL.revokeObjectURL(this.files[index].preview);
+                    this.files.splice(index, 1);
+                    const dt = new DataTransfer();
+                    const input = this.$refs.fileInput;
+                    Array.from(input.files).forEach((file, i) => { if (i !== index) dt.items.add(file); });
+                    input.files = dt.files;
+                }
+            }"
+        >
+            @* Dropzone *@
+            <div
+                x-ref="dropzone"
+                class="relative rounded-lg border-2 border-dashed border-input bg-background transition-colors"
+                :class="{ 'border-primary bg-primary/5': dragging }"
+            >
+                <input
+                    type="file"
+                    name=@name
+                    id=@input_id
+                    x-ref="fileInput"
+                    @if let Some(acc) = accept { accept=@acc }
+                    @if multiple { multiple }
+                    @if required { required }
+                    @if disabled { disabled }
+                    @change="handleFiles($event)"
+                    @dragenter="dragging = true"
+                    @dragleave="dragging = false"
+                    @dragover.prevent="dragging = true"
+                    @drop="dragging = false"
+                    class="absolute inset-0 z-10 w-full h-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+                />
+
+                <div class="flex flex-col items-center justify-center py-8 text-center">
+                    @* Upload icon *@
+                    <svg class="h-10 w-10 mb-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                        <path d="M12 12v9"></path>
+                        <path d="m16 16-4-4-4 4"></path>
+                    </svg>
+
+                    <p class="mb-2 text-sm text-muted-foreground">
+                        <span class="font-semibold text-foreground">@dropzone_label</span>
+                    </p>
+
+                    <p class="text-xs text-muted-foreground">
+                        @hint_text
+                        @if multiple { (multiple files allowed) }
+                    </p>
+                </div>
+            </div>
+
+            @* File List *@
+            <div x-show="files.length > 0" x-transition class="mt-4">
+                <div class="rounded-lg border border-border divide-y divide-border overflow-hidden">
+                    @* Header *@
+                    <div class="flex justify-between items-center px-4 py-3 bg-muted/50">
+                        <span class="text-sm font-medium" x-text="files.length + ' file' + (files.length !== 1 ? 's' : '') + ' selected'"></span>
+                        <button
+                            type="button"
+                            @click="clearFiles()"
+                            class="text-xs text-destructive hover:text-destructive/80 font-medium transition-colors"
+                        >
+                            Clear all
+                        </button>
+                    </div>
+
+                    @* File items *@
+                    <template x-for="(file, index) in files" :key="index">
+                        <div class="flex items-center gap-4 px-4 py-3 bg-background">
+                            @* Preview or icon *@
+                            <div class="flex-shrink-0">
+                                <template x-if="file.isImage && file.preview">
+                                    <img :src="file.preview" :alt="file.name" class="h-12 w-12 rounded-md object-cover border border-border" />
+                                </template>
+                                <template x-if="!file.isImage || !file.preview">
+                                    <div class="h-12 w-12 rounded-md bg-muted flex items-center justify-center">
+                                        <svg class="h-6 w-6 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                        </svg>
+                                    </div>
+                                </template>
+                            </div>
+
+                            @* File info *@
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium truncate" x-text="file.name"></p>
+                                <div class="mt-1 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+                                    <span x-text="file.type"></span>
+                                    <span x-text="file.size"></span>
+                                    <span x-text="file.lastModified"></span>
+                                </div>
+                            </div>
+
+                            @* Remove button *@
+                            <button
+                                type="button"
+                                @click="removeFile(index)"
+                                class="flex-shrink-0 p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                aria-label="Remove file"
+                            >
+                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 6 6 18"></path>
+                                    <path d="m6 6 12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* Edit variant - for editing existing files with option to replace *@
+@fn edit(
+    name: &str,
+    label: Option<&str>,
+    accept: Option<&str>,
+    multiple: bool,
+    required: bool,
+    disabled: bool,
+    current_file: Option<&str>,
+    current_url: Option<&str>,
+    dropzone_text: Option<&str>,
+    dropzone_hint: Option<&str>,
+    class: Option<&str>,
+) {
+    @let input_id = unique_id("file-upload-edit")
+    @let dropzone_label = dropzone_text.unwrap_or("Click to upload or drag and drop")
+    @let hint_text = dropzone_hint.unwrap_or("Any file type accepted")
+    @let has_current = current_file.is_some()
+
+    @let base = "flex flex-col gap-2"
+
+    <div class=@utils::cn(&[base, class.unwrap_or("")])>
+        @if let Some(lbl) = label {
+            <label for=@input_id class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                @lbl
+                @if required { <span class="text-destructive">*</span> }
+            </label>
+        }
+
+        <div
+            class="w-full"
+            x-data="{
+                editing: @if has_current { false } else { true },
+                files: [],
+                dragging: false,
+                formatSize(bytes) {
+                    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                    let size = bytes;
+                    let unitIndex = 0;
+                    while (size >= 1024 && unitIndex < units.length - 1) {
+                        size /= 1024;
+                        unitIndex++;
+                    }
+                    return size.toFixed(1) + ' ' + units[unitIndex];
+                },
+                handleFiles(event) {
+                    const input = event.target || this.$refs.fileInput;
+                    this.files = Array.from(input.files).map(file => ({
+                        name: file.name,
+                        type: file.type || 'unknown',
+                        size: this.formatSize(file.size),
+                        lastModified: new Date(file.lastModified).toLocaleDateString(),
+                        isImage: file.type.startsWith('image/'),
+                        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+                    }));
+                },
+                clearFiles() {
+                    this.files.forEach(f => { if (f.preview) URL.revokeObjectURL(f.preview); });
+                    this.files = [];
+                    if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+                },
+                removeFile(index) {
+                    if (this.files[index].preview) URL.revokeObjectURL(this.files[index].preview);
+                    this.files.splice(index, 1);
+                    const dt = new DataTransfer();
+                    const input = this.$refs.fileInput;
+                    Array.from(input.files).forEach((file, i) => { if (i !== index) dt.items.add(file); });
+                    input.files = dt.files;
+                },
+                startEditing() {
+                    this.editing = true;
+                    this.files = [];
+                },
+                cancelEditing() {
+                    this.editing = false;
+                    this.clearFiles();
+                }
+            }"
+        >
+            @* Current file display *@
+            @if has_current {
+                <div x-show="!editing" class="flex items-center gap-4 p-4 rounded-lg border border-border bg-background">
+                    @* File icon or preview *@
+                    <div class="flex-shrink-0 h-12 w-12 rounded-md bg-muted flex items-center justify-center">
+                        <svg class="h-6 w-6 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                        </svg>
+                    </div>
+
+                    @* File info *@
+                    <div class="flex-1 min-w-0">
+                        @if let Some(filename) = current_file {
+                            <p class="text-sm font-medium truncate">@filename</p>
+                        }
+                        @if let Some(url) = current_url {
+                            <a href=@url class="text-xs text-primary hover:underline" target="_blank" rel="noopener">
+                                Download current file
+                            </a>
+                        }
+                    </div>
+
+                    @* Replace button *@
+                    @if !disabled {
+                        <button
+                            type="button"
+                            @click="startEditing()"
+                            class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                        >
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                <path d="M12 12v9"></path>
+                                <path d="m16 16-4-4-4 4"></path>
+                            </svg>
+                            Replace
+                        </button>
+                    }
+                </div>
+            }
+
+            @* Upload zone *@
+            <div x-show=@if has_current { "editing" } else { "true" }>
+                @* Dropzone *@
+                <div
+                    x-ref="dropzone"
+                    class="relative rounded-lg border-2 border-dashed border-input bg-background transition-colors"
+                    :class="{ 'border-primary bg-primary/5': dragging }"
+                >
+                    <input
+                        type="file"
+                        name=@name
+                        id=@input_id
+                        x-ref="fileInput"
+                        @if let Some(acc) = accept { accept=@acc }
+                        @if multiple { multiple }
+                        @if required && !has_current { required }
+                        @if disabled { disabled }
+                        @change="handleFiles($event)"
+                        @dragenter="dragging = true"
+                        @dragleave="dragging = false"
+                        @dragover.prevent="dragging = true"
+                        @drop="dragging = false"
+                        class="absolute inset-0 z-10 w-full h-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+                    />
+
+                    <div class="flex flex-col items-center justify-center py-8 text-center">
+                        @* Upload icon *@
+                        <svg class="h-10 w-10 mb-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                            <path d="M12 12v9"></path>
+                            <path d="m16 16-4-4-4 4"></path>
+                        </svg>
+
+                        <p class="mb-2 text-sm text-muted-foreground">
+                            <span class="font-semibold text-foreground">@dropzone_label</span>
+                        </p>
+
+                        <p class="text-xs text-muted-foreground">
+                            @hint_text
+                            @if multiple { (multiple files allowed) }
+                        </p>
+                    </div>
+                </div>
+
+                @* Cancel button when editing existing *@
+                @if has_current {
+                    <div x-show="editing && files.length === 0" class="mt-2">
+                        <button
+                            type="button"
+                            @click="cancelEditing()"
+                            class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                }
+
+                @* File List *@
+                <div x-show="files.length > 0" x-transition class="mt-4">
+                    <div class="rounded-lg border border-border divide-y divide-border overflow-hidden">
+                        @* Header *@
+                        <div class="flex justify-between items-center px-4 py-3 bg-muted/50">
+                            <span class="text-sm font-medium" x-text="files.length + ' file' + (files.length !== 1 ? 's' : '') + ' selected'"></span>
+                            <button
+                                type="button"
+                                @click="clearFiles()"
+                                class="text-xs text-destructive hover:text-destructive/80 font-medium transition-colors"
+                            >
+                                Clear all
+                            </button>
+                        </div>
+
+                        @* File items *@
+                        <template x-for="(file, index) in files" :key="index">
+                            <div class="flex items-center gap-4 px-4 py-3 bg-background">
+                                @* Preview or icon *@
+                                <div class="flex-shrink-0">
+                                    <template x-if="file.isImage && file.preview">
+                                        <img :src="file.preview" :alt="file.name" class="h-12 w-12 rounded-md object-cover border border-border" />
+                                    </template>
+                                    <template x-if="!file.isImage || !file.preview">
+                                        <div class="h-12 w-12 rounded-md bg-muted flex items-center justify-center">
+                                            <svg class="h-6 w-6 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                                                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                                            </svg>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                @* File info *@
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium truncate" x-text="file.name"></p>
+                                    <div class="mt-1 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+                                        <span x-text="file.type"></span>
+                                        <span x-text="file.size"></span>
+                                        <span x-text="file.lastModified"></span>
+                                    </div>
+                                </div>
+
+                                @* Remove button *@
+                                <button
+                                    type="button"
+                                    @click="removeFile(index)"
+                                    class="flex-shrink-0 p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                    aria-label="Remove file"
+                                >
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M18 6 6 18"></path>
+                                        <path d="m6 6 12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+
+                    @* Cancel button when files selected *@
+                    @if has_current {
+                        <div class="mt-2">
+                            <button
+                                type="button"
+                                @click="cancelEditing()"
+                                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                Cancel and keep current file
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* Simple dropzone without file list - for minimal upload UI *@
+@fn dropzone(
+    name: &str,
+    accept: Option<&str>,
+    multiple: bool,
+    required: bool,
+    disabled: bool,
+    text: Option<&str>,
+    hint: Option<&str>,
+    class: Option<&str>,
+) {
+    @let input_id = unique_id("file-dropzone")
+    @let dropzone_label = text.unwrap_or("Click to upload or drag and drop")
+    @let hint_text = hint.unwrap_or("Any file type accepted")
+
+    <div
+        x-data="{ dragging: false }"
+        class=@utils::cn(&["relative rounded-lg border-2 border-dashed border-input bg-background transition-colors", class.unwrap_or("")])
+        :class="{ 'border-primary bg-primary/5': dragging }"
+    >
+        <input
+            type="file"
+            name=@name
+            id=@input_id
+            @if let Some(acc) = accept { accept=@acc }
+            @if multiple { multiple }
+            @if required { required }
+            @if disabled { disabled }
+            @dragenter="dragging = true"
+            @dragleave="dragging = false"
+            @dragover.prevent="dragging = true"
+            @drop="dragging = false"
+            class="absolute inset-0 z-10 w-full h-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+        />
+
+        <div class="flex flex-col items-center justify-center py-8 text-center">
+            <svg class="h-10 w-10 mb-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                <path d="M12 12v9"></path>
+                <path d="m16 16-4-4-4 4"></path>
+            </svg>
+
+            <p class="mb-2 text-sm text-muted-foreground">
+                <span class="font-semibold text-foreground">@dropzone_label</span>
+            </p>
+
+            <p class="text-xs text-muted-foreground">
+                @hint_text
+                @if multiple { (multiple files allowed) }
+            </p>
+        </div>
+    </div>
+}

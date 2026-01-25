@@ -1,0 +1,594 @@
+@**
+ * DateTime Picker component
+ * Combined date and time selection with calendar and time picker
+ * Uses Alpine.js for interactive picking with popover
+ *
+ * Usage:
+ *   @import components/datetime-picker.wtz as datetime_picker
+ *
+ *   Basic 24-hour datetime picker:
+ *   <@datetime_picker::apply
+ *       name="event_start"
+ *       value=Some("2024-01-15T14:30")
+ *   />
+ *
+ *   12-hour format:
+ *   <@datetime_picker::apply
+ *       name="appointment"
+ *       value=None
+ *       use_12h=true
+ *       placeholder=Some("Select date and time")
+ *   />
+ *
+ *   With min/max constraints:
+ *   <@datetime_picker::apply
+ *       name="booking"
+ *       value=None
+ *       min=Some("2024-01-01T00:00")
+ *       max=Some("2024-12-31T23:59")
+ *   />
+ *
+ *   With label:
+ *   <@datetime_picker::labeled
+ *       label="Event Start"
+ *       name="start"
+ *       value=None
+ *       required=true
+ *   />
+ **@
+
+@import lib/utils.wtz as utils
+
+@fn apply(
+    name: &str,
+    value: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    min: Option<&str> = None,
+    max: Option<&str> = None,
+    use_12h: bool = false,
+    disabled: bool = false,
+    class: Option<&str> = None,
+) {
+    @let initial_value = value.unwrap_or("")
+    @let min_datetime = min.unwrap_or("")
+    @let max_datetime = max.unwrap_or("")
+    @let placeholder_text = placeholder.unwrap_or("Select date and time")
+    @let max_hour = (if use_12h { 12 } else { 23 })
+    @let min_hour = (if use_12h { 1 } else { 0 })
+
+    @let input_cls = utils::cn(&[
+        "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors",
+        "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+        "disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer pr-10",
+        class.unwrap_or("")
+    ])
+
+    <div
+        class="relative inline-block w-full"
+        x-data=@```json {
+            open: false,
+            value: '@initial_value',
+            displayValue: '',
+            dateValue: '',
+            hour: 12,
+            minute: 0,
+            period: 'AM',
+            use12h: @use_12h,
+            maxHour: @max_hour,
+            minHour: @min_hour,
+            currentMonth: null,
+            currentYear: null,
+            days: [],
+            weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            min: '@min_datetime',
+            max: '@max_datetime',
+
+            init() {
+                if (this.value) {
+                    this.parseDateTime(this.value);
+                } else {
+                    const now = new Date();
+                    this.currentMonth = now.getMonth();
+                    this.currentYear = now.getFullYear();
+                    this.hour = this.use12h ? 12 : 0;
+                }
+                this.buildCalendar();
+            },
+
+            parseDateTime(datetimeStr) {
+                if (!datetimeStr) return;
+                const parts = datetimeStr.split('T');
+                if (parts.length >= 1) {
+                    this.dateValue = parts[0];
+                    const date = new Date(parts[0] + 'T00:00:00');
+                    this.currentMonth = date.getMonth();
+                    this.currentYear = date.getFullYear();
+                }
+                if (parts.length >= 2) {
+                    const timeParts = parts[1].split(':');
+                    if (timeParts.length >= 1) {
+                        let h = parseInt(timeParts[0], 10) || 0;
+                        if (this.use12h) {
+                            this.period = h >= 12 ? 'PM' : 'AM';
+                            h = h % 12;
+                            if (h === 0) h = 12;
+                        }
+                        this.hour = h;
+                    }
+                    if (timeParts.length >= 2) {
+                        this.minute = parseInt(timeParts[1], 10) || 0;
+                    }
+                }
+                this.updateDisplayValue();
+            },
+
+            formatISODate(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return year + '-' + month + '-' + day;
+            },
+
+            formatTime24h() {
+                let h = this.hour;
+                if (this.use12h) {
+                    h = this.hour % 12;
+                    if (this.period === 'PM') {
+                        h = h + 12;
+                    }
+                    if (h === 12 && this.period === 'AM') {
+                        h = 0;
+                    }
+                    if (h === 24) {
+                        h = 12;
+                    }
+                }
+                const hStr = h.toString().padStart(2, '0');
+                const mStr = this.minute.toString().padStart(2, '0');
+                return hStr + ':' + mStr;
+            },
+
+            formatDisplayTime() {
+                const hStr = this.hour.toString().padStart(2, '0');
+                const mStr = this.minute.toString().padStart(2, '0');
+                if (this.use12h) {
+                    return hStr + ':' + mStr + ' ' + this.period;
+                }
+                return hStr + ':' + mStr;
+            },
+
+            updateValue() {
+                if (this.dateValue) {
+                    this.value = this.dateValue + 'T' + this.formatTime24h();
+                    this.updateDisplayValue();
+                }
+            },
+
+            updateDisplayValue() {
+                if (!this.dateValue) {
+                    this.displayValue = '';
+                    return;
+                }
+                const date = new Date(this.dateValue + 'T00:00:00');
+                const dateStr = date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                this.displayValue = dateStr + ', ' + this.formatDisplayTime();
+            },
+
+            buildCalendar() {
+                this.days = [];
+                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+                const startingDay = firstDay.getDay();
+                const totalDays = lastDay.getDate();
+
+                for (let i = 0; i < startingDay; i++) {
+                    this.days.push({ day: '', date: null, disabled: true, outside: true });
+                }
+
+                for (let day = 1; day <= totalDays; day++) {
+                    const date = new Date(this.currentYear, this.currentMonth, day);
+                    const isoDate = this.formatISODate(date);
+                    const isDisabled = this.isDateDisabled(isoDate);
+                    const isSelected = this.dateValue === isoDate;
+                    const isToday = this.formatISODate(new Date()) === isoDate;
+
+                    this.days.push({
+                        day,
+                        date: isoDate,
+                        disabled: isDisabled,
+                        selected: isSelected,
+                        today: isToday,
+                        outside: false
+                    });
+                }
+            },
+
+            isDateDisabled(isoDate) {
+                if (this.min) {
+                    const minDate = this.min.split('T')[0];
+                    if (isoDate < minDate) return true;
+                }
+                if (this.max) {
+                    const maxDate = this.max.split('T')[0];
+                    if (isoDate > maxDate) return true;
+                }
+                return false;
+            },
+
+            prevMonth() {
+                if (this.currentMonth === 0) {
+                    this.currentMonth = 11;
+                    this.currentYear--;
+                } else {
+                    this.currentMonth--;
+                }
+                this.buildCalendar();
+            },
+
+            nextMonth() {
+                if (this.currentMonth === 11) {
+                    this.currentMonth = 0;
+                    this.currentYear++;
+                } else {
+                    this.currentMonth++;
+                }
+                this.buildCalendar();
+            },
+
+            selectDate(day) {
+                if (day.disabled || day.outside) return;
+                this.dateValue = day.date;
+                this.buildCalendar();
+                this.updateValue();
+            },
+
+            selectNow() {
+                const now = new Date();
+                const isoDate = this.formatISODate(now);
+                if (!this.isDateDisabled(isoDate)) {
+                    this.dateValue = isoDate;
+                    this.currentMonth = now.getMonth();
+                    this.currentYear = now.getFullYear();
+                    let h = now.getHours();
+                    if (this.use12h) {
+                        this.period = h >= 12 ? 'PM' : 'AM';
+                        h = h % 12;
+                        if (h === 0) h = 12;
+                    }
+                    this.hour = h;
+                    this.minute = now.getMinutes();
+                    this.buildCalendar();
+                    this.updateValue();
+                }
+            },
+
+            incrementHour() {
+                if (this.hour >= this.maxHour) {
+                    this.hour = this.minHour;
+                } else {
+                    this.hour++;
+                }
+                this.updateValue();
+            },
+
+            decrementHour() {
+                if (this.hour <= this.minHour) {
+                    this.hour = this.maxHour;
+                } else {
+                    this.hour--;
+                }
+                this.updateValue();
+            },
+
+            incrementMinute() {
+                this.minute = (this.minute + 1) % 60;
+                this.updateValue();
+            },
+
+            decrementMinute() {
+                this.minute = this.minute - 1;
+                if (this.minute < 0) this.minute = 59;
+                this.updateValue();
+            },
+
+            togglePeriod() {
+                this.period = this.period === 'AM' ? 'PM' : 'AM';
+                this.updateValue();
+            },
+
+            handleKeydown(event, dayIndex) {
+                const cols = 7;
+                let newIndex = dayIndex;
+
+                switch (event.key) {
+                    case 'ArrowLeft':
+                        newIndex = dayIndex - 1;
+                        break;
+                    case 'ArrowRight':
+                        newIndex = dayIndex + 1;
+                        break;
+                    case 'ArrowUp':
+                        newIndex = dayIndex - cols;
+                        break;
+                    case 'ArrowDown':
+                        newIndex = dayIndex + cols;
+                        break;
+                    case 'Enter':
+                    case ' ':
+                        if (this.days[dayIndex] && !this.days[dayIndex].disabled) {
+                            this.selectDate(this.days[dayIndex]);
+                        }
+                        event.preventDefault();
+                        return;
+                    case 'Escape':
+                        this.open = false;
+                        return;
+                    default:
+                        return;
+                }
+
+                event.preventDefault();
+
+                if (newIndex < 0) {
+                    this.prevMonth();
+                    this.$nextTick(() => {
+                        const buttons = this.$refs.calendar?.querySelectorAll('[data-day]');
+                        if (buttons?.length) buttons[buttons.length - 1]?.focus();
+                    });
+                } else if (newIndex >= this.days.length) {
+                    this.nextMonth();
+                    this.$nextTick(() => {
+                        const buttons = this.$refs.calendar?.querySelectorAll('[data-day]');
+                        if (buttons?.length) buttons[0]?.focus();
+                    });
+                } else {
+                    this.$nextTick(() => {
+                        const buttons = this.$refs.calendar?.querySelectorAll('[data-day]');
+                        if (buttons?.[newIndex]) buttons[newIndex].focus();
+                    });
+                }
+            }
+        } ```@
+    >
+        <input type="hidden" name="@name" x-model="value" />
+
+        <div
+            class="relative"
+            @@click="if (!$el.querySelector('input[type=text]').disabled) { open = !open }"
+        >
+            <input
+                type="text"
+                readonly
+                x-model="displayValue"
+                placeholder="@placeholder_text"
+                class="@input_cls"
+                @if disabled { disabled }
+                aria-haspopup="dialog"
+                :aria-expanded="open"
+            />
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                    <line x1="16" x2="16" y1="2" y2="6"></line>
+                    <line x1="8" x2="8" y1="2" y2="6"></line>
+                    <line x1="3" x2="21" y1="10" y2="10"></line>
+                    <circle cx="17" cy="17" r="3"></circle>
+                    <path d="M17 15.5v1.5l1 1"></path>
+                </svg>
+            </div>
+        </div>
+
+        <div
+            x-show="open"
+            x-cloak
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            @@click.outside="open = false"
+            @@keydown.escape.window="open = false"
+            class="absolute z-50 mt-2 p-3 rounded-md border bg-popover text-popover-foreground shadow-md"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Choose date and time"
+            x-ref="calendar"
+        >
+            @* Calendar header *@
+            <div class="flex items-center justify-between mb-2">
+                <button
+                    type="button"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+                    @@click="prevMonth()"
+                    aria-label="Previous month"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m15 18-6-6 6-6"></path>
+                    </svg>
+                </button>
+
+                <div class="text-sm font-medium" x-text="months[currentMonth] + ' ' + currentYear"></div>
+
+                <button
+                    type="button"
+                    class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+                    @@click="nextMonth()"
+                    aria-label="Next month"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                </button>
+            </div>
+
+            @* Weekday headers *@
+            <div class="grid grid-cols-7 gap-1 mb-1">
+                <template x-for="weekday in weekdays" :key="weekday">
+                    <div class="text-center text-xs text-muted-foreground font-medium h-8 flex items-center justify-center" x-text="weekday"></div>
+                </template>
+            </div>
+
+            @* Calendar grid *@
+            <div class="grid grid-cols-7 gap-1" role="grid">
+                <template x-for="(day, index) in days" :key="index">
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center rounded-md text-sm h-8 w-8 p-0 font-normal transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        :class="{
+                            'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground': day.selected,
+                            'bg-accent': day.today && !day.selected,
+                            'text-muted-foreground opacity-50 cursor-not-allowed hover:bg-transparent': day.disabled || day.outside,
+                            'invisible': day.outside
+                        }"
+                        :disabled="day.disabled || day.outside"
+                        @@click="selectDate(day)"
+                        @@keydown="handleKeydown($event, index)"
+                        x-text="day.day"
+                        data-day
+                        :aria-selected="day.selected"
+                        :aria-disabled="day.disabled"
+                    ></button>
+                </template>
+            </div>
+
+            @* Time picker section *@
+            <div class="mt-3 pt-3 border-t">
+                <div class="text-xs text-muted-foreground mb-2 text-center">Time</div>
+                <div class="flex items-center justify-center gap-2">
+                    @* Hours *@
+                    <div class="flex flex-col items-center">
+                        <button
+                            type="button"
+                            @@click="incrementHour()"
+                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m18 15-6-6-6 6"/>
+                            </svg>
+                        </button>
+                        <div class="w-10 h-8 flex items-center justify-center rounded border bg-background text-sm font-mono font-medium" x-text="hour.toString().padStart(2, '0')"></div>
+                        <button
+                            type="button"
+                            @@click="decrementHour()"
+                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m6 9 6 6 6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <span class="text-lg font-bold text-muted-foreground">:</span>
+
+                    @* Minutes *@
+                    <div class="flex flex-col items-center">
+                        <button
+                            type="button"
+                            @@click="incrementMinute()"
+                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m18 15-6-6-6 6"/>
+                            </svg>
+                        </button>
+                        <div class="w-10 h-8 flex items-center justify-center rounded border bg-background text-sm font-mono font-medium" x-text="minute.toString().padStart(2, '0')"></div>
+                        <button
+                            type="button"
+                            @@click="decrementMinute()"
+                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m6 9 6 6 6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    @* AM/PM toggle for 12-hour format *@
+                    @if use_12h {
+                        <div class="flex flex-col items-center ml-1">
+                            <button
+                                type="button"
+                                @@click="togglePeriod()"
+                                class="w-10 h-8 flex items-center justify-center rounded border bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+                                x-text="period"
+                            ></button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Action buttons *@
+            <div class="mt-3 pt-3 border-t flex gap-2">
+                <button
+                    type="button"
+                    class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    @@click="selectNow()"
+                >
+                    Now
+                </button>
+                <button
+                    type="button"
+                    class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    @@click="open = false"
+                >
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@fn labeled(
+    label: &str,
+    name: &str,
+    value: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    min: Option<&str> = None,
+    max: Option<&str> = None,
+    use_12h: bool = false,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    <div class="space-y-2">
+        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            @label
+            @if required { <span class="text-destructive">*</span> }
+        </label>
+        <@apply
+            name=@name
+            value=@value
+            placeholder=@placeholder
+            min=@min
+            max=@max
+            use_12h=@use_12h
+            disabled=@disabled
+            class=@class
+        />
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </div>
+}
+
+@fn simple(name: &str, value: Option<&str>) {
+    <@apply
+        name=@name
+        value=@value
+    />
+}
+
+@fn simple_12h(name: &str, value: Option<&str>) {
+    <@apply
+        name=@name
+        value=@value
+        use_12h=true
+    />
+}

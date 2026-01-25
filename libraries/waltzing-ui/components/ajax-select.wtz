@@ -1,0 +1,400 @@
+@**
+ * Ajax Select component
+ * A searchable select that fetches options from an API endpoint
+ * Uses Alpine.js for fetch, debouncing, and state management
+ *
+ * @example
+ * @import components/ajax-select.wtz as ajax_select
+ *
+ * Ajax select with API endpoint:
+ *   <@ajax_select::create
+ *       name="user"
+ *       url="/api/users?search={query}"
+ *       value_field=Some("id")
+ *       label_field=Some("name")
+ *       placeholder=Some("Search users...")
+ *       min_chars=2
+ *       debounce_ms=300
+ *   />
+ *
+ * With pre-selected value:
+ *   <@ajax_select::create
+ *       name="user"
+ *       url="/api/users?search={query}"
+ *       selected_value=Some("123")
+ *       selected_label=Some("John Doe")
+ *   />
+ *
+ * With custom response path (for nested data like { data: { items: [...] } }):
+ *   <@ajax_select::create
+ *       name="user"
+ *       url="/api/users?q={query}"
+ *       response_path=Some("data.items")
+ *       value_field=Some("user_id")
+ *       label_field=Some("full_name")
+ *   />
+ **@
+
+@import lib/utils.wtz as utils
+
+@** Main ajax select component **@
+@fn create(
+    name: &str,
+    url: &str,
+    selected_value: Option<&str> = None,
+    selected_label: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    search_placeholder: Option<&str> = None,
+    min_chars: u32 = 1,
+    debounce_ms: u32 = 300,
+    response_path: Option<&str> = None,
+    value_field: Option<&str> = None,
+    label_field: Option<&str> = None,
+    loading_text: Option<&str> = None,
+    error_text: Option<&str> = None,
+    empty_text: Option<&str> = None,
+    no_input_text: Option<&str> = None,
+    clearable: bool = false,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    @let trigger_base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    @let error_cls = @if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
+    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, class.unwrap_or("")])
+
+    @let ph = placeholder.unwrap_or("Select...")
+    @let search_ph = search_placeholder.unwrap_or("Search...")
+    @let loading_msg = loading_text.unwrap_or("Loading...")
+    @let error_msg = error_text.unwrap_or("Failed to load options.")
+    @let empty_msg = empty_text.unwrap_or("No results found.")
+    @let no_input_msg = no_input_text.unwrap_or("Type to search...")
+
+    @let val_field = value_field.unwrap_or("value")
+    @let lbl_field = label_field.unwrap_or("label")
+    @let init_value = selected_value.unwrap_or("")
+    @let init_label = selected_label.unwrap_or("")
+    @let resp_path = response_path.unwrap_or("")
+
+    <div
+        class="relative w-full"
+        x-data="{
+            open: false,
+            search: '',
+            selected: '@init_value',
+            selectedLabel: '@init_label',
+            options: [],
+            loading: false,
+            fetchError: false,
+            highlightedIndex: -1,
+            debounceTimer: null,
+            minChars: @min_chars,
+            debounceMs: @debounce_ms,
+            url: '@url',
+            responsePath: '@resp_path',
+            valueField: '@val_field',
+            labelField: '@lbl_field',
+
+            fetchOptions(query) {
+                if (query.length < this.minChars) {
+                    this.options = [];
+                    return;
+                }
+
+                this.loading = true;
+                this.fetchError = false;
+
+                const fetchUrl = this.url.replace('{query}', encodeURIComponent(query));
+                fetch(fetchUrl)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Request failed');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (this.responsePath) {
+                            const parts = this.responsePath.split('.');
+                            for (const part of parts) {
+                                if (data && typeof data === 'object') {
+                                    data = data[part];
+                                } else {
+                                    data = [];
+                                    break;
+                                }
+                            }
+                        }
+                        if (!Array.isArray(data)) data = [];
+                        this.options = data.map(item => ({
+                            value: String(item[this.valueField] || ''),
+                            label: String(item[this.labelField] || '')
+                        }));
+                        this.highlightedIndex = -1;
+                    })
+                    .catch(e => {
+                        console.error('Ajax select error:', e);
+                        this.fetchError = true;
+                        this.options = [];
+                    })
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            },
+
+            debouncedFetch(query) {
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(() => {
+                    this.fetchOptions(query);
+                }, this.debounceMs);
+            },
+
+            selectOption(value, label) {
+                this.selected = value;
+                this.selectedLabel = label;
+                this.search = '';
+                this.open = false;
+                this.options = [];
+                this.$refs.hiddenInput.value = value;
+                this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            },
+
+            clearSelection() {
+                this.selected = '';
+                this.selectedLabel = '';
+                this.$refs.hiddenInput.value = '';
+                this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            },
+
+            highlightNext() {
+                if (this.options.length === 0) return;
+                this.highlightedIndex = Math.min(this.highlightedIndex + 1, this.options.length - 1);
+                this.$refs.optionsList?.children[this.highlightedIndex]?.scrollIntoView({ block: 'nearest' });
+            },
+
+            highlightPrev() {
+                if (this.options.length === 0) return;
+                this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
+                this.$refs.optionsList?.children[this.highlightedIndex]?.scrollIntoView({ block: 'nearest' });
+            },
+
+            selectHighlighted() {
+                if (this.highlightedIndex >= 0 && this.highlightedIndex < this.options.length) {
+                    const opt = this.options[this.highlightedIndex];
+                    this.selectOption(opt.value, opt.label);
+                }
+            }
+        }"
+        @@keydown.down.prevent="if(open) highlightNext()"
+        @@keydown.up.prevent="if(open) highlightPrev()"
+        @@keydown.enter.prevent="if(open) selectHighlighted()"
+        @@keydown.escape="open = false"
+    >
+        @* Hidden input for form submission *@
+        <input
+            type="hidden"
+            name="@name"
+            x-ref="hiddenInput"
+            :value="selected"
+            @if required { required }
+        />
+
+        @* Trigger button *@
+        <button
+            type="button"
+            class="@trigger_cls"
+            @@click="open = !open; if(open) { $nextTick(() => $refs.searchInput?.focus()); highlightedIndex = -1; }"
+            @if disabled { disabled }
+            @if error.is_some() { aria-invalid="true" }
+            aria-haspopup="listbox"
+            :aria-expanded="open"
+        >
+            <span x-text="selectedLabel || '@ph'" :class="!selectedLabel ? 'text-muted-foreground' : ''"></span>
+            <div class="flex items-center gap-1">
+                @if clearable {
+                    <span
+                        x-show="selected"
+                        x-cloak
+                        class="text-muted-foreground hover:text-foreground"
+                        @@click.stop="clearSelection()"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="M18 6 6 18"/>
+                            <path d="m6 6 12 12"/>
+                        </svg>
+                    </span>
+                }
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-muted-foreground" :class="open ? 'rotate-180' : ''">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </div>
+        </button>
+
+        @* Dropdown *@
+        <div
+            x-show="open"
+            x-cloak
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            @@click.outside="open = false"
+            class="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md"
+        >
+            @* Search input *@
+            <div class="flex items-center border-b px-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4 shrink-0 opacity-50">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                </svg>
+                <input
+                    type="text"
+                    x-ref="searchInput"
+                    x-model="search"
+                    @@input="debouncedFetch(search); highlightedIndex = -1"
+                    class="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+                    placeholder="@search_ph"
+                    autocomplete="off"
+                />
+                @* Loading spinner *@
+                <svg
+                    x-show="loading"
+                    x-cloak
+                    class="h-4 w-4 animate-spin text-muted-foreground"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+
+            @* Options list *@
+            <div
+                x-ref="optionsList"
+                class="max-h-60 overflow-auto p-1"
+                role="listbox"
+            >
+                @* Loading state *@
+                <div
+                    x-show="loading"
+                    class="py-6 text-center text-sm text-muted-foreground"
+                >
+                    @loading_msg
+                </div>
+
+                @* Error state *@
+                <div
+                    x-show="fetchError && !loading"
+                    class="py-6 text-center text-sm text-destructive"
+                >
+                    @error_msg
+                </div>
+
+                @* No input state (before typing) *@
+                <div
+                    x-show="!loading && !fetchError && search.length < minChars && options.length === 0"
+                    class="py-6 text-center text-sm text-muted-foreground"
+                >
+                    @no_input_msg
+                </div>
+
+                @* Empty state (after search) *@
+                <div
+                    x-show="!loading && !fetchError && search.length >= minChars && options.length === 0"
+                    class="py-6 text-center text-sm text-muted-foreground"
+                >
+                    @empty_msg
+                </div>
+
+                @* Options *@
+                <template x-for="(opt, idx) in options" :key="opt.value">
+                    <div
+                        class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                        :class="{ 'bg-accent text-accent-foreground': highlightedIndex === idx || selected === opt.value }"
+                        @@click="selectOption(opt.value, opt.label)"
+                        @@mouseenter="highlightedIndex = idx"
+                        role="option"
+                        :aria-selected="selected === opt.value"
+                    >
+                        @* Check icon for selected item *@
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="mr-2 h-4 w-4"
+                            :class="selected === opt.value ? 'opacity-100' : 'opacity-0'"
+                        >
+                            <path d="M20 6 9 17l-5-5"/>
+                        </svg>
+                        <span x-text="opt.label"></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+}
+
+@** Ajax select with label **@
+@fn labeled(
+    label: &str,
+    name: &str,
+    url: &str,
+    selected_value: Option<&str> = None,
+    selected_label: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    search_placeholder: Option<&str> = None,
+    min_chars: u32 = 1,
+    debounce_ms: u32 = 300,
+    response_path: Option<&str> = None,
+    value_field: Option<&str> = None,
+    label_field: Option<&str> = None,
+    loading_text: Option<&str> = None,
+    error_text: Option<&str> = None,
+    empty_text: Option<&str> = None,
+    no_input_text: Option<&str> = None,
+    clearable: bool = false,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: Option<&str> = None,
+) {
+    <div class="space-y-2">
+        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            @label
+            @if required { <span class="text-destructive">*</span> }
+        </label>
+        <@create
+            name=@name
+            url=@url
+            selected_value=@selected_value
+            selected_label=@selected_label
+            placeholder=@placeholder
+            search_placeholder=@search_placeholder
+            min_chars=@min_chars
+            debounce_ms=@debounce_ms
+            response_path=@response_path
+            value_field=@value_field
+            label_field=@label_field
+            loading_text=@loading_text
+            error_text=@error_text
+            empty_text=@empty_text
+            no_input_text=@no_input_text
+            clearable=@clearable
+            disabled=@disabled
+            required=@required
+            error=@error
+            class=@class
+        />
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </div>
+}

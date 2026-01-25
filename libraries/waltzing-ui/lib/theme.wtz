@@ -1,0 +1,364 @@
+@*
+ * Theme utilities for waltzing-ui
+ * Dark mode toggle, theme persistence, and system preference detection
+ *
+ * Usage:
+ *   @import lib/theme.wtz as theme
+ *
+ *   // Add theme script in <head> (before body for no flash)
+ *   <@theme::script />
+ *
+ *   // Theme toggle button
+ *   <@theme::toggle_button />
+ *
+ *   // Or use a dropdown for light/dark/system
+ *   <@theme::mode_selector />
+ *
+ *   // Helper functions
+ *   <@theme::dark_mode_script />  // Just the localStorage script
+ *
+ *   // JavaScript API:
+ *   window.themeManager.current()     // Get current theme ('light', 'dark', 'system')
+ *   window.themeManager.apply('dark') // Set theme
+ *   window.themeManager.toggle()      // Toggle between light/dark
+ *   window.themeManager.effective()   // Get effective theme (resolves 'system')
+ *@
+
+@import lib/utils.wtz as utils
+
+@* Script to read/set theme from localStorage and handle system preference *@
+@* Place this in <head> before body to prevent flash of wrong theme *@
+@fn script() {
+    <script>
+        (function() {
+            var storageKey = 'theme';
+            var root = document.documentElement;
+
+            function getSystemTheme() {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            function applyTheme(theme) {
+                var effectiveTheme = theme === 'system' ? getSystemTheme() : theme;
+                if (effectiveTheme === 'dark') {
+                    root.classList.add('dark');
+                } else {
+                    root.classList.remove('dark');
+                }
+            }
+
+            function getTheme() {
+                return localStorage.getItem(storageKey) || 'system';
+            }
+
+            function setTheme(theme) {
+                localStorage.setItem(storageKey, theme);
+                applyTheme(theme);
+                window.dispatchEvent(new CustomEvent('theme-change', { detail: { theme: theme } }));
+            }
+
+            applyTheme(getTheme());
+
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+                if (getTheme() === 'system') {
+                    applyTheme('system');
+                }
+            });
+
+            window.themeManager = {
+                current: getTheme,
+                apply: setTheme,
+                toggle: function() {
+                    var current = getTheme();
+                    var effectiveTheme = current === 'system' ? getSystemTheme() : current;
+                    setTheme(effectiveTheme === 'dark' ? 'light' : 'dark');
+                },
+                effective: function() {
+                    var theme = getTheme();
+                    return theme === 'system' ? getSystemTheme() : theme;
+                }
+            };
+        })();
+    </script>
+}
+
+@* Minimal script for dark mode persistence only (no Alpine integration) *@
+@fn dark_mode_script() {
+    <script>
+        (function() {
+            var theme = localStorage.getItem('theme');
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (theme === 'dark' || (theme !== 'light' && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+}
+
+@* Toggle button for switching between light and dark mode *@
+@fn toggle_button(class: Option<&str> = None) {
+    @let base = "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+    @let classes = &[@base, @class.unwrap_or("")]
+
+    <button
+        type="button"
+        class="@utils::cn(@classes)"
+        x-data="{ dark: document.documentElement.classList.contains('dark') }"
+        x-init="window.addEventListener('theme-change', () => dark = document.documentElement.classList.contains('dark'))"
+        @@click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"
+        :aria-label="dark ? 'Switch to light mode' : 'Switch to dark mode'"
+    >
+        @* Sun icon (shown in dark mode) *@
+        <svg
+            x-show="dark"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-5 w-5"
+        >
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m6.34 17.66-1.41 1.41"></path>
+            <path d="m19.07 4.93-1.41 1.41"></path>
+        </svg>
+
+        @* Moon icon (shown in light mode) *@
+        <svg
+            x-show="!dark"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-5 w-5"
+        >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+
+        <span class="sr-only" x-text="dark ? 'Switch to light mode' : 'Switch to dark mode'"></span>
+    </button>
+}
+
+@* Dropdown selector for light/dark/system modes *@
+@fn mode_selector(class: Option<&str> = None) {
+    @let base = "relative inline-block text-left"
+    @let classes = &[@base, @class.unwrap_or("")]
+
+    <div
+        class="@utils::cn(@classes)"
+        x-data="{
+            open: false,
+            theme: window.themeManager ? window.themeManager.current() : 'system',
+            setTheme(t) {
+                this.theme = t;
+                window.themeManager.apply(t);
+                this.open = false;
+            }
+        }"
+        x-init="window.addEventListener('theme-change', (e) => theme = e.detail.theme)"
+    >
+        @* Trigger button *@
+        <button
+            type="button"
+            class="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            @@click="open = !open"
+            :aria-expanded="open"
+            aria-haspopup="true"
+        >
+            @* Sun icon *@
+            <svg
+                x-show="theme === 'light'"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-4 w-4"
+            >
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2"></path>
+                <path d="M12 20v2"></path>
+                <path d="m4.93 4.93 1.41 1.41"></path>
+                <path d="m17.66 17.66 1.41 1.41"></path>
+                <path d="M2 12h2"></path>
+                <path d="M20 12h2"></path>
+                <path d="m6.34 17.66-1.41 1.41"></path>
+                <path d="m19.07 4.93-1.41 1.41"></path>
+            </svg>
+
+            @* Moon icon *@
+            <svg
+                x-show="theme === 'dark'"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-4 w-4"
+            >
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+
+            @* Monitor icon (system) *@
+            <svg
+                x-show="theme === 'system'"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-4 w-4"
+            >
+                <rect width="20" height="14" x="2" y="3" rx="2"></rect>
+                <line x1="8" x2="16" y1="21" y2="21"></line>
+                <line x1="12" x2="12" y1="17" y2="21"></line>
+            </svg>
+
+            <span x-text="theme.charAt(0).toUpperCase() + theme.slice(1)"></span>
+
+            @* Chevron *@
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-4 w-4 opacity-50"
+            >
+                <path d="m6 9 6 6 6-6"></path>
+            </svg>
+        </button>
+
+        @* Dropdown menu *@
+        <div
+            x-show="open"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="transform opacity-0 scale-95"
+            x-transition:enter-end="transform opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="transform opacity-100 scale-100"
+            x-transition:leave-end="transform opacity-0 scale-95"
+            @@click.away="open = false"
+            @@keydown.escape.window="open = false"
+            class="absolute right-0 z-50 mt-2 w-36 origin-top-right rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+            style="display: none;"
+            role="menu"
+        >
+            @* Light option *@
+            <button
+                type="button"
+                class="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                :class="{ 'bg-accent': theme === 'light' }"
+                role="menuitem"
+                @@click="setTheme('light')"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                >
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+                Light
+            </button>
+
+            @* Dark option *@
+            <button
+                type="button"
+                class="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                :class="{ 'bg-accent': theme === 'dark' }"
+                role="menuitem"
+                @@click="setTheme('dark')"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                >
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+                Dark
+            </button>
+
+            @* System option *@
+            <button
+                type="button"
+                class="relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                :class="{ 'bg-accent': theme === 'system' }"
+                role="menuitem"
+                @@click="setTheme('system')"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                >
+                    <rect width="20" height="14" x="2" y="3" rx="2"></rect>
+                    <line x1="8" x2="16" y1="21" y2="21"></line>
+                    <line x1="12" x2="12" y1="17" y2="21"></line>
+                </svg>
+                System
+            </button>
+        </div>
+    </div>
+}
