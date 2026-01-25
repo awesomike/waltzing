@@ -5,31 +5,24 @@
 
 @*
  * Concatenate class names, filtering out empty strings
- * Usage: @cn("base-class", @conditional_class, "always-class")
+ * Usage: @cn(vec!["base-class", @conditional_class, "always-class"])
  *@
-@fn cn(classes: &[&str]) -> String {
-    {
-        classes
-            .iter()
-            .filter(|s| !s.is_empty())
-            .copied()
-            .collect::<Vec<_>>()
-            .join(" ")
-    }
+@fn cn(classes: Vec<&str>) {
+    @(classes.iter().filter(|s| !s.is_empty()).copied().collect::<Vec<_>>().join(" "))
 }
 
 @*
  * Conditionally include a class
  * Usage: @class_if(is_active, "active")
  *@
-@fn class_if(condition: bool, class: &str) -> &str {
-    { if condition { class } else { "" } }
+@fn class_if(condition: bool, class: &str) {
+    @(if condition { class } else { "" })
 }
 
 @*
  * Choose between two classes based on condition
  * Usage: @class_toggle(is_open, "open", "closed")
  *@
-@fn class_toggle(condition: bool, if_true: &str, if_false: &str) -> &str {
-    { if condition { if_true } else { if_false } }
+@fn class_toggle(condition: bool, if_true: &str, if_false: &str) {
+    @(if condition { if_true } else { if_false })
 }

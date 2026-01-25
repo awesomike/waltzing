@@ -3,7 +3,7 @@
  * Common dashboard/app layout with collapsible sidebar
  *@
 
-@import layouts/base.wtz as base
+@import base.wtz as base
 @import lib/utils.wtz as utils
 
 @struct NavItem {
@@ -21,7 +21,7 @@
 @fn apply(
     title: &str,
     brand: @(),
-    nav_groups: &[NavGroup],
+    nav_groups: Vec<NavGroup>,
     header: Option<@()>,
     content: @(),
 ) {
@@ -57,12 +57,14 @@
                             <ul class="space-y-1">
                                 @for item in &group.items {
                                     <li>
+                                        @let active_cls = utils::class_if(item.active, "bg-accent text-accent-foreground")
+                                        @let link_classes = vec!["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                         <a
                                             href="@item.href"
-                                            class="@utils::cn(&["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", @utils::class_if(@item.active, "bg-accent text-accent-foreground")])"
+                                            class="@utils::cn(@link_classes)"
                                         >
                                             @if let Some(icon) = &item.icon {
-                                                <span class="h-5 w-5 flex-shrink-0">@safe(@icon)</span>
+                                                <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
                                             }
                                             <span x-show="sidebarOpen" x-transition>@item.label</span>
                                         </a>
@@ -120,7 +122,7 @@
 @fn simple(
     title: &str,
     brand: @(),
-    nav_groups: &[NavGroup],
+    nav_groups: Vec<NavGroup>,
     content: @(),
 ) {
     <@apply

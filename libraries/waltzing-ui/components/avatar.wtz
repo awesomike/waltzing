@@ -35,23 +35,25 @@
     class: Option<&str>,
 ) {
     @let base = "relative flex shrink-0 overflow-hidden rounded-full"
-    @let cls = class.unwrap_or("")
+    @let cls = class.unwrap_or_default()
 
-    @let size_cls = @match size {
+    @let size_cls = match size {
         Size::Sm => { "h-8 w-8" }
         Size::Default => { "h-10 w-10" }
         Size::Lg => { "h-14 w-14" }
     }
 
-    @let fallback_text_size = @match size {
+    @let fallback_text_size = match size {
         Size::Sm => { "text-xs" }
         Size::Default => { "text-sm" }
         Size::Lg => { "text-lg" }
     }
 
-    @let container_cls = utils::cn(&[base, size_cls, cls])
+    @let container_classes = vec![@base, @size_cls, @cls]
+    @let container_cls = utils::cn(@container_classes)
     @let fallback_base = "flex h-full w-full items-center justify-center rounded-full bg-muted"
-    @let fallback_cls = utils::cn(&[fallback_base, fallback_text_size])
+    @let fallback_classes = vec![@fallback_base, @fallback_text_size]
+    @let fallback_cls = utils::cn(@fallback_classes)
 
     <span class="@container_cls">
         @if let Some(image_src) = src {

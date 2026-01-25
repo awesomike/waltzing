@@ -30,15 +30,16 @@
     name: &str,
     checked: bool,
     disabled: bool,
-    class: Option<&str>,
+    class: Option<String>,
 ) {
     @let base = "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 
-    @let checked_cls = @if checked { "bg-primary text-primary-foreground" } else { "" }
+    @let checked_cls = if checked { "bg-primary text-primary-foreground" } else { "" }
 
-    @let data_state = @if checked { "checked" } else { "unchecked" }
+    @let data_state = if checked { "checked" } else { "unchecked" }
 
-    @let classes = &[@base, @checked_cls, @class.unwrap_or("")]
+    @let extra_class = class.unwrap_or_default()
+    @let classes = vec![@base, @checked_cls, @extra_class]
 
     <div class="relative inline-flex items-center justify-center">
         <input
@@ -77,11 +78,11 @@
     name: &str,
     checked: bool,
     disabled: bool,
-    description: Option<&str>,
+    description: Option<String>,
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 
-    @let checkbox_cls = @if description.is_some() { Some("mt-0.5") } else { None }
+    @let checkbox_cls = if description.is_some() { Some("mt-0.5") } else { None }
 
     <div class="flex items-start space-x-2">
         <@apply

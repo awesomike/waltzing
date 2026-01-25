@@ -30,7 +30,7 @@
 
 @fn apply(
     name: &str,
-    options: &[ComboboxOption],
+    options: Vec<ComboboxOption>,
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     disabled: bool = false,
@@ -39,23 +39,21 @@
     class: Option<&str> = None,
 ) {
     @let base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-    @let error_cls = @if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-    @let input_cls = utils::cn(&[@base, @error_cls, @class.unwrap_or("")])
+    @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
+    @let cls = class.unwrap_or("")
+    @let input_classes = vec![@base, @error_cls, @cls]
+    @let input_cls = utils::cn(@input_classes)
 
     @* Find the initial label for the selected value *@
-    @let initial_label = {
-        match selected {
-            Some(sel) => options.iter().find(|o| o.value == sel).map(|o| o.label.as_str()).unwrap_or(""),
-            None => "",
-        }
-    }
+    @let initial_label = selected.and_then(|sel| options.iter().find(|o| o.value == sel).map(|o| o.label.as_str())).unwrap_or("")
 
+    @let selected_val = selected.unwrap_or("")
     <div
         class="relative w-full"
         x-data="{
             open: false,
             search: '@initial_label',
-            selected: '@selected.unwrap_or("")',
+            selected: '@selected_val',
             highlightedIndex: -1,
             get filteredOptions() {
                 const searchLower = this.search.toLowerCase();
@@ -108,6 +106,7 @@
         />
 
         @* Search input *@
+        @let placeholder_text = placeholder.unwrap_or("Search...")
         <div class="relative">
             <input
                 type="text"
@@ -116,7 +115,7 @@
                 @focus="open = true; highlightedIndex = -1"
                 @click="open = true"
                 @input="open = true; highlightedIndex = -1"
-                placeholder="@placeholder.unwrap_or("Search...")"
+                placeholder="@placeholder_text"
                 @if disabled { disabled }
                 @if error.is_some() { aria-invalid="true" }
                 role="combobox"
@@ -154,12 +153,16 @@
             role="listbox"
         >
             @for (idx, opt) in options.iter().enumerate() {
+                @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
+                @let option_disabled = utils::class_if(opt.disabled, "pointer-events-none opacity-50")
+                @let option_classes = vec![@option_base, @option_disabled]
+                @let option_cls = utils::cn(@option_classes)
                 <div
                     data-option
                     data-value="@opt.value"
                     data-label="@opt.label"
                     @if opt.disabled { data-disabled="true" }
-                    class="@utils::cn(&["relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors", utils::class_if(opt.disabled, "pointer-events-none opacity-50")])"
+                    class="@option_cls"
                     :class="{
                         'bg-accent text-accent-foreground': highlightedIndex === @idx || selected === '@opt.value',
                         'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
@@ -205,7 +208,7 @@
 @fn labeled(
     label: &str,
     name: &str,
-    options: &[ComboboxOption],
+    options: Vec<ComboboxOption>,
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     disabled: bool = false,

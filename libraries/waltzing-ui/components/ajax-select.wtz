@@ -61,8 +61,10 @@
     class: Option<&str> = None,
 ) {
     @let trigger_base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-    @let error_cls = @if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, class.unwrap_or("")])
+    @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
+    @let class_str = class.unwrap_or("")
+    @let classes = vec![@trigger_base, @error_cls, @class_str]
+    @let trigger_cls = utils::cn(&@classes)
 
     @let ph = placeholder.unwrap_or("Select...")
     @let search_ph = search_placeholder.unwrap_or("Search...")

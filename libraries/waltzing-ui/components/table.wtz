@@ -5,32 +5,21 @@
 
 @import lib/utils.wtz as utils
 
-@fn apply<T>(
-    items: &[T],
+@fn apply(
     header: @(),
-    row: @(&T),
-    empty: Option<@()>,
+    body: @(),
     class: Option<&str>,
 ) {
+    @let cls = class.unwrap_or("")
+    @let base = "w-full caption-bottom text-sm"
+    @let classes = &[base, cls]
     <div class="relative w-full overflow-auto">
-        <table class="@utils::cn(&["w-full caption-bottom text-sm", @class.unwrap_or("")])">
+        <table class="@utils::cn(@classes)">
             <thead class="[&_tr]:border-b">
                 @header()
             </thead>
             <tbody class="[&_tr:last-child]:border-0">
-                @if items.is_empty() {
-                    @if let Some(e) = empty {
-                        <tr>
-                            <td colspan="100" class="h-24 text-center text-muted-foreground">
-                                @e()
-                            </td>
-                        </tr>
-                    }
-                } else {
-                    @for item in items {
-                        @row(item)
-                    }
-                }
+                @body()
             </tbody>
         </table>
     </div>
@@ -45,23 +34,41 @@
 
 @* Table header cell *@
 @fn th(class: Option<&str>, content: @()) {
-    <th class="@utils::cn(&["h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", @class.unwrap_or("")])">
+    @let cls = class.unwrap_or("")
+    @let base = "h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+    @let classes = &[base, cls]
+    <th class="@utils::cn(@classes)">
         @content()
     </th>
 }
 
 @* Table row *@
 @fn row(class: Option<&str>, content: @()) {
-    <tr class="@utils::cn(&["border-b transition-colors hover:bg-muted/50", @class.unwrap_or("")])">
+    @let cls = class.unwrap_or("")
+    @let base = "border-b transition-colors hover:bg-muted/50"
+    @let classes = &[base, cls]
+    <tr class="@utils::cn(@classes)">
         @content()
     </tr>
 }
 
 @* Table cell *@
 @fn td(class: Option<&str>, content: @()) {
-    <td class="@utils::cn(&["p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", @class.unwrap_or("")])">
+    @let cls = class.unwrap_or("")
+    @let base = "p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+    @let classes = &[base, cls]
+    <td class="@utils::cn(@classes)">
         @content()
     </td>
+}
+
+@* Empty state row *@
+@fn empty(content: @()) {
+    <tr>
+        <td colspan="100" class="h-24 text-center text-muted-foreground">
+            @content()
+        </td>
+    </tr>
 }
 
 @* Table caption *@

@@ -115,8 +115,10 @@
     input_base: &str,
     separator_cls: &str,
 ) {
+    @let extra_cls = class.unwrap_or("")
+    @let container_cls = utils::cn(vec![container_base, extra_cls])
     <div
-        class=@utils::cn(&[container_base, class.unwrap_or("")])
+        class="@container_cls"
         x-data=@```json {
             totalSeconds: @initial_seconds,
             hours: 0,
@@ -228,8 +230,10 @@
     input_base: &str,
     separator_cls: &str,
 ) {
+    @let extra_cls = class.unwrap_or("")
+    @let container_cls = utils::cn(vec![container_base, extra_cls])
     <div
-        class=@utils::cn(&[container_base, class.unwrap_or("")])
+        class="@container_cls"
         x-data=@```json {
             totalSeconds: @initial_seconds,
             minutes: 0,
@@ -330,8 +334,10 @@
     input_base: &str,
     separator_cls: &str,
 ) {
+    @let extra_cls = class.unwrap_or("")
+    @let container_cls = utils::cn(vec![container_base, extra_cls])
     <div
-        class=@utils::cn(&[container_base, class.unwrap_or("")])
+        class="@container_cls"
         x-data=@```json {
             totalSeconds: @initial_seconds,
             hours: 0,
@@ -509,10 +515,11 @@
     class: Option<&str> = None,
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-    @let disabled_label = @if disabled { "opacity-70" } else { "" }
+    @let disabled_label = if disabled { "opacity-70" } else { "" }
+    @let label_classes = utils::cn(vec![label_cls, disabled_label])
 
     <div class="space-y-2">
-        <label for="@name" class=@utils::cn(&[label_cls, disabled_label])>
+        <label for="@name" class="@label_classes">
             @label
             @if required { <span class="text-destructive ml-0.5">*</span> }
         </label>
@@ -548,8 +555,10 @@
     class: Option<&str> = None,
 ) {
     @let label_cls = "text-xs font-medium text-muted-foreground"
+    @let extra_cls = class.unwrap_or("")
+    @let container_cls = utils::cn(vec!["inline-flex items-center gap-2", extra_cls])
 
-    <div class=@utils::cn(&["inline-flex items-center gap-2", class.unwrap_or("")])>
+    <div class="@container_cls">
         <label for="@name" class="@label_cls">@label</label>
         <@inline
             name=@name

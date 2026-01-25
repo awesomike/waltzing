@@ -11,14 +11,15 @@
 }
 
 @fn apply(
-    tabs: &[Tab],
+    tabs: Vec<Tab>,
     default_tab: &str,
     content: @(&str),
     class: Option<&str>,
 ) {
+    @let cls = class.unwrap_or("")
     <div
         x-data=@```json { activeTab: "@default_tab" } ```@
-        class="@class.unwrap_or("")"
+        class="@cls"
     >
         @* Tab list *@
         <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground" role="tablist">
@@ -54,7 +55,7 @@
 
 @* Simple tabs with static content *@
 @fn simple(
-    tabs: &[Tab],
+    tabs: Vec<Tab>,
     default_tab: &str,
     panels: @(&str),
 ) {
@@ -63,14 +64,16 @@
 
 @* Vertical tabs variant *@
 @fn vertical(
-    tabs: &[Tab],
+    tabs: Vec<Tab>,
     default_tab: &str,
     content: @(&str),
     class: Option<&str>,
 ) {
+    @let cls = class.unwrap_or("")
+    @let classes = utils::cn(&["flex gap-4", @cls])
     <div
         x-data=@```json { activeTab: "@default_tab" } ```@
-        class="@utils::cn(&["flex gap-4", @class.unwrap_or("")])"
+        class="@classes"
     >
         @* Vertical tab list *@
         <div class="flex flex-col space-y-1" role="tablist">

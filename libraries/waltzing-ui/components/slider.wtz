@@ -21,6 +21,8 @@
  *   <@slider::apply name="locked" value=50.0 disabled=true />
  *@
 
+@import lib/utils.wtz as utils
+
 @* Main slider with single handle *@
 @fn apply(
     name: &str,
@@ -32,17 +34,19 @@
     class: Option<&str> = None,
 ) {
     @let percentage = ((value - min) / (max - min) * 100.0)
-    @let clamped = @if (percentage > 100.0) { 100.0 } else if (percentage < 0.0) { 0.0 } else { @percentage }
+    @let clamped = if (percentage > 100.0) { 100.0 } else if (percentage < 0.0) { 0.0 } else { percentage }
 
     @let container_base = "relative flex w-full touch-none select-none items-center"
-    @let disabled_cls = @if disabled { "opacity-50 cursor-not-allowed" } else { "" }
+    @let disabled_cls = if disabled { "opacity-50 cursor-not-allowed" } else { "" }
 
     @let track = "relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20"
     @let filled = "absolute h-full bg-primary"
     @let thumb = "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none"
+    @let extra_class = class.unwrap_or("")
+    @let container_classes = vec![@container_base, @disabled_cls, @extra_class]
 
     <div
-        class=@cn(&[container_base, disabled_cls, class.unwrap_or("")])
+        class="@utils::cn(@container_classes)"
         x-data=@```json { value: @value, min: @min, max: @max, step: @step, percentage: @clamped } ```@
         x-init="$watch('value', v => { percentage = ((v - min) / (max - min)) * 100; $dispatch('input', { name: '@name', value: v }) })"
     >
@@ -105,11 +109,12 @@
     class: Option<&str> = None,
 ) {
     @let label_cls = "text-sm font-medium leading-none"
-    @let disabled_label = @if disabled { "opacity-70" } else { "" }
+    @let disabled_label = if disabled { "opacity-70" } else { "" }
+    @let label_classes = vec![@label_cls, @disabled_label]
 
     <div class="space-y-2" x-data=@```json { displayValue: @value } ```@>
         <div class="flex justify-between">
-            <label for="@name" class=@cn(&[label_cls, disabled_label])>@label</label>
+            <label for="@name" class="@utils::cn(@label_classes)">@label</label>
             <span class="text-sm text-muted-foreground" x-text="displayValue"></span>
         </div>
         <div @input.camel="displayValue = $event.detail.value">
@@ -141,14 +146,16 @@
     @let pct_max = ((value_max - min) / (max - min) * 100.0)
 
     @let container_base = "relative flex w-full touch-none select-none items-center"
-    @let disabled_cls = @if disabled { "opacity-50 cursor-not-allowed" } else { "" }
+    @let disabled_cls = if disabled { "opacity-50 cursor-not-allowed" } else { "" }
 
     @let track = "relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20"
     @let filled = "absolute h-full bg-primary"
     @let thumb = "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none"
+    @let extra_class = class.unwrap_or("")
+    @let container_classes = vec![@container_base, @disabled_cls, @extra_class]
 
     <div
-        class=@cn(&[container_base, disabled_cls, class.unwrap_or("")])
+        class="@utils::cn(@container_classes)"
         x-data=@```json {
             minValue: @value_min,
             maxValue: @value_max,
@@ -245,11 +252,12 @@
     class: Option<&str> = None,
 ) {
     @let label_cls = "text-sm font-medium leading-none"
-    @let disabled_label = @if disabled { "opacity-70" } else { "" }
+    @let disabled_label = if disabled { "opacity-70" } else { "" }
+    @let label_classes = vec![@label_cls, @disabled_label]
 
     <div class="space-y-2" x-data=@```json { displayMin: @value_min, displayMax: @value_max } ```@>
         <div class="flex justify-between">
-            <label for="@name" class=@cn(&[label_cls, disabled_label])>@label</label>
+            <label for="@name" class="@utils::cn(@label_classes)">@label</label>
             <span class="text-sm text-muted-foreground" x-text="displayMin + ' - ' + displayMax"></span>
         </div>
         <div @input.camel="displayMin = $event.detail.valueMin; displayMax = $event.detail.valueMax">

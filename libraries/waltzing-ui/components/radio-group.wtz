@@ -32,15 +32,16 @@
 
 @fn apply(
     name: &str,
-    options: &[RadioOption],
+    options: Vec<RadioOption>,
     selected: Option<&str>,
     class: Option<&str>,
 ) {
     @let group_base = "grid gap-2"
+    @let cls = class.unwrap_or("")
 
     <div
         role="radiogroup"
-        class="@utils::cn(&[@group_base, @class.unwrap_or("")])"
+        class="@utils::cn(&[@group_base, @cls])"
     >
         @for opt in options {
             @let is_checked = (selected == Some(opt.value.as_str()))
@@ -86,15 +87,16 @@
 @* Radio group with horizontal layout *@
 @fn horizontal(
     name: &str,
-    options: &[RadioOption],
+    options: Vec<RadioOption>,
     selected: Option<&str>,
     class: Option<&str>,
 ) {
     @let group_base = "flex flex-wrap gap-4"
+    @let cls = class.unwrap_or("")
 
     <div
         role="radiogroup"
-        class="@utils::cn(&[@group_base, @class.unwrap_or("")])"
+        class="@utils::cn(&[@group_base, @cls])"
     >
         @for opt in options {
             @let is_checked = (selected == Some(opt.value.as_str()))
@@ -127,15 +129,15 @@
 @fn labeled(
     label: &str,
     name: &str,
-    options: &[RadioOption],
+    options: Vec<RadioOption>,
     selected: Option<&str>,
     required: bool,
     error: Option<&str>,
     class: Option<&str>,
 ) {
-    @let error_cls = @if error.is_some() { "[&_input]:border-destructive" } else { "" }
+    @let cls = class.unwrap_or("")
 
-    <fieldset class="space-y-3">
+    <fieldset class="space-y-3 @if error.is_some() { [&_input]:border-destructive }">
         <legend class="text-sm font-medium leading-none">
             @label
             @if required { <span class="text-destructive ml-0.5">*</span> }
@@ -144,7 +146,7 @@
             name=@name
             options=@options
             selected=@selected
-            class=Some(utils::cn(&[@error_cls, @class.unwrap_or("")]))
+            class=Some(@cls)
         />
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>

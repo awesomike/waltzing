@@ -37,28 +37,34 @@
 ) {
     @let base = "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7"
 
-    @let variant_cls = @match variant {
+    @let variant_cls = match variant {
         Variant::Default => { "bg-background text-foreground" }
         Variant::Destructive => { "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive" }
         Variant::Warning => { "border-yellow-500/50 text-yellow-600 dark:text-yellow-500 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-500" }
         Variant::Success => { "border-green-500/50 text-green-600 dark:text-green-500 [&>svg]:text-green-600 dark:[&>svg]:text-green-500" }
     }
 
-    <div role="alert" class="@utils::cn(&[@base, @variant_cls, @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec![@base, @variant_cls, @extra]
+    <div role="alert" class="@utils::cn(classes)">
         @content()
     </div>
 }
 
 @* Alert title *@
 @fn title(class: Option<&str>, content: @()) {
-    <h5 class="@utils::cn(&["mb-1 font-medium leading-none tracking-tight", @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec!["mb-1 font-medium leading-none tracking-tight", @extra]
+    <h5 class="@utils::cn(classes)">
         @content()
     </h5>
 }
 
 @* Alert description *@
 @fn description(class: Option<&str>, content: @()) {
-    <div class="@utils::cn(&["text-sm [&_p]:leading-relaxed", @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec!["text-sm [&_p]:leading-relaxed", @extra]
+    <div class="@utils::cn(classes)">
         @content()
     </div>
 }

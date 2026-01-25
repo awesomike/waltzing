@@ -35,22 +35,23 @@
 ) {
     @let base = "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
 
-    @let variant_cls = @match variant {
+    @let variant_cls = match variant {
         Variant::Default => { "bg-transparent" }
         Variant::Outline => { "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground" }
     }
 
-    @let size_cls = @match size {
+    @let size_cls = match size {
         Size::Sm => { "h-8 px-2 min-w-8" }
         Size::Default => { "h-9 px-3 min-w-9" }
         Size::Lg => { "h-10 px-3 min-w-10" }
     }
 
-    @let pressed_cls = @if pressed { "bg-accent text-accent-foreground" } else { "" }
-    @let aria_pressed_val = @if pressed { "true" } else { "false" }
-    @let data_state_val = @if pressed { "on" } else { "off" }
+    @let pressed_cls = if pressed { "bg-accent text-accent-foreground" } else { "" }
+    @let aria_pressed_val = if pressed { "true" } else { "false" }
+    @let data_state_val = if pressed { "on" } else { "off" }
 
-    @let classes = &[@base, @variant_cls, @size_cls, @pressed_cls, @class.unwrap_or("")]
+    @let extra_class = class.unwrap_or_default()
+    @let classes = vec![@base, @variant_cls, @size_cls, @pressed_cls, @extra_class]
 
     <button
         type="button"
@@ -160,7 +161,8 @@
 @* Toggle group for multiple related toggles (like text formatting) *@
 @fn group(class: Option<&str>, content: @()) {
     @let base = "inline-flex items-center gap-1"
-    @let classes = &[@base, @class.unwrap_or("")]
+    @let extra_class = class.unwrap_or_default()
+    @let classes = vec![@base, @extra_class]
     <div
         class="@utils::cn(@classes)"
         role="group"

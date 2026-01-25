@@ -71,19 +71,21 @@
     class: Option<&str> = None,
 ) {
     @let input_base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-    @let error_cls = @if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
+    @let error_cls = if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
 
     @let has_prefix = prefix.is_some()
     @let has_suffix = suffix.is_some()
-    @let prefix_cls = @if has_prefix { "pl-7" } else { "" }
-    @let suffix_cls = @if has_suffix { "pr-8" } else { "" }
+    @let prefix_cls = if has_prefix { "pl-7" } else { "" }
+    @let suffix_cls = if has_suffix { "pr-8" } else { "" }
 
-    @let input_cls = utils::cn(&[@input_base, @error_cls, @prefix_cls, @suffix_cls, @class.unwrap_or("")])
+    @let cls = class.unwrap_or("")
+    @let input_classes = vec![@input_base, @error_cls, @prefix_cls, @suffix_cls, @cls]
+    @let input_cls = utils::cn(@input_classes)
 
     @* Calculate display value (divide by multiplier for display) *@
-    @let display_value = @if let Some(v) = value { @(v / multiplier) } else { 0.0 }
+    @let display_value = if let Some(v) = value { (v / multiplier) } else { 0.0 }
     @let has_value = value.is_some()
-    @let initial_raw = @if has_value { @display_value } else { "null" }
+    @let initial_raw = if has_value { display_value.to_string() } else { "null".to_string() }
 
     <div class="relative flex items-center">
         @if has_prefix {
@@ -99,8 +101,8 @@
                 decimals: @decimals,
                 thousandSep: '@thousand_separator',
                 decimalSep: '@decimal_separator',
-                minVal: @if let Some(m) = min { @m } else { null },
-                maxVal: @if let Some(m) = max { @m } else { null },
+                minVal: @if let Some(m) = min { @m } @else { null },
+                maxVal: @if let Some(m) = max { @m } @else { null },
                 validationError: null,
                 init() {
                     if (this.rawValue !== null) {

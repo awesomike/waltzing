@@ -11,7 +11,9 @@
     class: Option<&str>,
     content: @(),
 ) {
-    <div class="@utils::cn(&["rounded-xl border bg-card text-card-foreground shadow", @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec!["rounded-xl border bg-card text-card-foreground shadow", extra]
+    <div class="@utils::cn(classes)">
         @if let Some(h) = header {
             <div class="flex flex-col space-y-1.5 p-6">
                 @h()
@@ -30,42 +32,54 @@
 
 @* Card with just content *@
 @fn simple(class: Option<&str>, content: @()) {
-    <div class="@utils::cn(&["rounded-xl border bg-card text-card-foreground shadow p-6", @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec!["rounded-xl border bg-card text-card-foreground shadow p-6", extra]
+    <div class="@utils::cn(classes)">
         @content()
     </div>
 }
 
 @* Card header component for composition *@
 @fn header(class: Option<&str>, content: @()) {
-    <div class="@utils::cn(&["flex flex-col space-y-1.5 p-6", @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec!["flex flex-col space-y-1.5 p-6", extra]
+    <div class="@utils::cn(classes)">
         @content()
     </div>
 }
 
 @* Card title *@
 @fn title(class: Option<&str>, content: @()) {
-    <h3 class="@utils::cn(&["font-semibold leading-none tracking-tight", @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec!["font-semibold leading-none tracking-tight", extra]
+    <h3 class="@utils::cn(classes)">
         @content()
     </h3>
 }
 
 @* Card description *@
 @fn description(class: Option<&str>, content: @()) {
-    <p class="@utils::cn(&["text-sm text-muted-foreground", @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec!["text-sm text-muted-foreground", extra]
+    <p class="@utils::cn(classes)">
         @content()
     </p>
 }
 
 @* Card content area *@
 @fn content(class: Option<&str>, content: @()) {
-    <div class="@utils::cn(&["p-6 pt-0", @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec!["p-6 pt-0", extra]
+    <div class="@utils::cn(classes)">
         @content()
     </div>
 }
 
 @* Card footer *@
 @fn footer(class: Option<&str>, content: @()) {
-    <div class="@utils::cn(&["flex items-center p-6 pt-0", @class.unwrap_or("")])">
+    @let extra = class.unwrap_or("")
+    @let classes = vec!["flex items-center p-6 pt-0", extra]
+    <div class="@utils::cn(classes)">
         @content()
     </div>
 }

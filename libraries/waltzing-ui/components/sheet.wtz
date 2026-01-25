@@ -39,21 +39,21 @@
     content: @(),
     class: Option<&str>,
 ) {
-    @let position_cls = @match side {
+    @let position_cls = match side {
         Side::Top => { "inset-x-0 top-0 border-b" }
         Side::Right => { "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm" }
         Side::Bottom => { "inset-x-0 bottom-0 border-t" }
         Side::Left => { "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm" }
     }
 
-    @let enter_start_cls = @match side {
+    @let enter_start_cls = match side {
         Side::Top => { "opacity-0 -translate-y-full" }
         Side::Right => { "opacity-0 translate-x-full" }
         Side::Bottom => { "opacity-0 translate-y-full" }
         Side::Left => { "opacity-0 -translate-x-full" }
     }
 
-    @let enter_end_cls = @match side {
+    @let enter_end_cls = match side {
         Side::Top => { "opacity-100 translate-y-0" }
         Side::Right => { "opacity-100 translate-x-0" }
         Side::Bottom => { "opacity-100 translate-y-0" }
@@ -61,7 +61,8 @@
     }
 
     @let base_cls = "fixed z-50 gap-4 bg-background p-6 shadow-lg"
-    @let sheet_cls = &[@base_cls, @position_cls, @class.unwrap_or("")]
+    @let extra_cls = class.unwrap_or("")
+    @let sheet_cls = vec![@base_cls, @position_cls, @extra_cls]
 
     <div x-data="{ open: false }">
         @* Trigger *@
@@ -146,21 +147,21 @@
     content: @(),
     class: Option<&str>,
 ) {
-    @let position_cls = @match side {
+    @let position_cls = match side {
         Side::Top => { "inset-x-0 top-0 border-b" }
         Side::Right => { "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm" }
         Side::Bottom => { "inset-x-0 bottom-0 border-t" }
         Side::Left => { "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm" }
     }
 
-    @let enter_start_cls = @match side {
+    @let enter_start_cls = match side {
         Side::Top => { "opacity-0 -translate-y-full" }
         Side::Right => { "opacity-0 translate-x-full" }
         Side::Bottom => { "opacity-0 translate-y-full" }
         Side::Left => { "opacity-0 -translate-x-full" }
     }
 
-    @let enter_end_cls = @match side {
+    @let enter_end_cls = match side {
         Side::Top => { "opacity-100 translate-y-0" }
         Side::Right => { "opacity-100 translate-x-0" }
         Side::Bottom => { "opacity-100 translate-y-0" }
@@ -168,7 +169,8 @@
     }
 
     @let base_cls = "fixed z-50 gap-4 bg-background p-6 shadow-lg"
-    @let sheet_cls = &[@base_cls, @position_cls, @class.unwrap_or("")]
+    @let extra_cls = class.unwrap_or("")
+    @let sheet_cls = vec![@base_cls, @position_cls, @extra_cls]
 
     <template x-teleport="body">
         <div

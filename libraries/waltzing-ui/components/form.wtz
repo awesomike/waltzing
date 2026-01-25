@@ -45,7 +45,9 @@
     content: @(),
 ) {
     @let base = "space-y-6"
-    @let classes = utils::cn(&[base, class.unwrap_or("")])
+    @let class_val = class.unwrap_or("")
+    @let class_vec = vec![base, class_val]
+    @let classes = utils::cn(class_vec)
 
     <form
         @if let Some(a) = action { action="@a" }
@@ -69,7 +71,9 @@
     content: @(),
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-    @let field_cls = utils::cn(&["space-y-2", class.unwrap_or("")])
+    @let class_val = class.unwrap_or("")
+    @let field_vec = vec!["space-y-2", class_val]
+    @let field_cls = utils::cn(field_vec)
 
     <div class="@field_cls">
         @if let Some(l) = label {
@@ -104,7 +108,9 @@
     class: Option<&str>,
     content: @(),
 ) {
-    @let section_cls = utils::cn(&["space-y-4", class.unwrap_or("")])
+    @let class_val = class.unwrap_or("")
+    @let section_vec = vec!["space-y-4", class_val]
+    @let section_cls = utils::cn(section_vec)
 
     <div class="@section_cls">
         @if title.is_some() || description.is_some() {
@@ -128,7 +134,9 @@
     class: Option<&str>,
     content: @(),
 ) {
-    @let row_cls = utils::cn(&["grid gap-4 sm:grid-cols-2", class.unwrap_or("")])
+    @let class_val = class.unwrap_or("")
+    @let row_vec = vec!["grid gap-4 sm:grid-cols-2", class_val]
+    @let row_cls = utils::cn(row_vec)
 
     <div class="@row_cls">
         @content()
@@ -141,14 +149,17 @@
     class: Option<&str>,
     content: @(),
 ) {
-    @let align_cls = @match align.unwrap_or("end") {
+    @let align_val = align.unwrap_or("end")
+    @let align_cls = match align_val {
         "start" => { "justify-start" }
         "center" => { "justify-center" }
         "end" => { "justify-end" }
         "between" => { "justify-between" }
         _ => { "justify-end" }
     }
-    @let actions_cls = utils::cn(&["flex flex-col-reverse gap-2 sm:flex-row", align_cls, class.unwrap_or("")])
+    @let class_val = class.unwrap_or("")
+    @let actions_vec = vec!["flex flex-col-reverse gap-2 sm:flex-row", align_cls, class_val]
+    @let actions_cls = utils::cn(actions_vec)
 
     <div class="@actions_cls">
         @content()

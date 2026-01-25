@@ -58,7 +58,8 @@
     @let input_cls = "flex h-9 w-20 rounded-md border border-input bg-transparent px-3 py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
 
-    @let classes = &[@container_cls, @class.unwrap_or("")]
+    @let cls = class.unwrap_or("")
+    @let classes = vec![@container_cls, @cls]
 
     <div
         class="@utils::cn(@classes)"
@@ -186,7 +187,8 @@
     @let input_cls = "flex h-9 w-20 rounded-md border border-input bg-transparent px-3 py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
 
-    @let classes = &[@container_cls, @class.unwrap_or("")]
+    @let cls = class.unwrap_or("")
+    @let classes = vec![@container_cls, @cls]
 
     @let x_data_init = format!("{{ expanded: ({} !== null && {} !== null && {} !== {}) }}", model_min, model_max, model_min, model_max)
     @let input_handler = format!("{} = {}", model_max, model_min)

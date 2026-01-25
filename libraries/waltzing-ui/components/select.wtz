@@ -13,7 +13,7 @@
 
 @fn apply(
     name: &str,
-    options: &[SelectOption],
+    options: Vec<SelectOption>,
     selected: Option<&str>,
     placeholder: Option<&str>,
     disabled: bool,
@@ -23,11 +23,10 @@
 ) {
     @let base = "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 
-    @let error_cls = @if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-
+    @let cls = class.unwrap_or("")
     <select
         name="@name"
-        class="@utils::cn(&[@base, @error_cls, @class.unwrap_or("")])"
+        class="@base @if error.is_some() { border-destructive focus:ring-destructive } @cls"
         @if disabled { disabled }
         @if required { required }
         @if error.is_some() { aria-invalid="true" }
@@ -51,7 +50,7 @@
 @fn labeled(
     label: &str,
     name: &str,
-    options: &[SelectOption],
+    options: Vec<SelectOption>,
     selected: Option<&str>,
     placeholder: Option<&str>,
     disabled: bool,

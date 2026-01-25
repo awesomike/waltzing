@@ -62,7 +62,7 @@
 @** Searchable single-select dropdown **@
 @fn create(
     name: &str,
-    options: &[SelectOption],
+    options: Vec<SelectOption>,
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     search_placeholder: Option<&str> = None,
@@ -74,8 +74,9 @@
     class: Option<&str> = None,
 ) {
     @let trigger_base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-    @let error_cls = @if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @class.unwrap_or("")])
+    @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
+    @let cls = class.unwrap_or("")
+    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @cls])
 
     @let initial_label = {
         match selected {
@@ -87,13 +88,14 @@
     @let ph = placeholder.unwrap_or("Select...")
     @let search_ph = search_placeholder.unwrap_or("Search...")
     @let empty_msg = empty_message.unwrap_or("No results found.")
+    @let sel = selected.unwrap_or("")
 
     <div
         class="relative w-full"
         x-data="{
             open: false,
             search: '',
-            selected: '@selected.unwrap_or("")',
+            selected: '@sel',
             selectedLabel: '@initial_label',
             highlightedIndex: -1,
             get filteredOptions() {
@@ -221,20 +223,22 @@
                 class="max-h-60 overflow-auto p-1"
                 role="listbox"
             >
+                @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
+                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"
                         data-label="@opt.label"
                         @if let Some(desc) = &opt.description { data-description="@desc" }
                         @if opt.disabled { data-disabled="true" }
-                        class="@utils::cn(&["relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors", utils::class_if(opt.disabled, "pointer-events-none opacity-50")])"
+                        class="@option_cls"
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx || selected === '@opt.value',
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
                         }"
                         x-show="'@opt.label'.toLowerCase().includes(search.toLowerCase()) || '@opt.description.clone().unwrap_or_default()'.toLowerCase().includes(search.toLowerCase())"
-                        @@click="@if !opt.disabled { selectOption('@opt.value', '@opt.label') }"
+                        @@click="@if !opt.disabled { selectOption('@opt.value', '@opt.label') } else { }"
                         @@mouseenter="highlightedIndex = @idx"
                         role="option"
                         :aria-selected="selected === '@opt.value'"
@@ -282,8 +286,8 @@
 @** Searchable multi-select dropdown with tag display **@
 @fn create_multi(
     name: &str,
-    options: &[SelectOption],
-    selected: &[&str],
+    options: Vec<SelectOption>,
+    selected: Vec<String>,
     placeholder: Option<&str> = None,
     search_placeholder: Option<&str> = None,
     empty_message: Option<&str> = None,
@@ -294,9 +298,10 @@
     class: Option<&str> = None,
 ) {
     @let trigger_base = "flex min-h-9 w-full flex-wrap items-center gap-1 rounded-md border border-input bg-transparent px-3 py-1.5 text-sm shadow-sm ring-offset-background focus-within:outline-none focus-within:ring-1 focus-within:ring-ring"
-    @let error_cls = @if error.is_some() { "border-destructive focus-within:ring-destructive" } else { "" }
-    @let disabled_cls = @if disabled { "cursor-not-allowed opacity-50" } else { "" }
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @disabled_cls, @class.unwrap_or("")])
+    @let error_cls = if error.is_some() { "border-destructive focus-within:ring-destructive" } else { "" }
+    @let disabled_cls = if disabled { "cursor-not-allowed opacity-50" } else { "" }
+    @let cls = class.unwrap_or("")
+    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @disabled_cls, @cls])
 
     @let ph = placeholder.unwrap_or("Select...")
     @let search_ph = search_placeholder.unwrap_or("Search...")
@@ -310,7 +315,7 @@
     @* Build a map of values to labels for initial display *@
     @let initial_labels = {
         let labels: Vec<String> = options.iter()
-            .filter(|o| selected.contains(&o.value.as_str()))
+            .filter(|o| selected.iter().any(|s| s == &o.value))
             .map(|o| format!("'{}': '{}'", o.value, o.label))
             .collect();
         format!("{{{}}}", labels.join(", "))
@@ -485,20 +490,22 @@
                 role="listbox"
                 aria-multiselectable="true"
             >
+                @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
+                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"
                         data-label="@opt.label"
                         @if let Some(desc) = &opt.description { data-description="@desc" }
                         @if opt.disabled { data-disabled="true" }
-                        class="@utils::cn(&["relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors", utils::class_if(opt.disabled, "pointer-events-none opacity-50")])"
+                        class="@option_cls"
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx,
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
                         }"
                         x-show="'@opt.label'.toLowerCase().includes(search.toLowerCase()) || '@opt.description.clone().unwrap_or_default()'.toLowerCase().includes(search.toLowerCase())"
-                        @@click="@if !opt.disabled { toggleOption('@opt.value', '@opt.label') }"
+                        @@click="@if !opt.disabled { toggleOption('@opt.value', '@opt.label') } else { }"
                         @@mouseenter="highlightedIndex = @idx"
                         role="option"
                         :aria-selected="selected.includes('@opt.value')"
@@ -547,7 +554,7 @@
 @** Simple select without search (basic dropdown) **@
 @fn simple(
     name: &str,
-    options: &[SelectOption],
+    options: Vec<SelectOption>,
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     clearable: bool = false,
@@ -557,8 +564,9 @@
     class: Option<&str> = None,
 ) {
     @let trigger_base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-    @let error_cls = @if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @class.unwrap_or("")])
+    @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
+    @let cls = class.unwrap_or("")
+    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @cls])
 
     @let initial_label = {
         match selected {
@@ -568,12 +576,13 @@
     }
 
     @let ph = placeholder.unwrap_or("Select...")
+    @let sel = selected.unwrap_or("")
 
     <div
         class="relative w-full"
         x-data="{
             open: false,
-            selected: '@selected.unwrap_or("")',
+            selected: '@sel',
             selectedLabel: '@initial_label',
             highlightedIndex: -1,
             selectOption(value, label) {
@@ -669,18 +678,20 @@
         >
             @* Options list *@
             <div x-ref="optionsList" role="listbox">
+                @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
+                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"
                         data-label="@opt.label"
                         @if opt.disabled { data-disabled="true" }
-                        class="@utils::cn(&["relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors", utils::class_if(opt.disabled, "pointer-events-none opacity-50")])"
+                        class="@option_cls"
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx || selected === '@opt.value',
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
                         }"
-                        @@click="@if !opt.disabled { selectOption('@opt.value', '@opt.label') }"
+                        @@click="@if !opt.disabled { selectOption('@opt.value', '@opt.label') } else { }"
                         @@mouseenter="highlightedIndex = @idx"
                         role="option"
                         :aria-selected="selected === '@opt.value'"
@@ -720,7 +731,7 @@
 @** Edit mode - single select with inline editing appearance **@
 @fn edit(
     name: &str,
-    options: &[SelectOption],
+    options: Vec<SelectOption>,
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     search_placeholder: Option<&str> = None,
@@ -732,8 +743,9 @@
     class: Option<&str> = None,
 ) {
     @let trigger_base = "flex h-8 w-full items-center justify-between rounded border-0 border-transparent bg-transparent px-2 py-1 text-sm hover:bg-muted/50 focus:bg-background focus:ring-1 focus:ring-ring"
-    @let error_cls = @if error.is_some() { "ring-1 ring-destructive" } else { "" }
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @class.unwrap_or("")])
+    @let error_cls = if error.is_some() { "ring-1 ring-destructive" } else { "" }
+    @let cls = class.unwrap_or("")
+    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @cls])
 
     @let initial_label = {
         match selected {
@@ -745,13 +757,14 @@
     @let ph = placeholder.unwrap_or("Select...")
     @let search_ph = search_placeholder.unwrap_or("Search...")
     @let empty_msg = empty_message.unwrap_or("No results found.")
+    @let sel = selected.unwrap_or("")
 
     <div
         class="relative w-full"
         x-data="{
             open: false,
             search: '',
-            selected: '@selected.unwrap_or("")',
+            selected: '@sel',
             selectedLabel: '@initial_label',
             highlightedIndex: -1,
             get filteredOptions() {
@@ -878,19 +891,21 @@
                 class="max-h-48 overflow-auto p-1"
                 role="listbox"
             >
+                @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
+                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"
                         data-label="@opt.label"
                         @if opt.disabled { data-disabled="true" }
-                        class="@utils::cn(&["relative flex cursor-default select-none items-center rounded-sm px-2 py-1 text-sm outline-none transition-colors", utils::class_if(opt.disabled, "pointer-events-none opacity-50")])"
+                        class="@option_cls"
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx || selected === '@opt.value',
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
                         }"
                         x-show="'@opt.label'.toLowerCase().includes(search.toLowerCase())"
-                        @@click="@if !opt.disabled { selectOption('@opt.value', '@opt.label') }"
+                        @@click="@if !opt.disabled { selectOption('@opt.value', '@opt.label') } else { }"
                         @@mouseenter="highlightedIndex = @idx"
                         role="option"
                         :aria-selected="selected === '@opt.value'"
@@ -929,8 +944,8 @@
 @** Edit mode - multi-select with inline editing appearance **@
 @fn edit_multi(
     name: &str,
-    options: &[SelectOption],
-    selected: &[&str],
+    options: Vec<SelectOption>,
+    selected: Vec<String>,
     placeholder: Option<&str> = None,
     search_placeholder: Option<&str> = None,
     empty_message: Option<&str> = None,
@@ -941,8 +956,9 @@
     class: Option<&str> = None,
 ) {
     @let trigger_base = "flex min-h-8 w-full flex-wrap items-center gap-1 rounded border-0 border-transparent bg-transparent px-2 py-1 text-sm hover:bg-muted/50 focus-within:bg-background focus-within:ring-1 focus-within:ring-ring"
-    @let error_cls = @if error.is_some() { "ring-1 ring-destructive" } else { "" }
-    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @class.unwrap_or("")])
+    @let error_cls = if error.is_some() { "ring-1 ring-destructive" } else { "" }
+    @let cls = class.unwrap_or("")
+    @let trigger_cls = utils::cn(&[@trigger_base, @error_cls, @cls])
 
     @let ph = placeholder.unwrap_or("Select...")
     @let search_ph = search_placeholder.unwrap_or("Search...")
@@ -955,7 +971,7 @@
 
     @let initial_labels = {
         let labels: Vec<String> = options.iter()
-            .filter(|o| selected.contains(&o.value.as_str()))
+            .filter(|o| selected.iter().any(|s| s == &o.value))
             .map(|o| format!("'{}': '{}'", o.value, o.label))
             .collect();
         format!("{{{}}}", labels.join(", "))
@@ -1129,19 +1145,21 @@
                 role="listbox"
                 aria-multiselectable="true"
             >
+                @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1 text-sm outline-none transition-colors"
                 @for (idx, opt) in options.iter().enumerate() {
+                    @let option_cls = utils::cn(&[@option_base, utils::class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
                         data-value="@opt.value"
                         data-label="@opt.label"
                         @if opt.disabled { data-disabled="true" }
-                        class="@utils::cn(&["relative flex cursor-default select-none items-center rounded-sm px-2 py-1 text-sm outline-none transition-colors", utils::class_if(opt.disabled, "pointer-events-none opacity-50")])"
+                        class="@option_cls"
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx,
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
                         }"
                         x-show="'@opt.label'.toLowerCase().includes(search.toLowerCase())"
-                        @@click="@if !opt.disabled { toggleOption('@opt.value', '@opt.label') }"
+                        @@click="@if !opt.disabled { toggleOption('@opt.value', '@opt.label') } else { }"
                         @@mouseenter="highlightedIndex = @idx"
                         role="option"
                         :aria-selected="selected.includes('@opt.value')"
@@ -1183,7 +1201,7 @@
 @fn labeled(
     label: &str,
     name: &str,
-    options: &[SelectOption],
+    options: Vec<SelectOption>,
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     search_placeholder: Option<&str> = None,
@@ -1222,8 +1240,8 @@
 @fn labeled_multi(
     label: &str,
     name: &str,
-    options: &[SelectOption],
-    selected: &[&str],
+    options: Vec<SelectOption>,
+    selected: Vec<String>,
     placeholder: Option<&str> = None,
     search_placeholder: Option<&str> = None,
     empty_message: Option<&str> = None,

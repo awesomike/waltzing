@@ -47,20 +47,22 @@
     class: Option<&str> = None,
     content: @(),
 ) {
-    @let is_horizontal = @match direction {
-        Direction::Horizontal => { "true" }
-        Direction::Vertical => { "false" }
+    @let is_horizontal = match direction {
+        Direction::Horizontal => "true",
+        Direction::Vertical => "false",
     }
 
-    @let container_cls = @match direction {
-        Direction::Horizontal => { "flex h-full w-full" }
-        Direction::Vertical => { "flex flex-col h-full w-full" }
+    @let container_cls = match direction {
+        Direction::Horizontal => "flex h-full w-full",
+        Direction::Vertical => "flex flex-col h-full w-full",
     }
 
+    @let cls = class.unwrap_or("")
+    @let container_classes = vec![container_cls, cls]
     <div
-        x-data=@format!("resizableGroup({})", is_horizontal)
+        x-data="resizableGroup(@is_horizontal)"
         x-ref="container"
-        class=@cn(&[container_cls, class.unwrap_or("")])
+        class="@utils::cn(@container_classes)"
         data-resizable-group
     >
         @content()
@@ -79,8 +81,10 @@
     @let min_val = min_size.unwrap_or(0.0)
     @let max_val = max_size.unwrap_or(100.0)
 
+    @let cls = class.unwrap_or("")
+    @let panel_classes = vec![base, cls]
     <div
-        class=@cn(&[base, class.unwrap_or("")])
+        class="@utils::cn(@panel_classes)"
         style=@format!("flex-basis: {}%; flex-shrink: 0; flex-grow: 0;", default_size)
         data-resizable-panel
         data-min-size=@min_val
@@ -94,8 +98,10 @@
 @fn handle(class: Option<&str> = None) {
     @let base = "relative flex items-center justify-center bg-border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1"
 
+    @let cls = class.unwrap_or("")
+    @let handle_classes = vec![base, cls]
     <div
-        class=@cn(&[base, class.unwrap_or("")])
+        class="@utils::cn(@handle_classes)"
         :data-horizontal="isHorizontal"
         :data-vertical="!isHorizontal"
         :class="isHorizontal ? 'w-px cursor-col-resize' : 'h-px cursor-row-resize'"

@@ -25,7 +25,7 @@
     error: Option<&str>,
     class: Option<&str>,
 ) {
-    @let type_str = @match input_type {
+    @let type_str = match input_type {
         InputType::Text => { "text" }
         InputType::Email => { "email" }
         InputType::Password => { "password" }
@@ -37,9 +37,10 @@
 
     @let base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 
-    @let error_cls = @if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
+    @let error_cls = if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
 
-    @let classes = &[@base, @error_cls, @class.unwrap_or("")]
+    @let extra_class = class.unwrap_or("")
+    @let classes = vec![@base, @error_cls, @extra_class]
 
     <input
         type="@type_str"

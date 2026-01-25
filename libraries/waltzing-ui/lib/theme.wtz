@@ -98,7 +98,8 @@
 @* Toggle button for switching between light and dark mode *@
 @fn toggle_button(class: Option<&str> = None) {
     @let base = "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-    @let classes = &[@base, @class.unwrap_or("")]
+    @let cls = class.unwrap_or("")
+    @let classes = vec![@base, @cls]
 
     <button
         type="button"
@@ -157,7 +158,8 @@
 @* Dropdown selector for light/dark/system modes *@
 @fn mode_selector(class: Option<&str> = None) {
     @let base = "relative inline-block text-left"
-    @let classes = &[@base, @class.unwrap_or("")]
+    @let cls = class.unwrap_or("")
+    @let classes = vec![@base, @cls]
 
     <div
         class="@utils::cn(@classes)"

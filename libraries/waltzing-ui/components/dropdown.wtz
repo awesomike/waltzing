@@ -16,7 +16,7 @@
     trigger: @(),
     content: @(),
 ) {
-    @let align_cls = @match align {
+    @let align_cls = match align {
         Align::Start => { "left-0" }
         Align::Center => { "left-1/2 -translate-x-1/2" }
         Align::End => { "right-0" }
@@ -29,6 +29,7 @@
         </div>
 
         @* Dropdown content *@
+        @let classes = vec!["absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md", @align_cls]
         <div
             x-show="open"
             x-transition:enter="transition ease-out duration-100"
@@ -39,7 +40,7 @@
             x-transition:leave-end="transform opacity-0 scale-95"
             @click.away="open = false"
             @keydown.escape.window="open = false"
-            class="@utils::cn(&["absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md", @align_cls])"
+            class="@utils::cn(@classes)"
             style="display: none;"
             role="menu"
         >
@@ -51,11 +52,13 @@
 @* Dropdown menu item *@
 @fn item(
     disabled: bool,
-    class: Option<&str>,
+    class: Option<String>,
     content: @(),
 ) {
+    @let extra_class = class.unwrap_or_default()
+    @let classes = vec!["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @utils::class_if(@disabled, "pointer-events-none opacity-50"), @extra_class]
     <button
-        class="@utils::cn(&["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @utils::class_if(@disabled, "pointer-events-none opacity-50"), @class.unwrap_or("")])"
+        class="@utils::cn(@classes)"
         role="menuitem"
         @if disabled { disabled }
         @click="open = false"
@@ -66,13 +69,15 @@
 
 @* Dropdown link item *@
 @fn link(
-    href: &str,
-    class: Option<&str>,
+    href: String,
+    class: Option<String>,
     content: @(),
 ) {
+    @let extra_class = class.unwrap_or_default()
+    @let classes = vec!["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @extra_class]
     <a
         href="@href"
-        class="@utils::cn(&["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", @class.unwrap_or("")])"
+        class="@utils::cn(@classes)"
         role="menuitem"
         @click="open = false"
     >

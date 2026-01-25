@@ -32,8 +32,9 @@
     on_confirm: Option<&str>,
 ) {
     @let confirm_base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2"
-    @let confirm_variant = @(if destructive { "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90" } else { "bg-primary text-primary-foreground shadow hover:bg-primary/90" })
-    @let confirm_classes = &[@confirm_base, @confirm_variant]
+    @let confirm_variant = if destructive { "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90" } else { "bg-primary text-primary-foreground shadow hover:bg-primary/90" }
+    @let confirm_classes_vec = vec![@confirm_base, @confirm_variant]
+    @let confirm_classes = &confirm_classes_vec
 
     <div x-data="{ open: false }">
         @* Trigger *@
@@ -117,8 +118,9 @@
     on_confirm: Option<&str>,
 ) {
     @let confirm_base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2"
-    @let confirm_variant = @(if destructive { "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90" } else { "bg-primary text-primary-foreground shadow hover:bg-primary/90" })
-    @let confirm_classes = &[@confirm_base, @confirm_variant]
+    @let confirm_variant = if destructive { "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90" } else { "bg-primary text-primary-foreground shadow hover:bg-primary/90" }
+    @let confirm_classes_vec = vec![@confirm_base, @confirm_variant]
+    @let confirm_classes = &confirm_classes_vec
 
     <template x-teleport="body">
         <div

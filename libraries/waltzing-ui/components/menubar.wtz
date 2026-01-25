@@ -35,8 +35,10 @@
     content: @(),
 ) {
     @let base = "flex h-9 items-center space-x-1 rounded-md border bg-background p-1 shadow-sm"
-    @let cls = class.unwrap_or("")
-    @let classes = utils::cn(&[@base, @cls])
+    @let empty = ""
+    @let cls = class.unwrap_or(@empty)
+    @let parts = vec![@base, @cls]
+    @let classes = utils::cn(@parts)
 
     <div
         class=@classes
@@ -105,7 +107,8 @@
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
     @let disabled_cls = utils::class_if(disabled, "pointer-events-none opacity-50")
-    @let classes = utils::cn(&[@base, @disabled_cls])
+    @let parts = vec![@base, @disabled_cls]
+    @let classes = utils::cn(@parts)
 
     <button
         type="button"
@@ -133,7 +136,7 @@
     label: &str,
     checked: bool,
 ) {
-    @let data_state = @if checked { "checked" } else { "unchecked" }
+    @let data_state = if checked { "checked" } else { "unchecked" }
 
     <button
         type="button"
@@ -171,7 +174,8 @@
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
     @let disabled_cls = utils::class_if(disabled, "pointer-events-none opacity-50")
-    @let classes = utils::cn(&[@base, @disabled_cls])
+    @let parts = vec![@base, @disabled_cls]
+    @let classes = utils::cn(@parts)
 
     <button
         type="button"

@@ -34,21 +34,23 @@
     class: Option<&str> = None,
 ) {
     @let initial_value = value.unwrap_or(0.0)
-    @let min_str = @if let Some(m) = min { @m.to_string() } else { "null" }
-    @let max_str = @if let Some(m) = max { @m.to_string() } else { "null" }
+    @let min_str = if let Some(m) = min { m.to_string() } else { "null".to_string() }
+    @let max_str = if let Some(m) = max { m.to_string() } else { "null".to_string() }
 
     @let container_base = "flex items-center"
-    @let disabled_cls = @if disabled { "opacity-50 cursor-not-allowed" } else { "" }
+    @let disabled_cls = if disabled { "opacity-50 cursor-not-allowed" } else { "" }
 
     @let input_base = "h-9 w-full text-center text-sm border-y border-input bg-transparent focus:outline-none focus:ring-1 focus:ring-ring [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-    @let input_disabled = @if disabled { "cursor-not-allowed" } else { "" }
+    @let input_disabled = if disabled { "cursor-not-allowed" } else { "" }
 
     @let btn_base = "inline-flex h-9 w-9 items-center justify-center border border-input bg-background text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
     @let btn_left = "rounded-l-md border-r-0"
     @let btn_right = "rounded-r-md border-l-0"
 
+    @let cls = class.unwrap_or("")
+    @let container_classes = vec![container_base, disabled_cls, cls]
     <div
-        class=@utils::cn(&[container_base, disabled_cls, class.unwrap_or("")])
+        class="@utils::cn(@container_classes)"
         x-data=@```json {
             value: @initial_value,
             min: @min_str,
@@ -75,10 +77,11 @@
         @* Hidden input for form submission *@
         <input type="hidden" name="@name" :value="value" />
 
+        @let btn_left_classes = vec![btn_base, btn_left]
         @* Decrement button *@
         <button
             type="button"
-            class=@utils::cn(&[btn_base, btn_left])
+            class="@utils::cn(@btn_left_classes)"
             @@click="decrement()"
             :disabled="min !== null && value <= min"
             @if disabled { disabled }
@@ -89,10 +92,11 @@
             </svg>
         </button>
 
+        @let input_classes = vec![input_base, input_disabled]
         @* Number input *@
         <input
             type="number"
-            class=@utils::cn(&[input_base, input_disabled])
+            class="@utils::cn(@input_classes)"
             :value="value"
             @@change="handleInput($event)"
             @@keydown.up.prevent="increment()"
@@ -104,10 +108,11 @@
             aria-label="@name"
         />
 
+        @let btn_right_classes = vec![btn_base, btn_right]
         @* Increment button *@
         <button
             type="button"
-            class=@utils::cn(&[btn_base, btn_right])
+            class="@utils::cn(@btn_right_classes)"
             @@click="increment()"
             :disabled="max !== null && value >= max"
             @if disabled { disabled }
@@ -131,21 +136,23 @@
     class: Option<&str> = None,
 ) {
     @let initial_value = value.unwrap_or(0.0)
-    @let min_str = @if let Some(m) = min { @m.to_string() } else { "null" }
-    @let max_str = @if let Some(m) = max { @m.to_string() } else { "null" }
+    @let min_str = if let Some(m) = min { m.to_string() } else { "null".to_string() }
+    @let max_str = if let Some(m) = max { m.to_string() } else { "null".to_string() }
 
     @let container_base = "flex items-center"
-    @let disabled_cls = @if disabled { "opacity-50 cursor-not-allowed" } else { "" }
+    @let disabled_cls = if disabled { "opacity-50 cursor-not-allowed" } else { "" }
 
     @let input_base = "h-9 w-full text-center text-sm border-y border-input bg-transparent focus:outline-none focus:ring-1 focus:ring-ring [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-    @let input_disabled = @if disabled { "cursor-not-allowed" } else { "" }
+    @let input_disabled = if disabled { "cursor-not-allowed" } else { "" }
 
     @let btn_base = "inline-flex h-9 w-9 items-center justify-center border border-input bg-background text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
     @let btn_left = "rounded-l-md border-r-0"
     @let btn_right = "rounded-r-md border-l-0"
 
+    @let cls = class.unwrap_or("")
+    @let container_classes = vec![container_base, disabled_cls, cls]
     <div
-        class=@utils::cn(&[container_base, disabled_cls, class.unwrap_or("")])
+        class="@utils::cn(@container_classes)"
         x-data=@```json {
             min: @min_str,
             max: @max_str,
@@ -170,10 +177,11 @@
             }
         } ```@
     >
+        @let btn_left_classes2 = vec![btn_base, btn_left]
         @* Decrement button *@
         <button
             type="button"
-            class=@utils::cn(&[btn_base, btn_left])
+            class="@utils::cn(@btn_left_classes2)"
             @@click="decrement()"
             :disabled="min !== null && @x_model <= min"
             @if disabled { disabled }
@@ -184,10 +192,11 @@
             </svg>
         </button>
 
+        @let input_classes2 = vec![input_base, input_disabled]
         @* Number input with x-model binding *@
         <input
             type="number"
-            class=@utils::cn(&[input_base, input_disabled])
+            class="@utils::cn(@input_classes2)"
             x-model.number="@x_model"
             @@change="@x_model = clamp($event.target.value)"
             @@keydown.up.prevent="increment()"
@@ -198,10 +207,11 @@
             @if disabled { disabled }
         />
 
+        @let btn_right_classes2 = vec![btn_base, btn_right]
         @* Increment button *@
         <button
             type="button"
-            class=@utils::cn(&[btn_base, btn_right])
+            class="@utils::cn(@btn_right_classes2)"
             @@click="increment()"
             :disabled="max !== null && @x_model >= max"
             @if disabled { disabled }
@@ -228,10 +238,11 @@
     class: Option<&str> = None,
 ) {
     @let label_cls = "text-sm font-medium leading-none"
-    @let disabled_label = @if disabled { "opacity-70" } else { "" }
+    @let disabled_label = if disabled { "opacity-70" } else { "" }
 
+    @let label_classes = vec![label_cls, disabled_label]
     <div class="space-y-2">
-        <label for="@name" class=@utils::cn(&[label_cls, disabled_label])>
+        <label for="@name" class="@utils::cn(@label_classes)">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>

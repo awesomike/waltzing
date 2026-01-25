@@ -15,28 +15,30 @@
 
 @fn apply(class: Option<&str>) {
     @let base = "animate-pulse rounded-md bg-muted"
+    @let extra = class.unwrap_or("")
+    @let classes = vec![@base, @extra]
 
-    <div class="@utils::cn(&[@base, @class.unwrap_or("")])"></div>
+    <div class="@utils::cn(@classes)"></div>
 }
 
 @* Circular skeleton (for avatars, icons) *@
 @fn circle(size: &str) {
     @let base = "animate-pulse rounded-full bg-muted"
+    @let classes = vec![@base, @size]
 
-    <div class="@utils::cn(&[@base, @size])"></div>
+    <div class="@utils::cn(@classes)"></div>
 }
 
 @* Multiple line text skeleton *@
 @fn text(lines: u32) {
-    @let base = "animate-pulse rounded-md bg-muted h-4"
-
+    @let last = (lines - 1)
     <div class="space-y-2">
         @for i in 0..lines {
-            @if (i == (lines - 1)) {
-                @* Last line is shorter *@
-                <div class="@utils::cn(&[@base, "w-3/4"])"></div>
-            } @else {
-                <div class="@utils::cn(&[@base, "w-full"])"></div>
+            @if (i == last) {
+                <div class="animate-pulse rounded-md bg-muted h-4 w-3/4"></div>
+            }
+            @if (i != last) {
+                <div class="animate-pulse rounded-md bg-muted h-4 w-full"></div>
             }
         }
     </div>

@@ -10,10 +10,10 @@
  *       breadcrumb::BreadcrumbItem { label: "Products".to_string(), href: Some("/products".to_string()) },
  *       breadcrumb::BreadcrumbItem { label: "Widgets".to_string(), href: None },
  *   ]
- *   <@breadcrumb::apply items=&items />
+ *   <@breadcrumb::apply items=items />
  *
  *   With custom separator:
- *   <@breadcrumb::apply items=&items separator=Some(">") />
+ *   <@breadcrumb::apply items=items separator_text=Some(">") />
  *
  *   Or build manually with components:
  *   <@breadcrumb::root>
@@ -129,20 +129,20 @@
 
 @* High-level apply function that renders a list of items *@
 @fn apply(
-    items: &[BreadcrumbItem],
-    separator: Option<&str> = None,
+    items: Vec<BreadcrumbItem>,
+    separator_text: Option<&str> = None,
     class: Option<&str> = None,
 ) {
     <@root class=@class>
         <@list>
             @for (i, item) in items.iter().enumerate() {
                 @if i > 0 {
-                    <@separator text=@separator />
+                    <@separator text=@separator_text />
                 }
                 <@item>
-                    @if item.href.is_some() {
-                        <@link href=@item.href.as_ref().unwrap()>@item.label</@>
-                    } @else {
+                    @if let Some(ref href) = item.href {
+                        <@link href=@href>@item.label</@>
+                    } else {
                         <@page>@item.label</@>
                     }
                 </@>

@@ -38,7 +38,7 @@
 @* Single selection toggle group - only one item can be selected at a time *@
 @fn single(
     name: &str,
-    items: &[ToggleItem],
+    items: Vec<ToggleItem>,
     selected: Option<&str>,
     variant: Variant,
     size: Size,
@@ -46,20 +46,25 @@
 ) {
     @let group_base = "inline-flex items-center rounded-md"
 
-    @let variant_cls = @match variant {
-        Variant::Default => { "bg-transparent" }
-        Variant::Outline => { "border border-input" }
+    @let variant_cls = {
+        match variant {
+            Variant::Default => "bg-transparent",
+            Variant::Outline => "border border-input",
+        }
     }
 
-    @let selected_json = @if let Some(s) = selected {
-        format!("'{}'", s)
-    } else {
-        "null".to_string()
+    @let selected_json = {
+        if let Some(s) = selected {
+            format!("'{}'", s)
+        } else {
+            "null".to_string()
+        }
     }
 
+    @let cls = class.unwrap_or("")
     <div
         role="group"
-        class="@utils::cn(&[@group_base, @variant_cls, @class.unwrap_or("")])"
+        class="@utils::cn(&[@group_base, @variant_cls, @cls])"
         x-data=@```json { selected: @selected_json } ```@
     >
         @for (idx, item) in items.iter().enumerate() {
@@ -70,25 +75,29 @@
 
             @let base = "inline-flex items-center justify-center text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
 
-            @let size_cls = @match size {
-                Size::Sm => { "h-8 px-2.5 min-w-8" }
-                Size::Default => { "h-9 px-3 min-w-9" }
-                Size::Lg => { "h-10 px-3 min-w-10" }
+            @let size_cls = {
+                match size {
+                    Size::Sm => "h-8 px-2.5 min-w-8",
+                    Size::Default => "h-9 px-3 min-w-9",
+                    Size::Lg => "h-10 px-3 min-w-10",
+                }
             }
 
-            @let position_cls = @if (is_first) && (is_last) {
-                "rounded-md"
-            } else if is_first {
-                "rounded-l-md rounded-r-none"
-            } else if is_last {
-                "rounded-l-none rounded-r-md"
-            } else {
-                "rounded-none"
+            @let position_cls = {
+                if is_first && is_last {
+                    "rounded-md"
+                } else if is_first {
+                    "rounded-l-md rounded-r-none"
+                } else if is_last {
+                    "rounded-l-none rounded-r-md"
+                } else {
+                    "rounded-none"
+                }
             }
 
-            @let selected_cls = @if is_selected { "bg-accent text-accent-foreground" } else { "bg-transparent" }
-            @let aria_pressed_val = @if is_selected { "true" } else { "false" }
-            @let data_state_val = @if is_selected { "on" } else { "off" }
+            @let selected_cls = { if is_selected { "bg-accent text-accent-foreground" } else { "bg-transparent" } }
+            @let aria_pressed_val = { if is_selected { "true" } else { "false" } }
+            @let data_state_val = { if is_selected { "on" } else { "off" } }
 
             <button
                 type="button"
@@ -105,7 +114,8 @@
                 :class="selected === '@item.value' ? 'bg-accent text-accent-foreground' : 'bg-transparent'"
             >
                 @if let Some(icon) = &item.icon {
-                    <span class="@if !item.label.is_empty() { "mr-2" } else { "" }">@icon</span>
+                    @let icon_margin = { if !item.label.is_empty() { "mr-2" } else { "" } }
+                    <span class="@icon_margin">@icon</span>
                 }
                 @item.label
             </button>
@@ -117,27 +127,27 @@
 @* Multiple selection toggle group - multiple items can be selected *@
 @fn multiple(
     name: &str,
-    items: &[ToggleItem],
-    selected: &[&str],
+    items: Vec<ToggleItem>,
+    selected: Vec<&str>,
     variant: Variant,
     size: Size,
     class: Option<&str>,
 ) {
     @let group_base = "inline-flex items-center rounded-md"
 
-    @let variant_cls = @match variant {
-        Variant::Default => { "bg-transparent" }
-        Variant::Outline => { "border border-input" }
+    @let variant_cls = {
+        match variant {
+            Variant::Default => "bg-transparent",
+            Variant::Outline => "border border-input",
+        }
     }
 
-    @let selected_json = {
-        let vals: Vec<String> = selected.iter().map(|s| format!("'{}'", s)).collect();
-        format!("[{}]", vals.join(", "))
-    }
+    @let selected_json = format!("[{}]", selected.iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(", "))
 
+    @let cls = class.unwrap_or("")
     <div
         role="group"
-        class="@utils::cn(&[@group_base, @variant_cls, @class.unwrap_or("")])"
+        class="@utils::cn(&[@group_base, @variant_cls, @cls])"
         x-data=@```json { selected: @selected_json } ```@
     >
         @for (idx, item) in items.iter().enumerate() {
@@ -148,25 +158,29 @@
 
             @let base = "inline-flex items-center justify-center text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
 
-            @let size_cls = @match size {
-                Size::Sm => { "h-8 px-2.5 min-w-8" }
-                Size::Default => { "h-9 px-3 min-w-9" }
-                Size::Lg => { "h-10 px-3 min-w-10" }
+            @let size_cls = {
+                match size {
+                    Size::Sm => "h-8 px-2.5 min-w-8",
+                    Size::Default => "h-9 px-3 min-w-9",
+                    Size::Lg => "h-10 px-3 min-w-10",
+                }
             }
 
-            @let position_cls = @if (is_first) && (is_last) {
-                "rounded-md"
-            } else if is_first {
-                "rounded-l-md rounded-r-none"
-            } else if is_last {
-                "rounded-l-none rounded-r-md"
-            } else {
-                "rounded-none"
+            @let position_cls = {
+                if is_first && is_last {
+                    "rounded-md"
+                } else if is_first {
+                    "rounded-l-md rounded-r-none"
+                } else if is_last {
+                    "rounded-l-none rounded-r-md"
+                } else {
+                    "rounded-none"
+                }
             }
 
-            @let selected_cls = @if is_selected { "bg-accent text-accent-foreground" } else { "bg-transparent" }
-            @let aria_pressed_val = @if is_selected { "true" } else { "false" }
-            @let data_state_val = @if is_selected { "on" } else { "off" }
+            @let selected_cls = { if is_selected { "bg-accent text-accent-foreground" } else { "bg-transparent" } }
+            @let aria_pressed_val = { if is_selected { "true" } else { "false" } }
+            @let data_state_val = { if is_selected { "on" } else { "off" } }
 
             <button
                 type="button"
@@ -183,7 +197,8 @@
                 :class="selected.includes('@item.value') ? 'bg-accent text-accent-foreground' : 'bg-transparent'"
             >
                 @if let Some(icon) = &item.icon {
-                    <span class="@if !item.label.is_empty() { "mr-2" } else { "" }">@icon</span>
+                    @let icon_margin = { if !item.label.is_empty() { "mr-2" } else { "" } }
+                    <span class="@icon_margin">@icon</span>
                 }
                 @item.label
             </button>
@@ -195,7 +210,7 @@
 @* Simple single selection with default styling *@
 @fn simple_single(
     name: &str,
-    items: &[ToggleItem],
+    items: Vec<ToggleItem>,
     selected: Option<&str>,
     class: Option<&str>,
 ) {
@@ -212,8 +227,8 @@
 @* Simple multiple selection with default styling *@
 @fn simple_multiple(
     name: &str,
-    items: &[ToggleItem],
-    selected: &[&str],
+    items: Vec<ToggleItem>,
+    selected: Vec<&str>,
     class: Option<&str>,
 ) {
     <@multiple
@@ -229,7 +244,7 @@
 @* Outline variant single selection *@
 @fn outline_single(
     name: &str,
-    items: &[ToggleItem],
+    items: Vec<ToggleItem>,
     selected: Option<&str>,
     class: Option<&str>,
 ) {
@@ -246,8 +261,8 @@
 @* Outline variant multiple selection *@
 @fn outline_multiple(
     name: &str,
-    items: &[ToggleItem],
-    selected: &[&str],
+    items: Vec<ToggleItem>,
+    selected: Vec<&str>,
     class: Option<&str>,
 ) {
     <@multiple
@@ -263,7 +278,7 @@
 @* Small single selection *@
 @fn sm_single(
     name: &str,
-    items: &[ToggleItem],
+    items: Vec<ToggleItem>,
     selected: Option<&str>,
     class: Option<&str>,
 ) {
@@ -280,7 +295,7 @@
 @* Large single selection *@
 @fn lg_single(
     name: &str,
-    items: &[ToggleItem],
+    items: Vec<ToggleItem>,
     selected: Option<&str>,
     class: Option<&str>,
 ) {
