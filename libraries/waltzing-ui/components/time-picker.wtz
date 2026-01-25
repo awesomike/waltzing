@@ -2,39 +2,32 @@
  * Time Picker component
  * A time input with hour, minute, and optional seconds selection
  * Uses Alpine.js for interactive time picking with popover
+ * Supports format toggle between HH:MM and HH:MM:SS
  *
  * Usage:
- *   import components/time-picker.wtz as time_picker
+ *   @import components/time-picker.wtz as time_picker
  *
  *   Basic 24-hour time picker:
- *   time_picker::apply(name="start_time", value=Some("14:30"))
+ *   <@time_picker::apply name="start_time" value=Some("14:30") />
  *
  *   12-hour format with seconds:
- *   time_picker::apply(
- *       name="alarm_time",
- *       value=None,
- *       precision=Precision::HoursMinutesSeconds,
- *       format=Format::TwelveHour,
- *       minute_step=5,
- *       show_now_button=true,
- *       now_button_label="Current Time"
- *   )
+ *   <@time_picker::apply
+ *       name="alarm_time"
+ *       value=None
+ *       format=time_picker::Format::TwelveHour
+ *       include_seconds=true
+ *       minute_step=5
+ *   />
  *
  *   With label:
- *   time_picker::labeled(
- *       label="Meeting Time",
- *       name="meeting_time",
- *       value=Some("09:00"),
+ *   <@time_picker::labeled
+ *       label="Meeting Time"
+ *       name="meeting_time"
+ *       value=Some("09:00")
  *       required=true
- *   )
+ *   />
  **@
 
-
-@enum Precision {
-    HoursOnly,
-    HoursMinutes,
-    HoursMinutesSeconds,
-}
 
 @enum Format {
     TwelveHour,
@@ -43,55 +36,80 @@
 
 @fn apply(
     name: &str,
-    value: Option<&str>,
-    precision: Precision = Precision::HoursMinutes,
+    value: Option<&str> = None,
     format: Format = Format::TwentyFourHour,
+    include_seconds: bool = false,
     minute_step: u8 = 1,
     second_step: u8 = 1,
     disabled: bool = false,
-    required: bool = false,
-    show_now_button: bool = false,
-    now_button_label: &str = "Now",
-    placeholder: &str = "Select time",
+    placeholder: Option<&str> = None,
     error: Option<&str> = None,
     class: Option<&str> = None,
 ) {
-    @let include_seconds = { matches!(precision, Precision::HoursMinutesSeconds) }
-    @let hours_only = { matches!(precision, Precision::HoursOnly) }
     @let use_12h = { matches!(format, Format::TwelveHour) }
     @let max_hour = { if use_12h { 12 } else { 23 } }
     @let min_hour = { if use_12h { 1 } else { 0 } }
-
-    @let base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-    @let error_cls = if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
-    @let custom_cls = class.unwrap_or("")
-    @let classes = vec![@base, @error_cls, @custom_cls]
-
+    @let placeholder_text = placeholder.unwrap_or("Select time")
     @let initial_value = value.unwrap_or("")
 
+    @let input_cls = cn(&[
+        "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors",
+        "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+        "disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer pr-10",
+        if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" },
+        class.unwrap_or("")
+    ])
+
     <div
-        class="relative"
+        class="inline-block w-full"
         x-data="{
             open: false,
             value: '@initial_value',
+            displayValue: '',
             hour: 12,
             minute: 0,
             second: 0,
             period: 'AM',
             use12h: @use_12h,
             includeSeconds: @include_seconds,
-            hoursOnly: @hours_only,
             minuteStep: @minute_step,
             secondStep: @second_step,
             maxHour: @max_hour,
             minHour: @min_hour,
+            pos: { x: 0, y: 0, width: 0 },
+            flipTop: false,
+
+            updatePos() {
+                const trigger = this.$refs.trigger;
+                if (!trigger) return;
+                const rect = trigger.getBoundingClientRect();
+                const pickerHeight = 280;
+                const spaceBelow = window.innerHeight - rect.bottom;
+                const spaceAbove = rect.top;
+                this.flipTop = spaceBelow < pickerHeight && spaceAbove > spaceBelow;
+                this.pos.x = rect.left;
+                this.pos.y = this.flipTop ? rect.top : rect.bottom;
+                this.pos.width = rect.width;
+            },
+
+            onScroll() { if (this.open) this.updatePos(); },
 
             init() {
+                this._scrollHandler = () => this.onScroll();
+                window.addEventListener('scroll', this._scrollHandler, true);
+                window.addEventListener('resize', this._scrollHandler);
+
                 if (this.value) {
                     this.parseTime(this.value);
                 } else {
                     this.hour = this.use12h ? 12 : 0;
                 }
+                this.updateDisplayValue();
+            },
+
+            destroy() {
+                window.removeEventListener('scroll', this._scrollHandler, true);
+                window.removeEventListener('resize', this._scrollHandler);
             },
 
             parseTime(timeStr) {
@@ -109,12 +127,14 @@
                 if (parts.length >= 2) {
                     this.minute = parseInt(parts[1], 10) || 0;
                 }
-                if (parts.length >= 3 && this.includeSeconds) {
+                if (parts.length >= 3) {
                     this.second = parseInt(parts[2], 10) || 0;
+                    this.includeSeconds = true;
                 }
+                this.updateDisplayValue();
             },
 
-            formatTime() {
+            formatTime24h() {
                 let h = this.hour;
                 if (this.use12h) {
                     h = this.hour % 12;
@@ -126,32 +146,35 @@
                 const mStr = this.minute.toString().padStart(2, '0');
                 const sStr = this.second.toString().padStart(2, '0');
 
-                if (this.hoursOnly) {
-                    return hStr + ':00';
-                } else if (this.includeSeconds) {
+                if (this.includeSeconds) {
                     return `${hStr}:${mStr}:${sStr}`;
-                } else {
-                    return `${hStr}:${mStr}`;
                 }
+                return `${hStr}:${mStr}`;
             },
 
-            displayTime() {
-                if (!this.value) return '';
+            updateDisplayValue() {
+                if (!this.value && this.hour === (this.use12h ? 12 : 0) && this.minute === 0 && this.second === 0) {
+                    this.displayValue = '';
+                    return;
+                }
                 const hStr = this.hour.toString().padStart(2, '0');
                 const mStr = this.minute.toString().padStart(2, '0');
                 const sStr = this.second.toString().padStart(2, '0');
 
-                if (this.hoursOnly) {
-                    return this.use12h ? `${hStr} ${this.period}` : hStr;
-                } else if (this.includeSeconds) {
-                    return this.use12h ? `${hStr}:${mStr}:${sStr} ${this.period}` : `${hStr}:${mStr}:${sStr}`;
+                if (this.includeSeconds) {
+                    this.displayValue = this.use12h
+                        ? `${hStr}:${mStr}:${sStr} ${this.period}`
+                        : `${hStr}:${mStr}:${sStr}`;
                 } else {
-                    return this.use12h ? `${hStr}:${mStr} ${this.period}` : `${hStr}:${mStr}`;
+                    this.displayValue = this.use12h
+                        ? `${hStr}:${mStr} ${this.period}`
+                        : `${hStr}:${mStr}`;
                 }
             },
 
             selectTime() {
-                this.value = this.formatTime();
+                this.value = this.formatTime24h();
+                this.updateDisplayValue();
                 this.open = false;
             },
 
@@ -166,6 +189,7 @@
                 this.hour = h;
                 this.minute = now.getMinutes();
                 this.second = now.getSeconds();
+                this.updateDisplayValue();
             },
 
             incrementHour() {
@@ -204,176 +228,214 @@
 
             togglePeriod() {
                 this.period = this.period === 'AM' ? 'PM' : 'AM';
+            },
+
+            toggleSeconds() {
+                this.includeSeconds = !this.includeSeconds;
+                if (!this.includeSeconds) {
+                    this.second = 0;
+                }
             }
         }"
-        @click.outside="open = false"
-        @keydown.escape.window="open = false"
+        x-init="init()"
+        @@destroy="destroy()"
     >
-        @* Hidden input for form submission - always 24h format *@
         <input type="hidden" name="@name" x-model="value" />
 
-        @* Trigger button *@
-        <button
-            type="button"
-            class="@cn(@classes) cursor-pointer text-left flex items-center justify-between"
-            @click="open = !open"
-            @if disabled { disabled }
-            @if error.is_some() { aria-invalid="true" }
-        >
-            <span x-text="displayTime() || '@placeholder'" :class="{ 'text-muted-foreground': !value }"></span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 h-4 w-4 opacity-50">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-        </button>
-
-        @* Popover *@
         <div
-            x-show="open"
-            x-cloak
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="absolute z-50 mt-2 rounded-md border bg-popover p-4 text-popover-foreground shadow-md"
+            class="relative"
+            x-ref="trigger"
+            @@click="if (!$el.querySelector('input[type=text]').disabled) { open = !open; $nextTick(() => updatePos()); }"
         >
-            <div class="flex items-center justify-center gap-2">
-                @* Hours *@
-                <div class="flex flex-col items-center">
-                    <span class="text-xs text-muted-foreground mb-1">Hour</span>
-                    <button
-                        type="button"
-                        @click="incrementHour()"
-                        class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m18 15-6-6-6 6"/>
-                        </svg>
-                    </button>
-                    <div class="w-12 h-10 flex items-center justify-center rounded border bg-background text-lg font-mono font-medium" x-text="hour.toString().padStart(2, '0')"></div>
-                    <button
-                        type="button"
-                        @click="decrementHour()"
-                        class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m6 9 6 6 6-6"/>
-                        </svg>
-                    </button>
-                </div>
-
-                @* Separator *@
-                @if !hours_only {
-                    <span class="text-xl font-bold text-muted-foreground mt-5">:</span>
-                }
-
-                @* Minutes *@
-                @if !hours_only {
-                    <div class="flex flex-col items-center">
-                        <span class="text-xs text-muted-foreground mb-1">Min</span>
-                        <button
-                            type="button"
-                            @click="incrementMinute()"
-                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m18 15-6-6-6 6"/>
-                            </svg>
-                        </button>
-                        <div class="w-12 h-10 flex items-center justify-center rounded border bg-background text-lg font-mono font-medium" x-text="minute.toString().padStart(2, '0')"></div>
-                        <button
-                            type="button"
-                            @click="decrementMinute()"
-                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m6 9 6 6 6-6"/>
-                            </svg>
-                        </button>
-                    </div>
-                }
-
-                @* Seconds (conditional) *@
-                @if include_seconds {
-                    <span class="text-xl font-bold text-muted-foreground mt-5">:</span>
-                    <div class="flex flex-col items-center">
-                        <span class="text-xs text-muted-foreground mb-1">Sec</span>
-                        <button
-                            type="button"
-                            @click="incrementSecond()"
-                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m18 15-6-6-6 6"/>
-                            </svg>
-                        </button>
-                        <div class="w-12 h-10 flex items-center justify-center rounded border bg-background text-lg font-mono font-medium" x-text="second.toString().padStart(2, '0')"></div>
-                        <button
-                            type="button"
-                            @click="decrementSecond()"
-                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m6 9 6 6 6-6"/>
-                            </svg>
-                        </button>
-                    </div>
-                }
-
-                @* AM/PM toggle for 12-hour format *@
-                @if use_12h {
-                    <div class="flex flex-col items-center ml-2">
-                        <span class="text-xs text-muted-foreground mb-1">&nbsp;</span>
-                        <button
-                            type="button"
-                            @click="togglePeriod()"
-                            class="w-12 h-10 flex items-center justify-center rounded border bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-                            x-text="period"
-                        ></button>
-                        <span class="text-xs text-muted-foreground mt-1">&nbsp;</span>
-                    </div>
-                }
-            </div>
-
-            @* Action buttons *@
-            <div class="flex justify-end gap-2 mt-4 pt-3 border-t">
-                @if show_now_button {
-                    <button
-                        type="button"
-                        @click="setNow()"
-                        class="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
-                    >
-                        @now_button_label
-                    </button>
-                }
-                <button
-                    type="button"
-                    @click="selectTime()"
-                    class="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                    Set
-                </button>
+            <input
+                type="text"
+                readonly
+                x-model="displayValue"
+                placeholder="@placeholder_text"
+                class="@input_cls"
+                @if disabled { disabled }
+                @if error.is_some() { aria-invalid="true" }
+                aria-haspopup="dialog"
+                :aria-expanded="open"
+            />
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
             </div>
         </div>
+
+        <template x-teleport="body">
+            <div
+                x-show="open"
+                x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                @@click.outside="open = false"
+                @@keydown.escape.window="open = false"
+                class="fixed z-[9999] rounded-md border bg-popover text-popover-foreground shadow-md"
+                :style="`left: ${pos.x}px; min-width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}`"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Choose time"
+            >
+                @* Format Toggle *@
+                <div class="p-3 border-b">
+                    <div class="flex items-center justify-center gap-2">
+                        <button
+                            type="button"
+                            @@click="includeSeconds = false"
+                            class="px-3 py-1 text-sm font-medium rounded-md transition-colors"
+                            :class="!includeSeconds ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                        >
+                            HH:MM
+                        </button>
+                        <button
+                            type="button"
+                            @@click="includeSeconds = true"
+                            class="px-3 py-1 text-sm font-medium rounded-md transition-colors"
+                            :class="includeSeconds ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                        >
+                            HH:MM:SS
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <div class="flex items-center justify-center gap-2">
+                        @* Hours *@
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs text-muted-foreground mb-1">Hour</span>
+                            <button
+                                type="button"
+                                @@click="incrementHour()"
+                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m18 15-6-6-6 6"/>
+                                </svg>
+                            </button>
+                            <div class="w-12 h-10 flex items-center justify-center rounded border bg-background text-lg font-mono font-medium" x-text="hour.toString().padStart(2, '0')"></div>
+                            <button
+                                type="button"
+                                @@click="decrementHour()"
+                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m6 9 6 6 6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <span class="text-xl font-bold text-muted-foreground mt-5">:</span>
+
+                        @* Minutes *@
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs text-muted-foreground mb-1">Min</span>
+                            <button
+                                type="button"
+                                @@click="incrementMinute()"
+                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m18 15-6-6-6 6"/>
+                                </svg>
+                            </button>
+                            <div class="w-12 h-10 flex items-center justify-center rounded border bg-background text-lg font-mono font-medium" x-text="minute.toString().padStart(2, '0')"></div>
+                            <button
+                                type="button"
+                                @@click="decrementMinute()"
+                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m6 9 6 6 6-6"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        @* Seconds (conditional) *@
+                        <template x-if="includeSeconds">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl font-bold text-muted-foreground mt-5">:</span>
+                                <div class="flex flex-col items-center">
+                                    <span class="text-xs text-muted-foreground mb-1">Sec</span>
+                                    <button
+                                        type="button"
+                                        @@click="incrementSecond()"
+                                        class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m18 15-6-6-6 6"/>
+                                        </svg>
+                                    </button>
+                                    <div class="w-12 h-10 flex items-center justify-center rounded border bg-background text-lg font-mono font-medium" x-text="second.toString().padStart(2, '0')"></div>
+                                    <button
+                                        type="button"
+                                        @@click="decrementSecond()"
+                                        class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m6 9 6 6 6-6"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+
+                        @* AM/PM toggle for 12-hour format *@
+                        @if use_12h {
+                            <div class="flex flex-col items-center ml-2">
+                                <span class="text-xs text-muted-foreground mb-1">&nbsp;</span>
+                                <button
+                                    type="button"
+                                    @@click="togglePeriod()"
+                                    class="w-12 h-10 flex items-center justify-center rounded border bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                                    x-text="period"
+                                ></button>
+                                <span class="text-xs text-muted-foreground mt-1">&nbsp;</span>
+                            </div>
+                        }
+                    </div>
+
+                    @* Action buttons *@
+                    <div class="flex gap-2 mt-4 pt-3 border-t">
+                        <button
+                            type="button"
+                            class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            @@click="setNow()"
+                        >
+                            Now
+                        </button>
+                        <button
+                            type="button"
+                            class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            @@click="selectTime()"
+                        >
+                            Set
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
     </div>
 }
 
-@* Time picker with label *@
 @fn labeled(
     label: &str,
     name: &str,
-    value: Option<&str>,
-    precision: Precision = Precision::HoursMinutes,
+    value: Option<&str> = None,
     format: Format = Format::TwentyFourHour,
+    include_seconds: bool = false,
     minute_step: u8 = 1,
     second_step: u8 = 1,
     disabled: bool = false,
     required: bool = false,
-    show_now_button: bool = false,
-    now_button_label: &str = "Now",
-    placeholder: &str = "Select time",
+    placeholder: Option<&str> = None,
     error: Option<&str> = None,
     class: Option<&str> = None,
 ) {
@@ -385,14 +447,11 @@
         <@apply
             name=@name
             value=@value
-            precision=@precision
             format=@format
+            include_seconds=@include_seconds
             minute_step=@minute_step
             second_step=@second_step
             disabled=@disabled
-            required=@required
-            show_now_button=@show_now_button
-            now_button_label=@now_button_label
             placeholder=@placeholder
             error=@error
             class=@class
@@ -403,7 +462,6 @@
     </div>
 }
 
-@* Shorthand for simple 24-hour time picker *@
 @fn simple(name: &str, value: Option<&str>) {
     <@apply
         name=@name
@@ -411,7 +469,6 @@
     />
 }
 
-@* Shorthand for 12-hour format *@
 @fn simple_12h(name: &str, value: Option<&str>) {
     <@apply
         name=@name
