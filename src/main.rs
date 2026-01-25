@@ -531,6 +531,20 @@ fn generate_sidebar(
     components: &[(&str, &str)],
     active: Option<&str>,
 ) -> String {
+    // Generate options for combobox
+    let combobox_options: String = components
+        .iter()
+        .map(|(id, name)| {
+            format!(
+                r#"<div data-option data-value="/library/{lib}/component/{id}" data-label="{name}" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors" :class="{{ 'bg-accent text-accent-foreground': highlightedIndex === {idx} || selected === '/library/{lib}/component/{id}', 'hover:bg-accent hover:text-accent-foreground': true }}" x-show="'{name}'.toLowerCase().includes(search.toLowerCase())" @click="selectOption('/library/{lib}/component/{id}', '{name}')" @mouseenter="highlightedIndex = {idx}" role="option" :aria-selected="selected === '/library/{lib}/component/{id}'"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4" :class="selected === '/library/{lib}/component/{id}' ? 'opacity-100' : 'opacity-0'"><path d="M20 6 9 17l-5-5"/></svg><span>{name}</span></div>"#,
+                lib = library_id,
+                id = id,
+                name = name,
+                idx = components.iter().position(|(i, _)| i == id).unwrap_or(0)
+            )
+        })
+        .collect();
+
     let nav_items: String = components
         .iter()
         .map(|(id, name)| {
@@ -557,8 +571,57 @@ fn generate_sidebar(
     };
 
     format!(
-        r#"
+        r##"
         <nav class="p-4">
+            <!-- Component Search Combobox -->
+            <div class="mb-4" x-data="{{
+                open: false,
+                search: '',
+                selected: '',
+                highlightedIndex: -1,
+                get filteredOptions() {{
+                    const searchLower = this.search.toLowerCase();
+                    return this.$refs.options ? Array.from(this.$refs.options.querySelectorAll('[data-option]')).filter(el => {{
+                        const label = el.dataset.label.toLowerCase();
+                        return label.includes(searchLower);
+                    }}) : [];
+                }},
+                selectOption(value, label) {{
+                    this.selected = value;
+                    this.search = label;
+                    this.open = false;
+                    window.location.href = value;
+                }},
+                highlightNext() {{
+                    const options = this.filteredOptions;
+                    if (options.length === 0) return;
+                    this.highlightedIndex = Math.min(this.highlightedIndex + 1, options.length - 1);
+                    options[this.highlightedIndex]?.scrollIntoView({{ block: 'nearest' }});
+                }},
+                highlightPrev() {{
+                    const options = this.filteredOptions;
+                    if (options.length === 0) return;
+                    this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
+                    options[this.highlightedIndex]?.scrollIntoView({{ block: 'nearest' }});
+                }},
+                selectHighlighted() {{
+                    const options = this.filteredOptions;
+                    if (this.highlightedIndex >= 0 && this.highlightedIndex < options.length) {{
+                        const el = options[this.highlightedIndex];
+                        this.selectOption(el.dataset.value, el.dataset.label);
+                    }}
+                }}
+            }}" @keydown.down.prevent="highlightNext()" @keydown.up.prevent="highlightPrev()" @keydown.enter.prevent="selectHighlighted()" @keydown.escape="open = false">
+                <div class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" class="flex h-9 w-full items-center rounded-md border border-input bg-transparent pl-8 pr-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring" x-model="search" @focus="open = true; highlightedIndex = -1" @click="open = true" @input="open = true; highlightedIndex = -1" placeholder="Search components..." role="combobox" aria-haspopup="listbox" :aria-expanded="open" aria-autocomplete="list" />
+                </div>
+                <div x-show="open" x-cloak x-ref="options" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false" class="absolute z-50 mt-1 max-h-60 w-[calc(100%-2rem)] overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md" role="listbox">
+                    {options}
+                    <div x-show="filteredOptions.length === 0" class="py-6 text-center text-sm text-muted-foreground">No components found.</div>
+                </div>
+            </div>
+
             <a href="/library/{lib}" class="block px-4 py-2 text-sm rounded-md mb-2 {all_cls} transition-colors">
                 All Components
             </a>
@@ -567,10 +630,11 @@ fn generate_sidebar(
             </div>
             {items}
         </nav>
-        "#,
+        "##,
         lib = library_id,
         all_cls = all_active,
-        items = nav_items
+        items = nav_items,
+        options = combobox_options
     )
 }
 
