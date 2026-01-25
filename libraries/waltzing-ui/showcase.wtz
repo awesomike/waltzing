@@ -1,0 +1,352 @@
+@*
+ * Component Showcase
+ * A comprehensive demo page displaying all waltzing-ui components organized by category.
+ * Includes a dark mode toggle and examples of each component's usage.
+ *
+ * @example
+ * @import showcase.wtz as showcase
+ *
+ * <@showcase::apply />
+ *@
+
+@import layouts/base.wtz as base
+@import components/alert.wtz as alert
+@import components/avatar.wtz as avatar
+@import components/badge.wtz as badge
+@import components/button.wtz as button
+@import components/card.wtz as card
+@import components/checkbox.wtz as checkbox
+@import components/input.wtz as input
+@import components/label.wtz as label
+@import components/progress.wtz as progress
+@import components/separator.wtz as separator
+@import components/skeleton.wtz as skeleton
+@import components/slider.wtz as slider
+@import components/switch.wtz as switch
+@import components/textarea.wtz as textarea
+@import components/toggle.wtz as toggle
+
+@* Section wrapper for consistent styling *@
+@fn section(title: &str, id: &str, content: @()) {
+    <section id="@id" class="scroll-mt-8">
+        <h2 class="text-2xl font-semibold tracking-tight mb-4">@title</h2>
+        @content()
+    </section>
+}
+
+@fn apply() {
+    @let page_title = "waltzing-ui Component Showcase"
+    @* Placeholder strings with spaces need @let to work in Some(...) *@
+    @let enter_password = "Enter password"
+    @let tell_about = "Tell us about yourself..."
+    @let weekly_updates = "Get weekly updates"
+    @let push_notifications = "Receive push notifications"
+    @let skeleton_circle_size = "h-12 w-12"
+    @let skeleton_w34 = "h-4 w-3/4"
+    @let skeleton_w12 = "h-4 w-1/2"
+    <@base::apply title=@page_title description=None head=None>
+        <div x-data="{ darkMode: false }" x-init="darkMode = document.documentElement.classList.contains('dark')" x-effect="document.documentElement.classList.toggle('dark', darkMode)">
+            <div class="container mx-auto px-4 py-8 max-w-6xl">
+                @* Header with theme toggle *@
+                <header class="flex items-center justify-between mb-12">
+                    <div>
+                        <h1 class="text-4xl font-bold tracking-tight">waltzing-ui</h1>
+                        <p class="text-muted-foreground mt-2">Component Showcase</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <@label::apply>Dark Mode</@>
+                        <button
+                            type="button"
+                            role="switch"
+                            class="peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            :class="darkMode ? 'bg-primary' : 'bg-input'"
+                            :aria-checked="darkMode.toString()"
+                            x-on:click="darkMode = !darkMode"
+                        >
+                            <span
+                                class="pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform"
+                                :class="darkMode ? 'translate-x-4' : 'translate-x-0'"
+                            ></span>
+                        </button>
+                    </div>
+                </header>
+
+                @* Buttons Section *@
+                <@section title="Buttons" id="buttons">
+                    <p class="text-muted-foreground mb-4">Clickable buttons with multiple variants and sizes.</p>
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <@button::primary>Primary</@>
+                        <@button::secondary>Secondary</@>
+                        <@button::outline>Outline</@>
+                        <@button::apply variant=button::Variant::Ghost size=button::Size::Default disabled=false class=None>Ghost</@>
+                        <@button::apply variant=button::Variant::Destructive size=button::Size::Default disabled=false class=None>Destructive</@>
+                        <@button::apply variant=button::Variant::Link size=button::Size::Default disabled=false class=None>Link</@>
+                    </div>
+                    <div class="flex flex-wrap gap-4 items-center mt-4">
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Sm disabled=false class=None>Small</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=false class=None>Default</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Lg disabled=false class=None>Large</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=true class=None>Disabled</@>
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Badges Section *@
+                <@section title="Badges" id="badges">
+                    <p class="text-muted-foreground mb-4">Small status indicators and tags.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <@badge::default>Default</@>
+                        <@badge::secondary>Secondary</@>
+                        <@badge::outline>Outline</@>
+                        <@badge::destructive>Destructive</@>
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Inputs Section *@
+                <@section title="Inputs" id="inputs">
+                    <p class="text-muted-foreground mb-4">Various form input components.</p>
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <@input::labeled
+                            label="Email"
+                            input_type=input::InputType::Email
+                            name="email"
+                            value=None
+                            placeholder=Some("name@example.com")
+                            disabled=false
+                            required=true
+                            error=None
+                            class=None
+                        />
+                        <@input::labeled
+                            label="Password"
+                            input_type=input::InputType::Password
+                            name="password"
+                            value=None
+                            placeholder=Some(@enter_password)
+                            disabled=false
+                            required=true
+                            error=None
+                            class=None
+                        />
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Textarea Section *@
+                <@section title="Textarea" id="textarea">
+                    <p class="text-muted-foreground mb-4">Multi-line text input.</p>
+                    <div class="max-w-md">
+                        <@textarea::labeled
+                            label="Bio"
+                            name="bio"
+                            value=None
+                            placeholder=Some(@tell_about)
+                            rows=Some(4)
+                            disabled=false
+                            required=false
+                            error=None
+                            class=None
+                        />
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Checkbox Section *@
+                <@section title="Checkbox" id="checkbox">
+                    <p class="text-muted-foreground mb-4">Custom styled checkboxes.</p>
+                    <div class="space-y-4">
+                        <@checkbox::simple name="terms" label="Accept terms" />
+                        <@checkbox::checked name="marketing" label="Marketing emails" />
+                        <@checkbox::labeled
+                            label="Newsletter"
+                            name="newsletter"
+                            checked=false
+                            disabled=false
+                            description=Some(@weekly_updates)
+                        />
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Switch Section *@
+                <@section title="Switch" id="switch">
+                    <p class="text-muted-foreground mb-4">Toggle switches for boolean values.</p>
+                    <div class="space-y-4 max-w-sm">
+                        <@switch::labeled
+                            label="Notifications"
+                            name="notifications"
+                            checked=true
+                            disabled=false
+                            description=Some(@push_notifications)
+                        />
+                        <@switch::labeled
+                            label="Email alerts"
+                            name="email_alerts"
+                            checked=false
+                            disabled=false
+                            description=None
+                        />
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Toggle Section *@
+                <@section title="Toggle" id="toggle">
+                    <p class="text-muted-foreground mb-4">Two-state buttons that can be toggled on or off.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <@toggle::simple name="bold">B</@>
+                        <@toggle::simple name="italic">I</@>
+                        <@toggle::outline name="underline" pressed=true>U</@>
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Slider Section *@
+                <@section title="Slider" id="slider">
+                    <p class="text-muted-foreground mb-4">Range input with custom styling.</p>
+                    <div class="space-y-6 max-w-md">
+                        <@slider::with_label
+                            label="Volume"
+                            name="volume"
+                            value=50.0
+                            min=0.0
+                            max=100.0
+                            step=1.0
+                            disabled=false
+                            class=None
+                        />
+                        <@slider::with_label
+                            label="Brightness"
+                            name="brightness"
+                            value=75.0
+                            min=0.0
+                            max=100.0
+                            step=5.0
+                            disabled=false
+                            class=None
+                        />
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Progress Section *@
+                <@section title="Progress" id="progress">
+                    <p class="text-muted-foreground mb-4">Visual indicator of progress or loading state.</p>
+                    <div class="space-y-4 max-w-md">
+                        <@progress::apply value=25.0 max=100.0 class=None />
+                        <@progress::apply value=50.0 max=100.0 class=None />
+                        <@progress::apply value=75.0 max=100.0 class=None />
+                        <@progress::with_label value=65.0 max=100.0 label="Progress" class=None />
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Avatar Section *@
+                <@section title="Avatar" id="avatar">
+                    <p class="text-muted-foreground mb-4">User avatar with image and fallback support.</p>
+                    <div class="flex items-center gap-4">
+                        <@avatar::sm src="https://github.com/shadcn.png" alt="User" fallback="CN" />
+                        <@avatar::image src="https://github.com/shadcn.png" alt="User" fallback="CN" />
+                        <@avatar::lg src="https://github.com/shadcn.png" alt="User" fallback="CN" />
+                        <@avatar::fallback initials="JD" />
+                        <@avatar::fallback initials="AB" />
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Card Section *@
+                <@section title="Card" id="card">
+                    <p class="text-muted-foreground mb-4">Container with optional header and footer.</p>
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <@card::simple class=None>
+                            <@card::title class=None>Card Title</@>
+                            <@card::description class=None>Card description</@>
+                            <p class="mt-4">This is the card content area.</p>
+                        </@>
+                        <@card::simple class=None>
+                            <h3 class="font-semibold mb-2">Simple Card</h3>
+                            <p class="text-muted-foreground">Without header or footer.</p>
+                        </@>
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Alert Section *@
+                <@section title="Alert" id="alert">
+                    <p class="text-muted-foreground mb-4">Callouts for important messages.</p>
+                    <div class="space-y-4">
+                        <@alert::default>
+                            <@alert::title class=None>Heads up!</@>
+                            <@alert::description class=None>Important message here.</@>
+                        </@>
+                        <@alert::success>
+                            <@alert::title class=None>Success!</@>
+                            <@alert::description class=None>Changes saved.</@>
+                        </@>
+                        <@alert::warning>
+                            <@alert::title class=None>Warning</@>
+                            <@alert::description class=None>Cannot be undone.</@>
+                        </@>
+                        <@alert::destructive>
+                            <@alert::title class=None>Error</@>
+                            <@alert::description class=None>Something went wrong.</@>
+                        </@>
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Skeleton Section *@
+                <@section title="Skeleton" id="skeleton">
+                    <p class="text-muted-foreground mb-4">Loading placeholders for content.</p>
+                    <div class="space-y-4 max-w-md">
+                        <div class="flex items-center gap-4">
+                            <@skeleton::circle size=@skeleton_circle_size />
+                            <div class="space-y-2 flex-1">
+                                <@skeleton::apply class=Some(@skeleton_w34) />
+                                <@skeleton::apply class=Some(@skeleton_w12) />
+                            </div>
+                        </div>
+                        <@skeleton::text lines=3 />
+                    </div>
+                </@>
+
+                <@separator::horizontal class=Some("my-8") />
+
+                @* Separator Section *@
+                <@section title="Separator" id="separator">
+                    <p class="text-muted-foreground mb-4">Visual divider between sections.</p>
+                    <div class="space-y-4">
+                        <p class="text-sm">Content above</p>
+                        <@separator::horizontal class=None />
+                        <p class="text-sm">Content below</p>
+                    </div>
+                    <div class="flex items-center gap-4 h-8 mt-4">
+                        <span class="text-sm">Item 1</span>
+                        <@separator::vertical class=None />
+                        <span class="text-sm">Item 2</span>
+                        <@separator::vertical class=None />
+                        <span class="text-sm">Item 3</span>
+                    </div>
+                </@>
+
+                @* Footer *@
+                <footer class="mt-16 py-8 border-t text-center text-sm text-muted-foreground">
+                    <p>Built with waltzing-ui</p>
+                </footer>
+            </div>
+        </div>
+    </@>
+}
