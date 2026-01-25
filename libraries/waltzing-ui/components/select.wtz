@@ -2,17 +2,17 @@
  * Select component
  * A custom dropdown select with Alpine.js
  *
- * Two usage patterns:
+ * Usage:
  *
  * 1. Declarative (for static options):
- * <@select::group name="country" selected=Some("us") placeholder="Select country">
+ * <@select::apply name="country" selected=@Some("us") placeholder=@Some("Select country")>
  *     <@select::option value="us">United States</@>
  *     <@select::option value="uk">United Kingdom</@>
  *     <@select::option value="ca" disabled=true>Canada</@>
  * </@>
  *
  * 2. Data-driven (for dynamic options):
- * <@select::from_vec name="country" options=@options selected=Some("us") />
+ * <@select::apply name="country" options=@options selected=@Some("us") />
  *@
 
 
@@ -23,9 +23,10 @@
     disabled: bool,
 }
 
-@* Select group container *@
-@fn group(
+@* Select container - use with children or options vec *@
+@fn apply(
     name: &str,
+    options: Vec<SelectOption> = Vec::new(),
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     disabled: bool = false,
@@ -129,7 +130,15 @@
                 :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`"
                 role="listbox"
             >
-                @content()
+                @if options.is_empty() {
+                    @content()
+                } else {
+                    @for opt in options {
+                        <@option value=@opt.value disabled=@opt.disabled>
+                            @opt.label
+                        </@>
+                    }
+                }
             </div>
         </template>
     </div>
@@ -174,38 +183,11 @@
     </div>
 }
 
-@* Data-driven select from Vec<SelectOption> *@
-@fn from_vec(
-    name: &str,
-    options: Vec<SelectOption>,
-    selected: Option<&str> = None,
-    placeholder: Option<&str> = None,
-    disabled: bool = false,
-    required: bool = false,
-    error: Option<&str> = None,
-    class: &str = "",
-) {
-    <@group
-        name=@name
-        selected=@selected
-        placeholder=@placeholder
-        disabled=@disabled
-        required=@required
-        error=@error
-        class=@class
-    >
-        @for opt in options {
-            <@option value=@opt.value disabled=@opt.disabled>
-                @opt.label
-            </@>
-        }
-    </@>
-}
-
-@* Select with label (declarative) *@
+@* Select with label *@
 @fn labeled(
     label: &str,
     name: &str,
+    options: Vec<SelectOption> = Vec::new(),
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     disabled: bool = false,
@@ -219,8 +201,9 @@
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>
-        <@group
+        <@apply
             name=@name
+            options=@options
             selected=@selected
             placeholder=@placeholder
             disabled=@disabled
@@ -230,39 +213,6 @@
         >
             @content()
         </@>
-        @if let Some(e) = error {
-            <p class="text-sm text-destructive">@e</p>
-        }
-    </div>
-}
-
-@* Select with label (data-driven) *@
-@fn labeled_from_vec(
-    label: &str,
-    name: &str,
-    options: Vec<SelectOption>,
-    selected: Option<&str> = None,
-    placeholder: Option<&str> = None,
-    disabled: bool = false,
-    required: bool = false,
-    error: Option<&str> = None,
-    class: &str = "",
-) {
-    <div class="space-y-2">
-        <label class="text-sm font-medium leading-none">
-            @label
-            @if required { <span class="text-destructive">*</span> }
-        </label>
-        <@from_vec
-            name=@name
-            options=@options
-            selected=@selected
-            placeholder=@placeholder
-            disabled=@disabled
-            required=@required
-            error=@error
-            class=@class
-        />
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>
         }

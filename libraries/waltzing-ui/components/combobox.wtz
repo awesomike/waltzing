@@ -2,17 +2,17 @@
  * Combobox component
  * A searchable select dropdown with autocomplete
  *
- * Two usage patterns:
+ * Usage:
  *
  * 1. Declarative (for static options):
- * <@combobox::group name="framework" selected=Some("react") placeholder="Search...">
+ * <@combobox::apply name="framework" selected=@Some("react") placeholder=@Some("Search...")>
  *     <@combobox::option value="react">React</@>
  *     <@combobox::option value="vue">Vue</@>
  *     <@combobox::option value="angular" disabled=true>Angular</@>
  * </@>
  *
  * 2. Data-driven (for dynamic options):
- * <@combobox::from_vec name="framework" options=@options selected=Some("react") />
+ * <@combobox::apply name="framework" options=@options selected=@Some("react") />
  *@
 
 
@@ -23,9 +23,10 @@
     disabled: bool,
 }
 
-@* Combobox group container with search *@
-@fn group(
+@* Combobox container with search - use with children or options vec *@
+@fn apply(
     name: &str,
+    options: Vec<ComboboxOption> = Vec::new(),
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     disabled: bool = false,
@@ -179,7 +180,15 @@
                 :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`"
                 role="listbox"
             >
-                @content()
+                @if options.is_empty() {
+                    @content()
+                } else {
+                    @for opt in options {
+                        <@option value=@opt.value disabled=@opt.disabled>
+                            @opt.label
+                        </@>
+                    }
+                }
 
                 @* Empty state *@
                 <div
@@ -238,38 +247,11 @@
     </div>
 }
 
-@* Data-driven combobox from Vec<ComboboxOption> *@
-@fn from_vec(
-    name: &str,
-    options: Vec<ComboboxOption>,
-    selected: Option<&str> = None,
-    placeholder: Option<&str> = None,
-    disabled: bool = false,
-    required: bool = false,
-    error: Option<&str> = None,
-    class: &str = "",
-) {
-    <@group
-        name=@name
-        selected=@selected
-        placeholder=@placeholder
-        disabled=@disabled
-        required=@required
-        error=@error
-        class=@class
-    >
-        @for opt in options {
-            <@option value=@opt.value disabled=@opt.disabled>
-                @opt.label
-            </@>
-        }
-    </@>
-}
-
-@* Combobox with label (declarative) *@
+@* Combobox with label *@
 @fn labeled(
     label: &str,
     name: &str,
+    options: Vec<ComboboxOption> = Vec::new(),
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     disabled: bool = false,
@@ -283,8 +265,9 @@
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>
-        <@group
+        <@apply
             name=@name
+            options=@options
             selected=@selected
             placeholder=@placeholder
             disabled=@disabled
@@ -294,39 +277,6 @@
         >
             @content()
         </@>
-        @if let Some(e) = error {
-            <p class="text-sm text-destructive">@e</p>
-        }
-    </div>
-}
-
-@* Combobox with label (data-driven) *@
-@fn labeled_from_vec(
-    label: &str,
-    name: &str,
-    options: Vec<ComboboxOption>,
-    selected: Option<&str> = None,
-    placeholder: Option<&str> = None,
-    disabled: bool = false,
-    required: bool = false,
-    error: Option<&str> = None,
-    class: &str = "",
-) {
-    <div class="space-y-2">
-        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            @label
-            @if required { <span class="text-destructive">*</span> }
-        </label>
-        <@from_vec
-            name=@name
-            options=@options
-            selected=@selected
-            placeholder=@placeholder
-            disabled=@disabled
-            required=@required
-            error=@error
-            class=@class
-        />
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>
         }

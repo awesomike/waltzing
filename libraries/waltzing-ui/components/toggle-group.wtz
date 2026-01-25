@@ -2,17 +2,17 @@
  * Toggle Group component
  * A group of toggle buttons with single or multiple selection
  *
- * Two usage patterns:
+ * Usage:
  *
  * 1. Declarative (for static items):
- * <@toggle_group::single name="align" selected=Some("left")>
+ * <@toggle_group::single name="align" selected=@Some("left")>
  *     <@toggle_group::item value="left">Left</@>
  *     <@toggle_group::item value="center">Center</@>
  *     <@toggle_group::item value="right">Right</@>
  * </@>
  *
  * 2. Data-driven (for dynamic items):
- * <@toggle_group::single_from_vec name="align" items=@items selected=Some("left") />
+ * <@toggle_group::single name="align" items=@items selected=@Some("left") />
  *@
 
 
@@ -35,9 +35,10 @@
     Lg,
 }
 
-@* Single selection toggle group (declarative) *@
+@* Single selection toggle group - use with children or items vec *@
 @fn single(
     name: &str,
+    items: Vec<ToggleItem> = Vec::new(),
     selected: Option<&str> = None,
     variant: Variant = Variant::Default,
     size: Size = Size::Default,
@@ -65,14 +66,23 @@
         class="@cn(&[@group_base, @variant_cls, @class])"
         x-data="{ selected: '@sel', toggleName: '@name', variant: '@variant_str', size: '@size_str', mode: 'single' }"
     >
-        @content()
+        @if items.is_empty() {
+            @content()
+        } else {
+            @for it in items {
+                <@item value=@it.value icon=@it.icon.as_deref() disabled=@it.disabled>
+                    @it.label
+                </@>
+            }
+        }
         <input type="hidden" name="@name" :value="selected || ''" />
     </div>
 }
 
-@* Multiple selection toggle group (declarative) *@
+@* Multiple selection toggle group - use with children or items vec *@
 @fn multiple(
     name: &str,
+    items: Vec<ToggleItem> = Vec::new(),
     selected: Vec<&str>,
     variant: Variant = Variant::Default,
     size: Size = Size::Default,
@@ -100,7 +110,15 @@
         class="@cn(&[@group_base, @variant_cls, @class])"
         x-data="{ selected: @selected_json, toggleName: '@name', variant: '@variant_str', size: '@size_str', mode: 'multiple' }"
     >
-        @content()
+        @if items.is_empty() {
+            @content()
+        } else {
+            @for it in items {
+                <@item value=@it.value icon=@it.icon.as_deref() disabled=@it.disabled>
+                    @it.label
+                </@>
+            }
+        }
         <input type="hidden" name="@name" :value="JSON.stringify(selected)" />
     </div>
 }
@@ -145,42 +163,6 @@
         }
         @content()
     </button>
-}
-
-@* Data-driven single selection toggle group *@
-@fn single_from_vec(
-    name: &str,
-    items: Vec<ToggleItem>,
-    selected: Option<&str> = None,
-    variant: Variant = Variant::Default,
-    size: Size = Size::Default,
-    class: &str = "",
-) {
-    <@single name=@name selected=@selected variant=@variant size=@size class=@class>
-        @for item in items {
-            <@item value=@item.value icon=@item.icon.as_deref() disabled=@item.disabled>
-                @item.label
-            </@>
-        }
-    </@>
-}
-
-@* Data-driven multiple selection toggle group *@
-@fn multiple_from_vec(
-    name: &str,
-    items: Vec<ToggleItem>,
-    selected: Vec<&str>,
-    variant: Variant = Variant::Default,
-    size: Size = Size::Default,
-    class: &str = "",
-) {
-    <@multiple name=@name selected=@selected variant=@variant size=@size class=@class>
-        @for item in items {
-            <@item value=@item.value icon=@item.icon.as_deref() disabled=@item.disabled>
-                @item.label
-            </@>
-        }
-    </@>
 }
 
 @* Convenience: simple single with defaults *@
