@@ -2,22 +2,13 @@
  * Time Picker component
  * A time input with hour, minute, and optional seconds selection
  * Uses Alpine.js for interactive time picking with popover
- * Supports format toggle between HH:MM and HH:MM:SS
+ * Supports dynamic 12h/24h toggle and HH:MM/HH:MM:SS format toggle
  *
  * Usage:
  *   @import components/time-picker.wtz as time_picker
  *
- *   Basic 24-hour time picker:
+ *   Basic time picker:
  *   <@time_picker::apply name="start_time" value=Some("14:30") />
- *
- *   12-hour format with seconds:
- *   <@time_picker::apply
- *       name="alarm_time"
- *       value=None
- *       format=time_picker::Format::TwelveHour
- *       include_seconds=true
- *       minute_step=5
- *   />
  *
  *   With label:
  *   <@time_picker::labeled
@@ -29,26 +20,14 @@
  **@
 
 
-@enum Format {
-    TwelveHour,
-    TwentyFourHour,
-}
-
 @fn apply(
     name: &str,
     value: Option<&str> = None,
-    format: Format = Format::TwentyFourHour,
-    include_seconds: bool = false,
-    minute_step: u8 = 1,
-    second_step: u8 = 1,
     disabled: bool = false,
     placeholder: Option<&str> = None,
     error: Option<&str> = None,
     class: Option<&str> = None,
 ) {
-    @let use_12h = { matches!(format, Format::TwelveHour) }
-    @let max_hour = { if use_12h { 12 } else { 23 } }
-    @let min_hour = { if use_12h { 1 } else { 0 } }
     @let placeholder_text = placeholder.unwrap_or("Select time")
     @let initial_value = value.unwrap_or("")
 
@@ -66,24 +45,23 @@
             open: false,
             value: '@initial_value',
             displayValue: '',
-            hour: 12,
+            hour: 0,
             minute: 0,
             second: 0,
             period: 'AM',
-            use12h: @use_12h,
-            includeSeconds: @include_seconds,
-            minuteStep: @minute_step,
-            secondStep: @second_step,
-            maxHour: @max_hour,
-            minHour: @min_hour,
+            use12h: false,
+            includeSeconds: false,
             pos: { x: 0, y: 0, width: 0 },
             flipTop: false,
+
+            get maxHour() { return this.use12h ? 12 : 23; },
+            get minHour() { return this.use12h ? 1 : 0; },
 
             updatePos() {
                 const trigger = this.$refs.trigger;
                 if (!trigger) return;
                 const rect = trigger.getBoundingClientRect();
-                const pickerHeight = 280;
+                const pickerHeight = 320;
                 const spaceBelow = window.innerHeight - rect.bottom;
                 const spaceAbove = rect.top;
                 this.flipTop = spaceBelow < pickerHeight && spaceAbove > spaceBelow;
@@ -101,8 +79,6 @@
 
                 if (this.value) {
                     this.parseTime(this.value);
-                } else {
-                    this.hour = this.use12h ? 12 : 0;
                 }
                 this.updateDisplayValue();
             },
@@ -131,7 +107,6 @@
                     this.second = parseInt(parts[2], 10) || 0;
                     this.includeSeconds = true;
                 }
-                this.updateDisplayValue();
             },
 
             formatTime24h() {
@@ -153,11 +128,13 @@
             },
 
             updateDisplayValue() {
-                if (!this.value && this.hour === (this.use12h ? 12 : 0) && this.minute === 0 && this.second === 0) {
+                if (!this.value && this.hour === 0 && this.minute === 0 && this.second === 0) {
                     this.displayValue = '';
                     return;
                 }
-                const hStr = this.hour.toString().padStart(2, '0');
+                let h = this.hour;
+                if (this.use12h && h === 0) h = 12;
+                const hStr = h.toString().padStart(2, '0');
                 const mStr = this.minute.toString().padStart(2, '0');
                 const sStr = this.second.toString().padStart(2, '0');
 
@@ -189,7 +166,24 @@
                 this.hour = h;
                 this.minute = now.getMinutes();
                 this.second = now.getSeconds();
-                this.updateDisplayValue();
+            },
+
+            toggle12h() {
+                const was12h = this.use12h;
+                this.use12h = !this.use12h;
+
+                if (this.use12h && !was12h) {
+                    // Converting from 24h to 12h
+                    this.period = this.hour >= 12 ? 'PM' : 'AM';
+                    this.hour = this.hour % 12;
+                    if (this.hour === 0) this.hour = 12;
+                } else if (!this.use12h && was12h) {
+                    // Converting from 12h to 24h
+                    let h = this.hour % 12;
+                    if (this.period === 'PM') h += 12;
+                    if (h === 24) h = 0;
+                    this.hour = h;
+                }
             },
 
             incrementHour() {
@@ -209,32 +203,25 @@
             },
 
             incrementMinute() {
-                this.minute = (this.minute + this.minuteStep) % 60;
+                this.minute = (this.minute + 1) % 60;
             },
 
             decrementMinute() {
-                this.minute = this.minute - this.minuteStep;
-                if (this.minute < 0) this.minute = 60 + this.minute;
+                this.minute = this.minute - 1;
+                if (this.minute < 0) this.minute = 59;
             },
 
             incrementSecond() {
-                this.second = (this.second + this.secondStep) % 60;
+                this.second = (this.second + 1) % 60;
             },
 
             decrementSecond() {
-                this.second = this.second - this.secondStep;
-                if (this.second < 0) this.second = 60 + this.second;
+                this.second = this.second - 1;
+                if (this.second < 0) this.second = 59;
             },
 
             togglePeriod() {
                 this.period = this.period === 'AM' ? 'PM' : 'AM';
-            },
-
-            toggleSeconds() {
-                this.includeSeconds = !this.includeSeconds;
-                if (!this.includeSeconds) {
-                    this.second = 0;
-                }
             }
         }"
         x-init="init()"
@@ -284,25 +271,47 @@
                 aria-modal="true"
                 aria-label="Choose time"
             >
-                @* Format Toggle *@
+                @* Format Toggles *@
                 <div class="p-3 border-b">
-                    <div class="flex items-center justify-center gap-2">
-                        <button
-                            type="button"
-                            @@click="includeSeconds = false"
-                            class="px-3 py-1 text-sm font-medium rounded-md transition-colors"
-                            :class="!includeSeconds ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
-                        >
-                            HH:MM
-                        </button>
-                        <button
-                            type="button"
-                            @@click="includeSeconds = true"
-                            class="px-3 py-1 text-sm font-medium rounded-md transition-colors"
-                            :class="includeSeconds ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
-                        >
-                            HH:MM:SS
-                        </button>
+                    <div class="flex items-center justify-between gap-4">
+                        @* 12h/24h Toggle *@
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                @@click="if (use12h) toggle12h()"
+                                class="px-2 py-1 text-xs font-medium rounded transition-colors"
+                                :class="!use12h ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                            >
+                                24h
+                            </button>
+                            <button
+                                type="button"
+                                @@click="if (!use12h) toggle12h()"
+                                class="px-2 py-1 text-xs font-medium rounded transition-colors"
+                                :class="use12h ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                            >
+                                12h
+                            </button>
+                        </div>
+                        @* HH:MM / HH:MM:SS Toggle *@
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                @@click="includeSeconds = false; second = 0"
+                                class="px-2 py-1 text-xs font-medium rounded transition-colors"
+                                :class="!includeSeconds ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                            >
+                                HH:MM
+                            </button>
+                            <button
+                                type="button"
+                                @@click="includeSeconds = true"
+                                class="px-2 py-1 text-xs font-medium rounded transition-colors"
+                                :class="includeSeconds ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                            >
+                                HH:MM:SS
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -388,7 +397,7 @@
                         </template>
 
                         @* AM/PM toggle for 12-hour format *@
-                        @if use_12h {
+                        <template x-if="use12h">
                             <div class="flex flex-col items-center ml-2">
                                 <span class="text-xs text-muted-foreground mb-1">&nbsp;</span>
                                 <button
@@ -399,7 +408,7 @@
                                 ></button>
                                 <span class="text-xs text-muted-foreground mt-1">&nbsp;</span>
                             </div>
-                        }
+                        </template>
                     </div>
 
                     @* Action buttons *@
@@ -429,10 +438,6 @@
     label: &str,
     name: &str,
     value: Option<&str> = None,
-    format: Format = Format::TwentyFourHour,
-    include_seconds: bool = false,
-    minute_step: u8 = 1,
-    second_step: u8 = 1,
     disabled: bool = false,
     required: bool = false,
     placeholder: Option<&str> = None,
@@ -447,10 +452,6 @@
         <@apply
             name=@name
             value=@value
-            format=@format
-            include_seconds=@include_seconds
-            minute_step=@minute_step
-            second_step=@second_step
             disabled=@disabled
             placeholder=@placeholder
             error=@error
@@ -466,13 +467,5 @@
     <@apply
         name=@name
         value=@value
-    />
-}
-
-@fn simple_12h(name: &str, value: Option<&str>) {
-    <@apply
-        name=@name
-        value=@value
-        format=Format::TwelveHour
     />
 }

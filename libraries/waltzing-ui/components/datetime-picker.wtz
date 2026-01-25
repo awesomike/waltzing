@@ -1,32 +1,16 @@
 @**
  * DateTime Picker component
- * Combined date and time selection with calendar and time picker
- * Supports year, month, and day selection views
- * Uses Alpine.js for interactive picking with popover
+ * Combined date and time selection using DatePicker and TimePicker layouts
+ * Supports year, month, and day selection views for dates
+ * Supports 12h/24h toggle and HH:MM/HH:MM:SS format for time
  *
  * Usage:
  *   @import components/datetime-picker.wtz as datetime_picker
  *
- *   Basic 24-hour datetime picker:
+ *   Basic datetime picker:
  *   <@datetime_picker::apply
  *       name="event_start"
  *       value=Some("2024-01-15T14:30")
- *   />
- *
- *   12-hour format:
- *   <@datetime_picker::apply
- *       name="appointment"
- *       value=None
- *       use_12h=true
- *       placeholder=Some("Select date and time")
- *   />
- *
- *   With min/max constraints:
- *   <@datetime_picker::apply
- *       name="booking"
- *       value=None
- *       min=Some("2024-01-01T00:00")
- *       max=Some("2024-12-31T23:59")
  *   />
  *
  *   With label:
@@ -45,7 +29,6 @@
     placeholder: Option<&str> = None,
     min: Option<&str> = None,
     max: Option<&str> = None,
-    use_12h: bool = false,
     disabled: bool = false,
     class: Option<&str> = None,
 ) {
@@ -53,8 +36,6 @@
     @let min_datetime = min.unwrap_or("")
     @let max_datetime = max.unwrap_or("")
     @let placeholder_text = placeholder.unwrap_or("Select date and time")
-    @let max_hour = (if use_12h { 12 } else { 23 })
-    @let min_hour = (if use_12h { 1 } else { 0 })
 
     @let input_cls = cn(&[
         "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors",
@@ -70,12 +51,12 @@
             value: '@initial_value',
             displayValue: '',
             dateValue: '',
-            hour: 12,
+            hour: 0,
             minute: 0,
+            second: 0,
             period: 'AM',
-            use12h: @use_12h,
-            maxHour: @max_hour,
-            minHour: @min_hour,
+            use12h: false,
+            includeSeconds: false,
             currentMonth: null,
             currentYear: null,
             currentView: 'days',
@@ -91,11 +72,14 @@
             pos: { x: 0, y: 0, width: 0 },
             flipTop: false,
 
+            get maxHour() { return this.use12h ? 12 : 23; },
+            get minHour() { return this.use12h ? 1 : 0; },
+
             updatePos() {
                 const trigger = this.$refs.trigger;
                 if (!trigger) return;
                 const rect = trigger.getBoundingClientRect();
-                const calendarHeight = 480;
+                const calendarHeight = 520;
                 const spaceBelow = window.innerHeight - rect.bottom;
                 const spaceAbove = rect.top;
                 this.flipTop = spaceBelow < calendarHeight && spaceAbove > spaceBelow;
@@ -117,10 +101,10 @@
                     const now = new Date();
                     this.currentMonth = now.getMonth();
                     this.currentYear = now.getFullYear();
-                    this.hour = this.use12h ? 12 : 0;
                 }
                 this.yearInput = this.currentYear;
                 this.buildCalendar();
+                this.updateDisplayValue();
             },
 
             destroy() {
@@ -151,8 +135,11 @@
                     if (timeParts.length >= 2) {
                         this.minute = parseInt(timeParts[1], 10) || 0;
                     }
+                    if (timeParts.length >= 3) {
+                        this.second = parseInt(timeParts[2], 10) || 0;
+                        this.includeSeconds = true;
+                    }
                 }
-                this.updateDisplayValue();
             },
 
             formatISODate(date) {
@@ -166,28 +153,29 @@
                 let h = this.hour;
                 if (this.use12h) {
                     h = this.hour % 12;
-                    if (this.period === 'PM') {
-                        h = h + 12;
-                    }
-                    if (h === 12 && this.period === 'AM') {
-                        h = 0;
-                    }
-                    if (h === 24) {
-                        h = 12;
-                    }
+                    if (this.period === 'PM') h += 12;
+                    if (h === 12 && this.period === 'AM') h = 0;
+                    if (h === 24) h = 12;
                 }
                 const hStr = h.toString().padStart(2, '0');
                 const mStr = this.minute.toString().padStart(2, '0');
-                return hStr + ':' + mStr;
+                const sStr = this.second.toString().padStart(2, '0');
+                if (this.includeSeconds) {
+                    return `${hStr}:${mStr}:${sStr}`;
+                }
+                return `${hStr}:${mStr}`;
             },
 
             formatDisplayTime() {
-                const hStr = this.hour.toString().padStart(2, '0');
+                let h = this.hour;
+                if (this.use12h && h === 0) h = 12;
+                const hStr = h.toString().padStart(2, '0');
                 const mStr = this.minute.toString().padStart(2, '0');
-                if (this.use12h) {
-                    return hStr + ':' + mStr + ' ' + this.period;
+                const sStr = this.second.toString().padStart(2, '0');
+                if (this.includeSeconds) {
+                    return this.use12h ? `${hStr}:${mStr}:${sStr} ${this.period}` : `${hStr}:${mStr}:${sStr}`;
                 }
-                return hStr + ':' + mStr;
+                return this.use12h ? `${hStr}:${mStr} ${this.period}` : `${hStr}:${mStr}`;
             },
 
             updateValue() {
@@ -383,9 +371,27 @@
                     }
                     this.hour = h;
                     this.minute = now.getMinutes();
+                    this.second = now.getSeconds();
                     this.buildCalendar();
                     this.updateValue();
                 }
+            },
+
+            toggle12h() {
+                const was12h = this.use12h;
+                this.use12h = !this.use12h;
+
+                if (this.use12h && !was12h) {
+                    this.period = this.hour >= 12 ? 'PM' : 'AM';
+                    this.hour = this.hour % 12;
+                    if (this.hour === 0) this.hour = 12;
+                } else if (!this.use12h && was12h) {
+                    let h = this.hour % 12;
+                    if (this.period === 'PM') h += 12;
+                    if (h === 24) h = 0;
+                    this.hour = h;
+                }
+                this.updateValue();
             },
 
             incrementHour() {
@@ -414,6 +420,17 @@
             decrementMinute() {
                 this.minute = this.minute - 1;
                 if (this.minute < 0) this.minute = 59;
+                this.updateValue();
+            },
+
+            incrementSecond() {
+                this.second = (this.second + 1) % 60;
+                this.updateValue();
+            },
+
+            decrementSecond() {
+                this.second = this.second - 1;
+                if (this.second < 0) this.second = 59;
                 this.updateValue();
             },
 
@@ -529,7 +546,9 @@
                 aria-label="Choose date and time"
                 x-ref="calendar"
             >
-                @* Header with navigation *@
+                @* ===== DATE PICKER SECTION ===== *@
+
+                @* Header with navigation (same as date-picker) *@
                 <div class="flex items-center justify-between p-3 border-b">
                     <button
                         type="button"
@@ -543,7 +562,6 @@
                     </button>
 
                     <div class="flex items-center gap-1">
-                        @* Year button *@
                         <button
                             type="button"
                             class="px-2 py-1 text-sm font-medium rounded hover:bg-accent transition-colors"
@@ -551,7 +569,6 @@
                             @@click="setView('years')"
                             x-text="currentYear"
                         ></button>
-                        @* Month button *@
                         <button
                             type="button"
                             class="px-2 py-1 text-sm font-medium rounded hover:bg-accent transition-colors"
@@ -559,7 +576,6 @@
                             @@click="setView('months')"
                             x-text="monthsShort[currentMonth]"
                         ></button>
-                        @* Calendar icon button *@
                         <button
                             type="button"
                             class="p-1 rounded hover:bg-accent transition-colors"
@@ -641,7 +657,6 @@
                     @* Years View *@
                     <div x-show="currentView === 'years'">
                         <div class="space-y-3">
-                            @* Year Input *@
                             <div class="relative">
                                 <input
                                     type="text"
@@ -683,7 +698,6 @@
                                 </div>
                             </div>
 
-                            @* Year Grid *@
                             <div class="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
                                 <template x-for="year in getYearOptions()" :key="year">
                                     <button
@@ -702,69 +716,148 @@
                     </div>
                 </div>
 
-                @* Time picker section *@
-                <div class="p-3 pt-0 border-t mt-3">
-                    <div class="text-xs text-muted-foreground mb-2 text-center pt-3">Time</div>
-                    <div class="flex items-center justify-center gap-2">
-                        @* Hours *@
-                        <div class="flex flex-col items-center">
-                            <button
-                                type="button"
-                                @@click="incrementHour()"
-                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m18 15-6-6-6 6"/>
-                                </svg>
-                            </button>
-                            <div class="w-10 h-8 flex items-center justify-center rounded border bg-background text-sm font-mono font-medium" x-text="hour.toString().padStart(2, '0')"></div>
-                            <button
-                                type="button"
-                                @@click="decrementHour()"
-                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m6 9 6 6 6-6"/>
-                                </svg>
-                            </button>
-                        </div>
+                @* ===== TIME PICKER SECTION (same layout as time-picker) ===== *@
 
-                        <span class="text-lg font-bold text-muted-foreground">:</span>
-
-                        @* Minutes *@
-                        <div class="flex flex-col items-center">
-                            <button
-                                type="button"
-                                @@click="incrementMinute()"
-                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m18 15-6-6-6 6"/>
-                                </svg>
-                            </button>
-                            <div class="w-10 h-8 flex items-center justify-center rounded border bg-background text-sm font-mono font-medium" x-text="minute.toString().padStart(2, '0')"></div>
-                            <button
-                                type="button"
-                                @@click="decrementMinute()"
-                                class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m6 9 6 6 6-6"/>
-                                </svg>
-                            </button>
-                        </div>
-
-                        @* AM/PM toggle for 12-hour format *@
-                        @if use_12h {
-                            <div class="flex flex-col items-center ml-1">
+                <div class="border-t">
+                    @* Time Format Toggles *@
+                    <div class="p-3 border-b">
+                        <div class="flex items-center justify-between gap-4">
+                            @* 12h/24h Toggle *@
+                            <div class="flex items-center gap-2">
                                 <button
                                     type="button"
-                                    @@click="togglePeriod()"
-                                    class="w-10 h-8 flex items-center justify-center rounded border bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
-                                    x-text="period"
-                                ></button>
+                                    @@click="if (use12h) toggle12h()"
+                                    class="px-2 py-1 text-xs font-medium rounded transition-colors"
+                                    :class="!use12h ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                                >
+                                    24h
+                                </button>
+                                <button
+                                    type="button"
+                                    @@click="if (!use12h) toggle12h()"
+                                    class="px-2 py-1 text-xs font-medium rounded transition-colors"
+                                    :class="use12h ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                                >
+                                    12h
+                                </button>
                             </div>
-                        }
+                            @* HH:MM / HH:MM:SS Toggle *@
+                            <div class="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    @@click="includeSeconds = false; second = 0; updateValue()"
+                                    class="px-2 py-1 text-xs font-medium rounded transition-colors"
+                                    :class="!includeSeconds ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                                >
+                                    HH:MM
+                                </button>
+                                <button
+                                    type="button"
+                                    @@click="includeSeconds = true; updateValue()"
+                                    class="px-2 py-1 text-xs font-medium rounded transition-colors"
+                                    :class="includeSeconds ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                                >
+                                    HH:MM:SS
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3">
+                        <div class="flex items-center justify-center gap-2">
+                            @* Hours *@
+                            <div class="flex flex-col items-center">
+                                <span class="text-xs text-muted-foreground mb-1">Hour</span>
+                                <button
+                                    type="button"
+                                    @@click="incrementHour()"
+                                    class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m18 15-6-6-6 6"/>
+                                    </svg>
+                                </button>
+                                <div class="w-12 h-10 flex items-center justify-center rounded border bg-background text-lg font-mono font-medium" x-text="hour.toString().padStart(2, '0')"></div>
+                                <button
+                                    type="button"
+                                    @@click="decrementHour()"
+                                    class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m6 9 6 6 6-6"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <span class="text-xl font-bold text-muted-foreground mt-5">:</span>
+
+                            @* Minutes *@
+                            <div class="flex flex-col items-center">
+                                <span class="text-xs text-muted-foreground mb-1">Min</span>
+                                <button
+                                    type="button"
+                                    @@click="incrementMinute()"
+                                    class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m18 15-6-6-6 6"/>
+                                    </svg>
+                                </button>
+                                <div class="w-12 h-10 flex items-center justify-center rounded border bg-background text-lg font-mono font-medium" x-text="minute.toString().padStart(2, '0')"></div>
+                                <button
+                                    type="button"
+                                    @@click="decrementMinute()"
+                                    class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m6 9 6 6 6-6"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            @* Seconds (conditional) *@
+                            <template x-if="includeSeconds">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xl font-bold text-muted-foreground mt-5">:</span>
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-xs text-muted-foreground mb-1">Sec</span>
+                                        <button
+                                            type="button"
+                                            @@click="incrementSecond()"
+                                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="m18 15-6-6-6 6"/>
+                                            </svg>
+                                        </button>
+                                        <div class="w-12 h-10 flex items-center justify-center rounded border bg-background text-lg font-mono font-medium" x-text="second.toString().padStart(2, '0')"></div>
+                                        <button
+                                            type="button"
+                                            @@click="decrementSecond()"
+                                            class="p-1 hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="m6 9 6 6 6-6"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+
+                            @* AM/PM toggle for 12-hour format *@
+                            <template x-if="use12h">
+                                <div class="flex flex-col items-center ml-2">
+                                    <span class="text-xs text-muted-foreground mb-1">&nbsp;</span>
+                                    <button
+                                        type="button"
+                                        @@click="togglePeriod()"
+                                        class="w-12 h-10 flex items-center justify-center rounded border bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                                        x-text="period"
+                                    ></button>
+                                    <span class="text-xs text-muted-foreground mt-1">&nbsp;</span>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
 
@@ -797,7 +890,6 @@
     placeholder: Option<&str> = None,
     min: Option<&str> = None,
     max: Option<&str> = None,
-    use_12h: bool = false,
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
@@ -814,7 +906,6 @@
             placeholder=@placeholder
             min=@min
             max=@max
-            use_12h=@use_12h
             disabled=@disabled
             class=@class
         />
@@ -828,13 +919,5 @@
     <@apply
         name=@name
         value=@value
-    />
-}
-
-@fn simple_12h(name: &str, value: Option<&str>) {
-    <@apply
-        name=@name
-        value=@value
-        use_12h=true
     />
 }
