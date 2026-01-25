@@ -78,14 +78,14 @@
                         <@button::primary>Primary</@>
                         <@button::secondary>Secondary</@>
                         <@button::outline>Outline</@>
-                        <@button::apply variant=button::Variant::Ghost size=button::Size::Default disabled=false>Ghost</@>
-                        <@button::apply variant=button::Variant::Destructive size=button::Size::Default disabled=false>Destructive</@>
-                        <@button::apply variant=button::Variant::Link size=button::Size::Default disabled=false>Link</@>
+                        <@button::apply variant=button::Variant::Ghost size=button::Size::Default>Ghost</@>
+                        <@button::apply variant=button::Variant::Destructive size=button::Size::Default>Destructive</@>
+                        <@button::apply variant=button::Variant::Link size=button::Size::Default>Link</@>
                     </div>
                     <div class="flex flex-wrap gap-4 items-center mt-4">
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Sm disabled=false>Small</@>
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=false>Default</@>
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Lg disabled=false>Large</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Sm>Small</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Default>Default</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Lg>Large</@>
                         <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=true>Disabled</@>
                     </div>
                 </@>
@@ -113,22 +113,22 @@
                             label="Email"
                             input_type=input::InputType::Email
                             name="email"
-                            value=None
+                           
                             placeholder=Some("name@example.com")
-                            disabled=false
+                           
                             required=true
-                            error=None
+                           
                            
                         />
                         <@input::labeled
                             label="Password"
                             input_type=input::InputType::Password
                             name="password"
-                            value=None
+                           
                             placeholder=Some(@enter_password)
-                            disabled=false
+                           
                             required=true
-                            error=None
+                           
                            
                         />
                     </div>
@@ -143,12 +143,12 @@
                         <@textarea::labeled
                             label="Bio"
                             name="bio"
-                            value=None
+                           
                             placeholder=Some(@tell_about)
                             rows=Some(4)
-                            disabled=false
-                            required=false
-                            error=None
+                           
+                           
+                           
                            
                         />
                     </div>
@@ -166,7 +166,7 @@
                             label="Newsletter"
                             name="newsletter"
                             checked=false
-                            disabled=false
+                           
                             description=Some(@weekly_updates)
                         />
                     </div>
@@ -182,14 +182,14 @@
                             label="Notifications"
                             name="notifications"
                             checked=true
-                            disabled=false
+                           
                             description=Some(@push_notifications)
                         />
                         <@switch::labeled
                             label="Email alerts"
                             name="email_alerts"
                             checked=false
-                            disabled=false
+                           
                             description=None
                         />
                     </div>
@@ -220,7 +220,7 @@
                             min=0.0
                             max=100.0
                             step=1.0
-                            disabled=false
+                           
                            
                         />
                         <@slider::with_label
@@ -230,7 +230,7 @@
                             min=0.0
                             max=100.0
                             step=5.0
-                            disabled=false
+                           
                            
                         />
                     </div>

@@ -7,15 +7,15 @@
  *
  * <@menubar::apply>
  *     <@menubar::menu label="File">
- *         <@menubar::item label="New File" shortcut=Some("Ctrl+N") disabled=false />
- *         <@menubar::item label="Open..." shortcut=Some("Ctrl+O") disabled=false />
+ *         <@menubar::item label="New File" shortcut=Some("Ctrl+N") />
+ *         <@menubar::item label="Open..." shortcut=Some("Ctrl+O") />
  *         <@menubar::separator />
- *         <@menubar::item label="Save" shortcut=Some("Ctrl+S") disabled=false />
+ *         <@menubar::item label="Save" shortcut=Some("Ctrl+S") />
  *         <@menubar::separator />
- *         <@menubar::item label="Exit" shortcut=None disabled=false />
+ *         <@menubar::item label="Exit" shortcut=None />
  *     </@>
  *     <@menubar::menu label="Edit">
- *         <@menubar::item label="Undo" shortcut=Some("Ctrl+Z") disabled=false />
+ *         <@menubar::item label="Undo" shortcut=Some("Ctrl+Z") />
  *         <@menubar::item label="Redo" shortcut=Some("Ctrl+Y") disabled=true />
  *         <@menubar::separator />
  *         <@menubar::checkbox label="Word Wrap" checked=true />
@@ -102,7 +102,7 @@
 @fn item(
     label: &str,
     shortcut: Option<&str>,
-    disabled: bool,
+    disabled: bool = false,
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
     @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
@@ -168,7 +168,7 @@
 
 @* Menu item with custom content *@
 @fn custom_item(
-    disabled: bool,
+    disabled: bool = false,
     content: @(),
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"

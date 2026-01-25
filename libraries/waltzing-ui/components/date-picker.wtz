@@ -15,7 +15,7 @@
  *   With min/max constraints:
  *   <@date_picker::apply
  *       name="start_date"
- *       value=None
+ *      
  *       placeholder=Some("Choose start date")
  *       min=Some("2024-01-01")
  *       max=Some("2024-12-31")

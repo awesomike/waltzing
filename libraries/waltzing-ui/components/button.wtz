@@ -23,7 +23,7 @@
 @fn apply(
     variant: Variant,
     size: Size,
-    disabled: bool,
+    disabled: bool = false,
     class: &str = "",
     content: @(),
 ) {
@@ -58,21 +58,21 @@
 
 @* Shorthand for primary button *@
 @fn primary(content: @()) {
-    <@apply variant=Variant::Primary size=Size::Default disabled=false>
+    <@apply variant=Variant::Primary size=Size::Default>
         @content()
     </@>
 }
 
 @* Shorthand for secondary button *@
 @fn secondary(content: @()) {
-    <@apply variant=Variant::Secondary size=Size::Default disabled=false>
+    <@apply variant=Variant::Secondary size=Size::Default>
         @content()
     </@>
 }
 
 @* Shorthand for outline button *@
 @fn outline(content: @()) {
-    <@apply variant=Variant::Outline size=Size::Default disabled=false>
+    <@apply variant=Variant::Outline size=Size::Default>
         @content()
     </@>
 }

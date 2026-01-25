@@ -37,8 +37,8 @@
 @* Main form-compatible apply function *@
 @fn apply(
     name: &str,
-    min_value: Option<f64>,
-    max_value: Option<f64>,
+    min_value: Option<f64> = None,
+    max_value: Option<f64> = None,
     min_allowed: Option<f64>,
     max_allowed: Option<f64>,
     step: f64,
@@ -147,8 +147,8 @@
 @fn labeled(
     label: &str,
     name: &str,
-    min_value: Option<f64>,
-    max_value: Option<f64>,
+    min_value: Option<f64> = None,
+    max_value: Option<f64> = None,
     min_allowed: Option<f64>,
     max_allowed: Option<f64>,
     step: f64,

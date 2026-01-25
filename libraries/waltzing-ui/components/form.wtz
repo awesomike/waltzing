@@ -19,9 +19,9 @@
  *         <@input::apply
  *             input_type=input::InputType::Email
  *             name="email"
- *             value=None
+ *            
  *             placeholder=Some("you@example.com")
- *             disabled=false
+ *            
  *             required=true
  *             error=email_error
  *            
@@ -64,8 +64,8 @@
     name: &str,
     label: Option<&str>,
     description: Option<&str>,
-    error: Option<&str>,
-    required: bool,
+    error: Option<&str> = None,
+    required: bool = false,
     class: &str = "",
     content: @(),
 ) {

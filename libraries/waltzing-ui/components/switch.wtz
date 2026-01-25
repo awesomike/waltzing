@@ -5,8 +5,8 @@
  * @example
  * @import components/switch.wtz as switch
  *
- * <@switch::apply name="notifications" checked=true disabled=false />
- * <@switch::labeled label="Enable notifications" name="notifications" checked=false disabled=false description=None />
+ * <@switch::apply name="notifications" checked=true />
+ * <@switch::labeled label="Enable notifications" name="notifications" checked=false description=None />
  * <@switch::simple name="dark_mode" />
  * <@switch::on name="feature" />
  *@
@@ -14,7 +14,7 @@
 @fn apply(
     name: &str,
     checked: bool,
-    disabled: bool,
+    disabled: bool = false,
     class: &str = "",
 ) {
     @let track_base = "peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
@@ -61,7 +61,7 @@
     label: &str,
     name: &str,
     checked: bool,
-    disabled: bool,
+    disabled: bool = false,
     description: Option<&str> = None,
 ) {
     @let label_base = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -102,12 +102,12 @@
 
 @* Simple switch, unchecked by default *@
 @fn simple(name: &str) {
-    <@apply name=@name checked=false disabled=false />
+    <@apply name=@name checked=false />
 }
 
 @* Switch that's on by default *@
 @fn on(name: &str) {
-    <@apply name=@name checked=true disabled=false />
+    <@apply name=@name checked=true />
 }
 
 @* Disabled switch *@

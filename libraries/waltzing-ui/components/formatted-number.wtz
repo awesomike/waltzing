@@ -53,7 +53,7 @@
 @* Main formatted number input *@
 @fn apply(
     name: &str,
-    value: Option<f64>,
+    value: Option<f64> = None,
     prefix: Option<&str> = None,
     suffix: Option<&str> = None,
     decimals: u32 = 2,
@@ -205,7 +205,7 @@
 ) {
     <@apply
         name=@name
-        value=None
+       
         prefix=@prefix
         suffix=@suffix
         decimals=@decimals

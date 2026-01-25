@@ -25,7 +25,7 @@
 @* Main numeric input for forms (creates hidden input for form submission) *@
 @fn create(
     name: &str,
-    value: Option<f64>,
+    value: Option<f64> = None,
     min: Option<f64> = None,
     max: Option<f64> = None,
     step: f64 = 1.0,
@@ -127,7 +127,7 @@
 @* Inline variant for Alpine.js x-model binding (no hidden inputs) *@
 @fn inline(
     x_model: &str,
-    value: Option<f64>,
+    value: Option<f64> = None,
     min: Option<f64> = None,
     max: Option<f64> = None,
     step: f64 = 1.0,
@@ -227,7 +227,7 @@
 @fn labeled(
     label: &str,
     name: &str,
-    value: Option<f64>,
+    value: Option<f64> = None,
     min: Option<f64> = None,
     max: Option<f64> = None,
     step: f64 = 1.0,
@@ -268,7 +268,7 @@
         min=None
         max=None
         step=1.0
-        disabled=false
+       
        
     />
 }

@@ -17,7 +17,7 @@
  *   <@datetime_picker::labeled
  *       label="Event Start"
  *       name="start"
- *       value=None
+ *      
  *       required=true
  *   />
  **@

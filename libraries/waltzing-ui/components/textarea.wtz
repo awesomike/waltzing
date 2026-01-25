@@ -6,7 +6,7 @@
  * ```
  * @import ui/components/textarea.wtz as textarea
  *
- * <@textarea::simple name="bio" value=None placeholder=Some("Tell us about yourself") />
+ * <@textarea::simple name="bio" placeholder=Some("Tell us about yourself") />
  *
  * <@textarea::labeled
  *     label="Description"
@@ -14,9 +14,9 @@
  *     value=Some("Initial text")
  *     placeholder=Some("Enter description...")
  *     rows=Some(6)
- *     disabled=false
+ *    
  *     required=true
- *     error=None
+ *    
  *    
  * />
  * ```
@@ -25,12 +25,12 @@
 
 @fn apply(
     name: &str,
-    value: Option<&str>,
-    placeholder: Option<&str>,
+    value: Option<&str> = None,
+    placeholder: Option<&str> = None,
     rows: Option<u32>,
-    disabled: bool,
-    required: bool,
-    error: Option<&str>,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
     class: &str = "",
 ) {
     @let base = "flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -55,12 +55,12 @@
 @fn labeled(
     label: &str,
     name: &str,
-    value: Option<&str>,
-    placeholder: Option<&str>,
+    value: Option<&str> = None,
+    placeholder: Option<&str> = None,
     rows: Option<u32>,
-    disabled: bool,
-    required: bool,
-    error: Option<&str>,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
     class: &str = "",
 ) {
     <div class="space-y-2">
@@ -91,9 +91,9 @@
         value=@value
         placeholder=@placeholder
         rows=None
-        disabled=false
-        required=false
-        error=None
+       
+       
+       
        
     />
 }
@@ -105,9 +105,9 @@
         value=@value
         placeholder=@placeholder
         rows=Some(@rows)
-        disabled=false
-        required=false
-        error=None
+       
+       
+       
        
     />
 }

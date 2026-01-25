@@ -196,17 +196,17 @@
 
 @* Simple 6-digit OTP input *@
 @fn simple(name: &str) {
-    <@apply name=@name length=6 disabled=false />
+    <@apply name=@name length=6 />
 }
 
 @* 4-digit PIN input *@
 @fn pin(name: &str) {
-    <@apply name=@name length=4 disabled=false />
+    <@apply name=@name length=4 />
 }
 
 @* 6-digit OTP with dash separator (XXX-XXX) *@
 @fn split(name: &str) {
-    <@with_separator name=@name length=6 separator_after=3 disabled=false />
+    <@with_separator name=@name length=6 separator_after=3 />
 }
 
 @* Disabled OTP input *@

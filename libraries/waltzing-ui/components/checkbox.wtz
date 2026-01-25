@@ -5,13 +5,13 @@
  * @example
  * @import components/checkbox.wtz as checkbox
  *
- * <@checkbox::apply name="terms" checked=false disabled=false />
+ * <@checkbox::apply name="terms" checked=false />
  *
  * <@checkbox::labeled
  *     label="Accept terms and conditions"
  *     name="terms"
  *     checked=false
- *     disabled=false
+ *    
  *     description=None
  * />
  *
@@ -19,7 +19,7 @@
  *     label="Marketing emails"
  *     name="marketing"
  *     checked=true
- *     disabled=false
+ *    
  *     description=Some("Receive emails about new products and features")
  * />
  *@
@@ -28,7 +28,7 @@
 @fn apply(
     name: &str,
     checked: bool,
-    disabled: bool,
+    disabled: bool = false,
     class: &str = "",
 ) {
     @let base = "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -76,7 +76,7 @@
     label: &str,
     name: &str,
     checked: bool,
-    disabled: bool,
+    disabled: bool = false,
     description: Option<String>,
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -105,7 +105,7 @@
         label=@label
         name=@name
         checked=false
-        disabled=false
+       
         description=None
     />
 }
@@ -116,7 +116,7 @@
         label=@label
         name=@name
         checked=true
-        disabled=false
+       
         description=None
     />
 }

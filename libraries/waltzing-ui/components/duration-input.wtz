@@ -15,7 +15,7 @@
  *   <@duration_input::create name="work_time" value=Some(7200) format="hh:mm" />
  *
  *   // With min/max constraints (in seconds)
- *   <@duration_input::create name="interval" value=None format="mm:ss" min=Some(60) max=Some(3600) />
+ *   <@duration_input::create name="interval" format="mm:ss" min=Some(60) max=Some(3600) />
  *
  *   // Inline variant for compact display
  *   <@duration_input::inline name="quick_time" value=Some(300) format="mm:ss" />
@@ -108,7 +108,7 @@
     initial_seconds: u32,
     min_seconds: u32,
     max_seconds: u32,
-    disabled: bool,
+    disabled: bool = false,
     class: &str = "",
     container_base: &str,
     input_base: &str,
@@ -223,7 +223,7 @@
     initial_seconds: u32,
     min_seconds: u32,
     max_seconds: u32,
-    disabled: bool,
+    disabled: bool = false,
     class: &str = "",
     container_base: &str,
     input_base: &str,
@@ -327,7 +327,7 @@
     initial_seconds: u32,
     min_seconds: u32,
     max_seconds: u32,
-    disabled: bool,
+    disabled: bool = false,
     class: &str = "",
     container_base: &str,
     input_base: &str,

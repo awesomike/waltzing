@@ -130,8 +130,8 @@
     name: &str,
     options: Vec<RadioOption>,
     selected: Option<&str>,
-    required: bool,
-    error: Option<&str>,
+    required: bool = false,
+    error: Option<&str> = None,
     class: &str = "",
 ) {
     @let cls = class

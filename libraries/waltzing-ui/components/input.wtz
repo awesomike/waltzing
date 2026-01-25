@@ -17,11 +17,11 @@
 @fn apply(
     input_type: InputType,
     name: &str,
-    value: Option<&str>,
-    placeholder: Option<&str>,
-    disabled: bool,
-    required: bool,
-    error: Option<&str>,
+    value: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
     class: &str = "",
 ) {
     @let type_str = match input_type {
@@ -58,11 +58,11 @@
     label: &str,
     input_type: InputType,
     name: &str,
-    value: Option<&str>,
-    placeholder: Option<&str>,
-    disabled: bool,
-    required: bool,
-    error: Option<&str>,
+    value: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
     class: &str = "",
 ) {
     <div class="space-y-2">
@@ -93,9 +93,9 @@
         name=@name
         value=@value
         placeholder=@placeholder
-        disabled=false
-        required=false
-        error=None
+       
+       
+       
        
     />
 }
@@ -107,9 +107,9 @@
         name=@name
         value=@value
         placeholder=@placeholder
-        disabled=false
-        required=false
-        error=None
+       
+       
+       
        
     />
 }
@@ -119,11 +119,11 @@
     <@apply
         input_type=InputType::Password
         name=@name
-        value=None
+       
         placeholder=@placeholder
-        disabled=false
-        required=false
-        error=None
+       
+       
+       
        
     />
 }

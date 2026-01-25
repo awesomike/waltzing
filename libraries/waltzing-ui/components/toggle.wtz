@@ -5,7 +5,7 @@
  * Usage:
  *   @import ui/components/toggle.wtz as toggle
  *
- *   <@toggle::apply name="bold" pressed=false disabled=false variant=toggle::Variant::Default size=toggle::Size::Default>B</@>
+ *   <@toggle::apply name="bold" pressed=false variant=toggle::Variant::Default size=toggle::Size::Default>B</@>
  *   <@toggle::simple name="italic">I</@>
  *   <@toggle::outline name="underline" pressed=true>U</@>
  *   <@toggle::icon name="star">★</@>
@@ -26,7 +26,7 @@
 @fn apply(
     name: &str,
     pressed: bool,
-    disabled: bool,
+    disabled: bool = false,
     variant: Variant,
     size: Size,
     class: &str = "",
@@ -77,7 +77,7 @@
     <@apply
         name=@name
         pressed=false
-        disabled=false
+       
         variant=Variant::Default
         size=Size::Default
        
@@ -91,7 +91,7 @@
     <@apply
         name=@name
         pressed=@pressed
-        disabled=false
+       
         variant=Variant::Outline
         size=Size::Default
        
@@ -106,7 +106,7 @@
     <@apply
         name=@name
         pressed=false
-        disabled=false
+       
         variant=Variant::Default
         size=Size::Default
         class=@icon_class
@@ -134,7 +134,7 @@
     <@apply
         name=@name
         pressed=false
-        disabled=false
+       
         variant=Variant::Default
         size=Size::Sm
        
@@ -148,7 +148,7 @@
     <@apply
         name=@name
         pressed=false
-        disabled=false
+       
         variant=Variant::Default
         size=Size::Lg
        

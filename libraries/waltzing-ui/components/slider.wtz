@@ -276,7 +276,7 @@
 
 @* Simple slider with default values *@
 @fn simple(name: &str, value: f64) {
-    <@apply name=@name value=@value min=0.0 max=100.0 step=1.0 disabled=false />
+    <@apply name=@name value=@value min=0.0 max=100.0 step=1.0 />
 }
 
 @* Disabled slider *@

@@ -87,7 +87,7 @@
 
 @* Dropdown menu item *@
 @fn item(
-    disabled: bool,
+    disabled: bool = false,
     class: &str = "",
     content: @(),
 ) {
