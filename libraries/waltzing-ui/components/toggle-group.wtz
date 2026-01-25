@@ -2,20 +2,21 @@
  * Toggle Group component
  * A group of toggle buttons with single or multiple selection
  *
- * @example
- * @import components/toggle-group.wtz as toggle_group
+ * Two usage patterns:
  *
- * @let items = vec![
- *     ToggleItem { value: "left".into(), label: "Left".into(), icon: None, disabled: false },
- *     ToggleItem { value: "center".into(), label: "Center".into(), icon: None, disabled: false },
- *     ToggleItem { value: "right".into(), label: "Right".into(), icon: None, disabled: false },
- * ];
+ * 1. Declarative (for static items):
+ * <@toggle_group::single name="align" selected=Some("left")>
+ *     <@toggle_group::item value="left">Left</@>
+ *     <@toggle_group::item value="center">Center</@>
+ *     <@toggle_group::item value="right">Right</@>
+ * </@>
  *
- * <@toggle_group::single name="align" items=&items selected=Some("left") />
- * <@toggle_group::multiple name="format" items=&items selected=&["left", "right"] />
+ * 2. Data-driven (for dynamic items):
+ * <@toggle_group::single_from_vec name="align" items=@items selected=Some("left") />
  *@
 
 
+@* Item struct for data-driven usage *@
 @struct ToggleItem {
     value: String,
     label: String,
@@ -34,276 +35,198 @@
     Lg,
 }
 
-@* Single selection toggle group - only one item can be selected at a time *@
+@* Single selection toggle group (declarative) *@
 @fn single(
     name: &str,
-    items: Vec<ToggleItem>,
-    selected: Option<&str>,
-    variant: Variant,
-    size: Size,
+    selected: Option<&str> = None,
+    variant: Variant = Variant::Default,
+    size: Size = Size::Default,
     class: &str = "",
+    content: @(),
 ) {
     @let group_base = "inline-flex items-center rounded-md"
-
-    @let variant_cls = {
-        match variant {
-            Variant::Default => "bg-transparent",
-            Variant::Outline => "border border-input",
-        }
+    @let variant_cls = match variant {
+        Variant::Default => "bg-transparent",
+        Variant::Outline => "border border-input",
+    }
+    @let sel = selected.unwrap_or("")
+    @let variant_str = match variant {
+        Variant::Default => "default",
+        Variant::Outline => "outline",
+    }
+    @let size_str = match size {
+        Size::Sm => "sm",
+        Size::Default => "default",
+        Size::Lg => "lg",
     }
 
-    @let selected_json = {
-        if let Some(s) = selected {
-            format!("'{}'", s)
-        } else {
-            "null".to_string()
-        }
-    }
-
-    @let cls = class
     <div
         role="group"
-        class="@cn(&[@group_base, @variant_cls, @cls])"
-        x-data=@```json { selected: @selected_json } ```@
+        class="@cn(&[@group_base, @variant_cls, @class])"
+        x-data="{ selected: '@sel', toggleName: '@name', variant: '@variant_str', size: '@size_str', mode: 'single' }"
     >
-        @for (idx, item) in items.iter().enumerate() {
-            @let is_first = (idx == 0)
-            @let is_last = (idx == (items.len() - 1))
-            @let is_selected = (selected == Some(item.value.as_str()))
-            @let item_id = format!("{}_{}", name, item.value)
-
-            @let base = "inline-flex items-center justify-center text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-
-            @let size_cls = {
-                match size {
-                    Size::Sm => "h-8 px-2.5 min-w-8",
-                    Size::Default => "h-9 px-3 min-w-9",
-                    Size::Lg => "h-10 px-3 min-w-10",
-                }
-            }
-
-            @let position_cls = {
-                if is_first && is_last {
-                    "rounded-md"
-                } else if is_first {
-                    "rounded-l-md rounded-r-none"
-                } else if is_last {
-                    "rounded-l-none rounded-r-md"
-                } else {
-                    "rounded-none"
-                }
-            }
-
-            @let selected_cls = { if is_selected { "bg-accent text-accent-foreground" } else { "bg-transparent" } }
-            @let aria_pressed_val = { if is_selected { "true" } else { "false" } }
-            @let data_state_val = { if is_selected { "on" } else { "off" } }
-
-            <button
-                type="button"
-                id="@item_id"
-                role="radio"
-                class="@cn(&[@base, @size_cls, @position_cls, @selected_cls])"
-                aria-pressed="@aria_pressed_val"
-                data-state="@data_state_val"
-                data-value="@item.value"
-                @if item.disabled { disabled aria-disabled="true" }
-                x-on:click="selected = '@item.value'; $dispatch('change', { name: '@name', value: selected })"
-                :aria-pressed="selected === '@item.value' ? 'true' : 'false'"
-                :data-state="selected === '@item.value' ? 'on' : 'off'"
-                :class="selected === '@item.value' ? 'bg-accent text-accent-foreground' : 'bg-transparent'"
-            >
-                @if let Some(icon) = &item.icon {
-                    @let icon_margin = { if !item.label.is_empty() { "mr-2" } else { "" } }
-                    <span class="@icon_margin">@icon</span>
-                }
-                @item.label
-            </button>
-        }
+        @content()
         <input type="hidden" name="@name" :value="selected || ''" />
     </div>
 }
 
-@* Multiple selection toggle group - multiple items can be selected *@
+@* Multiple selection toggle group (declarative) *@
 @fn multiple(
     name: &str,
-    items: Vec<ToggleItem>,
     selected: Vec<&str>,
-    variant: Variant,
-    size: Size,
+    variant: Variant = Variant::Default,
+    size: Size = Size::Default,
     class: &str = "",
+    content: @(),
 ) {
     @let group_base = "inline-flex items-center rounded-md"
-
-    @let variant_cls = {
-        match variant {
-            Variant::Default => "bg-transparent",
-            Variant::Outline => "border border-input",
-        }
+    @let variant_cls = match variant {
+        Variant::Default => "bg-transparent",
+        Variant::Outline => "border border-input",
+    }
+    @let selected_json = format!("[{}]", selected.iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(", "))
+    @let variant_str = match variant {
+        Variant::Default => "default",
+        Variant::Outline => "outline",
+    }
+    @let size_str = match size {
+        Size::Sm => "sm",
+        Size::Default => "default",
+        Size::Lg => "lg",
     }
 
-    @let selected_json = format!("[{}]", selected.iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(", "))
-
-    @let cls = class
     <div
         role="group"
-        class="@cn(&[@group_base, @variant_cls, @cls])"
-        x-data=@```json { selected: @selected_json } ```@
+        class="@cn(&[@group_base, @variant_cls, @class])"
+        x-data="{ selected: @selected_json, toggleName: '@name', variant: '@variant_str', size: '@size_str', mode: 'multiple' }"
     >
-        @for (idx, item) in items.iter().enumerate() {
-            @let is_first = (idx == 0)
-            @let is_last = (idx == (items.len() - 1))
-            @let is_selected = selected.contains(&item.value.as_str())
-            @let item_id = format!("{}_{}", name, item.value)
-
-            @let base = "inline-flex items-center justify-center text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-
-            @let size_cls = {
-                match size {
-                    Size::Sm => "h-8 px-2.5 min-w-8",
-                    Size::Default => "h-9 px-3 min-w-9",
-                    Size::Lg => "h-10 px-3 min-w-10",
-                }
-            }
-
-            @let position_cls = {
-                if is_first && is_last {
-                    "rounded-md"
-                } else if is_first {
-                    "rounded-l-md rounded-r-none"
-                } else if is_last {
-                    "rounded-l-none rounded-r-md"
-                } else {
-                    "rounded-none"
-                }
-            }
-
-            @let selected_cls = { if is_selected { "bg-accent text-accent-foreground" } else { "bg-transparent" } }
-            @let aria_pressed_val = { if is_selected { "true" } else { "false" } }
-            @let data_state_val = { if is_selected { "on" } else { "off" } }
-
-            <button
-                type="button"
-                id="@item_id"
-                role="checkbox"
-                class="@cn(&[@base, @size_cls, @position_cls, @selected_cls])"
-                aria-pressed="@aria_pressed_val"
-                data-state="@data_state_val"
-                data-value="@item.value"
-                @if item.disabled { disabled aria-disabled="true" }
-                x-on:click="selected.includes('@item.value') ? selected = selected.filter(v => v !== '@item.value') : selected.push('@item.value'); $dispatch('change', { name: '@name', value: selected })"
-                :aria-pressed="selected.includes('@item.value') ? 'true' : 'false'"
-                :data-state="selected.includes('@item.value') ? 'on' : 'off'"
-                :class="selected.includes('@item.value') ? 'bg-accent text-accent-foreground' : 'bg-transparent'"
-            >
-                @if let Some(icon) = &item.icon {
-                    @let icon_margin = { if !item.label.is_empty() { "mr-2" } else { "" } }
-                    <span class="@icon_margin">@icon</span>
-                }
-                @item.label
-            </button>
-        }
+        @content()
         <input type="hidden" name="@name" :value="JSON.stringify(selected)" />
     </div>
 }
 
-@* Simple single selection with default styling *@
+@* Individual toggle item - must be used inside single/multiple *@
+@fn item(
+    value: &str,
+    icon: Option<&str> = None,
+    disabled: bool = false,
+    content: @(),
+) {
+    @let base = "inline-flex items-center justify-center text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+
+    <button
+        type="button"
+        data-value="@value"
+        class="@base first:rounded-l-md last:rounded-r-md [&:not(:first-child):not(:last-child)]:rounded-none"
+        :class="{
+            'h-8 px-2.5 min-w-8': size === 'sm',
+            'h-9 px-3 min-w-9': size === 'default',
+            'h-10 px-3 min-w-10': size === 'lg',
+            'bg-accent text-accent-foreground': mode === 'single' ? selected === '@value' : selected.includes('@value'),
+            'bg-transparent': mode === 'single' ? selected !== '@value' : !selected.includes('@value')
+        }"
+        :role="mode === 'single' ? 'radio' : 'checkbox'"
+        :aria-pressed="mode === 'single' ? (selected === '@value' ? 'true' : 'false') : (selected.includes('@value') ? 'true' : 'false')"
+        :data-state="mode === 'single' ? (selected === '@value' ? 'on' : 'off') : (selected.includes('@value') ? 'on' : 'off')"
+        @if disabled { disabled aria-disabled="true" }
+        x-on:click="
+            if (mode === 'single') {
+                selected = '@value';
+            } else {
+                selected.includes('@value')
+                    ? selected = selected.filter(v => v !== '@value')
+                    : selected.push('@value');
+            }
+            $dispatch('change', { name: toggleName, value: selected });
+        "
+    >
+        @if let Some(ic) = icon {
+            <span class="mr-2">@ic</span>
+        }
+        @content()
+    </button>
+}
+
+@* Data-driven single selection toggle group *@
+@fn single_from_vec(
+    name: &str,
+    items: Vec<ToggleItem>,
+    selected: Option<&str> = None,
+    variant: Variant = Variant::Default,
+    size: Size = Size::Default,
+    class: &str = "",
+) {
+    <@single name=@name selected=@selected variant=@variant size=@size class=@class>
+        @for item in items {
+            <@item value=@item.value icon=@item.icon.as_deref() disabled=@item.disabled>
+                @item.label
+            </@>
+        }
+    </@>
+}
+
+@* Data-driven multiple selection toggle group *@
+@fn multiple_from_vec(
+    name: &str,
+    items: Vec<ToggleItem>,
+    selected: Vec<&str>,
+    variant: Variant = Variant::Default,
+    size: Size = Size::Default,
+    class: &str = "",
+) {
+    <@multiple name=@name selected=@selected variant=@variant size=@size class=@class>
+        @for item in items {
+            <@item value=@item.value icon=@item.icon.as_deref() disabled=@item.disabled>
+                @item.label
+            </@>
+        }
+    </@>
+}
+
+@* Convenience: simple single with defaults *@
 @fn simple_single(
     name: &str,
-    items: Vec<ToggleItem>,
-    selected: Option<&str>,
+    selected: Option<&str> = None,
     class: &str = "",
+    content: @(),
 ) {
-    <@single
-        name=@name
-        items=@items
-        selected=@selected
-        variant=Variant::Default
-        size=Size::Default
-        class=@class
-    />
+    <@single name=@name selected=@selected class=@class>
+        @content()
+    </@>
 }
 
-@* Simple multiple selection with default styling *@
+@* Convenience: simple multiple with defaults - pass empty vec for no selection *@
 @fn simple_multiple(
     name: &str,
-    items: Vec<ToggleItem>,
     selected: Vec<&str>,
     class: &str = "",
+    content: @(),
 ) {
-    <@multiple
-        name=@name
-        items=@items
-        selected=@selected
-        variant=Variant::Default
-        size=Size::Default
-        class=@class
-    />
+    <@multiple name=@name selected=@selected class=@class>
+        @content()
+    </@>
 }
 
-@* Outline variant single selection *@
+@* Convenience: outline single *@
 @fn outline_single(
     name: &str,
-    items: Vec<ToggleItem>,
-    selected: Option<&str>,
+    selected: Option<&str> = None,
     class: &str = "",
+    content: @(),
 ) {
-    <@single
-        name=@name
-        items=@items
-        selected=@selected
-        variant=Variant::Outline
-        size=Size::Default
-        class=@class
-    />
+    <@single name=@name selected=@selected variant=Variant::Outline class=@class>
+        @content()
+    </@>
 }
 
-@* Outline variant multiple selection *@
+@* Convenience: outline multiple *@
 @fn outline_multiple(
     name: &str,
-    items: Vec<ToggleItem>,
     selected: Vec<&str>,
     class: &str = "",
+    content: @(),
 ) {
-    <@multiple
-        name=@name
-        items=@items
-        selected=@selected
-        variant=Variant::Outline
-        size=Size::Default
-        class=@class
-    />
-}
-
-@* Small single selection *@
-@fn sm_single(
-    name: &str,
-    items: Vec<ToggleItem>,
-    selected: Option<&str>,
-    class: &str = "",
-) {
-    <@single
-        name=@name
-        items=@items
-        selected=@selected
-        variant=Variant::Default
-        size=Size::Sm
-        class=@class
-    />
-}
-
-@* Large single selection *@
-@fn lg_single(
-    name: &str,
-    items: Vec<ToggleItem>,
-    selected: Option<&str>,
-    class: &str = "",
-) {
-    <@single
-        name=@name
-        items=@items
-        selected=@selected
-        variant=Variant::Default
-        size=Size::Lg
-        class=@class
-    />
+    <@multiple name=@name selected=@selected variant=Variant::Outline class=@class>
+        @content()
+    </@>
 }
