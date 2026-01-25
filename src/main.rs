@@ -1193,13 +1193,34 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "duration-input" => r#"
-            <div class="flex items-center gap-2">
-                <input type="number" value="2" class="w-16 h-9 rounded-md border border-input bg-transparent px-3 text-sm text-center">
-                <select class="h-9 rounded-md border border-input bg-transparent px-2 text-sm">
-                    <option>hours</option>
-                    <option>minutes</option>
-                    <option>days</option>
-                </select>
+            <div class="space-y-4">
+                <div x-data="{ hours: '02', minutes: '30', seconds: '00' }" class="flex items-center gap-1">
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs text-muted-foreground mb-1">HH</span>
+                        <input type="text" x-model="hours" maxlength="2" @input="hours = $event.target.value.replace(/\D/g, '').slice(0,2).padStart(2, '0')" class="w-12 h-10 text-center rounded-md border border-input bg-transparent text-lg font-mono">
+                    </div>
+                    <span class="text-xl font-bold mt-4">:</span>
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs text-muted-foreground mb-1">MM</span>
+                        <input type="text" x-model="minutes" maxlength="2" @input="minutes = Math.min(59, $event.target.value.replace(/\D/g, '')).toString().padStart(2, '0')" class="w-12 h-10 text-center rounded-md border border-input bg-transparent text-lg font-mono">
+                    </div>
+                    <span class="text-xl font-bold mt-4">:</span>
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs text-muted-foreground mb-1">SS</span>
+                        <input type="text" x-model="seconds" maxlength="2" @input="seconds = Math.min(59, $event.target.value.replace(/\D/g, '')).toString().padStart(2, '0')" class="w-12 h-10 text-center rounded-md border border-input bg-transparent text-lg font-mono">
+                    </div>
+                </div>
+                <div x-data="{ days: '01', hours: '12' }" class="flex items-center gap-1">
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs text-muted-foreground mb-1">Days</span>
+                        <input type="text" x-model="days" maxlength="2" @input="days = $event.target.value.replace(/\D/g, '').slice(0,2).padStart(2, '0')" class="w-12 h-10 text-center rounded-md border border-input bg-transparent text-lg font-mono">
+                    </div>
+                    <span class="text-xl font-bold mt-4">:</span>
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs text-muted-foreground mb-1">Hours</span>
+                        <input type="text" x-model="hours" maxlength="2" @input="hours = Math.min(23, $event.target.value.replace(/\D/g, '')).toString().padStart(2, '0')" class="w-12 h-10 text-center rounded-md border border-input bg-transparent text-lg font-mono">
+                    </div>
+                </div>
             </div>
         "#,
 
@@ -1242,14 +1263,54 @@ fn get_component_preview(component: &str) -> &'static str {
         "##,
 
         "input-otp" => r#"
-            <div class="flex gap-2">
-                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
-                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
-                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
-                <span class="flex items-center text-muted-foreground">-</span>
-                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
-                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
-                <input type="text" maxlength="1" class="w-10 h-10 text-center rounded-md border border-input bg-transparent text-lg">
+            <div x-data="{
+                otp: ['', '', '', '', '', ''],
+                focusNext(index) {
+                    if (index < 5) this.$refs['otp' + (index + 1)].focus();
+                },
+                focusPrev(index) {
+                    if (index > 0) this.$refs['otp' + (index - 1)].focus();
+                },
+                handleInput(index, event) {
+                    const val = event.target.value.replace(/\D/g, '');
+                    if (val.length > 0) {
+                        this.otp[index] = val[0];
+                        event.target.value = val[0];
+                        this.focusNext(index);
+                    }
+                },
+                handleKeydown(index, event) {
+                    if (event.key === 'Backspace') {
+                        if (this.otp[index] === '') {
+                            this.focusPrev(index);
+                        } else {
+                            this.otp[index] = '';
+                        }
+                    } else if (event.key === 'ArrowLeft') {
+                        this.focusPrev(index);
+                    } else if (event.key === 'ArrowRight') {
+                        this.focusNext(index);
+                    }
+                },
+                handlePaste(event) {
+                    event.preventDefault();
+                    const paste = (event.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+                    for (let i = 0; i < paste.length && i < 6; i++) {
+                        this.otp[i] = paste[i];
+                    }
+                    if (paste.length > 0) {
+                        const focusIdx = Math.min(paste.length, 5);
+                        this.$refs['otp' + focusIdx].focus();
+                    }
+                }
+            }" class="flex gap-2" @paste="handlePaste($event)">
+                <input x-ref="otp0" type="text" inputmode="numeric" maxlength="1" :value="otp[0]" @input="handleInput(0, $event)" @keydown="handleKeydown(0, $event)" class="w-12 h-12 text-center rounded-md border border-input bg-transparent text-xl font-semibold focus:border-primary focus:ring-1 focus:ring-primary">
+                <input x-ref="otp1" type="text" inputmode="numeric" maxlength="1" :value="otp[1]" @input="handleInput(1, $event)" @keydown="handleKeydown(1, $event)" class="w-12 h-12 text-center rounded-md border border-input bg-transparent text-xl font-semibold focus:border-primary focus:ring-1 focus:ring-primary">
+                <input x-ref="otp2" type="text" inputmode="numeric" maxlength="1" :value="otp[2]" @input="handleInput(2, $event)" @keydown="handleKeydown(2, $event)" class="w-12 h-12 text-center rounded-md border border-input bg-transparent text-xl font-semibold focus:border-primary focus:ring-1 focus:ring-primary">
+                <span class="flex items-center text-muted-foreground text-xl">-</span>
+                <input x-ref="otp3" type="text" inputmode="numeric" maxlength="1" :value="otp[3]" @input="handleInput(3, $event)" @keydown="handleKeydown(3, $event)" class="w-12 h-12 text-center rounded-md border border-input bg-transparent text-xl font-semibold focus:border-primary focus:ring-1 focus:ring-primary">
+                <input x-ref="otp4" type="text" inputmode="numeric" maxlength="1" :value="otp[4]" @input="handleInput(4, $event)" @keydown="handleKeydown(4, $event)" class="w-12 h-12 text-center rounded-md border border-input bg-transparent text-xl font-semibold focus:border-primary focus:ring-1 focus:ring-primary">
+                <input x-ref="otp5" type="text" inputmode="numeric" maxlength="1" :value="otp[5]" @input="handleInput(5, $event)" @keydown="handleKeydown(5, $event)" class="w-12 h-12 text-center rounded-md border border-input bg-transparent text-xl font-semibold focus:border-primary focus:ring-1 focus:ring-primary">
             </div>
         "#,
 
@@ -1316,11 +1377,13 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "password-input" => r#"
-            <div class="relative w-full max-w-xs">
-                <input type="password" value="password123" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm pr-10">
-                <button class="absolute right-0 top-0 h-9 w-9 flex items-center justify-center text-muted-foreground hover:text-foreground">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <div x-data="{ show: false, password: 'mypassword123' }" class="relative w-full max-w-xs">
+                <input :type="show ? 'text' : 'password'" x-model="password" placeholder="Enter password" class="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm pr-10 focus:outline-none focus:ring-1 focus:ring-primary">
+                <button type="button" @click="show = !show" class="absolute right-0 top-0 h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" :aria-label="show ? 'Hide password' : 'Show password'">
+                    <svg x-show="!show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg x-show="show" x-cloak width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
                 </button>
+                <p class="mt-2 text-xs text-muted-foreground">Click the eye icon to <span x-text="show ? 'hide' : 'show'"></span> password</p>
             </div>
         "#,
 
