@@ -738,16 +738,18 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "select" => r#"
-            <div x-data="{ open: false, selected: 'Select a fruit' }" class="relative w-[180px]">
-                <button @click="open = !open" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+            <div x-data="{ open: false, selected: 'Select a fruit', pos: { top: 0, left: 0, width: 0 } }" class="relative w-[180px]">
+                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY, left: r.left + window.scrollX, width: r.width }; open = !open" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring">
                     <span x-text="selected"></span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-50"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <div x-show="open" @click.away="open = false" x-cloak class="absolute z-50 mt-1 w-full rounded-md border bg-popover p-1 shadow-md">
-                    <div @click="selected = 'Apple'; open = false" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent">Apple</div>
-                    <div @click="selected = 'Banana'; open = false" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent">Banana</div>
-                    <div @click="selected = 'Orange'; open = false" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent">Orange</div>
-                </div>
+                <template x-teleport="body">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-50 rounded-md border bg-popover p-1 shadow-md" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px; width: ' + pos.width + 'px;'">
+                        <div @click="selected = 'Apple'; open = false" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent">Apple</div>
+                        <div @click="selected = 'Banana'; open = false" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent">Banana</div>
+                        <div @click="selected = 'Orange'; open = false" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent">Orange</div>
+                    </div>
+                </template>
             </div>
         "#,
 
@@ -803,43 +805,47 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "dropdown" => r#"
-            <div x-data="{ open: false }" class="relative inline-block">
-                <button @click="open = !open" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">
+            <div x-data="{ open: false, pos: { top: 0, left: 0 } }" class="relative inline-block">
+                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY, left: r.left + window.scrollX }; open = !open" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">
                     Open Menu
                     <svg class="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
-                <div x-show="open" @click.away="open = false" x-cloak class="absolute left-0 mt-2 w-56 rounded-md border bg-popover p-1 shadow-md z-50">
-                    <div class="px-2 py-1.5 text-sm font-semibold">My Account</div>
-                    <div class="h-px bg-border my-1"></div>
-                    <button class="w-full text-left px-2 py-1.5 text-sm rounded-sm hover:bg-accent">Profile</button>
-                    <button class="w-full text-left px-2 py-1.5 text-sm rounded-sm hover:bg-accent">Settings</button>
-                    <div class="h-px bg-border my-1"></div>
-                    <button class="w-full text-left px-2 py-1.5 text-sm rounded-sm hover:bg-accent text-destructive">Log out</button>
-                </div>
+                <template x-teleport="body">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed w-56 rounded-md border bg-popover p-1 shadow-md z-50" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px;'">
+                        <div class="px-2 py-1.5 text-sm font-semibold">My Account</div>
+                        <div class="h-px bg-border my-1"></div>
+                        <button class="w-full text-left px-2 py-1.5 text-sm rounded-sm hover:bg-accent">Profile</button>
+                        <button class="w-full text-left px-2 py-1.5 text-sm rounded-sm hover:bg-accent">Settings</button>
+                        <div class="h-px bg-border my-1"></div>
+                        <button class="w-full text-left px-2 py-1.5 text-sm rounded-sm hover:bg-accent text-destructive">Log out</button>
+                    </div>
+                </template>
             </div>
         "#,
 
         "popover" => r#"
-            <div x-data="{ open: false }" class="relative inline-block">
-                <button @click="open = !open" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Open Popover</button>
-                <div x-show="open" @click.away="open = false" x-cloak class="absolute left-0 mt-2 w-80 rounded-md border bg-popover p-4 shadow-md z-50">
-                    <div class="grid gap-4">
-                        <div class="space-y-2">
-                            <h4 class="font-medium leading-none">Dimensions</h4>
-                            <p class="text-sm text-muted-foreground">Set the dimensions for the layer.</p>
-                        </div>
-                        <div class="grid gap-2">
-                            <div class="grid grid-cols-3 items-center gap-4">
-                                <label class="text-sm">Width</label>
-                                <input class="col-span-2 h-8 rounded-md border px-2 text-sm" value="100%">
+            <div x-data="{ open: false, pos: { top: 0, left: 0 } }" class="relative inline-block">
+                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY, left: r.left + window.scrollX }; open = !open" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Open Popover</button>
+                <template x-teleport="body">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed w-80 rounded-md border bg-popover p-4 shadow-md z-50" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px;'">
+                        <div class="grid gap-4">
+                            <div class="space-y-2">
+                                <h4 class="font-medium leading-none">Dimensions</h4>
+                                <p class="text-sm text-muted-foreground">Set the dimensions for the layer.</p>
                             </div>
-                            <div class="grid grid-cols-3 items-center gap-4">
-                                <label class="text-sm">Height</label>
-                                <input class="col-span-2 h-8 rounded-md border px-2 text-sm" value="25px">
+                            <div class="grid gap-2">
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label class="text-sm">Width</label>
+                                    <input class="col-span-2 h-8 rounded-md border px-2 text-sm bg-transparent" value="100%">
+                                </div>
+                                <div class="grid grid-cols-3 items-center gap-4">
+                                    <label class="text-sm">Height</label>
+                                    <input class="col-span-2 h-8 rounded-md border px-2 text-sm bg-transparent" value="25px">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </template>
             </div>
         "#,
 
@@ -950,19 +956,21 @@ fn get_component_preview(component: &str) -> &'static str {
         "#,
 
         "combobox" => r#"
-            <div x-data="{ open: false, search: '', selected: '' }" class="relative w-[200px]">
-                <button @click="open = !open" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
+            <div x-data="{ open: false, search: '', selected: '', pos: { top: 0, left: 0, width: 0 } }" class="relative w-[200px]">
+                <button x-ref="trigger" @click="let r = $refs.trigger.getBoundingClientRect(); pos = { top: r.bottom + window.scrollY, left: r.left + window.scrollX, width: r.width }; open = !open" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
                     <span x-text="selected || 'Select framework...'"></span>
                     <svg class="h-4 w-4 opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </button>
-                <div x-show="open" @click.away="open = false" x-cloak class="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md">
-                    <input x-model="search" placeholder="Search..." class="w-full border-b px-3 py-2 text-sm outline-none">
-                    <div class="p-1">
-                        <div @click="selected = 'Next.js'; open = false" x-show="'next.js'.includes(search.toLowerCase())" class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Next.js</div>
-                        <div @click="selected = 'SvelteKit'; open = false" x-show="'sveltekit'.includes(search.toLowerCase())" class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">SvelteKit</div>
-                        <div @click="selected = 'Nuxt'; open = false" x-show="'nuxt'.includes(search.toLowerCase())" class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Nuxt</div>
+                <template x-teleport="body">
+                    <div x-show="open" @click.away="open = false" x-cloak class="fixed z-50 rounded-md border bg-popover shadow-md" :style="'top: ' + pos.top + 'px; left: ' + pos.left + 'px; width: ' + pos.width + 'px;'">
+                        <input x-model="search" placeholder="Search..." class="w-full border-b px-3 py-2 text-sm outline-none bg-transparent">
+                        <div class="p-1">
+                            <div @click="selected = 'Next.js'; open = false" x-show="'next.js'.includes(search.toLowerCase())" class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Next.js</div>
+                            <div @click="selected = 'SvelteKit'; open = false" x-show="'sveltekit'.includes(search.toLowerCase())" class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">SvelteKit</div>
+                            <div @click="selected = 'Nuxt'; open = false" x-show="'nuxt'.includes(search.toLowerCase())" class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Nuxt</div>
+                        </div>
                     </div>
-                </div>
+                </template>
             </div>
         "#,
 
