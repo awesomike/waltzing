@@ -1055,7 +1055,7 @@ fn get_component_usage(component: &str) -> String {
 &lt;@button::primary&gt;Click me&lt;/@&gt;
 
 // With variant and size
-&lt;@button::apply
+&lt;@button
     variant=button::Variant::Secondary
     size=button::Size::Lg
     disabled=false
@@ -1066,7 +1066,7 @@ fn get_component_usage(component: &str) -> String {
         "input" => r#"@import components/input.wtz as input
 
 // Basic input
-&lt;@input::apply
+&lt;@input
     name="email"
     placeholder=Some("Enter email")
     type_attr="email"
@@ -1083,7 +1083,7 @@ fn get_component_usage(component: &str) -> String {
         "card" => r#"@import components/card.wtz as card
 
 // Simple card
-&lt;@card::apply&gt;
+&lt;@card&gt;
     &lt;@card::header&gt;
         &lt;@card::title&gt;Card Title&lt;/@&gt;
         &lt;@card::description&gt;Card description&lt;/@&gt;
@@ -1099,7 +1099,7 @@ fn get_component_usage(component: &str) -> String {
                 r#"@import components/{}.wtz as {}
 
 // Basic usage
-&lt;@{}::apply ... /&gt;
+&lt;@{} ... /&gt;
 
 // See component source for options"#,
                 component, comp_name, comp_name
