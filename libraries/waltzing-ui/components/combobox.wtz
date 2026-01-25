@@ -1,67 +1,78 @@
 @*
  * Combobox component
  * A searchable select dropdown with autocomplete
- * Uses Alpine.js for search, filtering, and keyboard navigation
  *
- * Usage:
- *   @import components/combobox.wtz as combobox
+ * Two usage patterns:
  *
- *   @let options = [
- *       combobox::ComboboxOption { value: "react", label: "React", disabled: false },
- *       combobox::ComboboxOption { value: "vue", label: "Vue", disabled: false },
- *       combobox::ComboboxOption { value: "angular", label: "Angular", disabled: true },
- *   ]
+ * 1. Declarative (for static options):
+ * <@combobox::group name="framework" selected=Some("react") placeholder="Search...">
+ *     <@combobox::option value="react">React</@>
+ *     <@combobox::option value="vue">Vue</@>
+ *     <@combobox::option value="angular" disabled=true>Angular</@>
+ * </@>
  *
- *   <@combobox::apply
- *       name="framework"
- *       options=@options
- *       selected=Some("react")
- *       placeholder=Some("Select a framework...")
- *   />
+ * 2. Data-driven (for dynamic options):
+ * <@combobox::from_vec name="framework" options=@options selected=Some("react") />
  *@
 
 
+@* Option struct for data-driven usage *@
 @struct ComboboxOption {
     value: String,
     label: String,
     disabled: bool,
 }
 
-@fn apply(
+@* Combobox group container with search *@
+@fn group(
     name: &str,
-    options: Vec<ComboboxOption>,
     selected: Option<&str> = None,
     placeholder: Option<&str> = None,
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
     class: &str = "",
+    content: @(),
 ) {
     @let base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-    @let cls = class
-    @let input_classes = vec![@base, @error_cls, @cls]
+    @let input_classes = vec![@base, @error_cls, @class]
     @let input_cls = cn(@input_classes)
 
-    @* Find the initial label for the selected value *@
-    @let initial_label = selected.and_then(|sel| options.iter().find(|o| o.value == sel).map(|o| o.label.as_str())).unwrap_or("")
+    @let sel = selected.unwrap_or("")
+    @let ph = placeholder.unwrap_or("Search...")
 
-    @let selected_val = selected.unwrap_or("")
     <div
         class="w-full"
         x-data="{
             open: false,
             flipTop: false,
             pos: { x: 0, y: 0, width: 0 },
-            search: '@initial_label',
-            selected: '@selected_val',
+            search: '',
+            selected: '@sel',
+            selectedLabel: '',
             highlightedIndex: -1,
+            comboName: '@name',
             get filteredOptions() {
                 const searchLower = this.search.toLowerCase();
                 return this.$refs.options ? Array.from(this.$refs.options.querySelectorAll('[data-option]')).filter(el => {
-                    const label = el.dataset.label.toLowerCase();
+                    const label = (el.dataset.label || '').toLowerCase();
                     return label.includes(searchLower);
                 }) : [];
+            },
+            init() {
+                const initial = this.$refs.options?.querySelector(`[data-value='${this.selected}']`);
+                if (initial) {
+                    this.selectedLabel = initial.dataset.label || initial.textContent.trim();
+                    this.search = this.selectedLabel;
+                }
+                this._scrollHandler = () => { if (this.open) this.updatePos(); };
+                window.addEventListener('scroll', this._scrollHandler, true);
+                window.addEventListener('resize', this._scrollHandler);
+            },
+            destroy() {
+                window.removeEventListener('scroll', this._scrollHandler, true);
+                window.removeEventListener('resize', this._scrollHandler);
             },
             updatePos() {
                 const trigger = this.$refs.trigger;
@@ -75,18 +86,9 @@
                 this.pos.y = this.flipTop ? rect.top : rect.bottom;
                 this.pos.width = rect.width;
             },
-            onScroll() { if (this.open) this.updatePos(); },
-            init() {
-                this._scrollHandler = () => this.onScroll();
-                window.addEventListener('scroll', this._scrollHandler, true);
-                window.addEventListener('resize', this._scrollHandler);
-            },
-            destroy() {
-                window.removeEventListener('scroll', this._scrollHandler, true);
-                window.removeEventListener('resize', this._scrollHandler);
-            },
             selectOption(value, label) {
                 this.selected = value;
+                this.selectedLabel = label;
                 this.search = label;
                 this.open = false;
                 this.$refs.hiddenInput.value = value;
@@ -108,8 +110,8 @@
                 const options = this.filteredOptions;
                 if (this.highlightedIndex >= 0 && this.highlightedIndex < options.length) {
                     const el = options[this.highlightedIndex];
-                    if (!el.dataset.disabled) {
-                        this.selectOption(el.dataset.value, el.dataset.label);
+                    if (el.dataset.disabled !== 'true') {
+                        this.selectOption(el.dataset.value, el.dataset.label || el.textContent.trim());
                     }
                 }
             }
@@ -131,7 +133,6 @@
         />
 
         @* Search input *@
-        @let placeholder_text = placeholder.unwrap_or("Search...")
         <div class="relative" x-ref="trigger">
             <input
                 type="text"
@@ -140,7 +141,7 @@
                 @focus="open = true; highlightedIndex = -1; $nextTick(() => updatePos())"
                 @click="open = true; $nextTick(() => updatePos())"
                 @input="open = true; highlightedIndex = -1"
-                placeholder="@placeholder_text"
+                placeholder="@ph"
                 @if disabled { disabled }
                 @if error.is_some() { aria-invalid="true" }
                 role="combobox"
@@ -148,11 +149,10 @@
                 :aria-expanded="open"
                 aria-autocomplete="list"
             />
-            @* Chevron icon *@
             <button
                 type="button"
                 class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                @click="open = !open; if(open) { $refs.input?.focus(); $nextTick(() => updatePos()); }"
+                @click="open = !open; if(open) { $nextTick(() => updatePos()); }"
                 tabindex="-1"
                 @if disabled { disabled }
             >
@@ -162,7 +162,7 @@
             </button>
         </div>
 
-        @* Dropdown options (teleported to body) *@
+        @* Dropdown (teleported to body) *@
         <template x-teleport="body">
             <div
                 x-show="open"
@@ -179,61 +179,129 @@
                 :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`"
                 role="listbox"
             >
-            @for (idx, opt) in options.iter().enumerate() {
-                @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
-                @let option_disabled = class_if(opt.disabled, "pointer-events-none opacity-50")
-                @let option_classes = vec![@option_base, @option_disabled]
-                @let option_cls = cn(@option_classes)
-                <div
-                    data-option
-                    data-value="@opt.value"
-                    data-label="@opt.label"
-                    @if opt.disabled { data-disabled="true" }
-                    class="@option_cls"
-                    :class="{
-                        'bg-accent text-accent-foreground': highlightedIndex === @idx || selected === '@opt.value',
-                        'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
-                    }"
-                    x-show="'@opt.label'.toLowerCase().includes(search.toLowerCase())"
-                    @click="@if !opt.disabled { selectOption('@opt.value', '@opt.label') }"
-                    @mouseenter="highlightedIndex = @idx"
-                    role="option"
-                    :aria-selected="selected === '@opt.value'"
-                >
-                    @* Check icon for selected item *@
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mr-2 h-4 w-4"
-                        :class="selected === '@opt.value' ? 'opacity-100' : 'opacity-0'"
-                    >
-                        <path d="M20 6 9 17l-5-5"/>
-                    </svg>
-                    <span>@opt.label</span>
-                </div>
-            }
+                @content()
 
-            @* Empty state *@
-            <div
-                x-show="filteredOptions.length === 0"
-                class="py-6 text-center text-sm text-muted-foreground"
-            >
-                No results found.
-            </div>
+                @* Empty state *@
+                <div
+                    x-show="filteredOptions.length === 0"
+                    class="py-6 text-center text-sm text-muted-foreground"
+                >
+                    No results found.
+                </div>
             </div>
         </template>
     </div>
 }
 
-@* Combobox with label *@
+@* Individual combobox option - must be used inside a group *@
+@fn option(
+    value: &str,
+    disabled: bool = false,
+    content: @(),
+) {
+    @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
+
+    <div
+        data-option
+        data-value="@value"
+        data-label
+        @if disabled { data-disabled="true" }
+        x-data="{ get label() { return this.$el.querySelector('span')?.textContent.trim() || this.$el.textContent.trim(); } }"
+        x-init="$el.dataset.label = label"
+        class="@option_base @if disabled { pointer-events-none opacity-50 }"
+        :class="{
+            'bg-accent text-accent-foreground': selected === '@value',
+            'hover:bg-accent hover:text-accent-foreground': true
+        }"
+        x-show="($el.dataset.label || '').toLowerCase().includes(search.toLowerCase())"
+        @click="@if !disabled { selectOption('@value', label) }"
+        role="option"
+        :aria-selected="selected === '@value'"
+        @if disabled { aria-disabled="true" }
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="mr-2 h-4 w-4"
+            :class="selected === '@value' ? 'opacity-100' : 'opacity-0'"
+        >
+            <path d="M20 6 9 17l-5-5"/>
+        </svg>
+        <span>@content()</span>
+    </div>
+}
+
+@* Data-driven combobox from Vec<ComboboxOption> *@
+@fn from_vec(
+    name: &str,
+    options: Vec<ComboboxOption>,
+    selected: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: &str = "",
+) {
+    <@group
+        name=@name
+        selected=@selected
+        placeholder=@placeholder
+        disabled=@disabled
+        required=@required
+        error=@error
+        class=@class
+    >
+        @for opt in options {
+            <@option value=@opt.value disabled=@opt.disabled>
+                @opt.label
+            </@>
+        }
+    </@>
+}
+
+@* Combobox with label (declarative) *@
 @fn labeled(
+    label: &str,
+    name: &str,
+    selected: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    disabled: bool = false,
+    required: bool = false,
+    error: Option<&str> = None,
+    class: &str = "",
+    content: @(),
+) {
+    <div class="space-y-2">
+        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            @label
+            @if required { <span class="text-destructive">*</span> }
+        </label>
+        <@group
+            name=@name
+            selected=@selected
+            placeholder=@placeholder
+            disabled=@disabled
+            required=@required
+            error=@error
+            class=@class
+        >
+            @content()
+        </@>
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive">@e</p>
+        }
+    </div>
+}
+
+@* Combobox with label (data-driven) *@
+@fn labeled_from_vec(
     label: &str,
     name: &str,
     options: Vec<ComboboxOption>,
@@ -245,11 +313,11 @@
     class: &str = "",
 ) {
     <div class="space-y-2">
-        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>
-        <@apply
+        <@from_vec
             name=@name
             options=@options
             selected=@selected
