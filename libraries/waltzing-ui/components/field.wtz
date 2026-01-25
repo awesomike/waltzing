@@ -1,0 +1,54 @@
+@*
+ * Field component
+ * Form field wrapper combining label, input slot, description, and error message
+ *
+ * @example
+ * @import components/field.wtz as field
+ * @import components/input.wtz as input
+ *
+ * <@field::apply label="Email" description=Some("We'll never share your email") required=true error=@None>
+ *     <@input::apply
+ *         input_type=input::InputType::Email
+ *         name="email"
+ *         placeholder=Some("you@example.com")
+ *     />
+ * </@>
+ *
+ * <@field::apply label="Username" required=false>
+ *     <@input::text name="username" value=None placeholder=Some("Enter username") />
+ * </@>
+ *
+ * <@field::apply label="Password" error=Some("Password is required") required=true>
+ *     <@input::password name="password" placeholder=Some("Enter password") />
+ * </@>
+ *@
+
+
+@* Main field wrapper with label, description, and error *@
+@fn apply(
+    label: &str,
+    description: Option<&str> = None,
+    error: Option<&str> = None,
+    required: bool = false,
+    class: &str = "",
+    content: @(),
+) {
+    @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    @let field_cls = cn(&["space-y-2", class])
+
+    <div class="@field_cls">
+        <label class="@label_cls">
+            @label
+            @if required { <span class="text-destructive ml-0.5">*</span> }
+        </label>
+        @content()
+        @if let Some(d) = description {
+            @if error.is_none() {
+                <p class="text-sm text-muted-foreground">@d</p>
+            }
+        }
+        @if let Some(e) = error {
+            <p class="text-sm text-destructive" role="alert">@e</p>
+        }
+    </div>
+}

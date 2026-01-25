@@ -1,0 +1,153 @@
+@*
+ * Empty state component
+ * Placeholder for empty content areas with centered layout
+ *
+ * @example
+ * @import components/empty.wtz as empty
+ *
+ * <@empty::apply title="No results" description="Try adjusting your search">
+ *   <@empty::action><@button::primary>Create New</@></@>
+ * </@>
+ *
+ * <@empty::apply title="No items yet">
+ *   <@empty::icon>
+ *     <svg>...</svg>
+ *   </@>
+ * </@>
+ *
+ * <@empty::compact title="Empty" />
+ *
+ * <@empty::apply
+ *     title="No messages"
+ *     description=Some("Start a conversation to see messages here")
+ *     variant=empty::Variant::Compact
+ *     class="min-h-[200px]"
+ * />
+ *@
+
+@enum Variant {
+    Default,
+    Compact,
+}
+
+@* Main empty state component *@
+@fn apply(
+    title: &str,
+    description: Option<&str> = None,
+    variant: Variant = Variant::Default,
+    class: &str = "",
+    content: @() = @{},
+) {
+    @let base = "flex flex-col items-center justify-center text-center"
+
+    @let variant_cls = match variant {
+        Variant::Default => "py-12 px-4",
+        Variant::Compact => "py-6 px-4",
+    }
+
+    @let title_cls = match variant {
+        Variant::Default => "text-lg font-semibold text-foreground",
+        Variant::Compact => "text-sm font-medium text-foreground",
+    }
+
+    @let desc_cls = match variant {
+        Variant::Default => "mt-2 text-sm text-muted-foreground max-w-sm",
+        Variant::Compact => "mt-1 text-xs text-muted-foreground max-w-xs",
+    }
+
+    @let extra_cls = class
+    @let classes = vec![base, variant_cls, extra_cls]
+
+    <div class="@cn(@classes)">
+        @content()
+        <h3 class="@title_cls">@title</h3>
+        @if let Some(desc) = description {
+            <p class="@desc_cls">@desc</p>
+        }
+    </div>
+}
+
+@* Icon slot for empty state *@
+@fn icon(
+    class: &str = "",
+    content: @(),
+) {
+    @let base = "mb-4 text-muted-foreground"
+    @let extra_cls = class
+    @let classes = vec![base, extra_cls]
+
+    <div class="@cn(@classes)">
+        @content()
+    </div>
+}
+
+@* Action slot for buttons/CTAs *@
+@fn action(
+    class: &str = "",
+    content: @(),
+) {
+    @let base = "mt-4"
+    @let extra_cls = class
+    @let classes = vec![base, extra_cls]
+
+    <div class="@cn(@classes)">
+        @content()
+    </div>
+}
+
+@* Shorthand for compact variant *@
+@fn compact(
+    title: &str,
+    description: Option<&str> = None,
+    class: &str = "",
+    content: @() = @{},
+) {
+    <@apply
+        title=@title
+        description=@description
+        variant=Variant::Compact
+        class=@class
+    >
+        @content()
+    </@>
+}
+
+@* Empty state with default placeholder icon *@
+@fn with_icon(
+    title: &str,
+    description: Option<&str> = None,
+    variant: Variant = Variant::Default,
+    class: &str = "",
+    action_content: @() = @{},
+) {
+    @let icon_size = match variant {
+        Variant::Default => "h-12 w-12",
+        Variant::Compact => "h-8 w-8",
+    }
+
+    <@apply
+        title=@title
+        description=@description
+        variant=@variant
+        class=@class
+    >
+        <@icon>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="@icon_size"
+            >
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 12h8"/>
+            </svg>
+        </@>
+        @action_content()
+    </@>
+}

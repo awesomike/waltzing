@@ -1,0 +1,162 @@
+@*
+ * Button Group component
+ * A group of buttons with shared styling, connected visually
+ *
+ * Usage:
+ *
+ * 1. Declarative (for static items):
+ * <@button_group::apply>
+ *     <@button_group::item>Left</@>
+ *     <@button_group::item>Center</@>
+ *     <@button_group::item>Right</@>
+ * </@>
+ *
+ * 2. With variant and size:
+ * <@button_group::apply variant=button_group::Variant::Outline size=button_group::Size::Lg>
+ *     <@button_group::item>One</@>
+ *     <@button_group::item>Two</@>
+ * </@>
+ *
+ * 3. Vertical orientation:
+ * <@button_group::vertical>
+ *     <@button_group::item>Top</@>
+ *     <@button_group::item>Bottom</@>
+ * </@>
+ *@
+
+
+@enum Variant {
+    Primary,
+    Secondary,
+    Outline,
+    Ghost,
+}
+
+@enum Size {
+    Sm,
+    Default,
+    Lg,
+}
+
+@enum Orientation {
+    Horizontal,
+    Vertical,
+}
+
+@* Main button group container *@
+@fn apply(
+    variant: Variant = Variant::Primary,
+    size: Size = Size::Default,
+    orientation: Orientation = Orientation::Horizontal,
+    class: &str = "",
+    content: @(),
+) {
+    @let group_base = "inline-flex"
+    @let orientation_cls = match orientation {
+        Orientation::Horizontal => "flex-row",
+        Orientation::Vertical => "flex-col",
+    }
+    @let variant_str = match variant {
+        Variant::Primary => "primary",
+        Variant::Secondary => "secondary",
+        Variant::Outline => "outline",
+        Variant::Ghost => "ghost",
+    }
+    @let size_str = match size {
+        Size::Sm => "sm",
+        Size::Default => "default",
+        Size::Lg => "lg",
+    }
+    @let orientation_str = match orientation {
+        Orientation::Horizontal => "horizontal",
+        Orientation::Vertical => "vertical",
+    }
+
+    <div
+        role="group"
+        class="@cn(&[@group_base, @orientation_cls, @class])"
+        x-data="{ variant: '@variant_str', size: '@size_str', orientation: '@orientation_str' }"
+    >
+        @content()
+    </div>
+}
+
+@* Individual button item - must be used inside apply *@
+@fn item(
+    disabled: bool = false,
+    class: &str = "",
+    content: @(),
+) {
+    @let base = "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:z-10 disabled:pointer-events-none disabled:opacity-50"
+
+    @* Horizontal: first rounded-l, last rounded-r, middle flat, negative margin for border overlap *@
+    @let horizontal_rounding = "first:rounded-l-md last:rounded-r-md [&:not(:first-child):not(:last-child)]:rounded-none first:rounded-r-none last:rounded-l-none [&:not(:first-child)]:-ml-px"
+
+    @* Vertical: first rounded-t, last rounded-b, middle flat, negative margin for border overlap *@
+    @let vertical_rounding = "first:rounded-t-md last:rounded-b-md [&:not(:first-child):not(:last-child)]:rounded-none first:rounded-b-none last:rounded-t-none [&:not(:first-child)]:-mt-px"
+
+    <button
+        type="button"
+        class="@cn(&[@base, @class])"
+        :class="{
+            'h-8 px-3 text-xs': size === 'sm',
+            'h-9 px-4 py-2': size === 'default',
+            'h-10 px-8': size === 'lg',
+            'bg-primary text-primary-foreground shadow hover:bg-primary/90': variant === 'primary',
+            'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80': variant === 'secondary',
+            'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground': variant === 'outline',
+            'hover:bg-accent hover:text-accent-foreground': variant === 'ghost',
+            '@horizontal_rounding': orientation === 'horizontal',
+            '@vertical_rounding': orientation === 'vertical'
+        }"
+        @if disabled { disabled aria-disabled="true" }
+    >
+        @content()
+    </button>
+}
+
+@* Convenience: horizontal button group with defaults *@
+@fn horizontal(
+    variant: Variant = Variant::Primary,
+    size: Size = Size::Default,
+    class: &str = "",
+    content: @(),
+) {
+    <@apply variant=@variant size=@size orientation=Orientation::Horizontal class=@class>
+        @content()
+    </@>
+}
+
+@* Convenience: vertical button group *@
+@fn vertical(
+    variant: Variant = Variant::Primary,
+    size: Size = Size::Default,
+    class: &str = "",
+    content: @(),
+) {
+    <@apply variant=@variant size=@size orientation=Orientation::Vertical class=@class>
+        @content()
+    </@>
+}
+
+@* Convenience: outline horizontal group *@
+@fn outline(
+    size: Size = Size::Default,
+    class: &str = "",
+    content: @(),
+) {
+    <@apply variant=Variant::Outline size=@size class=@class>
+        @content()
+    </@>
+}
+
+@* Convenience: secondary horizontal group *@
+@fn secondary(
+    size: Size = Size::Default,
+    class: &str = "",
+    content: @(),
+) {
+    <@apply variant=Variant::Secondary size=@size class=@class>
+        @content()
+    </@>
+}

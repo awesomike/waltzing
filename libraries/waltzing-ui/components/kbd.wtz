@@ -1,0 +1,45 @@
+@*
+ * Kbd (Keyboard) component
+ * Styled keyboard key indicator for shortcuts
+ *
+ * @example
+ * @import components/kbd.wtz as kbd
+ *
+ * Single key:
+ * <@kbd::apply>⌘</@>
+ * <@kbd::apply>K</@>
+ *
+ * Key combinations:
+ * <@kbd::combo keys=vec!["⌘", "K"] />
+ * <@kbd::combo keys=vec!["Ctrl", "Shift", "P"] />
+ *
+ * With custom separator:
+ * <@kbd::combo keys=vec!["⌘", "K"] separator="+" />
+ *@
+
+@* Single keyboard key *@
+@fn apply(
+    class: &str = "",
+    content: @(),
+) {
+    @let base = "inline-flex items-center justify-center rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs font-medium text-muted-foreground shadow-sm"
+    <kbd class=@cn(&[base, class])>
+        @content()
+    </kbd>
+}
+
+@* Keyboard shortcut combination *@
+@fn combo(
+    keys: Vec<&str>,
+    separator: &str = " ",
+    class: &str = "",
+) {
+    <span class=@cn(&["inline-flex items-center gap-1", class])>
+        @for (i, key) in keys.iter().enumerate() {
+            @if i > 0 {
+                <span class="text-xs text-muted-foreground">@separator</span>
+            }
+            <@apply>@key</@>
+        }
+    </span>
+}

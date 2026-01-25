@@ -1,0 +1,99 @@
+@*
+ * Spinner component
+ * Loading spinner with CSS animation
+ *
+ * @example
+ * @import components/spinner.wtz as spinner
+ *
+ * <@spinner::apply />
+ * <@spinner::apply size=spinner::Size::Lg />
+ * <@spinner::apply color=spinner::Color::Primary label="Loading..." />
+ *
+ * // Shorthand variants
+ * <@spinner::sm />
+ * <@spinner::lg />
+ * <@spinner::primary />
+ *@
+
+@enum Size {
+    Sm,
+    Default,
+    Lg,
+}
+
+@enum Color {
+    Default,
+    Primary,
+    Secondary,
+    Muted,
+}
+
+@fn apply(
+    size: Size = Size::Default,
+    color: Color = Color::Default,
+    label: &str = "",
+    class: &str = "",
+) {
+    @let size_classes = match size {
+        Size::Sm => "h-4 w-4 border-2",
+        Size::Default => "h-6 w-6 border-2",
+        Size::Lg => "h-8 w-8 border-3",
+    }
+
+    @let color_classes = match color {
+        Color::Default => "border-foreground/20 border-t-foreground",
+        Color::Primary => "border-primary/20 border-t-primary",
+        Color::Secondary => "border-secondary/20 border-t-secondary-foreground",
+        Color::Muted => "border-muted/20 border-t-muted-foreground",
+    }
+
+    @let base = "inline-block rounded-full animate-spin"
+    @let has_label = (label.len() > 0)
+
+    @if has_label {
+        <div class="inline-flex items-center gap-2">
+            <div
+                role="status"
+                aria-label="@label"
+                class=@cn(&[base, size_classes, color_classes, class])
+            ></div>
+            <span class="text-sm text-muted-foreground">@label</span>
+        </div>
+    } else {
+        <div
+            role="status"
+            aria-label="Loading"
+            class=@cn(&[base, size_classes, color_classes, class])
+        ></div>
+    }
+}
+
+@* Shorthand for small spinner *@
+@fn sm(color: Color = Color::Default, label: &str = "", class: &str = "") {
+    <@apply size=Size::Sm color=@color label=@label class=@class />
+}
+
+@* Shorthand for default spinner *@
+@fn default(color: Color = Color::Default, label: &str = "", class: &str = "") {
+    <@apply size=Size::Default color=@color label=@label class=@class />
+}
+
+@* Shorthand for large spinner *@
+@fn lg(color: Color = Color::Default, label: &str = "", class: &str = "") {
+    <@apply size=Size::Lg color=@color label=@label class=@class />
+}
+
+@* Shorthand for primary colored spinner *@
+@fn primary(size: Size = Size::Default, label: &str = "", class: &str = "") {
+    <@apply size=@size color=Color::Primary label=@label class=@class />
+}
+
+@* Shorthand for secondary colored spinner *@
+@fn secondary(size: Size = Size::Default, label: &str = "", class: &str = "") {
+    <@apply size=@size color=Color::Secondary label=@label class=@class />
+}
+
+@* Shorthand for muted colored spinner *@
+@fn muted(size: Size = Size::Default, label: &str = "", class: &str = "") {
+    <@apply size=@size color=Color::Muted label=@label class=@class />
+}

@@ -1,0 +1,150 @@
+@*
+ * Typography component
+ * Consistent text styles following shadcn/ui typography patterns
+ *
+ * @example
+ * @import components/typography.wtz as t
+ *
+ * <@t::h1>Page Title</@>
+ * <@t::h2>Section Heading</@>
+ * <@t::lead>A larger intro paragraph that stands out.</@>
+ * <@t::p>Regular paragraph text with normal sizing.</@>
+ * <@t::muted>Some secondary text that's less prominent.</@>
+ * <@t::blockquote>A notable quote from someone important.</@>
+ * <@t::code>inline_code()</@>
+ * <@t::pre>
+ *     const x = 1;
+ *     const y = 2;
+ * </@>
+ * <@t::list items=items />
+ *@
+
+@* Heading 1 - Main page title *@
+@fn h1(class: &str = "", content: @()) {
+    @let base = "scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl"
+    <h1 class=@cn(&[base, class])>
+        @content()
+    </h1>
+}
+
+@* Heading 2 - Section heading *@
+@fn h2(class: &str = "", content: @()) {
+    @let base = "scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0"
+    <h2 class=@cn(&[base, class])>
+        @content()
+    </h2>
+}
+
+@* Heading 3 - Subsection heading *@
+@fn h3(class: &str = "", content: @()) {
+    @let base = "scroll-m-20 text-2xl font-semibold tracking-tight"
+    <h3 class=@cn(&[base, class])>
+        @content()
+    </h3>
+}
+
+@* Heading 4 - Minor heading *@
+@fn h4(class: &str = "", content: @()) {
+    @let base = "scroll-m-20 text-xl font-semibold tracking-tight"
+    <h4 class=@cn(&[base, class])>
+        @content()
+    </h4>
+}
+
+@* Paragraph - Standard body text *@
+@fn p(class: &str = "", content: @()) {
+    @let base = "leading-7 [&:not(:first-child)]:mt-6"
+    <p class=@cn(&[base, class])>
+        @content()
+    </p>
+}
+
+@* Lead - Larger intro text *@
+@fn lead(class: &str = "", content: @()) {
+    @let base = "text-xl text-muted-foreground"
+    <p class=@cn(&[base, class])>
+        @content()
+    </p>
+}
+
+@* Large - Emphasized larger text *@
+@fn large(class: &str = "", content: @()) {
+    @let base = "text-lg font-semibold"
+    <div class=@cn(&[base, class])>
+        @content()
+    </div>
+}
+
+@* Small - Smaller text for details *@
+@fn small(class: &str = "", content: @()) {
+    @let base = "text-sm font-medium leading-none"
+    <small class=@cn(&[base, class])>
+        @content()
+    </small>
+}
+
+@* Muted - Secondary, less prominent text *@
+@fn muted(class: &str = "", content: @()) {
+    @let base = "text-sm text-muted-foreground"
+    <p class=@cn(&[base, class])>
+        @content()
+    </p>
+}
+
+@* Blockquote - Quoted text with left border *@
+@fn blockquote(class: &str = "", content: @()) {
+    @let base = "mt-6 border-l-2 pl-6 italic"
+    <blockquote class=@cn(&[base, class])>
+        @content()
+    </blockquote>
+}
+
+@* Code - Inline code snippet *@
+@fn code(class: &str = "", content: @()) {
+    @let base = "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold"
+    <code class=@cn(&[base, class])>
+        @content()
+    </code>
+}
+
+@* Pre - Code block for multi-line code *@
+@fn pre(class: &str = "", content: @()) {
+    @let base = "mb-4 mt-6 overflow-x-auto rounded-lg border bg-muted p-4"
+    <pre class=@cn(&[base, class])><code class="relative font-mono text-sm">@content()</code></pre>
+}
+
+@* List - Unordered list with bullet styling *@
+@fn list(items: Vec<&str>, class: &str = "") {
+    @let base = "my-6 ml-6 list-disc [&>li]:mt-2"
+    <ul class=@cn(&[base, class])>
+        @for item in items {
+            <li>@item</li>
+        }
+    </ul>
+}
+
+@* Ordered list with number styling *@
+@fn ol(items: Vec<&str>, class: &str = "") {
+    @let base = "my-6 ml-6 list-decimal [&>li]:mt-2"
+    <ol class=@cn(&[base, class])>
+        @for item in items {
+            <li>@item</li>
+        }
+    </ol>
+}
+
+@* Custom list item for more control *@
+@fn li(class: &str = "", content: @()) {
+    @let base = "mt-2"
+    <li class=@cn(&[base, class])>
+        @content()
+    </li>
+}
+
+@* Unordered list wrapper for custom content *@
+@fn ul(class: &str = "", content: @()) {
+    @let base = "my-6 ml-6 list-disc [&>li]:mt-2"
+    <ul class=@cn(&[base, class])>
+        @content()
+    </ul>
+}
