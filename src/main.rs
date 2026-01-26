@@ -937,10 +937,19 @@ fn extract_doc_comment(content: &str) -> String {
             continue;
         }
         if in_comment {
+            // Stop at end of comment
             if trimmed.ends_with("*@") || trimmed == "*@" {
                 break;
             }
             let cleaned = trimmed.trim_start_matches("*").trim();
+            // Stop at @example, @param, or other documentation tags
+            if cleaned.starts_with("@example")
+                || cleaned.starts_with("@param")
+                || cleaned.starts_with("@import")
+            {
+                break;
+            }
+            // Skip lines starting with @ (other tags)
             if !cleaned.starts_with("@") && !cleaned.is_empty() {
                 lines.push(cleaned.to_string());
             }
