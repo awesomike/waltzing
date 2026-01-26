@@ -188,6 +188,15 @@ fn head_common() -> &'static str {
         *::-webkit-scrollbar-thumb:hover {
             background-color: hsl(var(--muted-foreground));
         }
+
+        /* Thin borders globally */
+        .border, .border-t, .border-b, .border-l, .border-r,
+        [class*="border-"] {
+            border-width: 0.5px !important;
+        }
+        .border-2 {
+            border-width: 1px !important;
+        }
     </style>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
@@ -346,19 +355,8 @@ async fn library_showcase(Path(id): Path<String>) -> impl IntoResponse {
         <!-- Sidebar -->
         <aside
             :class="sidebarOpen ? 'w-64' : 'w-0'"
-            class="flex-shrink-0 border-r border-border bg-card overflow-y-auto transition-all duration-300"
+            class="flex-shrink-0 border-r border-border bg-card transition-all duration-300 flex flex-col h-full overflow-hidden"
         >
-            <div class="p-4 border-b border-border">
-                <a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m12 19-7-7 7-7"></path>
-                        <path d="M19 12H5"></path>
-                    </svg>
-                    <span class="text-sm">Back</span>
-                </a>
-                <h1 class="text-lg font-semibold">{name}</h1>
-                <p class="text-sm text-muted-foreground">v{version}</p>
-            </div>
             {sidebar}
         </aside>
 
@@ -386,7 +384,6 @@ async fn library_showcase(Path(id): Path<String>) -> impl IntoResponse {
 </html>"#,
                 name = lib.name,
                 head = head_common(),
-                version = lib.version,
                 sidebar = sidebar,
                 toggle = theme_toggle(),
                 content = content
@@ -435,19 +432,8 @@ async fn component_showcase(
         <!-- Sidebar -->
         <aside
             :class="sidebarOpen ? 'w-64' : 'w-0'"
-            class="flex-shrink-0 border-r border-border bg-card overflow-y-auto transition-all duration-300"
+            class="flex-shrink-0 border-r border-border bg-card transition-all duration-300 flex flex-col h-full overflow-hidden"
         >
-            <div class="p-4 border-b border-border">
-                <a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m12 19-7-7 7-7"></path>
-                        <path d="M19 12H5"></path>
-                    </svg>
-                    <span class="text-sm">Back</span>
-                </a>
-                <h1 class="text-lg font-semibold">{lib_name}</h1>
-                <p class="text-sm text-muted-foreground">v{version}</p>
-            </div>
             {sidebar}
         </aside>
 
@@ -479,7 +465,6 @@ async fn component_showcase(
                 title = title,
                 lib_name = lib.name,
                 head = head_common(),
-                version = lib.version,
                 sidebar = sidebar,
                 toggle = theme_toggle(),
                 content = content
@@ -527,19 +512,8 @@ async fn layout_showcase(
         <!-- Sidebar -->
         <aside
             :class="sidebarOpen ? 'w-64' : 'w-0'"
-            class="flex-shrink-0 border-r border-border bg-card overflow-y-auto transition-all duration-300"
+            class="flex-shrink-0 border-r border-border bg-card transition-all duration-300 flex flex-col h-full overflow-hidden"
         >
-            <div class="p-4 border-b border-border">
-                <a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m12 19-7-7 7-7"></path>
-                        <path d="M19 12H5"></path>
-                    </svg>
-                    <span class="text-sm">Back</span>
-                </a>
-                <h1 class="text-lg font-semibold">{lib_name}</h1>
-                <p class="text-sm text-muted-foreground">v{version}</p>
-            </div>
             {sidebar}
         </aside>
 
@@ -571,7 +545,6 @@ async fn layout_showcase(
                 title = title,
                 lib_name = lib.name,
                 head = head_common(),
-                version = lib.version,
                 sidebar = sidebar,
                 toggle = theme_toggle(),
                 content = content
@@ -619,19 +592,8 @@ async fn block_showcase(
         <!-- Sidebar -->
         <aside
             :class="sidebarOpen ? 'w-64' : 'w-0'"
-            class="flex-shrink-0 border-r border-border bg-card overflow-y-auto transition-all duration-300"
+            class="flex-shrink-0 border-r border-border bg-card transition-all duration-300 flex flex-col h-full overflow-hidden"
         >
-            <div class="p-4 border-b border-border">
-                <a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m12 19-7-7 7-7"></path>
-                        <path d="M19 12H5"></path>
-                    </svg>
-                    <span class="text-sm">Back</span>
-                </a>
-                <h1 class="text-lg font-semibold">{lib_name}</h1>
-                <p class="text-sm text-muted-foreground">v{version}</p>
-            </div>
             {sidebar}
         </aside>
 
@@ -663,7 +625,6 @@ async fn block_showcase(
                 title = title,
                 lib_name = lib.name,
                 head = head_common(),
-                version = lib.version,
                 sidebar = sidebar,
                 toggle = theme_toggle(),
                 content = content
