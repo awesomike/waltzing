@@ -59,7 +59,7 @@ async fn main() {
 
 fn head_common() -> &'static str {
     r#"
-    <link rel="icon" type="image/svg+xml" href="/static/images/lizard.svg">
+    <link rel="icon" type="image/svg+xml" href="/static/images/waltzing.svg">
     <script>
         // Theme initialization - runs before page render to prevent flash
         (function() {
