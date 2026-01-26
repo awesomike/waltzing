@@ -5,6 +5,7 @@
 
 use axum::{
     extract::Path,
+    http::HeaderMap,
     response::{Html, IntoResponse},
     routing::get,
     Router,
@@ -188,10 +189,45 @@ fn head_common() -> &'static str {
             background-color: hsl(var(--muted-foreground));
         }
     </style>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 "#
+}
+
+/// Check if the request is from HTMX
+fn is_htmx_request(headers: &HeaderMap) -> bool {
+    headers.get("HX-Request").is_some()
+}
+
+/// Generate just the main content area for HTMX partial updates
+fn main_content_partial(title: &str, content: &str, item_type: &str) -> String {
+    format!(
+        r##"<header class="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div class="flex items-center gap-4">
+        <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-md hover:bg-accent">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" x2="20" y1="12" y2="12"></line>
+                <line x1="4" x2="20" y1="6" y2="6"></line>
+                <line x1="4" x2="20" y1="18" y2="18"></line>
+            </svg>
+        </button>
+        <div>
+            <p class="text-xs text-muted-foreground uppercase tracking-wide">{item_type}</p>
+            <h2 class="text-xl font-semibold">{title}</h2>
+        </div>
+    </div>
+    {toggle}
+</header>
+<div class="p-6 max-w-4xl">
+    {content}
+</div>"##,
+        title = title,
+        item_type = item_type,
+        toggle = theme_toggle(),
+        content = content
+    )
 }
 
 fn theme_toggle() -> &'static str {
@@ -362,28 +398,27 @@ async fn library_showcase(Path(id): Path<String>) -> impl IntoResponse {
 }
 
 /// Single component showcase page
-async fn component_showcase(Path((id, component)): Path<(String, String)>) -> impl IntoResponse {
+async fn component_showcase(
+    headers: HeaderMap,
+    Path((id, component)): Path<(String, String)>,
+) -> impl IntoResponse {
     let library = LIBRARIES.iter().find(|lib| lib.id == id);
 
     match library {
         Some(lib) => {
+            let content = generate_component_detail(&component);
+            let title = id_to_title(&component);
+
+            // For HTMX requests, return only the main content
+            if is_htmx_request(&headers) {
+                return Html(main_content_partial(&title, &content, "Component"));
+            }
+
+            // Full page for regular requests
             let components = get_component_list(&id);
             let layouts = get_layout_list(&id);
             let blocks = get_block_list(&id);
             let sidebar = generate_sidebar(&id, &components, &layouts, &blocks, Some(&component));
-            let content = generate_component_detail(&component);
-
-            let title = component
-                .split('-')
-                .map(|s| {
-                    let mut c = s.chars();
-                    match c.next() {
-                        None => String::new(),
-                        Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
-                    }
-                })
-                .collect::<Vec<_>>()
-                .join(" ");
 
             let html = format!(
                 r#"<!DOCTYPE html>
@@ -416,7 +451,7 @@ async fn component_showcase(Path((id, component)): Path<(String, String)>) -> im
         </aside>
 
         <!-- Main content -->
-        <main class="flex-1 overflow-y-auto">
+        <main id="main-content" class="flex-1 overflow-y-auto">
             <header class="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div class="flex items-center gap-4">
                     <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-md hover:bg-accent">
@@ -426,7 +461,10 @@ async fn component_showcase(Path((id, component)): Path<(String, String)>) -> im
                             <line x1="4" x2="20" y1="18" y2="18"></line>
                         </svg>
                     </button>
-                    <h2 class="text-xl font-semibold">{title}</h2>
+                    <div>
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide">Component</p>
+                        <h2 class="text-xl font-semibold">{title}</h2>
+                    </div>
                 </div>
                 {toggle}
             </header>
@@ -452,18 +490,27 @@ async fn component_showcase(Path((id, component)): Path<(String, String)>) -> im
     }
 }
 
-async fn layout_showcase(Path((id, layout)): Path<(String, String)>) -> impl IntoResponse {
+async fn layout_showcase(
+    headers: HeaderMap,
+    Path((id, layout)): Path<(String, String)>,
+) -> impl IntoResponse {
     let library = LIBRARIES.iter().find(|lib| lib.id == id);
 
     match library {
         Some(lib) => {
+            let content = generate_layout_detail(&layout);
+            let title = id_to_title(&layout);
+
+            // For HTMX requests, return only the main content
+            if is_htmx_request(&headers) {
+                return Html(main_content_partial(&title, &content, "Layout"));
+            }
+
+            // Full page for regular requests
             let components = get_component_list(&id);
             let layouts = get_layout_list(&id);
             let blocks = get_block_list(&id);
             let sidebar = generate_sidebar(&id, &components, &layouts, &blocks, Some(&layout));
-            let content = generate_layout_detail(&layout);
-
-            let title = id_to_title(&layout);
 
             let html = format!(
                 r#"<!DOCTYPE html>
@@ -496,7 +543,7 @@ async fn layout_showcase(Path((id, layout)): Path<(String, String)>) -> impl Int
         </aside>
 
         <!-- Main content -->
-        <main class="flex-1 overflow-y-auto">
+        <main id="main-content" class="flex-1 overflow-y-auto">
             <header class="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div class="flex items-center gap-4">
                     <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-md hover:bg-accent">
@@ -507,7 +554,7 @@ async fn layout_showcase(Path((id, layout)): Path<(String, String)>) -> impl Int
                         </svg>
                     </button>
                     <div>
-                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Layout</span>
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide">Layout</p>
                         <h2 class="text-xl font-semibold">{title}</h2>
                     </div>
                 </div>
@@ -535,18 +582,27 @@ async fn layout_showcase(Path((id, layout)): Path<(String, String)>) -> impl Int
     }
 }
 
-async fn block_showcase(Path((id, block)): Path<(String, String)>) -> impl IntoResponse {
+async fn block_showcase(
+    headers: HeaderMap,
+    Path((id, block)): Path<(String, String)>,
+) -> impl IntoResponse {
     let library = LIBRARIES.iter().find(|lib| lib.id == id);
 
     match library {
         Some(lib) => {
+            let content = generate_block_detail(&block);
+            let title = id_to_title(&block);
+
+            // For HTMX requests, return only the main content
+            if is_htmx_request(&headers) {
+                return Html(main_content_partial(&title, &content, "Block"));
+            }
+
+            // Full page for regular requests
             let components = get_component_list(&id);
             let layouts = get_layout_list(&id);
             let blocks = get_block_list(&id);
             let sidebar = generate_sidebar(&id, &components, &layouts, &blocks, Some(&block));
-            let content = generate_block_detail(&block);
-
-            let title = id_to_title(&block);
 
             let html = format!(
                 r#"<!DOCTYPE html>
@@ -579,7 +635,7 @@ async fn block_showcase(Path((id, block)): Path<(String, String)>) -> impl IntoR
         </aside>
 
         <!-- Main content -->
-        <main class="flex-1 overflow-y-auto">
+        <main id="main-content" class="flex-1 overflow-y-auto">
             <header class="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div class="flex items-center gap-4">
                     <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-md hover:bg-accent">
@@ -590,7 +646,7 @@ async fn block_showcase(Path((id, block)): Path<(String, String)>) -> impl IntoR
                         </svg>
                     </button>
                     <div>
-                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Block</span>
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide">Block</p>
                         <h2 class="text-xl font-semibold">{title}</h2>
                     </div>
                 </div>
@@ -706,10 +762,10 @@ fn generate_sidebar(
             } else {
                 "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             };
+            let url = format!("/library/{}/component/{}", library_id, id);
             format!(
-                r#"<a href="/library/{lib}/component/{comp}" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"#,
-                lib = library_id,
-                comp = id,
+                r##"<a href="{url}" hx-get="{url}" hx-target="#main-content" hx-push-url="true" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"##,
+                url = url,
                 cls = active_class,
                 name = name
             )
@@ -725,10 +781,10 @@ fn generate_sidebar(
             } else {
                 "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             };
+            let url = format!("/library/{}/layout/{}", library_id, id);
             format!(
-                r#"<a href="/library/{lib}/layout/{layout}" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"#,
-                lib = library_id,
-                layout = id,
+                r##"<a href="{url}" hx-get="{url}" hx-target="#main-content" hx-push-url="true" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"##,
+                url = url,
                 cls = active_class,
                 name = name
             )
@@ -744,10 +800,10 @@ fn generate_sidebar(
             } else {
                 "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             };
+            let url = format!("/library/{}/block/{}", library_id, id);
             format!(
-                r#"<a href="/library/{lib}/block/{block}" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"#,
-                lib = library_id,
-                block = id,
+                r##"<a href="{url}" hx-get="{url}" hx-target="#main-content" hx-push-url="true" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"##,
+                url = url,
                 cls = active_class,
                 name = name
             )
