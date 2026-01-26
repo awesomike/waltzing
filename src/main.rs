@@ -189,13 +189,13 @@ fn head_common() -> &'static str {
             background-color: hsl(var(--muted-foreground));
         }
 
-        /* Thin borders globally */
-        .border, .border-t, .border-b, .border-l, .border-r,
-        [class*="border-"] {
-            border-width: 0.5px !important;
-        }
-        .border-2 {
-            border-width: 1px !important;
+        /* Remove shadows from cards in preview areas */
+        .component-preview .shadow,
+        .component-preview .shadow-sm,
+        .component-preview .shadow-md,
+        .component-preview .shadow-lg,
+        .component-preview [class*="shadow"] {
+            box-shadow: none !important;
         }
     </style>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
