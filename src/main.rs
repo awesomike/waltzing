@@ -395,7 +395,7 @@ async fn library_showcase(Path(id): Path<String>) -> impl IntoResponse {
         </aside>
 
         <!-- Main content -->
-        <main class="flex-1 overflow-y-auto">
+        <main id="main-content" class="flex-1 overflow-y-auto">
             <header class="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div class="flex items-center gap-4">
                     <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-md hover:bg-accent">
