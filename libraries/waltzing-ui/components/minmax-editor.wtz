@@ -50,8 +50,8 @@
     @let is_expanded = (min_value.is_some() && max_value.is_some() && min_value != max_value)
     @let min_init = min_value.unwrap_or(0.0)
     @let max_init = max_value.unwrap_or(0.0)
-    @let name_min = format!("{}_min", name)
-    @let name_max = format!("{}_max", name)
+    @let name_min = format("{}_min", name)
+    @let name_max = format("{}_max", name)
 
     @let container_cls = "inline-flex items-center"
     @let input_cls = "flex h-9 w-20 rounded-md border border-input bg-transparent px-3 py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -189,12 +189,12 @@
     @let cls = class
     @let classes = [container_cls, cls]
 
-    @let x_data_init = format!("{{ expanded: ({} !== null && {} !== null && {} !== {}) }}", model_min, model_max, model_min, model_max)
-    @let input_handler = format!("{} = {}", model_max, model_min)
-    @let blur_handler = format!("if ({} > {}) {{ {} = {} }}", model_min, model_max, model_max, model_min)
-    @let collapse_handler = format!("if ({} === {} || {} === null) expanded = false", model_min, model_max, model_max)
-    @let collapse_class = format!("({} === {} || {} === null) ? 'text-muted-foreground hover:text-foreground' : 'text-muted-foreground/30 cursor-not-allowed'", model_min, model_max, model_max)
-    @let collapse_disabled = format!("{} !== {} && {} !== null", model_min, model_max, model_max)
+    @let x_data_init = format("{{ expanded: ({} !== null && {} !== null && {} !== {}) }}", model_min, model_max, model_min, model_max)
+    @let input_handler = format("{} = {}", model_max, model_min)
+    @let blur_handler = format("if ({} > {}) {{ {} = {} }}", model_min, model_max, model_max, model_min)
+    @let collapse_handler = format("if ({} === {} || {} === null) expanded = false", model_min, model_max, model_max)
+    @let collapse_class = format("({} === {} || {} === null) ? 'text-muted-foreground hover:text-foreground' : 'text-muted-foreground/30 cursor-not-allowed'", model_min, model_max, model_max)
+    @let collapse_disabled = format("{} !== {} && {} !== null", model_min, model_max, model_max)
 
     <div
         class=@cn(classes)

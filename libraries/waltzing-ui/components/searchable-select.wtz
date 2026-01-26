@@ -307,17 +307,17 @@
     @let empty_msg = empty_message.unwrap_or("No results found.")
 
     @let selected_json = {
-        let vals: Vec<String> = selected.iter().map(|s| format!("'{}'", s)).collect();
-        format!("[{}]", vals.join(", "))
+        let vals: Vec<String> = selected.iter().map(|s| format("'{}'", s)).collect();
+        format("[{}]", vals.join(", "))
     }
 
     @* Build a map of values to labels for initial display *@
     @let initial_labels = {
         let labels: Vec<String> = options.iter()
             .filter(|o| selected.iter().any(|s| s == &o.value))
-            .map(|o| format!("'{}': '{}'", o.value, o.label))
+            .map(|o| format("'{}': '{}'", o.value, o.label))
             .collect();
-        format!("{{{}}}", labels.join(", "))
+        format("{{{}}}", labels.join(", "))
     }
 
     <div
@@ -964,16 +964,16 @@
     @let empty_msg = empty_message.unwrap_or("No results found.")
 
     @let selected_json = {
-        let vals: Vec<String> = selected.iter().map(|s| format!("'{}'", s)).collect();
-        format!("[{}]", vals.join(", "))
+        let vals: Vec<String> = selected.iter().map(|s| format("'{}'", s)).collect();
+        format("[{}]", vals.join(", "))
     }
 
     @let initial_labels = {
         let labels: Vec<String> = options.iter()
             .filter(|o| selected.iter().any(|s| s == &o.value))
-            .map(|o| format!("'{}': '{}'", o.value, o.label))
+            .map(|o| format("'{}': '{}'", o.value, o.label))
             .collect();
-        format!("{{{}}}", labels.join(", "))
+        format("{{{}}}", labels.join(", "))
     }
 
     <div

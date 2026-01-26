@@ -59,9 +59,9 @@
         let mut parts = [];
         for e in &events {
             let color = e.color.as_ref().map(|c| c.as_str()).unwrap_or("bg-primary");
-            parts.push(format!("{{ date: '{}', title: '{}', color: '{}' }}", e.date, e.title, color));
+            parts.push(format("{{ date: '{}', title: '{}', color: '{}' }}", e.date, e.title, color));
         }
-        format!("[{}]", parts.join(", "))
+        format("[{}]", parts.join(", "))
     }
 
     <div
@@ -324,9 +324,9 @@
         let mut parts = [];
         for e in &events {
             let color = e.color.as_ref().map(|c| c.as_str()).unwrap_or("bg-primary");
-            parts.push(format!("{{ date: '{}', title: '{}', color: '{}' }}", e.date, e.title, color));
+            parts.push(format("{{ date: '{}', title: '{}', color: '{}' }}", e.date, e.title, color));
         }
-        format!("[{}]", parts.join(", "))
+        format("[{}]", parts.join(", "))
     }
 
     <div

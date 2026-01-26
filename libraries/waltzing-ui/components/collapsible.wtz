@@ -32,7 +32,7 @@
 ) {
     @let open_str = if open { "true" } else { "false" }
 
-    <div x-data=@format!("{{ open: {} }}", open_str)>
+    <div x-data=@format("{{ open: {} }}", open_str)>
         <button
             type="button"
             @@click="open = !open"
@@ -61,7 +61,7 @@
     <div>
         <button
             type="button"
-            @@click=@format!("{} = !{}", open_var, open_var)
+            @@click=@format("{} = !{}", open_var, open_var)
             :aria-expanded=@open_var
             class="flex items-center gap-2"
         >

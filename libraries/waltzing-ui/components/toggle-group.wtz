@@ -94,7 +94,7 @@
         Variant::Default => "bg-transparent",
         Variant::Outline => "border border-input",
     }
-    @let selected_json = format!("[{}]", selected.iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(", "))
+    @let selected_json = format("[{}]", selected.iter().map(|s| format("'{}'", s)).collect::<Vec<String>>().join(", "))
     @let variant_str = match variant {
         Variant::Default => "default",
         Variant::Outline => "outline",

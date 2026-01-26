@@ -12,23 +12,23 @@
  *     filetree::FileNode {
  *         name: "src",
  *         node_type: filetree::NodeType::Folder,
- *         children: vec![
+ *         children: [
  *             filetree::FileNode {
  *                 name: "main.rs",
  *                 node_type: filetree::NodeType::File,
- *                 children: vec![],
+ *                 children: [],
  *             },
  *             filetree::FileNode {
  *                 name: "lib.rs",
  *                 node_type: filetree::NodeType::File,
- *                 children: vec![],
+ *                 children: [],
  *             },
  *         ],
  *     },
  *     filetree::FileNode {
  *         name: "README.md",
  *         node_type: filetree::NodeType::File,
- *         children: vec![],
+ *         children: [],
  *     },
  * ]
  *

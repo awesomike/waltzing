@@ -12,7 +12,7 @@
  * @let nav_groups = [
  *     sidebar15::NavGroup {
  *         label: Some("Main"),
- *         items: vec![
+ *         items: [
  *             sidebar15::NavItem { label: "Dashboard", href: "/", icon: Some("<svg>...</svg>"), active: true },
  *             sidebar15::NavItem { label: "Projects", href: "/projects", icon: Some("<svg>...</svg>"), active: false },
  *         ],
@@ -141,10 +141,7 @@
                             @for item in &group.items {
                                 <li class="relative group/item">
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = [
-                                        "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                                        active_cls
-                                    ]
+                                    @let link_classes = ["flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                     <a
                                         href=@item.href
                                         class=@cn(link_classes)
@@ -415,10 +412,7 @@
                             @for item in &group.items {
                                 <li class="relative group/item">
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = [
-                                        "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                                        active_cls
-                                    ]
+                                    @let link_classes = ["flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                     <a
                                         href=@item.href
                                         class=@cn(link_classes)
@@ -663,10 +657,7 @@
                             @for item in &group.items {
                                 <li class="relative group/item">
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = [
-                                        "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                                        active_cls
-                                    ]
+                                    @let link_classes = ["flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                     <a
                                         href=@item.href
                                         class=@cn(link_classes)
@@ -932,10 +923,7 @@
                             @for item in &group.items {
                                 <li class="relative group/item">
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = [
-                                        "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                                        active_cls
-                                    ]
+                                    @let link_classes = ["flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                     <a
                                         href=@item.href
                                         class=@cn(link_classes)

@@ -14,33 +14,33 @@
  *         href: Some("/"),
  *         icon: Some("<svg>...</svg>"),
  *         active: true,
- *         children: vec![],
+ *         children: [],
  *     },
  *     sidebar::NavItem {
  *         label: "Products",
  *         href: None,
  *         icon: Some("<svg>...</svg>"),
  *         active: false,
- *         children: vec![
+ *         children: [
  *             sidebar::NavItem {
  *                 label: "All Products",
  *                 href: Some("/products"),
  *                 icon: None,
  *                 active: false,
- *                 children: vec![],
+ *                 children: [],
  *             },
  *             sidebar::NavItem {
  *                 label: "Categories",
  *                 href: None,
  *                 icon: None,
  *                 active: false,
- *                 children: vec![
+ *                 children: [
  *                     sidebar::NavItem {
  *                         label: "Electronics",
  *                         href: Some("/products/electronics"),
  *                         icon: None,
  *                         active: false,
- *                         children: vec![],
+ *                         children: [],
  *                     },
  *                 ],
  *             },

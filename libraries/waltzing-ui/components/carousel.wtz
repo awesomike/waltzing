@@ -306,9 +306,9 @@
 ) {
     <button
         type="button"
-        @click=@format!("$dispatch('carousel-goto', {{ index: {} }}); activeThumb = {}", index, index)
+        @click=@format("$dispatch('carousel-goto', {{ index: {} }}); activeThumb = {}", index, index)
         class=@cn(&["h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring", class])
-        :class=@format!("activeThumb === {} ? 'border-primary' : 'border-transparent'", index)
+        :class=@format("activeThumb === {} ? 'border-primary' : 'border-transparent'", index)
     >
         <img src=@src alt=@alt class="h-full w-full object-cover" />
     </button>

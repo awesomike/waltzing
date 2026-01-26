@@ -6,7 +6,7 @@
  *   @import ui/components/chart.wtz as chart
  *
  *   // Bar chart (vertical)
- *   @let data = vec![
+ *   @let data = [
  *       chart::DataPoint { label: "Jan", value: 100.0, color: None },
  *       chart::DataPoint { label: "Feb", value: 150.0, color: None },
  *       chart::DataPoint { label: "Mar", value: 80.0, color: None },
@@ -20,7 +20,7 @@
  *   <@chart::line data=@data />
  *
  *   // Donut chart
- *   @let segments = vec![
+ *   @let segments = [
  *       chart::Segment { label: "Desktop", value: 60.0, color: Some("hsl(var(--primary))") },
  *       chart::Segment { label: "Mobile", value: 30.0, color: Some("hsl(var(--secondary))") },
  *       chart::Segment { label: "Tablet", value: 10.0, color: Some("hsl(var(--muted))") },
@@ -28,7 +28,7 @@
  *   <@chart::donut data=@segments />
  *
  *   // Sparkline (inline small chart)
- *   @let values = vec![10.0, 25.0, 15.0, 30.0, 20.0, 35.0, 28.0]
+ *   @let values = [10.0, 25.0, 15.0, 30.0, 20.0, 35.0, 28.0]
  *   <@chart::sparkline data=@values />
  *@
 
@@ -69,7 +69,7 @@
 
     @match direction {
         Direction::Vertical => {
-            @let container = vec!["flex flex-col gap-2", extra_class]
+            @let container = ["flex flex-col gap-2", extra_class]
             <div class=@cn(container)>
                 <div class="flex items-end gap-2 @height">
                     @for point in data {
@@ -104,7 +104,7 @@
             </div>
         }
         Direction::Horizontal => {
-            @let container = vec!["flex flex-col gap-3", extra_class]
+            @let container = ["flex flex-col gap-3", extra_class]
             <div class=@cn(container)>
                 @for point in data {
                     @let pct = (point.value / safe_max * 100.0)
@@ -163,7 +163,7 @@
     @let points = data.iter().enumerate().map(|(i, d)| {
         let x = padding as f64 + (i as f64 * step_x);
         let y = padding as f64 + chart_height as f64 - ((d.value - min_value) / safe_range * chart_height as f64);
-        format!("{},{}", x as i32, y as i32)
+        format("{},{}", x as i32, y as i32)
     }).collect::<Vec<_>>().join(" ")
 
     @* Build fill polygon points (includes bottom corners) *@
@@ -171,16 +171,16 @@
         let mut pts = data.iter().enumerate().map(|(i, d)| {
             let x = padding as f64 + (i as f64 * step_x);
             let y = padding as f64 + chart_height as f64 - ((d.value - min_value) / safe_range * chart_height as f64);
-            format!("{},{}", x as i32, y as i32)
+            format("{},{}", x as i32, y as i32)
         }).collect::<Vec<_>>();
         let bottom_y = padding + chart_height;
-        pts.push(format!("{},{}", padding + chart_width, bottom_y));
-        pts.push(format!("{},{}", padding, bottom_y));
+        pts.push(format("{},{}", padding + chart_width, bottom_y));
+        pts.push(format("{},{}", padding, bottom_y));
         pts.join(" ")
     }
 
     @let extra_class = class
-    @let container = vec!["w-full", extra_class]
+    @let container = ["w-full", extra_class]
 
     <div class=@cn(container)>
         <svg
@@ -272,16 +272,10 @@
     @let circumference = (2.0 * 3.14159265359 * radius_f64)
 
     @* Default colors using theme variables *@
-    @let default_colors = vec![
-        "hsl(var(--primary))",
-        "hsl(var(--secondary))",
-        "hsl(var(--accent))",
-        "hsl(var(--muted))",
-        "hsl(var(--destructive))",
-    ]
+    @let default_colors = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--muted))", "hsl(var(--destructive))"]
 
     @let extra_class = class
-    @let container = vec!["flex flex-col items-center gap-4", extra_class]
+    @let container = ["flex flex-col items-center gap-4", extra_class]
 
     @* Precompute cumulative offsets for each segment *@
     @let offsets = {
@@ -407,23 +401,23 @@
     @let points = data.iter().enumerate().map(|(i, &v)| {
         let x = (i as f64 * step_x) as i32;
         let y = padding as i32 + chart_height as i32 - ((v - min_value) / safe_range * chart_height as f64) as i32;
-        format!("{},{}", x, y)
+        format("{},{}", x, y)
     }).collect::<Vec<_>>().join(" ")
 
     @let fill_points = {
         let mut pts = data.iter().enumerate().map(|(i, &v)| {
             let x = (i as f64 * step_x) as i32;
             let y = padding as i32 + chart_height as i32 - ((v - min_value) / safe_range * chart_height as f64) as i32;
-            format!("{},{}", x, y)
+            format("{},{}", x, y)
         }).collect::<Vec<_>>();
-        pts.push(format!("{},{}", width, height));
-        pts.push(format!("0,{}", height));
+        pts.push(format("{},{}", width, height));
+        pts.push(format("0,{}", height));
         pts.join(" ")
     }
 
     @let stroke_color = color
     @let extra_class = class
-    @let container = vec!["inline-block", extra_class]
+    @let container = ["inline-block", extra_class]
 
     <svg
         width=@width
@@ -470,7 +464,7 @@
     @let arrow = if is_positive { "^" } else { "v" }
 
     @let extra_class = class
-    @let container = vec!["inline-flex items-center gap-2", extra_class]
+    @let container = ["inline-flex items-center gap-2", extra_class]
 
     <div class=@cn(container)>
         <@sparkline
@@ -502,15 +496,10 @@
     }).fold(0.0_f64, |a, b| a.max(b))
     @let safe_max = if (max_total == 0.0) { 1.0 } else { max_total }
 
-    @let default_colors = vec![
-        "hsl(var(--primary))",
-        "hsl(var(--secondary))",
-        "hsl(var(--accent))",
-        "hsl(var(--muted))",
-    ]
+    @let default_colors = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--muted))"]
 
     @let extra_class = class
-    @let container = vec!["flex flex-col gap-2", extra_class]
+    @let container = ["flex flex-col gap-2", extra_class]
 
     <div class=@cn(container)>
         <div class="flex items-end gap-2 @height">
@@ -565,7 +554,7 @@
     @let clamped_int = clamped as i32
 
     @let extra_class = class
-    @let container = vec!["w-full", extra_class]
+    @let container = ["w-full", extra_class]
 
     <div class=@cn(container)>
         @if let Some(lbl) = label {
@@ -610,7 +599,7 @@
     @let dash = (clamped / 100.0 * circumference)
 
     @let extra_class = class
-    @let container = vec!["inline-flex flex-col items-center gap-2", extra_class]
+    @let container = ["inline-flex flex-col items-center gap-2", extra_class]
 
     <div class=@cn(container)>
         <div class="relative">

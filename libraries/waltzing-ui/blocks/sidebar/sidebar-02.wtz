@@ -14,7 +14,7 @@
  *         label: "Main",
  *         icon: Some("<svg>...</svg>"),
  *         collapsed: false,
- *         items: vec![
+ *         items: [
  *             sidebar::NavItem { label: "Dashboard", href: "/", icon: Some("<svg>...</svg>"), active: true },
  *             sidebar::NavItem { label: "Projects", href: "/projects", icon: None, active: false },
  *         ],
@@ -24,7 +24,7 @@
  *         label: "Settings",
  *         icon: None,
  *         collapsed: true,
- *         items: vec![
+ *         items: [
  *             sidebar::NavItem { label: "Profile", href: "/settings/profile", icon: None, active: false },
  *             sidebar::NavItem { label: "Security", href: "/settings/security", icon: None, active: false },
  *         ],
@@ -134,10 +134,7 @@
                             @for item in &section.items {
                                 <li>
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = [
-                                        "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                                        active_cls
-                                    ]
+                                    @let link_classes = ["flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                     <a href=@item.href class=@cn(link_classes)>
                                         @if let Some(icon) = &item.icon {
                                             <span class="h-4 w-4 flex-shrink-0">@safe(icon)</span>
@@ -235,10 +232,7 @@
                             @for item in &section.items {
                                 <li>
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = [
-                                        "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                                        active_cls
-                                    ]
+                                    @let link_classes = ["flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                     <a href=@item.href class=@cn(link_classes)>
                                         @if let Some(icon) = &item.icon {
                                             <span class="h-4 w-4 flex-shrink-0">@safe(icon)</span>

@@ -75,10 +75,7 @@
                 @for item in nav_items {
                     <li>
                         @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                        @let link_classes = [
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                            active_cls
-                        ]
+                        @let link_classes = ["flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                         <a href=@item.href class=@cn(link_classes)>
                             @if let Some(icon) = &item.icon {
                                 <span class="h-4 w-4 flex-shrink-0">@safe(icon)</span>
@@ -178,10 +175,7 @@
                 @for item in nav_items {
                     <li>
                         @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                        @let link_classes = [
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                            active_cls
-                        ]
+                        @let link_classes = ["flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                         <a href=@item.href class=@cn(link_classes)>
                             @if let Some(icon) = &item.icon {
                                 <span class="h-4 w-4 flex-shrink-0">@safe(icon)</span>

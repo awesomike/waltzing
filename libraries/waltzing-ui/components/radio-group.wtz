@@ -42,7 +42,7 @@
         } else {
             @for opt in options {
                 @let is_checked = (selected == Some(opt.value.as_str()))
-                @let item_id = format!("{}_{}", name, opt.value)
+                @let item_id = format("{}_{}", name, opt.value)
                 @let radio_base = "aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 
@@ -95,7 +95,7 @@
         } else {
             @for opt in options {
                 @let is_checked = (selected == Some(opt.value.as_str()))
-                @let item_id = format!("{}_{}", name, opt.value)
+                @let item_id = format("{}_{}", name, opt.value)
                 @let radio_base = "aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 

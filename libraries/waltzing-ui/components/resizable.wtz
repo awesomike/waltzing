@@ -84,7 +84,7 @@
     @let panel_classes = [base, cls]
     <div
         class=@cn(panel_classes)
-        style=@format!("flex-basis: {}%; flex-shrink: 0; flex-grow: 0;", default_size)
+        style=@format("flex-basis: {}%; flex-shrink: 0; flex-grow: 0;", default_size)
         data-resizable-panel
         data-min-size=@min_val
         data-max-size=@max_val
