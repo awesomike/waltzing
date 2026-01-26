@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <defs>
+    <linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Body + tail (S-shaped tube) -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- main body -->
+    <path
+      d="
+        M 76 212
+        C 112 232, 152 218, 162 188
+        C 170 164, 154 144, 138 129
+        C 120 112, 116 95, 126 82
+        C 139 65, 160 64, 178 67
+        C 196 70, 210 69, 220 60
+      "
+      stroke="url(#fg)"
+      stroke-width="28"
+    />
+
+    <!-- inner dorsal stripe -->
+    <path
+      d="
+        M 80 210
+        C 115 228, 148 216, 156 188
+        C 163 165, 148 147, 134 134
+        C 118 118, 115 100, 124 88
+        C 135 74, 155 73, 172 76
+        C 188 79, 202 78, 212 70
+      "
+      stroke="#4c1d95"
+      stroke-width="10"
+      stroke-opacity="0.7"
+    />
+  </g>
+
+  <!-- Head -->
+  <g>
+    <ellipse cx="222" cy="56" rx="18" ry="13" fill="url(#fg)"/>
+    <!-- eyes -->
+    <ellipse cx="214" cy="54" rx="3.2" ry="4" fill="#1e1b4b"/>
+    <ellipse cx="225" cy="50" rx="2.8" ry="3.4" fill="#1e1b4b"/>
+    <circle cx="213" cy="52.5" r="1.1" fill="white"/>
+    <circle cx="224" cy="49" r="1" fill="white"/>
+  </g>
+
+  <!-- Limbs + feet -->
+  <g fill="none" stroke="url(#fg)" stroke-width="10" stroke-linecap="round">
+    <!-- front left leg -->
+    <path d="M 142 96 L 114 76"/>
+    <!-- front right leg -->
+    <path d="M 174 94 L 198 78"/>
+    <!-- rear left leg -->
+    <path d="M 130 154 L 102 182"/>
+    <!-- rear right leg -->
+    <path d="M 160 170 L 186 198"/>
+  </g>
+
+  <!-- toes -->
+  <g fill="none" stroke="#7c3aed" stroke-width="5" stroke-linecap="round">
+    <!-- front left toes -->
+    <path d="M 114 76 L 104 70"/>
+    <path d="M 114 76 L 106 84"/>
+    <path d="M 114 76 L 112 66"/>
+
+    <!-- front right toes -->
+    <path d="M 198 78 L 208 72"/>
+    <path d="M 198 78 L 208 82"/>
+    <path d="M 198 78 L 196 68"/>
+
+    <!-- rear left toes -->
+    <path d="M 102 182 L 92 190"/>
+    <path d="M 102 182 L 94 174"/>
+    <path d="M 102 182 L 100 194"/>
+
+    <!-- rear right toes -->
+    <path d="M 186 198 L 196 206"/>
+    <path d="M 186 198 L 178 206"/>
+    <path d="M 186 198 L 188 188"/>
+  </g>
+</svg>
