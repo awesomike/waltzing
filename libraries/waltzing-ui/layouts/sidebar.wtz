@@ -114,7 +114,7 @@
                 </main>
             </div>
         </div>
-    </@>
+    </@base::apply>
 }
 
 @* Simple sidebar without header *@

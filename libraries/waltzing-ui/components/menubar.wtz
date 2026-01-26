@@ -13,18 +13,18 @@
  *         <@menubar::item label="Save" shortcut=Some("Ctrl+S") />
  *         <@menubar::separator />
  *         <@menubar::item label="Exit" shortcut=None />
- *     </@>
+ *     </@menubar::menu>
  *     <@menubar::menu label="Edit">
  *         <@menubar::item label="Undo" shortcut=Some("Ctrl+Z") />
  *         <@menubar::item label="Redo" shortcut=Some("Ctrl+Y") disabled=true />
  *         <@menubar::separator />
  *         <@menubar::checkbox label="Word Wrap" checked=true />
- *     </@>
+ *     </@menubar::menu>
  *     <@menubar::menu label="View">
  *         <@menubar::checkbox label="Show Sidebar" checked=true />
  *         <@menubar::checkbox label="Show Line Numbers" checked=false />
- *     </@>
- * </@>
+ *     </@menubar::menu>
+ * </@menubar::apply>
  *@
 
 

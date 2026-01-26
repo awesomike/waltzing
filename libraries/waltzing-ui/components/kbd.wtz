@@ -6,8 +6,8 @@
  * @import components/kbd.wtz as kbd
  *
  * Single key:
- * <@kbd::apply>⌘</@>
- * <@kbd::apply>K</@>
+ * <@kbd::apply>⌘</@kbd::apply>
+ * <@kbd::apply>K</@kbd::apply>
  *
  * Key combinations:
  * <@kbd::combo keys=vec!["⌘", "K"] />
@@ -39,7 +39,7 @@
             @if i > 0 {
                 <span class="text-xs text-muted-foreground">@separator</span>
             }
-            <@apply>@key</@>
+            <@apply>@key</@apply>
         }
     </span>
 }

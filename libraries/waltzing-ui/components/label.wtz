@@ -5,11 +5,11 @@
  * @example
  * @import components/label.wtz as label
  *
- * <@label for_id=Some("email")>Email address</@>
+ * <@label for_id=Some("email")>Email address</@label>
  *
- * <@label>Standalone label</@>
+ * <@label>Standalone label</@label>
  *
- * <@label for_id=Some("username") class="mb-2">Username</@>
+ * <@label for_id=Some("username") class="mb-2">Username</@label>
  *@
 
 @* Main label component with optional for attribute *@

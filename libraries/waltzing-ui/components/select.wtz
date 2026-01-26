@@ -6,10 +6,10 @@
  *
  * 1. Declarative (for static options):
  * <@select::apply name="country" selected=@Some("us") placeholder=@Some("Select country")>
- *     <@select::option value="us">United States</@>
- *     <@select::option value="uk">United Kingdom</@>
- *     <@select::option value="ca" disabled=true>Canada</@>
- * </@>
+ *     <@select::option value="us">United States</@select::option>
+ *     <@select::option value="uk">United Kingdom</@select::option>
+ *     <@select::option value="ca" disabled=true>Canada</@select::option>
+ * </@select::apply>
  *
  * 2. Data-driven (for dynamic options):
  * <@select::apply name="country" options=@options selected=@Some("us") />
@@ -136,7 +136,7 @@
                     @for opt in options {
                         <@option value=@opt.value disabled=@opt.disabled>
                             @opt.label
-                        </@>
+                        </@option>
                     }
                 }
             </div>
@@ -212,7 +212,7 @@
             class=@class
         >
             @content()
-        </@>
+        </@apply>
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>
         }

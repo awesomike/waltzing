@@ -26,11 +26,11 @@
  *       selectable=true
  *   >
  *       <@data_table::selectable_row row_id="1">
- *           <@data_table::cell>John Doe</@>
- *           <@data_table::cell>john@example.com</@>
- *           <@data_table::cell>Active</@>
- *       </@>
- *   </@>
+ *           <@data_table::cell>John Doe</@data_table::cell>
+ *           <@data_table::cell>john@example.com</@data_table::cell>
+ *           <@data_table::cell>Active</@data_table::cell>
+ *       </@data_table::selectable_row>
+ *   </@data_table::apply>
  *
  * Events dispatched:
  *   - sort-change: { key: string, dir: 'asc'|'desc'|'' }

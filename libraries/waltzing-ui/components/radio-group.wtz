@@ -6,9 +6,9 @@
  *
  * 1. Declarative (for static options):
  * <@radio::apply name="theme" selected=Some("light")>
- *     <@radio::option value="light">Light</@>
- *     <@radio::option value="dark">Dark</@>
- * </@>
+ *     <@radio::option value="light">Light</@radio::option>
+ *     <@radio::option value="dark">Dark</@radio::option>
+ * </@radio::apply>
  *
  * 2. Data-driven (for dynamic options):
  * <@radio::apply name="theme" options=@options selected=Some("light") />
@@ -175,7 +175,7 @@
         </legend>
         <@apply name=@name options=@options selected=@selected class=@class>
             @content()
-        </@>
+        </@apply>
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>
         }

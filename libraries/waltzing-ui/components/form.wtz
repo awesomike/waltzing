@@ -26,12 +26,12 @@
  *             error=email_error
  *            
  *         />
- *     </@>
+ *     </@form::field>
  *
  *     <@form::actions align=None>
- *         <@button::primary>Submit</@>
- *     </@>
- * </@>
+ *         <@button::primary>Submit</@button::primary>
+ *     </@form::actions>
+ * </@form::apply>
  *@
 
 
@@ -178,7 +178,7 @@
        
     >
         @content()
-    </@>
+    </@apply>
 }
 
 @* Multipart form for file uploads *@
@@ -196,6 +196,6 @@
        
     >
         @content()
-    </@>
+    </@apply>
 }
 

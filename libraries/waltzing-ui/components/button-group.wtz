@@ -6,22 +6,22 @@
  *
  * 1. Declarative (for static items):
  * <@button_group::apply>
- *     <@button_group::item>Left</@>
- *     <@button_group::item>Center</@>
- *     <@button_group::item>Right</@>
- * </@>
+ *     <@button_group::item>Left</@button_group::item>
+ *     <@button_group::item>Center</@button_group::item>
+ *     <@button_group::item>Right</@button_group::item>
+ * </@button_group::apply>
  *
  * 2. With variant and size:
  * <@button_group::apply variant=button_group::Variant::Outline size=button_group::Size::Lg>
- *     <@button_group::item>One</@>
- *     <@button_group::item>Two</@>
- * </@>
+ *     <@button_group::item>One</@button_group::item>
+ *     <@button_group::item>Two</@button_group::item>
+ * </@button_group::apply>
  *
  * 3. Vertical orientation:
  * <@button_group::vertical>
- *     <@button_group::item>Top</@>
- *     <@button_group::item>Bottom</@>
- * </@>
+ *     <@button_group::item>Top</@button_group::item>
+ *     <@button_group::item>Bottom</@button_group::item>
+ * </@button_group::vertical>
  *@
 
 
@@ -124,7 +124,7 @@
 ) {
     <@apply variant=@variant size=@size orientation=Orientation::Horizontal class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* Convenience: vertical button group *@
@@ -136,7 +136,7 @@
 ) {
     <@apply variant=@variant size=@size orientation=Orientation::Vertical class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* Convenience: outline horizontal group *@
@@ -147,7 +147,7 @@
 ) {
     <@apply variant=Variant::Outline size=@size class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* Convenience: secondary horizontal group *@
@@ -158,5 +158,5 @@
 ) {
     <@apply variant=Variant::Secondary size=@size class=@class>
         @content()
-    </@>
+    </@apply>
 }

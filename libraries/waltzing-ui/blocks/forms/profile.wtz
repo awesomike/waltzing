@@ -94,7 +94,7 @@
                     <p class="text-xs text-muted-foreground">JPG, PNG or GIF. Max 2MB.</p>
                 </div>
             </div>
-        </@>
+        </@form::section>
 
         <@separator::horizontal class="my-6" />
 
@@ -109,7 +109,7 @@
                     required=true
                     error=@name_error
                 />
-            </@>
+            </@field::apply>
 
             <@field::apply label="Email Address" required=true error=@email_error description=@Some("This email will be used for account notifications")>
                 <@input::apply
@@ -120,7 +120,7 @@
                     required=true
                     error=@email_error
                 />
-            </@>
+            </@field::apply>
 
             <@field::apply label="Bio" error=@bio_error description=@Some("Brief description for your profile. Max 160 characters.")>
                 <@textarea::apply
@@ -130,8 +130,8 @@
                     rows=@Some(3)
                     error=@bio_error
                 />
-            </@>
-        </@>
+            </@field::apply>
+        </@form::section>
 
         <@separator::horizontal class="my-6" />
 
@@ -146,8 +146,8 @@
                         placeholder=@Some("username")
                         error=@twitter_error
                     />
-                </@>
-            </@>
+                </@input_group::with_prefix>
+            </@field::apply>
 
             <@field::apply label="GitHub" error=@github_error>
                 <@input_group::with_prefix prefix_text="github.com/">
@@ -158,8 +158,8 @@
                         placeholder=@Some("username")
                         error=@github_error
                     />
-                </@>
-            </@>
+                </@input_group::with_prefix>
+            </@field::apply>
 
             <@field::apply label="Website" error=@website_error>
                 <@input_group::with_prefix prefix_text="https://">
@@ -170,9 +170,9 @@
                         placeholder=@Some("yoursite.com")
                         error=@website_error
                     />
-                </@>
-            </@>
-        </@>
+                </@input_group::with_prefix>
+            </@field::apply>
+        </@form::section>
 
         <@separator::horizontal class="my-6" />
 
@@ -185,9 +185,9 @@
                     <polyline points="7 3 7 8 15 8"/>
                 </svg>
                 Save Changes
-            </@>
-        </@>
-    </@>
+            </@button::primary>
+        </@form::actions>
+    </@form::apply>
 }
 
 @* Compact profile form wrapped in a card *@
@@ -211,8 +211,8 @@
 ) {
     <@card::apply
         header=@Some(@() {
-            <@card::title>Profile Settings</@>
-            <@card::description>Manage your account information and social links</@>
+            <@card::title>Profile Settings</@card::title>
+            <@card::description>Manage your account information and social links</@card::description>
         })
         footer=None
     >
@@ -234,5 +234,5 @@
             website_value=@website_value
             website_error=@website_error
         />
-    </@>
+    </@card::apply>
 }

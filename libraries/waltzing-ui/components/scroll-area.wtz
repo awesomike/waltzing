@@ -8,7 +8,7 @@
  * // Vertical scroll area (default)
  * <@scroll_area::apply class="h-72 w-48">
  *     <p>Long scrollable content...</p>
- * </@>
+ * </@scroll_area::apply>
  *
  * // Horizontal scroll area
  * <@scroll_area::horizontal class="w-96">
@@ -16,17 +16,17 @@
  *         <div class="w-32 shrink-0">Item 1</div>
  *         <div class="w-32 shrink-0">Item 2</div>
  *     </div>
- * </@>
+ * </@scroll_area::horizontal>
  *
  * // Both directions
  * <@scroll_area::both class="h-72 w-96">
  *     <div class="w-[600px]">Wide and tall content...</div>
- * </@>
+ * </@scroll_area::both>
  *
  * // With fade edges
  * <@scroll_area::apply class="h-72" fade=true>
  *     <p>Content with faded edges...</p>
- * </@>
+ * </@scroll_area::apply>
  *@
 
 

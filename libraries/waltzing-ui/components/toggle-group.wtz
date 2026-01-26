@@ -6,10 +6,10 @@
  *
  * 1. Declarative (for static items):
  * <@toggle_group::single name="align" selected=@Some("left")>
- *     <@toggle_group::item value="left">Left</@>
- *     <@toggle_group::item value="center">Center</@>
- *     <@toggle_group::item value="right">Right</@>
- * </@>
+ *     <@toggle_group::item value="left">Left</@toggle_group::item>
+ *     <@toggle_group::item value="center">Center</@toggle_group::item>
+ *     <@toggle_group::item value="right">Right</@toggle_group::item>
+ * </@toggle_group::single>
  *
  * 2. Data-driven (for dynamic items):
  * <@toggle_group::single name="align" items=@items selected=@Some("left") />
@@ -72,7 +72,7 @@
             @for it in items {
                 <@item value=@it.value icon=@it.icon.as_deref() disabled=@it.disabled>
                     @it.label
-                </@>
+                </@item>
             }
         }
         <input type="hidden" name="@name" :value="selected || ''" />
@@ -116,7 +116,7 @@
             @for it in items {
                 <@item value=@it.value icon=@it.icon.as_deref() disabled=@it.disabled>
                     @it.label
-                </@>
+                </@item>
             }
         }
         <input type="hidden" name="@name" :value="JSON.stringify(selected)" />
@@ -174,7 +174,7 @@
 ) {
     <@single name=@name selected=@selected class=@class>
         @content()
-    </@>
+    </@single>
 }
 
 @* Convenience: simple multiple with defaults - pass empty vec for no selection *@
@@ -186,7 +186,7 @@
 ) {
     <@multiple name=@name selected=@selected class=@class>
         @content()
-    </@>
+    </@multiple>
 }
 
 @* Convenience: outline single *@
@@ -198,7 +198,7 @@
 ) {
     <@single name=@name selected=@selected variant=Variant::Outline class=@class>
         @content()
-    </@>
+    </@single>
 }
 
 @* Convenience: outline multiple *@
@@ -210,5 +210,5 @@
 ) {
     <@multiple name=@name selected=@selected variant=Variant::Outline class=@class>
         @content()
-    </@>
+    </@multiple>
 }

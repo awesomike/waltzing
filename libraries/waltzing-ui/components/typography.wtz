@@ -5,17 +5,17 @@
  * @example
  * @import components/typography.wtz as t
  *
- * <@t::h1>Page Title</@>
- * <@t::h2>Section Heading</@>
- * <@t::lead>A larger intro paragraph that stands out.</@>
- * <@t::p>Regular paragraph text with normal sizing.</@>
- * <@t::muted>Some secondary text that's less prominent.</@>
- * <@t::blockquote>A notable quote from someone important.</@>
- * <@t::code>inline_code()</@>
+ * <@t::h1>Page Title</@t::h1>
+ * <@t::h2>Section Heading</@t::h2>
+ * <@t::lead>A larger intro paragraph that stands out.</@t::lead>
+ * <@t::p>Regular paragraph text with normal sizing.</@t::p>
+ * <@t::muted>Some secondary text that's less prominent.</@t::muted>
+ * <@t::blockquote>A notable quote from someone important.</@t::blockquote>
+ * <@t::code>inline_code()</@t::code>
  * <@t::pre>
  *     const x = 1;
  *     const y = 2;
- * </@>
+ * </@t::pre>
  * <@t::list items=items />
  *@
 

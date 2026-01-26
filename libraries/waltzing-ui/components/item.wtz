@@ -7,13 +7,13 @@
  * @import components/badge.wtz as badge
  *
  * <@item::apply title="Settings" description="Manage your preferences">
- *   <@item::icon>⚙️</@>
- *   <@item::action><@badge::default>New</@></@>
- * </@>
+ *   <@item::icon>⚙️</@item::icon>
+ *   <@item::action><@badge::default>New</@badge::default></@item::action>
+ * </@item::apply>
  *
  * <@item::apply title="Notifications" variant=item::Variant::Compact>
- *   <@item::icon>🔔</@>
- * </@>
+ *   <@item::icon>🔔</@item::icon>
+ * </@item::apply>
  *
  * <@item::simple title="Simple item" />
  *@

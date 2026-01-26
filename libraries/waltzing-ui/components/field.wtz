@@ -12,15 +12,15 @@
  *         name="email"
  *         placeholder=Some("you@example.com")
  *     />
- * </@>
+ * </@field::apply>
  *
  * <@field::apply label="Username" required=false>
  *     <@input::text name="username" value=None placeholder=Some("Enter username") />
- * </@>
+ * </@field::apply>
  *
  * <@field::apply label="Password" error=Some("Password is required") required=true>
  *     <@input::password name="password" placeholder=Some("Enter password") />
- * </@>
+ * </@field::apply>
  *@
 
 

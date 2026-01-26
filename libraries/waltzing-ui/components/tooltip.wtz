@@ -41,7 +41,7 @@
 ) {
     <@rich side=@side align=Align::Center trigger=@trigger>
         @text
-    </@>
+    </@rich>
 }
 
 @* Rich content tooltip with alignment control, auto-flip, and scroll tracking *@

@@ -212,8 +212,8 @@
                             @* Chart area *@
                             <@card::apply
                                 header=@Some(@() {
-                                    <@card::title>Overview</@>
-                                    <@card::description>Revenue over the last 6 months</@>
+                                    <@card::title>Overview</@card::title>
+                                    <@card::description>Revenue over the last 6 months</@card::description>
                                 })
                                 footer=None
                                 class="lg:col-span-4"
@@ -222,13 +222,13 @@
                                 <div class="h-[300px] w-full">
                                     <@chart_placeholder />
                                 </div>
-                            </@>
+                            </@card::apply>
 
                             @* Recent sales *@
                             <@card::apply
                                 header=@Some(@() {
-                                    <@card::title>Recent Sales</@>
-                                    <@card::description>You made @(recent_sales.len()) sales this month.</@>
+                                    <@card::title>Recent Sales</@card::title>
+                                    <@card::description>You made @(recent_sales.len()) sales this month.</@card::description>
                                 })
                                 footer=None
                                 class="lg:col-span-3"
@@ -247,44 +247,44 @@
                                         </div>
                                     }
                                 </div>
-                            </@>
+                            </@card::apply>
                         </div>
 
                         @* Data table *@
                         <@card::apply header=@Some(@() {
-                            <@card::title>Recent Transactions</@>
-                            <@card::description>A list of your recent transactions.</@>
+                            <@card::title>Recent Transactions</@card::title>
+                            <@card::description>A list of your recent transactions.</@card::description>
                         }) footer=None>
                             <@table::apply
                                 header=@() {
                                     <@table::header_row>
-                                        <@table::th>Customer</@>
-                                        <@table::th>Email</@>
-                                        <@table::th>Amount</@>
-                                        <@table::th class="text-right">Status</@>
-                                    </@>
+                                        <@table::th>Customer</@table::th>
+                                        <@table::th>Email</@table::th>
+                                        <@table::th>Amount</@table::th>
+                                        <@table::th class="text-right">Status</@table::th>
+                                    </@table::header_row>
                                 }
                                 body=@() {
                                     @for sale in &recent_sales {
                                         <@table::row>
-                                            <@table::td class="font-medium">@sale.name</@>
-                                            <@table::td>@sale.email</@>
-                                            <@table::td>@sale.amount</@>
+                                            <@table::td class="font-medium">@sale.name</@table::td>
+                                            <@table::td>@sale.email</@table::td>
+                                            <@table::td>@sale.amount</@table::td>
                                             <@table::td class="text-right">
                                                 <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
                                                     Completed
                                                 </span>
-                                            </@>
-                                        </@>
+                                            </@table::td>
+                                        </@table::row>
                                     }
                                 }
                             />
-                        </@>
+                        </@card::apply>
                     </div>
                 </main>
             </div>
         </div>
-    </@>
+    </@base::apply>
 }
 
 @* Stat card component *@
@@ -314,7 +314,7 @@
                 @change from last month
             </p>
         }
-    </@>
+    </@card::simple>
 }
 
 @* Placeholder bar chart using CSS *@

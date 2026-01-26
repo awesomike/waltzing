@@ -7,19 +7,19 @@
  *
  * <@aspect_ratio::apply ratio=1.7778>
  *     <img src="photo.jpg" class="object-cover w-full h-full" />
- * </@>
+ * </@aspect_ratio::apply>
  *
  * <@aspect_ratio::video>
  *     <iframe src="..." class="w-full h-full"></iframe>
- * </@>
+ * </@aspect_ratio::video>
  *
  * <@aspect_ratio::square>
  *     <img src="avatar.jpg" class="object-cover w-full h-full rounded-md" />
- * </@>
+ * </@aspect_ratio::square>
  *
  * <@aspect_ratio::portrait>
  *     <img src="portrait.jpg" class="object-cover w-full h-full" />
- * </@>
+ * </@aspect_ratio::portrait>
  *@
 
 
@@ -45,33 +45,33 @@
 @fn video(class: &str = "", content: @()) {
     <@apply ratio=1.7778 class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* 1:1 aspect ratio (square) *@
 @fn square(class: &str = "", content: @()) {
     <@apply ratio=1.0 class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* 4:3 aspect ratio (classic TV/photo) *@
 @fn standard(class: &str = "", content: @()) {
     <@apply ratio=1.3333 class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* 21:9 aspect ratio (ultrawide/cinema) *@
 @fn ultrawide(class: &str = "", content: @()) {
     <@apply ratio=2.3333 class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* 3:4 aspect ratio (portrait photo) *@
 @fn portrait(class: &str = "", content: @()) {
     <@apply ratio=0.75 class=@class>
         @content()
-    </@>
+    </@apply>
 }

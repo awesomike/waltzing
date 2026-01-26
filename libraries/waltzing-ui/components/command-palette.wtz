@@ -12,12 +12,12 @@
  *     <@command_palette::group label="Navigation">
  *         <@command_palette::item label="Home" shortcut="G H" />
  *         <@command_palette::item label="Settings" shortcut="G S" />
- *     </@>
+ *     </@command_palette::group>
  *     <@command_palette::group label="Actions">
  *         <@command_palette::item label="New File" shortcut="Ctrl N" />
  *         <@command_palette::item label="Save" shortcut="Ctrl S" />
- *     </@>
- * </@>
+ *     </@command_palette::group>
+ * </@command_palette::apply>
  *
  * With custom placeholder and trigger:
  * <@command_palette::apply
@@ -25,12 +25,12 @@
  *     trigger=@{<button class="btn">Open Palette</button>}
  * >
  *     ...
- * </@>
+ * </@command_palette::apply>
  *
  * Handling selection:
  * <@command_palette::apply @@command-select="handleCommand($event.detail)">
  *     ...
- * </@>
+ * </@command_palette::apply>
  **@
 
 

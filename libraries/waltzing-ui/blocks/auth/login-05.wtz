@@ -37,8 +37,8 @@
     @let container_cls = cn(&["flex min-h-screen items-center justify-center p-4", class])
     @let email_ph = Some("you@example.com")
     @let header = Some(@() {
-        <@card::title>@title</@>
-        <@card::description>@description</@>
+        <@card::title>@title</@card::title>
+        <@card::description>@description</@card::description>
     })
 
     <div class="@container_cls">
@@ -53,7 +53,7 @@
                         required=true
                         error=@email_error
                     />
-                </@>
+                </@field::apply>
 
                 <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
@@ -61,7 +61,7 @@
                         <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
                     </svg>
                     @submit_text
-                </@>
+                </@button::apply>
 
                 <p class="text-center text-xs text-muted-foreground">
                     @info_text
@@ -74,6 +74,6 @@
                     </p>
                 }
             </form>
-        </@>
+        </@card::apply>
     </div>
 }

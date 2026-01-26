@@ -63,13 +63,13 @@
 @* Block card for displaying block info *@
 @fn block_card(name: &str, description: &str, path: &str, demo_href: Option<&str>) {
     <@card::simple>
-        <@card::title>@name</@>
-        <@card::description>@description</@>
+        <@card::title>@name</@card::title>
+        <@card::description>@description</@card::description>
         <p class="mt-2"><code class="text-xs bg-muted px-1 py-0.5 rounded">@path</code></p>
         @if let Some(href) = demo_href {
             <a href="@href" class="mt-2 inline-flex text-xs text-primary hover:underline">View Demo &rarr;</a>
         }
-    </@>
+    </@card::simple>
 }
 
 @fn apply() {
@@ -93,7 +93,7 @@
                         <p class="text-muted-foreground mt-2">Component Showcase</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <@label::apply>Dark Mode</@>
+                        <@label::apply>Dark Mode</@label::apply>
                         <button
                             type="button"
                             role="switch"
@@ -114,20 +114,20 @@
                 <@section title="Buttons" id="buttons">
                     <p class="text-muted-foreground mb-4">Clickable buttons with multiple variants and sizes.</p>
                     <div class="flex flex-wrap gap-4 items-center">
-                        <@button::primary>Primary</@>
-                        <@button::secondary>Secondary</@>
-                        <@button::outline>Outline</@>
-                        <@button::apply variant=button::Variant::Ghost size=button::Size::Default>Ghost</@>
-                        <@button::apply variant=button::Variant::Destructive size=button::Size::Default>Destructive</@>
-                        <@button::apply variant=button::Variant::Link size=button::Size::Default>Link</@>
+                        <@button::primary>Primary</@button::primary>
+                        <@button::secondary>Secondary</@button::secondary>
+                        <@button::outline>Outline</@button::outline>
+                        <@button::apply variant=button::Variant::Ghost size=button::Size::Default>Ghost</@button::apply>
+                        <@button::apply variant=button::Variant::Destructive size=button::Size::Default>Destructive</@button::apply>
+                        <@button::apply variant=button::Variant::Link size=button::Size::Default>Link</@button::apply>
                     </div>
                     <div class="flex flex-wrap gap-4 items-center mt-4">
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Sm>Small</@>
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Default>Default</@>
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Lg>Large</@>
-                        <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=true>Disabled</@>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Sm>Small</@button::apply>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Default>Default</@button::apply>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Lg>Large</@button::apply>
+                        <@button::apply variant=button::Variant::Primary size=button::Size::Default disabled=true>Disabled</@button::apply>
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -135,12 +135,12 @@
                 <@section title="Badges" id="badges">
                     <p class="text-muted-foreground mb-4">Small status indicators and tags.</p>
                     <div class="flex flex-wrap gap-2">
-                        <@badge::default>Default</@>
-                        <@badge::secondary>Secondary</@>
-                        <@badge::outline>Outline</@>
-                        <@badge::destructive>Destructive</@>
+                        <@badge::default>Default</@badge::default>
+                        <@badge::secondary>Secondary</@badge::secondary>
+                        <@badge::outline>Outline</@badge::outline>
+                        <@badge::destructive>Destructive</@badge::destructive>
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -171,7 +171,7 @@
                            
                         />
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -191,7 +191,7 @@
                            
                         />
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -209,7 +209,7 @@
                             description=@Some(weekly_updates)
                         />
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -232,7 +232,7 @@
                             description=None
                         />
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -240,11 +240,11 @@
                 <@section title="Toggle" id="toggle">
                     <p class="text-muted-foreground mb-4">Two-state buttons that can be toggled on or off.</p>
                     <div class="flex flex-wrap gap-2">
-                        <@toggle::simple name="bold">B</@>
-                        <@toggle::simple name="italic">I</@>
-                        <@toggle::outline name="underline" pressed=true>U</@>
+                        <@toggle::simple name="bold">B</@toggle::simple>
+                        <@toggle::simple name="italic">I</@toggle::simple>
+                        <@toggle::outline name="underline" pressed=true>U</@toggle::outline>
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -273,7 +273,7 @@
                            
                         />
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -286,7 +286,7 @@
                         <@progress::apply value=75.0 max=100.0 />
                         <@progress::with_label value=65.0 max=100.0 label="Progress" />
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -300,7 +300,7 @@
                         <@avatar::fallback initials="JD" />
                         <@avatar::fallback initials="AB" />
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -309,16 +309,16 @@
                     <p class="text-muted-foreground mb-4">Container with optional header and footer.</p>
                     <div class="grid gap-6 md:grid-cols-2">
                         <@card::simple>
-                            <@card::title>Card Title</@>
-                            <@card::description>Card description</@>
+                            <@card::title>Card Title</@card::title>
+                            <@card::description>Card description</@card::description>
                             <p class="mt-4">This is the card content area.</p>
-                        </@>
+                        </@card::simple>
                         <@card::simple>
                             <h3 class="font-semibold mb-2">Simple Card</h3>
                             <p class="text-muted-foreground">Without header or footer.</p>
-                        </@>
+                        </@card::simple>
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -327,23 +327,23 @@
                     <p class="text-muted-foreground mb-4">Callouts for important messages.</p>
                     <div class="space-y-4">
                         <@alert::default>
-                            <@alert::title>Heads up!</@>
-                            <@alert::description>Important message here.</@>
-                        </@>
+                            <@alert::title>Heads up!</@alert::title>
+                            <@alert::description>Important message here.</@alert::description>
+                        </@alert::default>
                         <@alert::success>
-                            <@alert::title>Success!</@>
-                            <@alert::description>Changes saved.</@>
-                        </@>
+                            <@alert::title>Success!</@alert::title>
+                            <@alert::description>Changes saved.</@alert::description>
+                        </@alert::success>
                         <@alert::warning>
-                            <@alert::title>Warning</@>
-                            <@alert::description>Cannot be undone.</@>
-                        </@>
+                            <@alert::title>Warning</@alert::title>
+                            <@alert::description>Cannot be undone.</@alert::description>
+                        </@alert::warning>
                         <@alert::destructive>
-                            <@alert::title>Error</@>
-                            <@alert::description>Something went wrong.</@>
-                        </@>
+                            <@alert::title>Error</@alert::title>
+                            <@alert::description>Something went wrong.</@alert::description>
+                        </@alert::destructive>
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -360,7 +360,7 @@
                         </div>
                         <@skeleton::text lines=3 />
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -379,7 +379,7 @@
                         <@separator::vertical />
                         <span class="text-sm">Item 3</span>
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -388,20 +388,20 @@
                     <p class="text-muted-foreground mb-4">Page layout templates for common application structures.</p>
                     <div class="grid gap-6 md:grid-cols-2">
                         <@card::simple>
-                            <@card::title>Base Layout</@>
-                            <@card::description>Standard HTML page with Tailwind, Alpine.js, and theme support</@>
+                            <@card::title>Base Layout</@card::title>
+                            <@card::description>Standard HTML page with Tailwind, Alpine.js, and theme support</@card::description>
                             <p class="mt-2 text-xs text-muted-foreground">This showcase uses the base layout</p>
                             <p class="mt-2"><code class="text-xs bg-muted px-1 py-0.5 rounded">/layouts/base.wtz</code></p>
-                        </@>
+                        </@card::simple>
                         <@card::simple>
-                            <@card::title>Sidebar Layout</@>
-                            <@card::description>Dashboard layout with collapsible navigation sidebar</@>
+                            <@card::title>Sidebar Layout</@card::title>
+                            <@card::description>Dashboard layout with collapsible navigation sidebar</@card::description>
                             <p class="mt-2 text-xs text-muted-foreground">Supports NavItem and NavGroup for navigation</p>
                             <p class="mt-2"><code class="text-xs bg-muted px-1 py-0.5 rounded">/layouts/sidebar.wtz</code></p>
                             <a href="/sidebar-demo" class="mt-2 inline-flex text-xs text-primary hover:underline">View Demo &rarr;</a>
-                        </@>
+                        </@card::simple>
                     </div>
-                </@>
+                </@section>
 
                 <@separator::horizontal class="my-8" />
 
@@ -455,7 +455,7 @@
                                     demo_href=@Some("/demo/blocks/auth/signup-01")
                                 />
                             </div>
-                        </@>
+                        </@subsection>
 
                         <@separator::horizontal class="my-6" />
 
@@ -470,7 +470,7 @@
                                     demo_href=@Some("/demo/blocks/sidebar/sidebar-07")
                                 />
                             </div>
-                        </@>
+                        </@subsection>
 
                         <@separator::horizontal class="my-6" />
 
@@ -485,7 +485,7 @@
                                     demo_href=@Some("/demo/blocks/dashboard/dashboard-01")
                                 />
                             </div>
-                        </@>
+                        </@subsection>
 
                         <@separator::horizontal class="my-6" />
 
@@ -494,8 +494,8 @@
                             <p class="text-muted-foreground mb-4">Complete form blocks for common use cases.</p>
                             <div class="space-y-8">
                                 <@card::simple>
-                                    <@card::title>Contact Form</@>
-                                    <@card::description>Standard contact form with validation support</@>
+                                    <@card::title>Contact Form</@card::title>
+                                    <@card::description>Standard contact form with validation support</@card::description>
                                     <p class="mt-1"><code class="text-xs bg-muted px-1 py-0.5 rounded">/blocks/forms/contact.wtz</code></p>
                                     <div class="mt-4">
                                         <@contact_form::apply
@@ -504,10 +504,10 @@
                                             class="space-y-4"
                                         />
                                     </div>
-                                </@>
+                                </@card::simple>
                                 <@card::simple>
-                                    <@card::title>Profile Form</@>
-                                    <@card::description>Profile/account settings form with avatar, personal info, and social links</@>
+                                    <@card::title>Profile Form</@card::title>
+                                    <@card::description>Profile/account settings form with avatar, personal info, and social links</@card::description>
                                     <p class="mt-1"><code class="text-xs bg-muted px-1 py-0.5 rounded">/blocks/forms/profile.wtz</code></p>
                                     <div class="mt-4">
                                         <@profile_form::apply
@@ -519,9 +519,9 @@
                                             bio_value=@Some("Software developer passionate about building great products")
                                         />
                                     </div>
-                                </@>
+                                </@card::simple>
                             </div>
-                        </@>
+                        </@subsection>
 
                         <@separator::horizontal class="my-6" />
 
@@ -537,7 +537,7 @@
                                         title="Confirm Action"
                                         message="Are you sure you want to proceed with this action?"
                                         trigger=@() {
-                                            <@button::outline>Open Confirm</@>
+                                            <@button::outline>Open Confirm</@button::outline>
                                         }
                                     />
                                 </div>
@@ -551,7 +551,7 @@
                                         itemName="Example Document"
                                         message="This action cannot be undone. All associated data will be permanently removed."
                                         trigger=@() {
-                                            <@button::apply variant=button::Variant::Destructive size=button::Size::Default>Open Delete</@>
+                                            <@button::apply variant=button::Variant::Destructive size=button::Size::Default>Open Delete</@button::apply>
                                         }
                                     />
                                 </div>
@@ -566,9 +566,9 @@
                                     />
                                 </div>
                             </div>
-                        </@>
+                        </@subsection>
                     </div>
-                </@>
+                </@section>
 
                 @* Footer *@
                 <footer class="mt-16 py-8 border-t text-center text-sm text-muted-foreground">
@@ -576,5 +576,5 @@
                 </footer>
             </div>
         </div>
-    </@>
+    </@base::apply>
 }

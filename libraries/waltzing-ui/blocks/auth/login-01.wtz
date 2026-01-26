@@ -40,8 +40,8 @@
     @let email_ph = Some("you@example.com")
     @let password_ph = Some("Enter your password")
     @let header = Some(@() {
-        <@card::title>@title</@>
-        <@card::description>@description</@>
+        <@card::title>@title</@card::title>
+        <@card::description>@description</@card::description>
     })
 
     <div class="@container_cls">
@@ -56,7 +56,7 @@
                         required=true
                         error=@email_error
                     />
-                </@>
+                </@field::apply>
 
                 <@field::apply label="Password" required=true error=@password_error>
                     <@input::apply
@@ -66,7 +66,7 @@
                         required=true
                         error=@password_error
                     />
-                </@>
+                </@field::apply>
 
                 @if let Some(url) = forgot_password_url {
                     <div class="text-right">
@@ -78,7 +78,7 @@
 
                 <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
                     @submit_text
-                </@>
+                </@button::apply>
 
                 @if let Some(url) = register_url {
                     <p class="text-center text-sm text-muted-foreground">
@@ -87,6 +87,6 @@
                     </p>
                 }
             </form>
-        </@>
+        </@card::apply>
     </div>
 }

@@ -5,13 +5,13 @@
  * @example
  * @import components/badge.wtz as badge
  *
- * <@badge::default>New</@>
- * <@badge::secondary>Pending</@>
- * <@badge::destructive>Error</@>
+ * <@badge::default>New</@badge::default>
+ * <@badge::secondary>Pending</@badge::secondary>
+ * <@badge::destructive>Error</@badge::destructive>
  *
  * <@badge variant=badge::Variant::Outline class="ml-2">
  *     Custom
- * </@>
+ * </@badge>
  *@
 
 @enum Variant {
@@ -56,26 +56,26 @@
 @fn default(class: &str = "", content: @()) {
     <@apply variant=Variant::Default class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* Shorthand for secondary badge *@
 @fn secondary(class: &str = "", content: @()) {
     <@apply variant=Variant::Secondary class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* Shorthand for outline badge *@
 @fn outline(class: &str = "", content: @()) {
     <@apply variant=Variant::Outline class=@class>
         @content()
-    </@>
+    </@apply>
 }
 
 @* Shorthand for destructive badge *@
 @fn destructive(class: &str = "", content: @()) {
     <@apply variant=Variant::Destructive class=@class>
         @content()
-    </@>
+    </@apply>
 }

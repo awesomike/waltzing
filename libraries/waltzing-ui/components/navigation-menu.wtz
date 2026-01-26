@@ -11,12 +11,12 @@
  *       <@nav::list>
  *           <@nav::item label="Home" href=Some("/") active=false />
  *           <@nav::dropdown label="Products">
- *               <@nav::dropdown_item href="/products/widgets">Widgets</@>
- *               <@nav::dropdown_item href="/products/gadgets">Gadgets</@>
- *           </@>
+ *               <@nav::dropdown_item href="/products/widgets">Widgets</@nav::dropdown_item>
+ *               <@nav::dropdown_item href="/products/gadgets">Gadgets</@nav::dropdown_item>
+ *           </@nav::dropdown>
  *           <@nav::item label="About" href=Some("/about") />
- *       </@>
- *   </@>
+ *       </@nav::list>
+ *   </@nav::root>
  *@
 
 

@@ -103,7 +103,7 @@
                             required=true
                             error=@email_error
                         />
-                    </@>
+                    </@field::apply>
 
                     <@field::apply label="Password" required=true error=@password_error>
                         <@input::apply
@@ -113,7 +113,7 @@
                             required=true
                             error=@password_error
                         />
-                    </@>
+                    </@field::apply>
 
                     @if let Some(url) = forgot_password_url {
                         <div class="text-right">
@@ -125,7 +125,7 @@
 
                     <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
                         @submit_text
-                    </@>
+                    </@button::apply>
                 </form>
 
                 @if let Some(url) = register_url {

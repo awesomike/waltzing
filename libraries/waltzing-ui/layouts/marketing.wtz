@@ -70,7 +70,7 @@
                 copyright=@copyright
             />
         </div>
-    </@>
+    </@base::apply>
 }
 
 @*
@@ -110,7 +110,7 @@
                 copyright=@copyright
             />
         </div>
-    </@>
+    </@base::apply>
 }
 
 @*
@@ -363,7 +363,7 @@
                 </div>
             }
         </div>
-    </@>
+    </@hero_section>
 }
 
 @*
@@ -384,7 +384,7 @@
                 @media()
             </div>
         </div>
-    </@>
+    </@hero_section>
 }
 
 @*

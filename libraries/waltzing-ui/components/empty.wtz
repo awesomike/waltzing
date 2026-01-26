@@ -6,14 +6,14 @@
  * @import components/empty.wtz as empty
  *
  * <@empty::apply title="No results" description="Try adjusting your search">
- *   <@empty::action><@button::primary>Create New</@></@>
- * </@>
+ *   <@empty::action><@button::primary>Create New</@button::primary></@empty::action>
+ * </@empty::apply>
  *
  * <@empty::apply title="No items yet">
  *   <@empty::icon>
  *     <svg>...</svg>
- *   </@>
- * </@>
+ *   </@empty::icon>
+ * </@empty::apply>
  *
  * <@empty::compact title="Empty" />
  *
@@ -109,7 +109,7 @@
         class=@class
     >
         @content()
-    </@>
+    </@apply>
 }
 
 @* Empty state with default placeholder icon *@
@@ -147,7 +147,7 @@
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M8 12h8"/>
             </svg>
-        </@>
+        </@icon>
         @action_content()
-    </@>
+    </@apply>
 }

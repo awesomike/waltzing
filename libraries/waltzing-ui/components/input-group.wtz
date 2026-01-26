@@ -8,21 +8,21 @@
  *
  *   Basic with text addons:
  *   <@input_group::apply>
- *       <@input_group::prefix>$</@>
+ *       <@input_group::prefix>$</@input_group::prefix>
  *       <@input::apply input_type=input::InputType::Number name="amount" placeholder=Some("0.00") />
- *       <@input_group::suffix>.00</@>
- *   </@>
+ *       <@input_group::suffix>.00</@input_group::suffix>
+ *   </@input_group::apply>
  *
  *   With icon prefix:
  *   <@input_group::with_icon icon="search">
  *       <@input::apply input_type=input::InputType::Search name="search" placeholder=Some("Search...") />
- *   </@>
+ *   </@input_group::with_icon>
  *
  *   With button suffix:
  *   <@input_group::apply>
  *       <@input::apply input_type=input::InputType::Email name="email" placeholder=Some("Enter email") />
- *       <@input_group::suffix_button>Subscribe</@>
- *   </@>
+ *       <@input_group::suffix_button>Subscribe</@input_group::suffix_button>
+ *   </@input_group::apply>
  *@
 
 

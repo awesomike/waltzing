@@ -18,11 +18,11 @@
  *   Or build manually with components:
  *   <@breadcrumb::root>
  *       <@breadcrumb::list>
- *           <@breadcrumb::item><@breadcrumb::link href="/">Home</@></@>
+ *           <@breadcrumb::item><@breadcrumb::link href="/">Home</@breadcrumb::link></@breadcrumb::item>
  *           <@breadcrumb::separator />
- *           <@breadcrumb::item><@breadcrumb::page>Products</@></@>
- *       </@>
- *   </@>
+ *           <@breadcrumb::item><@breadcrumb::page>Products</@breadcrumb::page></@breadcrumb::item>
+ *       </@breadcrumb::list>
+ *   </@breadcrumb::root>
  *@
 
 
@@ -140,12 +140,12 @@
                 }
                 <@item>
                     @if let Some(ref href) = item.href {
-                        <@link href=@href>@item.label</@>
+                        <@link href=@href>@item.label</@link>
                     } else {
-                        <@page>@item.label</@>
+                        <@page>@item.label</@page>
                     }
-                </@>
+                </@item>
             }
-        </@>
-    </@>
+        </@list>
+    </@root>
 }

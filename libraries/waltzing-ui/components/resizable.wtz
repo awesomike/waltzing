@@ -9,23 +9,23 @@
  *   <@resizable::panel_group direction=resizable::Direction::Horizontal>
  *       <@resizable::panel default_size=30.0>
  *           <p>Sidebar content (30%)</p>
- *       </@>
+ *       </@resizable::panel>
  *       <@resizable::handle />
  *       <@resizable::panel default_size=70.0>
  *           <p>Main content (70%)</p>
- *       </@>
- *   </@>
+ *       </@resizable::panel>
+ *   </@resizable::panel_group>
  *
  *   // Vertical layout (stacked panels)
  *   <@resizable::panel_group direction=resizable::Direction::Vertical>
  *       <@resizable::panel default_size=50.0 min_size=Some(20.0)>
  *           <p>Top panel</p>
- *       </@>
+ *       </@resizable::panel>
  *       <@resizable::handle />
  *       <@resizable::panel default_size=50.0 max_size=Some(80.0)>
  *           <p>Bottom panel</p>
- *       </@>
- *   </@>
+ *       </@resizable::panel>
+ *   </@resizable::panel_group>
  *
  *   // Simple two-panel layouts
  *   <@resizable::horizontal left_size=30.0
@@ -153,7 +153,7 @@
         <@panel default_size=@left_size content=@left />
         <@handle />
         <@panel default_size=@right_size content=@right />
-    </@>
+    </@panel_group>
 }
 
 @* Simple vertical two-panel layout *@
@@ -169,7 +169,7 @@
         <@panel default_size=@top_size content=@top />
         <@handle />
         <@panel default_size=@bottom_size content=@bottom />
-    </@>
+    </@panel_group>
 }
 
 @* Three-panel horizontal layout *@
@@ -189,7 +189,7 @@
         <@panel default_size=@center_size content=@center />
         <@handle />
         <@panel default_size=@right_size content=@right />
-    </@>
+    </@panel_group>
 }
 
 @* Alpine.js component definition - include once in your page *@

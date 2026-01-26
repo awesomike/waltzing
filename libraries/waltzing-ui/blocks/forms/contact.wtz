@@ -56,7 +56,7 @@
                 required=true
                 error=@name_error
             />
-        </@>
+        </@field::apply>
 
         <@field::apply label="Email" required=true error=@email_error>
             <@input::apply
@@ -67,7 +67,7 @@
                 required=true
                 error=@email_error
             />
-        </@>
+        </@field::apply>
 
         <@field::apply label="Subject" required=true error=@subject_error>
             <@input::apply
@@ -78,7 +78,7 @@
                 required=true
                 error=@subject_error
             />
-        </@>
+        </@field::apply>
 
         <@field::apply label="Message" required=true error=@message_error>
             <@textarea::apply
@@ -89,11 +89,11 @@
                 required=true
                 error=@message_error
             />
-        </@>
+        </@field::apply>
 
         <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
             @submit_text
-        </@>
+        </@button::apply>
     </form>
 }
 
@@ -129,7 +129,7 @@
                 required=true
                 error=@name_error
             />
-        </@>
+        </@field::apply>
 
         <@field::apply label="Email" required=true error=@email_error>
             <@input::apply
@@ -140,7 +140,7 @@
                 required=true
                 error=@email_error
             />
-        </@>
+        </@field::apply>
 
         <@field::apply label="Subject" required=true error=@subject_error>
             <@input::apply
@@ -151,7 +151,7 @@
                 required=true
                 error=@subject_error
             />
-        </@>
+        </@field::apply>
 
         <@field::apply label="Message" required=true error=@message_error>
             <@textarea::apply
@@ -162,7 +162,7 @@
                 required=true
                 error=@message_error
             />
-        </@>
+        </@field::apply>
 
         @button()
     </form>

@@ -9,42 +9,42 @@
  *
  *   // Basic carousel with items
  *   <@carousel::apply>
- *       <@carousel::item><img src="/image1.jpg" alt="Slide 1" /></@>
- *       <@carousel::item><img src="/image2.jpg" alt="Slide 2" /></@>
- *       <@carousel::item><img src="/image3.jpg" alt="Slide 3" /></@>
- *   </@>
+ *       <@carousel::item><img src="/image1.jpg" alt="Slide 1" /></@carousel::item>
+ *       <@carousel::item><img src="/image2.jpg" alt="Slide 2" /></@carousel::item>
+ *       <@carousel::item><img src="/image3.jpg" alt="Slide 3" /></@carousel::item>
+ *   </@carousel::apply>
  *
  *   // Carousel with auto-play (interval in ms)
  *   <@carousel::apply auto_play=true interval=5000>
- *       <@carousel::item>Slide 1</@>
- *       <@carousel::item>Slide 2</@>
- *   </@>
+ *       <@carousel::item>Slide 1</@carousel::item>
+ *       <@carousel::item>Slide 2</@carousel::item>
+ *   </@carousel::apply>
  *
  *   // Carousel without dots
  *   <@carousel::apply show_dots=false>
- *       <@carousel::item>Content</@>
- *   </@>
+ *       <@carousel::item>Content</@carousel::item>
+ *   </@carousel::apply>
  *
  *   // Carousel without navigation buttons
  *   <@carousel::apply show_buttons=false>
- *       <@carousel::item>Content</@>
- *   </@>
+ *       <@carousel::item>Content</@carousel::item>
+ *   </@carousel::apply>
  *
  *   // Full control with custom orientation
  *   <@carousel::apply orientation=carousel::Orientation::Vertical>
- *       <@carousel::item>Vertical slide</@>
- *   </@>
+ *       <@carousel::item>Vertical slide</@carousel::item>
+ *   </@carousel::apply>
  *
  *   // Carousel with thumbnails
  *   <div class="space-y-2">
  *       <@carousel::apply show_dots=false>
- *           <@carousel::item><img src="/image1.jpg" /></@>
- *           <@carousel::item><img src="/image2.jpg" /></@>
- *       </@>
+ *           <@carousel::item><img src="/image1.jpg" /></@carousel::item>
+ *           <@carousel::item><img src="/image2.jpg" /></@carousel::item>
+ *       </@carousel::apply>
  *       <@carousel::thumbnail_strip>
  *           <@carousel::thumbnail src="/thumb1.jpg" alt="Thumb 1" index=0 />
  *           <@carousel::thumbnail src="/thumb2.jpg" alt="Thumb 2" index=1 />
- *       </@>
+ *       </@carousel::thumbnail_strip>
  *   </div>
  *@
 

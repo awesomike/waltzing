@@ -6,19 +6,19 @@
  * @import components/alert.wtz as alert
  *
  * <@alert::default>
- *     <@alert::title>Heads up!</@>
- *     <@alert::description>You can use alerts to display important messages.</@>
- * </@>
+ *     <@alert::title>Heads up!</@alert::title>
+ *     <@alert::description>You can use alerts to display important messages.</@alert::description>
+ * </@alert::default>
  *
  * <@alert::destructive>
- *     <@alert::title>Error</@>
- *     <@alert::description>Something went wrong. Please try again.</@>
- * </@>
+ *     <@alert::title>Error</@alert::title>
+ *     <@alert::description>Something went wrong. Please try again.</@alert::description>
+ * </@alert::destructive>
  *
  * <@alert::apply variant=alert::Variant::Success class="my-4">
- *     <@alert::title>Success!</@>
- *     <@alert::description>Your changes have been saved.</@>
- * </@>
+ *     <@alert::title>Success!</@alert::title>
+ *     <@alert::description>Your changes have been saved.</@alert::description>
+ * </@alert::apply>
  *@
 
 
@@ -72,26 +72,26 @@
 @fn default(content: @()) {
     <@apply variant=Variant::Default>
         @content()
-    </@>
+    </@apply>
 }
 
 @* Shorthand for destructive alert *@
 @fn destructive(content: @()) {
     <@apply variant=Variant::Destructive>
         @content()
-    </@>
+    </@apply>
 }
 
 @* Shorthand for warning alert *@
 @fn warning(content: @()) {
     <@apply variant=Variant::Warning>
         @content()
-    </@>
+    </@apply>
 }
 
 @* Shorthand for success alert *@
 @fn success(content: @()) {
     <@apply variant=Variant::Success>
         @content()
-    </@>
+    </@apply>
 }

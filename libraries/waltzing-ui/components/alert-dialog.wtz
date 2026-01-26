@@ -16,7 +16,7 @@
  *     on_confirm=Some("deleteItem()")
  * >
  *     <button>Delete Item</button>
- * </@>
+ * </@alert_dialog::apply>
  * ```
  *@
 

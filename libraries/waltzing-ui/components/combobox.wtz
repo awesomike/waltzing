@@ -6,10 +6,10 @@
  *
  * 1. Declarative (for static options):
  * <@combobox::apply name="framework" selected=@Some("react") placeholder=@Some("Search...")>
- *     <@combobox::option value="react">React</@>
- *     <@combobox::option value="vue">Vue</@>
- *     <@combobox::option value="angular" disabled=true>Angular</@>
- * </@>
+ *     <@combobox::option value="react">React</@combobox::option>
+ *     <@combobox::option value="vue">Vue</@combobox::option>
+ *     <@combobox::option value="angular" disabled=true>Angular</@combobox::option>
+ * </@combobox::apply>
  *
  * 2. Data-driven (for dynamic options):
  * <@combobox::apply name="framework" options=@options selected=@Some("react") />
@@ -186,7 +186,7 @@
                     @for opt in options {
                         <@option value=@opt.value disabled=@opt.disabled>
                             @opt.label
-                        </@>
+                        </@option>
                     }
                 }
 
@@ -276,7 +276,7 @@
             class=@class
         >
             @content()
-        </@>
+        </@apply>
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>
         }

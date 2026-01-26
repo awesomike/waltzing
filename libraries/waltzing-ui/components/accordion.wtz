@@ -24,7 +24,7 @@
  *
  * <@accordion::item id="standalone" title="Standalone Item">
  *     <p>This is a standalone accordion item.</p>
- * </@>
+ * </@accordion::item>
  *@
 
 @struct AccordionItem {

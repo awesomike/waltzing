@@ -40,7 +40,7 @@
                         <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
                     </svg>
                     Share
-                </@>
+                </@button::outline>
             }
         }
         content=@() {
@@ -65,7 +65,7 @@
                                 x-on:click="navigator.clipboard.writeText($refs.shareUrl.value); copied = true; setTimeout(() => copied = false, 2000)"
                                 x-text="copied ? 'Copied!' : 'Copy'"
                             ></span>
-                        </@>
+                        </@button::apply>
                     </div>
                 </div>
 
@@ -152,7 +152,7 @@
                                 x-on:click="if (email) { window.location.href = 'mailto:' + email + '?subject=Check%20this%20out&body=' + encodeURIComponent('@url'); sent = true; setTimeout(() => sent = false, 2000); }"
                                 x-text="sent ? 'Sent!' : 'Send'"
                             ></span>
-                        </@>
+                        </@button::apply>
                     </div>
                 </div>
             </div>
@@ -185,7 +185,7 @@
                         <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line>
                         <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
                     </svg>
-                </@>
+                </@button::apply>
             }
         }
         content=@() {
@@ -206,7 +206,7 @@
                         x-on:click="navigator.clipboard.writeText($refs.shareUrl.value); copied = true; setTimeout(() => copied = false, 2000)"
                         x-text="copied ? 'Copied!' : 'Copy'"
                     ></span>
-                </@>
+                </@button::apply>
             </div>
         }
         footer=@None

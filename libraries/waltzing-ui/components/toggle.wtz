@@ -5,10 +5,10 @@
  * Usage:
  *   @import ui/components/toggle.wtz as toggle
  *
- *   <@toggle::apply name="bold" pressed=false variant=toggle::Variant::Default size=toggle::Size::Default>B</@>
- *   <@toggle::simple name="italic">I</@>
- *   <@toggle::outline name="underline" pressed=true>U</@>
- *   <@toggle::icon name="star">★</@>
+ *   <@toggle::apply name="bold" pressed=false variant=toggle::Variant::Default size=toggle::Size::Default>B</@toggle::apply>
+ *   <@toggle::simple name="italic">I</@toggle::simple>
+ *   <@toggle::outline name="underline" pressed=true>U</@toggle::outline>
+ *   <@toggle::icon name="star">★</@toggle::icon>
  *@
 
 
@@ -82,7 +82,7 @@
        
     >
         @content()
-    </@>
+    </@apply>
 }
 
 @* Toggle with outline variant *@
@@ -96,7 +96,7 @@
        
     >
         @content()
-    </@>
+    </@apply>
 }
 
 @* Toggle sized for icons *@
@@ -111,7 +111,7 @@
         class=@icon_class
     >
         @content()
-    </@>
+    </@apply>
 }
 
 @* Disabled toggle *@
@@ -125,7 +125,7 @@
        
     >
         @content()
-    </@>
+    </@apply>
 }
 
 @* Small toggle *@
@@ -139,7 +139,7 @@
        
     >
         @content()
-    </@>
+    </@apply>
 }
 
 @* Large toggle *@
@@ -153,7 +153,7 @@
        
     >
         @content()
-    </@>
+    </@apply>
 }
 
 @* Toggle group for multiple related toggles (like text formatting) *@

@@ -36,8 +36,8 @@
 ) {
     @let container_cls = cn(&["flex min-h-screen items-center justify-center p-4", class])
     @let header = Some(@() {
-        <@card::title class="text-center">@title</@>
-        <@card::description class="text-center">@description</@>
+        <@card::title class="text-center">@title</@card::title>
+        <@card::description class="text-center">@description</@card::description>
     })
 
     <div class="@container_cls">
@@ -53,7 +53,7 @@
 
                 <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
                     @submit_text
-                </@>
+                </@button::apply>
 
                 @if let Some(url) = resend_url {
                     <p class="text-center text-sm text-muted-foreground">
@@ -70,6 +70,6 @@
                     </div>
                 }
             </form>
-        </@>
+        </@card::apply>
     </div>
 }
