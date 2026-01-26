@@ -46,7 +46,7 @@
  * @param class - Additional CSS classes for the container
  *@
 @fn apply(
-    events: Vec<Event> = vec![],
+    events: Vec<Event> = Vec::new(),
     on_date_click: Option<&str> = None,
     show_week_numbers: bool = false,
     class: &str = "",
@@ -312,7 +312,7 @@
  * @param class - Additional CSS classes for the container
  *@
 @fn compact(
-    events: Vec<Event> = vec![],
+    events: Vec<Event> = Vec::new(),
     on_date_click: Option<&str> = None,
     class: &str = "",
 ) {

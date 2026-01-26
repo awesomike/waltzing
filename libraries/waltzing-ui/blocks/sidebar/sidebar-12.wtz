@@ -27,7 +27,7 @@
  * />
  *@
 
-@import ui/components/calendar.wtz as calendar
+@import /components/calendar.wtz as calendar
 
 @struct NavItem {
     label: String,
@@ -54,7 +54,7 @@
 @fn apply(
     brand: @(),
     nav_items: Vec<NavItem>,
-    events: Vec<Event> = vec![],
+    events: Vec<Event> = Vec::new(),
     selected_date: Option<&str> = None,
     on_date_select: Option<&str> = None,
     class: &str = "",
@@ -142,7 +142,7 @@
 @fn with_add_button(
     brand: @(),
     nav_items: Vec<NavItem>,
-    events: Vec<Event> = vec![],
+    events: Vec<Event> = Vec::new(),
     selected_date: Option<&str> = None,
     on_date_select: Option<&str> = None,
     on_add_event: Option<&str> = None,
@@ -255,7 +255,7 @@
  * @param class - Additional CSS classes for the sidebar container
  *@
 @fn mini(
-    events: Vec<Event> = vec![],
+    events: Vec<Event> = Vec::new(),
     selected_date: Option<&str> = None,
     on_date_select: Option<&str> = None,
     class: &str = "",

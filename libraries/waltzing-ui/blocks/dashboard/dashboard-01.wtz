@@ -118,7 +118,7 @@
                 @* Collapse toggle *@
                 <div class="border-t p-4">
                     <button
-                        @click="sidebarCollapsed = !sidebarCollapsed"
+                        @@click="sidebarCollapsed = !sidebarCollapsed"
                         class="flex w-full items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     >
                         <svg
@@ -163,9 +163,12 @@
                             />
                         </div>
 
-                        @* User menu *@
-                        <@dropdown::apply align=dropdown::Align::End trigger=@() {
-                            <button class="flex items-center gap-2 rounded-full border p-1 pr-3 hover:bg-accent">
+                        @* User menu - simplified inline version *@
+                        <div x-data="{ userMenuOpen: false }" class="relative inline-block text-left">
+                            <button
+                                @@click="userMenuOpen = !userMenuOpen"
+                                class="flex items-center gap-2 rounded-full border p-1 pr-3 hover:bg-accent"
+                            >
                                 <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
                                     @(user_name.chars().next().unwrap_or('U'))
                                 </div>
@@ -174,19 +177,23 @@
                                     <path d="m6 9 6 6 6-6"/>
                                 </svg>
                             </button>
-                        }>
-                            <@dropdown::label>
-                                <div>
+                            <div
+                                x-show="userMenuOpen"
+                                x-cloak
+                                @@click.away="userMenuOpen = false"
+                                class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                            >
+                                <div class="px-2 py-1.5 text-sm font-semibold">
                                     <p class="font-medium">@user_name</p>
                                     <p class="text-xs text-muted-foreground">@user_email</p>
                                 </div>
-                            </@>
-                            <@dropdown::separator />
-                            <@dropdown::link href="/profile".to_string()>Profile</@>
-                            <@dropdown::link href="/settings".to_string()>Settings</@>
-                            <@dropdown::separator />
-                            <@dropdown::item>Sign out</@>
-                        </@>
+                                <div class="-mx-1 my-1 h-px bg-muted"></div>
+                                <a href="/profile" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground">Profile</a>
+                                <a href="/settings" class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground">Settings</a>
+                                <div class="-mx-1 my-1 h-px bg-muted"></div>
+                                <button class="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground">Sign out</button>
+                            </div>
+                        </div>
                     </div>
                 </header>
 
@@ -327,112 +334,18 @@
     </div>
 }
 
-@* Default navigation items *@
-@fn default_nav_items() -> Vec<NavItem> {
-    vec![
-        NavItem {
-            label: "Dashboard".to_string(),
-            href: "/".to_string(),
-            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\"/></svg>".to_string()),
-            active: true,
-        },
-        NavItem {
-            label: "Analytics".to_string(),
-            href: "/analytics".to_string(),
-            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 3v18h18\"/><path d=\"m19 9-5 5-4-4-3 3\"/></svg>".to_string()),
-            active: false,
-        },
-        NavItem {
-            label: "Customers".to_string(),
-            href: "/customers".to_string(),
-            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/></svg>".to_string()),
-            active: false,
-        },
-        NavItem {
-            label: "Products".to_string(),
-            href: "/products".to_string(),
-            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m7.5 4.27 9 5.15\"/><path d=\"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z\"/><path d=\"m3.3 7 8.7 5 8.7-5\"/><path d=\"M12 22V12\"/></svg>".to_string()),
-            active: false,
-        },
-        NavItem {
-            label: "Settings".to_string(),
-            href: "/settings".to_string(),
-            icon: Some("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>".to_string()),
-            active: false,
-        },
-    ]
-}
-
-@* Default stats data *@
-@fn default_stats() -> Vec<Stat> {
-    vec![
-        Stat {
-            label: "Total Revenue".to_string(),
-            value: "$45,231.89".to_string(),
-            change: Some("+20.1%".to_string()),
-            trend: Trend::Up,
-        },
-        Stat {
-            label: "Subscriptions".to_string(),
-            value: "+2,350".to_string(),
-            change: Some("+180.1%".to_string()),
-            trend: Trend::Up,
-        },
-        Stat {
-            label: "Sales".to_string(),
-            value: "+12,234".to_string(),
-            change: Some("+19%".to_string()),
-            trend: Trend::Up,
-        },
-        Stat {
-            label: "Active Now".to_string(),
-            value: "+573".to_string(),
-            change: Some("+201".to_string()),
-            trend: Trend::Up,
-        },
-    ]
-}
-
-@* Default recent sales data *@
-@fn default_recent_sales() -> Vec<Sale> {
-    vec![
-        Sale {
-            name: "Olivia Martin".to_string(),
-            email: "olivia.martin@email.com".to_string(),
-            amount: "+$1,999.00".to_string(),
-        },
-        Sale {
-            name: "Jackson Lee".to_string(),
-            email: "jackson.lee@email.com".to_string(),
-            amount: "+$39.00".to_string(),
-        },
-        Sale {
-            name: "Isabella Nguyen".to_string(),
-            email: "isabella.nguyen@email.com".to_string(),
-            amount: "+$299.00".to_string(),
-        },
-        Sale {
-            name: "William Kim".to_string(),
-            email: "will@email.com".to_string(),
-            amount: "+$99.00".to_string(),
-        },
-        Sale {
-            name: "Sofia Davis".to_string(),
-            email: "sofia.davis@email.com".to_string(),
-            amount: "+$39.00".to_string(),
-        },
-    ]
-}
-
-@* Demo version with default data *@
-@fn demo() {
-    <@apply
-        title="Dashboard"
-        brand_name="Acme Inc"
-        user_name="John Doe"
-        user_email="john@example.com"
-        nav_items=@default_nav_items()
-        stats=@default_stats()
-        recent_sales=@default_recent_sales()
-    />
-}
+@* Demo version - data should be provided by the caller *@
+@*
+ * To use this component for a demo, call the apply function with
+ * sample data from your Rust application:
+ *
+ * <@dashboard::apply
+ *     title="Dashboard"
+ *     brand_name="Acme Inc"
+ *     user_name="John Doe"
+ *     user_email="john@example.com"
+ *     nav_items=@nav_items
+ *     stats=@stats
+ *     recent_sales=@recent_sales
+ * />
+ *@

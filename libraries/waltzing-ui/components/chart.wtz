@@ -80,7 +80,8 @@
                         }
                         <div class="flex-1 flex flex-col items-center justify-end h-full">
                             @if show_values {
-                                <span class="text-xs text-muted-foreground mb-1">@(point.value as i64)</span>
+                                @let value_int = point.value as i64
+                                <span class="text-xs text-muted-foreground mb-1">@value_int</span>
                             }
                             <div
                                 class="w-full rounded-t-sm transition-all duration-300 hover:opacity-80"
@@ -123,7 +124,8 @@
                                 aria-label="@(point.label): @(point.value)"
                             >
                                 @if show_values {
-                                    <span class="text-xs font-medium text-primary-foreground">@(point.value as i64)</span>
+                                    @let value_int = point.value as i64
+                                    <span class="text-xs font-medium text-primary-foreground">@value_int</span>
                                 }
                             </div>
                         </div>
@@ -153,7 +155,9 @@
     @let padding = 40_u32
     @let chart_width = (width - padding * 2)
     @let chart_height = (height - padding * 2)
-    @let step_x = if (count > 1) { (chart_width as f64 / (count - 1) as f64) } else { chart_width as f64 }
+    @let chart_width_f64 = chart_width as f64
+    @let count_minus_one_f64 = (count - 1) as f64
+    @let step_x = if (count > 1) { (chart_width_f64 / count_minus_one_f64) } else { chart_width_f64 }
 
     @* Build points string for polyline *@
     @let points = data.iter().enumerate().map(|(i, d)| {
@@ -264,7 +268,8 @@
     @let safe_total = if (total == 0.0) { 1.0 } else { total }
     @let center = (size / 2)
     @let radius = ((size - thickness) / 2)
-    @let circumference = (2.0 * 3.14159265359 * radius as f64)
+    @let radius_f64 = radius as f64
+    @let circumference = (2.0 * 3.14159265359 * radius_f64)
 
     @* Default colors using theme variables *@
     @let default_colors = vec![
@@ -278,6 +283,20 @@
     @let extra_class = class
     @let container = vec!["flex flex-col items-center gap-4", extra_class]
 
+    @* Precompute cumulative offsets for each segment *@
+    @let offsets = {
+        let mut result = Vec::new();
+        let mut sum = 0.0_f64;
+        for segment in data.iter() {
+            result.push(sum);
+            let pct = segment.value / safe_total;
+            let dash = pct * circumference;
+            sum = sum + dash;
+        }
+        result
+    }
+    @let center_radius = (radius - thickness / 2) as i32
+
     <div class="@cn(@container)">
         <svg
             width="@size"
@@ -287,15 +306,17 @@
             role="img"
             aria-label="Donut chart"
         >
-            @let mut offset = 0.0_f64
             @for (i, segment) in data.iter().enumerate() {
                 @let pct = (segment.value / safe_total)
                 @let dash = (pct * circumference)
                 @let gap = (circumference - dash)
+                @let offset = offsets.get(i).copied().unwrap_or(0.0)
+                @let neg_offset = (-offset)
                 @let color = match &segment.color {
                     Some(c) => { c.as_str() }
                     None => { default_colors.get(i % default_colors.len()).unwrap_or(&"hsl(var(--primary))") }
                 }
+                @let pct_int = (pct * 100.0) as i32
 
                 <circle
                     cx="@center"
@@ -305,20 +326,18 @@
                     stroke="@color"
                     stroke-width="@thickness"
                     stroke-dasharray="@dash @gap"
-                    stroke-dashoffset="@(-offset)"
+                    stroke-dashoffset="@neg_offset"
                     class="transition-all duration-300 hover:opacity-80"
                 >
-                    <title>@(segment.label): @(segment.value) (@((pct * 100.0) as i32)%)</title>
+                    <title>@(segment.label): @(segment.value) (@(pct_int)%)</title>
                 </circle>
-
-                @let _ = { offset = offset + dash; }
             }
 
             @* Center hole (for better visual) *@
             <circle
                 cx="@center"
                 cy="@center"
-                r="@((radius - thickness / 2) as i32)"
+                r="@center_radius"
                 fill="hsl(var(--background))"
             />
         </svg>
@@ -355,10 +374,11 @@
     show_legend: bool = true,
     class: &str = "",
 ) {
+    @let thickness = (size / 2)
     <@donut
         data=@data
         size=@size
-        thickness=@(size / 2)
+        thickness=@thickness
         show_legend=@show_legend
         class=@class
     />
@@ -378,7 +398,9 @@
     @let min_value = data.iter().fold(f64::MAX, |a, &b| a.min(b))
     @let safe_range = if ((max_value - min_value) == 0.0) { 1.0 } else { (max_value - min_value) }
     @let count = data.len()
-    @let step_x = if (count > 1) { (width as f64 / (count - 1) as f64) } else { width as f64 }
+    @let width_f64 = width as f64
+    @let count_minus_one_f64 = (count - 1) as f64
+    @let step_x = if (count > 1) { (width_f64 / count_minus_one_f64) } else { width_f64 }
     @let padding = 2_u32
     @let chart_height = (height - padding * 2)
 
@@ -458,8 +480,9 @@
             color=@trend_color
             fill=true
         />
+        @let trend_pct_int = (trend_pct.abs()) as i32
         <span class="text-xs font-medium @trend_text_cls">
-            @arrow @((trend_pct.abs()) as i32)%
+            @arrow @(trend_pct_int)%
         </span>
     </div>
 }
@@ -539,6 +562,7 @@
 ) {
     @let pct = (value / max * 100.0)
     @let clamped = if (pct > 100.0) { 100.0 } else if (pct < 0.0) { 0.0 } else { pct }
+    @let clamped_int = clamped as i32
 
     @let extra_class = class
     @let container = vec!["w-full", extra_class]
@@ -548,7 +572,7 @@
             <div class="flex justify-between mb-1">
                 <span class="text-sm text-muted-foreground">@lbl</span>
                 @if show_value {
-                    <span class="text-sm font-medium">@(clamped as i32)%</span>
+                    <span class="text-sm font-medium">@(clamped_int)%</span>
                 }
             </div>
         }
@@ -578,9 +602,11 @@
 ) {
     @let pct = (value / max * 100.0)
     @let clamped = if (pct > 100.0) { 100.0 } else if (pct < 0.0) { 0.0 } else { pct }
+    @let clamped_int = clamped as i32
     @let center = (size / 2)
     @let radius = ((size - thickness) / 2)
-    @let circumference = (2.0 * 3.14159265359 * radius as f64)
+    @let radius_f64 = radius as f64
+    @let circumference = (2.0 * 3.14159265359 * radius_f64)
     @let dash = (clamped / 100.0 * circumference)
 
     @let extra_class = class
@@ -594,7 +620,7 @@
                 viewBox="0 0 @size @size"
                 class="transform -rotate-90"
                 role="img"
-                aria-label="Gauge showing @(clamped as i32)%"
+                aria-label="Gauge showing @(clamped_int)%"
             >
                 @* Background track *@
                 <circle
@@ -620,7 +646,7 @@
             </svg>
             @* Center value *@
             <div class="absolute inset-0 flex items-center justify-center">
-                <span class="text-2xl font-bold">@(clamped as i32)%</span>
+                <span class="text-2xl font-bold">@(clamped_int)%</span>
             </div>
         </div>
         @if let Some(lbl) = label {

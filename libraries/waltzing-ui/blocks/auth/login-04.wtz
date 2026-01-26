@@ -204,16 +204,6 @@
         <@card::title class="text-xl">@title</@>
         <@card::description>@description</@>
     })
-    @let footer_content = register_url.map(|url| {
-        @() {
-            <p class="w-full text-center text-sm text-muted-foreground">
-                Don't have an account?
-                <a href="@url" class="font-medium text-primary underline-offset-4 hover:underline">
-                    Create an account
-                </a>
-            </p>
-        }
-    })
 
     <div class="@container_cls">
         @* Background image *@
@@ -227,17 +217,42 @@
         </div>
 
         @* Card overlay *@
-        <@card::apply header=@header footer=@footer_content class="relative z-10 w-full max-w-md">
-            <@form
-                action=@action
-                method=@method
-                email_value=@email_value
-                email_error=@email_error
-                password_error=@password_error
-                submit_text=@submit_text
-                forgot_password_url=@forgot_password_url
-            />
-        </@>
+        @if let Some(url) = register_url {
+            <@card::apply
+                header=@header
+                footer=@Some(@() {
+                    <p class="w-full text-center text-sm text-muted-foreground">
+                        Don't have an account?
+                        <a href="@url" class="font-medium text-primary underline-offset-4 hover:underline">
+                            Create an account
+                        </a>
+                    </p>
+                })
+                class="relative z-10 w-full max-w-md"
+            >
+                <@form
+                    action=@action
+                    method=@method
+                    email_value=@email_value
+                    email_error=@email_error
+                    password_error=@password_error
+                    submit_text=@submit_text
+                    forgot_password_url=@forgot_password_url
+                />
+            </@>
+        } @else {
+            <@card::apply header=@header footer=@None class="relative z-10 w-full max-w-md">
+                <@form
+                    action=@action
+                    method=@method
+                    email_value=@email_value
+                    email_error=@email_error
+                    password_error=@password_error
+                    submit_text=@submit_text
+                    forgot_password_url=@forgot_password_url
+                />
+            </@>
+        }
     </div>
 }
 

@@ -20,7 +20,7 @@ pub const LIBRARIES: &[Library] = &[
         name: "waltzing-ui",
         version: "0.1.0",
         description: "A shadcn-inspired component library for Waltzing",
-        component_count: 30,
+        component_count: 78,
     },
 ];
 
