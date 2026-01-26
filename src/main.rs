@@ -59,6 +59,39 @@ async fn main() {
 
 fn head_common() -> &'static str {
     r#"
+    <script>
+        // Theme initialization - runs before page render to prevent flash
+        (function() {
+            function getCookie(name) {
+                var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+                return match ? match[2] : null;
+            }
+            function setCookie(name, value) {
+                document.cookie = name + '=' + value + '; path=/; max-age=31536000; SameSite=Lax';
+            }
+            var theme = getCookie('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            window.themeManager = {
+                current: function() { return getCookie('theme') || 'system'; },
+                toggle: function() {
+                    var isDark = document.documentElement.classList.contains('dark');
+                    document.documentElement.classList.toggle('dark');
+                    setCookie('theme', isDark ? 'light' : 'dark');
+                },
+                apply: function(t) {
+                    setCookie('theme', t);
+                    if (t === 'system') {
+                        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        document.documentElement.classList.toggle('dark', prefersDark);
+                    } else {
+                        document.documentElement.classList.toggle('dark', t === 'dark');
+                    }
+                }
+            };
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -243,7 +276,8 @@ fn main_content_partial(title: &str, content: &str, item_type: &str) -> String {
 fn theme_toggle() -> &'static str {
     r#"
 <button
-    @click="dark = !dark"
+    x-data="{ dark: document.documentElement.classList.contains('dark') }"
+    @click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"
     class="p-2 rounded-md border border-border hover:bg-accent transition-colors"
     :aria-label="dark ? 'Switch to light mode' : 'Switch to dark mode'"
 >
@@ -294,14 +328,14 @@ async fn index() -> impl IntoResponse {
 
     let html = format!(
         r#"<!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waltzing Showcase</title>
     {head}
 </head>
-<body class="min-h-screen" x-data="{{ dark: true }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+<body class="min-h-screen bg-background text-foreground">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <header class="flex items-center justify-between mb-12">
             <div>
@@ -343,14 +377,14 @@ async fn library_showcase(Path(id): Path<String>) -> impl IntoResponse {
 
             let html = format!(
                 r#"<!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{name} - Waltzing Showcase</title>
     {head}
 </head>
-<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: $persist(true).as('sidebar_open') }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+<body class="min-h-screen bg-background text-foreground" x-data="{{ sidebarOpen: $persist(true).as('sidebar_open') }}">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside
@@ -420,14 +454,14 @@ async fn component_showcase(
 
             let html = format!(
                 r#"<!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - {lib_name} - Waltzing Showcase</title>
     {head}
 </head>
-<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: $persist(true).as('sidebar_open') }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+<body class="min-h-screen bg-background text-foreground" x-data="{{ sidebarOpen: $persist(true).as('sidebar_open') }}">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside
@@ -500,14 +534,14 @@ async fn layout_showcase(
 
             let html = format!(
                 r#"<!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} Layout - {lib_name} - Waltzing Showcase</title>
     {head}
 </head>
-<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: $persist(true).as('sidebar_open') }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+<body class="min-h-screen bg-background text-foreground" x-data="{{ sidebarOpen: $persist(true).as('sidebar_open') }}">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside
@@ -580,14 +614,14 @@ async fn block_showcase(
 
             let html = format!(
                 r#"<!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} Block - {lib_name} - Waltzing Showcase</title>
     {head}
 </head>
-<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: $persist(true).as('sidebar_open') }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+<body class="min-h-screen bg-background text-foreground" x-data="{{ sidebarOpen: $persist(true).as('sidebar_open') }}">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside
