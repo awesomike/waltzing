@@ -45,15 +45,15 @@
 
     <div
         class="w-full"
-        x-data=@```json {
+        x-data="{
             open: false,
             flipTop: false,
             pos: { x: 0, y: 0, width: 0 },
             search: '',
-            selected: @sel,
+            selected: '@sel',
             selectedLabel: '',
             highlightedIndex: -1,
-            comboName: @name,
+            comboName: '@name',
             get filteredOptions() {
                 const searchLower = this.search.toLowerCase();
                 return this.$refs.options ? Array.from(this.$refs.options.querySelectorAll('[data-option]')).filter(el => {
@@ -116,7 +116,7 @@
                     }
                 }
             }
-        } ```@
+        }"
         x-init="init()"
         @destroy="destroy()"
         @keydown.down.prevent="highlightNext()"
@@ -137,7 +137,7 @@
         <div class="relative" x-ref="trigger">
             <input
                 type="text"
-                class=@input_cls pr-8
+                class="@input_cls pr-8"
                 x-model="search"
                 @focus="open = true; highlightedIndex = -1; $nextTick(() => updatePos())"
                 @click="open = true; $nextTick(() => updatePos())"
@@ -217,7 +217,7 @@
         @if disabled { data-disabled="true" }
         x-data="{ get label() { return this.$el.querySelector('span')?.textContent.trim() || this.$el.textContent.trim(); } }"
         x-init="$el.dataset.label = label"
-        class=@option_base @if disabled { pointer-events-none opacity-50 }
+        class="@option_base @if disabled { pointer-events-none opacity-50 }"
         :class="{
             'bg-accent text-accent-foreground': selected === '@value',
             'hover:bg-accent hover:text-accent-foreground': true

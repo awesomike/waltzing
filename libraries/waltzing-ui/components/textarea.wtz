@@ -42,7 +42,7 @@
 
     <textarea
         name=@name
-        class=@cn(@classes)
+        class=@cn(classes)
         @if let Some(r) = rows { rows=@r }
         @if let Some(p) = placeholder { placeholder=@p }
         @if disabled { disabled }

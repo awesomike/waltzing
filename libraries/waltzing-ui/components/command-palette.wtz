@@ -199,7 +199,7 @@
     <div
         class=@group_cls
         role="group"
-        x-data=@```json { groupLabel: @label } ```@
+        x-data="{ groupLabel: '@label' }"
         x-show="!search || filteredItems.some(i => i.group === '@label')"
     >
         <div class="px-2 py-1.5 text-xs font-medium text-muted-foreground">
@@ -230,7 +230,7 @@
         role="option"
         tabindex="-1"
         @if disabled { aria-disabled="true" }
-        x-data=@```json { itemIndex: -1, itemLabel: @label, itemId: @item_id } ```@
+        x-data="{ itemIndex: -1, itemLabel: '@label', itemId: '@item_id' }"
         x-init="itemIndex = items.length; registerItem('@item_id', '@label', groupLabel || '')"
         :data-selected="(() => {
             if (!search) return selectedIndex === itemIndex;

@@ -49,7 +49,7 @@
     @let classes = [base, variant_cls, size_cls, extra_class]
 
     <button
-        class=@cn(@classes)
+        class=@cn(classes)
         @if disabled { disabled }
     >
         @content()

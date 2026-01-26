@@ -91,11 +91,11 @@
 
     <div
         class="relative w-full"
-        x-data=@```json {
+        x-data="{
             open: false,
             search: '',
-            selected: @sel,
-            selectedLabel: @initial_label,
+            selected: '@sel',
+            selectedLabel: '@initial_label',
             highlightedIndex: -1,
             get filteredOptions() {
                 const searchLower = this.search.toLowerCase();
@@ -140,7 +140,7 @@
                     }
                 }
             }
-        } ```@
+        }"
         @@keydown.down.prevent="if(open) highlightNext()"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -227,8 +227,8 @@
                     @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
-                        data-value="@opt.value"
-                        data-label="@opt.label"
+                        data-value=@opt.value
+                        data-label=@opt.label
                         @if let Some(desc) = &opt.description { data-description=@desc }
                         @if opt.disabled { data-disabled="true" }
                         class=@option_cls
@@ -322,7 +322,7 @@
 
     <div
         class="relative w-full"
-        x-data=@```json {
+        x-data="{
             open: false,
             search: '',
             selected: @selected_json,
@@ -385,7 +385,7 @@
                     }
                 }
             }
-        } ```@
+        }"
         @@keydown.down.prevent="if(open) highlightNext()"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -494,8 +494,8 @@
                     @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
-                        data-value="@opt.value"
-                        data-label="@opt.label"
+                        data-value=@opt.value
+                        data-label=@opt.label
                         @if let Some(desc) = &opt.description { data-description=@desc }
                         @if opt.disabled { data-disabled="true" }
                         class=@option_cls
@@ -579,10 +579,10 @@
 
     <div
         class="relative w-full"
-        x-data=@```json {
+        x-data="{
             open: false,
-            selected: @sel,
-            selectedLabel: @initial_label,
+            selected: '@sel',
+            selectedLabel: '@initial_label',
             highlightedIndex: -1,
             selectOption(value, label) {
                 this.selected = value;
@@ -616,7 +616,7 @@
                     this.selectOption(el.dataset.value, el.dataset.label);
                 }
             }
-        } ```@
+        }"
         @@keydown.down.prevent="if(open) highlightNext(); else open = true"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -682,8 +682,8 @@
                     @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
-                        data-value="@opt.value"
-                        data-label="@opt.label"
+                        data-value=@opt.value
+                        data-label=@opt.label
                         @if opt.disabled { data-disabled="true" }
                         class=@option_cls
                         :class="{
@@ -760,11 +760,11 @@
 
     <div
         class="relative w-full"
-        x-data=@```json {
+        x-data="{
             open: false,
             search: '',
-            selected: @sel,
-            selectedLabel: @initial_label,
+            selected: '@sel',
+            selectedLabel: '@initial_label',
             highlightedIndex: -1,
             get filteredOptions() {
                 const searchLower = this.search.toLowerCase();
@@ -808,7 +808,7 @@
                     }
                 }
             }
-        } ```@
+        }"
         @@keydown.down.prevent="if(open) highlightNext()"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -895,8 +895,8 @@
                     @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
-                        data-value="@opt.value"
-                        data-label="@opt.label"
+                        data-value=@opt.value
+                        data-label=@opt.label
                         @if opt.disabled { data-disabled="true" }
                         class=@option_cls
                         :class="{
@@ -978,7 +978,7 @@
 
     <div
         class="relative w-full"
-        x-data=@```json {
+        x-data="{
             open: false,
             search: '',
             selected: @selected_json,
@@ -1040,7 +1040,7 @@
                     }
                 }
             }
-        } ```@
+        }"
         @@keydown.down.prevent="if(open) highlightNext()"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -1149,8 +1149,8 @@
                     @let option_cls = cn(&[@option_base, class_if(opt.disabled, "pointer-events-none opacity-50")])
                     <div
                         data-option
-                        data-value="@opt.value"
-                        data-label="@opt.label"
+                        data-value=@opt.value
+                        data-label=@opt.label
                         @if opt.disabled { data-disabled="true" }
                         class=@option_cls
                         :class="{

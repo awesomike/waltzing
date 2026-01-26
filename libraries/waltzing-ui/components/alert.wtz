@@ -45,7 +45,7 @@
 
     @let extra = class
     @let classes = [base, variant_cls, extra]
-    <div role="alert" class=@cn(classes)>
+    <div role="alert" class="@cn(classes)">
         @content()
     </div>
 }
@@ -54,7 +54,7 @@
 @fn title(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["mb-1 font-medium leading-none tracking-tight", extra]
-    <h5 class=@cn(classes)>
+    <h5 class="@cn(classes)">
         @content()
     </h5>
 }
@@ -63,7 +63,7 @@
 @fn description(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["text-sm [&_p]:leading-relaxed", extra]
-    <div class=@cn(classes)>
+    <div class="@cn(classes)">
         @content()
     </div>
 }

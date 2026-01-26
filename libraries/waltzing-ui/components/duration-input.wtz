@@ -144,7 +144,7 @@
                 total = Math.max(this.min, Math.min(this.max, total));
                 this.totalSeconds = total;
                 this.fromSeconds(total);
-                this.$dispatch('input', { name: @name, value: total });
+                this.$dispatch('input', { name: '@name', value: total });
             },
 
             handleInput(field, event) {
@@ -202,7 +202,7 @@
                 const parsed = this.parseFlexible(text);
                 if (parsed !== null) {
                     this.fromSeconds(parsed);
-                    this.$dispatch('input', { name: @name, value: this.totalSeconds });
+                    this.$dispatch('input', { name: '@name', value: this.totalSeconds });
                 }
             }
         } ```@
@@ -256,7 +256,7 @@
                 total = Math.max(this.min, Math.min(this.max, total));
                 this.totalSeconds = total;
                 this.fromSeconds(total);
-                this.$dispatch('input', { name: @name, value: total });
+                this.$dispatch('input', { name: '@name', value: total });
             },
 
             handleInput(field, event) {
@@ -308,7 +308,7 @@
                 const parsed = this.parseFlexible(text);
                 if (parsed !== null) {
                     this.fromSeconds(parsed);
-                    this.$dispatch('input', { name: @name, value: this.totalSeconds });
+                    this.$dispatch('input', { name: '@name', value: this.totalSeconds });
                 }
             }
         } ```@
@@ -360,7 +360,7 @@
                 total = Math.max(this.min, Math.min(this.max, total));
                 this.totalSeconds = total;
                 this.fromSeconds(total);
-                this.$dispatch('input', { name: @name, value: total });
+                this.$dispatch('input', { name: '@name', value: total });
             },
 
             handleInput(field, event) {
@@ -412,7 +412,7 @@
                 const parsed = this.parseFlexible(text);
                 if (parsed !== null) {
                     this.fromSeconds(parsed);
-                    this.$dispatch('input', { name: @name, value: this.totalSeconds });
+                    this.$dispatch('input', { name: '@name', value: this.totalSeconds });
                 }
             }
         } ```@

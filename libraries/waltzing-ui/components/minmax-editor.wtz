@@ -61,7 +61,7 @@
     @let classes = [container_cls, cls]
 
     <div
-        class=@cn(@classes)
+        class=@cn(classes)
         x-data=@```json {
             expanded: @is_expanded,
             minVal: @min_init,
@@ -197,7 +197,7 @@
     @let collapse_disabled = format!("{} !== {} && {} !== null", model_min, model_max, model_max)
 
     <div
-        class=@cn(@classes)
+        class=@cn(classes)
         x-data=@x_data_init
     >
         <label class="text-sm font-medium leading-none">@label</label>

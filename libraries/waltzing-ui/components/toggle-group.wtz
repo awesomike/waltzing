@@ -63,8 +63,8 @@
 
     <div
         role="group"
-        class=@cn(&[@group_base, @variant_cls, @class])
-        x-data=@```json { selected: @sel, toggleName: @name, variant: @variant_str, size: @size_str, mode: 'single' } ```@
+        class="@cn(&[@group_base, @variant_cls, @class])"
+        x-data="{ selected: '@sel', toggleName: '@name', variant: '@variant_str', size: '@size_str', mode: 'single' }"
     >
         @if items.is_empty() {
             @content()
@@ -107,8 +107,8 @@
 
     <div
         role="group"
-        class=@cn(&[@group_base, @variant_cls, @class])
-        x-data=@```json { selected: @selected_json, toggleName: @name, variant: @variant_str, size: @size_str, mode: 'multiple' } ```@
+        class="@cn(&[@group_base, @variant_cls, @class])"
+        x-data="{ selected: @selected_json, toggleName: '@name', variant: '@variant_str', size: '@size_str', mode: 'multiple' }"
     >
         @if items.is_empty() {
             @content()
@@ -135,7 +135,7 @@
     <button
         type="button"
         data-value=@value
-        class=@base first:rounded-l-md last:rounded-r-md [&:not(:first-child):not(:last-child)]:rounded-none
+        class="@base first:rounded-l-md last:rounded-r-md [&:not(:first-child):not(:last-child)]:rounded-none"
         :class="{
             'h-8 px-2.5 min-w-8': size === 'sm',
             'h-9 px-3 min-w-9': size === 'default',

@@ -56,12 +56,12 @@
         id=@name
         name=@name
         role="button"
-        class=@cn(@classes)
+        class=@cn(classes)
         aria-pressed=@aria_pressed_val
         data-state=@data_state_val
         @if disabled { disabled aria-disabled="true" }
         x-data=@```json { pressed: @pressed } ```@
-        x-on:click=@```js pressed = !pressed; $dispatch('input', { name: @name, value: pressed }) ```@
+        x-on:click="pressed = !pressed; $dispatch('input', { name: '@name', value: pressed })"
         :aria-pressed="pressed.toString()"
         :data-state="pressed ? 'on' : 'off'"
         :class="pressed ? 'bg-accent text-accent-foreground' : ''"
@@ -162,7 +162,7 @@
     @let extra_class = class
     @let classes = [base, extra_class]
     <div
-        class=@cn(@classes)
+        class=@cn(classes)
         role="group"
     >
         @content()

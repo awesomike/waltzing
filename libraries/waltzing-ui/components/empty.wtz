@@ -58,7 +58,7 @@
     @let extra_cls = class
     @let classes = [base, variant_cls, extra_cls]
 
-    <div class=@cn(@classes)>
+    <div class=@cn(classes)>
         @content()
         <h3 class=@title_cls>@title</h3>
         @if let Some(desc) = description {
@@ -76,7 +76,7 @@
     @let extra_cls = class
     @let classes = [base, extra_cls]
 
-    <div class=@cn(@classes)>
+    <div class=@cn(classes)>
         @content()
     </div>
 }
@@ -90,7 +90,7 @@
     @let extra_cls = class
     @let classes = [base, extra_cls]
 
-    <div class=@cn(@classes)>
+    <div class=@cn(classes)>
         @content()
     </div>
 }

@@ -60,12 +60,12 @@
 
     @let extra_cls = class
 
-    <div class="inline-block" x-data=@```json {
+    <div class="inline-block" x-data="{
         open: false,
         pos: { x: 0, y: 0 },
-        flipTop: @side_type === 'top',
-        side: @side_type,
-        align: @align_type,
+        flipTop: '@side_type' === 'top',
+        side: '@side_type',
+        align: '@align_type',
         openTimeout: null,
         closeTimeout: null,
         updatePos() {
@@ -97,13 +97,13 @@
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
         }
-    } ```@ x-init="init()" @@destroy="destroy()">
+    }" x-init="init()" @destroy="destroy()">
         <div
             x-ref="trigger"
-            @@mouseenter="clearTimeout(closeTimeout); openTimeout = setTimeout(() => { open = true; $nextTick(() => updatePos()); }, @open_delay_ms)"
-            @@mouseleave="clearTimeout(openTimeout); closeTimeout = setTimeout(() => open = false, @close_delay_ms)"
-            @@focus="clearTimeout(closeTimeout); openTimeout = setTimeout(() => { open = true; $nextTick(() => updatePos()); }, @open_delay_ms)"
-            @@blur="clearTimeout(openTimeout); closeTimeout = setTimeout(() => open = false, @close_delay_ms)"
+            @mouseenter="clearTimeout(closeTimeout); openTimeout = setTimeout(() => { open = true; $nextTick(() => updatePos()); }, @open_delay_ms)"
+            @mouseleave="clearTimeout(openTimeout); closeTimeout = setTimeout(() => open = false, @close_delay_ms)"
+            @focus="clearTimeout(closeTimeout); openTimeout = setTimeout(() => { open = true; $nextTick(() => updatePos()); }, @open_delay_ms)"
+            @blur="clearTimeout(openTimeout); closeTimeout = setTimeout(() => open = false, @close_delay_ms)"
         >
             @trigger()
         </div>
@@ -118,8 +118,8 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                @@mouseenter="clearTimeout(closeTimeout)"
-                @@mouseleave="closeTimeout = setTimeout(() => open = false, @close_delay_ms)"
+                @mouseenter="clearTimeout(closeTimeout)"
+                @mouseleave="closeTimeout = setTimeout(() => open = false, @close_delay_ms)"
                 class="fixed z-[9999] w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none @extra_cls"
                 :style="(side === 'left' || side === 'right')
                     ? `left: ${side === 'right' ? pos.x + 8 : 'auto'}px; right: ${side === 'left' ? (window.innerWidth - pos.x + 8) : 'auto'}px; top: ${pos.y}px; transform: translateY(-50%);`

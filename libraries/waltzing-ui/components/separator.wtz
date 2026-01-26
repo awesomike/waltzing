@@ -43,7 +43,7 @@
     <div
         role="separator"
         aria-orientation=@aria_orientation
-        class=@cn(@classes)
+        class=@cn(classes)
     ></div>
 }
 

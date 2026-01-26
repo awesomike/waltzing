@@ -81,7 +81,7 @@
                                     <div class="grid grid-cols-@(providers.len()) gap-3">
                                         @for provider in providers {
                                             <a
-                                                href="@provider.href"
+                                                href=@provider.href
                                                 class="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                             >
                                                 <span class="h-5 w-5">@safe(&provider.icon)</span>
@@ -99,7 +99,7 @@
                                 <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
                                     @for link in links {
                                         <a
-                                            href="@link.href"
+                                            href=@link.href
                                             class="hover:text-foreground hover:underline underline-offset-4"
                                         >
                                             @link.label
@@ -146,7 +146,7 @@
                             <div class="grid grid-cols-@(providers.len()) gap-3">
                                 @for provider in providers {
                                     <a
-                                        href="@provider.href"
+                                        href=@provider.href
                                         class="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                     >
                                         <span class="h-5 w-5">@safe(&provider.icon)</span>
@@ -164,7 +164,7 @@
                         <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
                             @for link in links {
                                 <a
-                                    href="@link.href"
+                                    href=@link.href
                                     class="hover:text-foreground hover:underline underline-offset-4"
                                 >
                                     @link.label
@@ -205,7 +205,7 @@
                     <div class="grid grid-cols-@(providers.len()) gap-3">
                         @for provider in providers {
                             <a
-                                href="@provider.href"
+                                href=@provider.href
                                 class="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                                 <span class="h-5 w-5">@safe(&provider.icon)</span>

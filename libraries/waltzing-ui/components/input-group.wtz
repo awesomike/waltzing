@@ -50,7 +50,7 @@
     @let extra = class
     @let classes = ["flex w-full", extra]
 
-    <div class=@cn(classes)>
+    <div class="@cn(classes)">
         @content()
     </div>
 }
@@ -64,7 +64,7 @@
     @let extra = class
     @let classes = [base, extra]
 
-    <span class=@cn(classes)>
+    <span class="@cn(classes)">
         @content()
     </span>
 }
@@ -78,7 +78,7 @@
     @let extra = class
     @let classes = [base, extra]
 
-    <span class=@cn(classes)>
+    <span class="@cn(classes)">
         @content()
     </span>
 }
@@ -95,7 +95,7 @@
 
     <button
         type="button"
-        class=@cn(classes)
+        class="@cn(classes)"
         @if disabled { disabled }
     >
         @content()
@@ -114,7 +114,7 @@
 
     <button
         type="button"
-        class=@cn(classes)
+        class="@cn(classes)"
         @if disabled { disabled }
     >
         @content()
@@ -160,7 +160,7 @@
     @let extra = class
     @let classes = ["flex w-full", extra]
 
-    <div class=@cn(classes)>
+    <div class="@cn(classes)">
         <span class="flex items-center justify-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-muted-foreground">
             @match icon {
                 Icon::Search => {
@@ -257,7 +257,7 @@
     @let extra = class
     @let classes = ["flex w-full", extra]
 
-    <div class=@cn(classes)>
+    <div class="@cn(classes)">
         <span class="flex items-center justify-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
             @prefix_text
         </span>
@@ -279,7 +279,7 @@
     @let extra = class
     @let classes = ["flex w-full", extra]
 
-    <div class=@cn(classes)>
+    <div class="@cn(classes)">
         <span class="flex items-center justify-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
             @prefix_text
         </span>
@@ -298,7 +298,7 @@
     @let extra = class
     @let classes = ["flex w-full", extra]
 
-    <div class=@cn(classes)>
+    <div class="@cn(classes)">
         <div class="flex-1 [&>input]:rounded-r-none [&>input]:border-r-0">
             @content()
         </div>
@@ -318,7 +318,7 @@
     @let extra = class
     @let classes = ["flex w-full", extra]
 
-    <div class=@cn(classes)>
+    <div class="@cn(classes)">
         <div class="flex-1 [&>input]:rounded-r-none [&>input]:border-r-0">
             @content()
         </div>

@@ -51,7 +51,7 @@
             @if disabled { disabled }
         />
         <div
-            class=@cn(@classes)
+            class=@cn(classes)
             data-state=@data_state
         >
             @if checked {

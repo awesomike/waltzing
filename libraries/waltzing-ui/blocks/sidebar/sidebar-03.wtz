@@ -96,7 +96,7 @@
             @* Parent item with children - clickable to expand *@
             <button
                 @click="open = !open"
-                class=@item_classes w-full text-left
+                class="@item_classes w-full text-left"
                 :aria-expanded="open"
             >
                 <span class="flex items-center gap-3">
@@ -138,7 +138,7 @@
             @let href = item.href.as_deref().unwrap_or("#")
             <a
                 href=@href
-                class=@item_classes block
+                class="@item_classes block"
             >
                 <span class="flex items-center gap-3">
                     @if let Some(icon) = &item.icon {

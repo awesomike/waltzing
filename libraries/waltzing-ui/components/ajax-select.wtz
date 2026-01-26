@@ -80,11 +80,11 @@
 
     <div
         class="relative w-full"
-        x-data=@```json {
+        x-data="{
             open: false,
             search: '',
-            selected: @init_value,
-            selectedLabel: @init_label,
+            selected: '@init_value',
+            selectedLabel: '@init_label',
             options: [],
             loading: false,
             fetchError: false,
@@ -92,10 +92,10 @@
             debounceTimer: null,
             minChars: @min_chars,
             debounceMs: @debounce_ms,
-            url: @url,
-            responsePath: @resp_path,
-            valueField: @val_field,
-            labelField: @lbl_field,
+            url: '@url',
+            responsePath: '@resp_path',
+            valueField: '@val_field',
+            labelField: '@lbl_field',
 
             fetchOptions(query) {
                 if (query.length < this.minChars) {
@@ -183,7 +183,7 @@
                     this.selectOption(opt.value, opt.label);
                 }
             }
-        } ```@
+        }"
         @@keydown.down.prevent="if(open) highlightNext()"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"

@@ -93,13 +93,13 @@
 
         <div
             class="w-full"
-            x-data=@```json {
+            x-data="{
                 rawValue: @initial_raw,
                 displayValue: '',
                 multiplier: @multiplier,
                 decimals: @decimals,
-                thousandSep: @thousand_separator,
-                decimalSep: @decimal_separator,
+                thousandSep: '@thousand_separator',
+                decimalSep: '@decimal_separator',
                 minVal: @if let Some(m) = min { @m } @else { null },
                 maxVal: @if let Some(m) = max { @m } @else { null },
                 validationError: null,
@@ -148,7 +148,7 @@
                     if (this.rawValue === null) return '';
                     return (this.rawValue * this.multiplier).toString();
                 }
-            } ```@
+            }"
         >
             @* Hidden input stores the actual value (multiplied) *@
             <input type="hidden" name=@name :value="getStoredValue()" />

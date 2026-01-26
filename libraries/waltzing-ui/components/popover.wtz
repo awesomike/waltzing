@@ -49,12 +49,12 @@
 
     @let extra_cls = class
 
-    <div class="inline-block" x-data=@```json {
+    <div class="inline-block" x-data="{
         open: false,
         pos: { x: 0, y: 0 },
         flipTop: false,
-        side: @side_type,
-        align: @align_type,
+        side: '@side_type',
+        align: '@align_type',
         updatePos() {
             const trigger = this.$refs.trigger;
             if (!trigger) return;
@@ -85,8 +85,8 @@
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
         }
-    } ```@ x-init="init()" @@destroy="destroy()">
-        <div x-ref="trigger" @@click="open = !open; $nextTick(() => updatePos())" aria-haspopup="true" :aria-expanded="open">
+    }" x-init="init()" @destroy="destroy()">
+        <div x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())" aria-haspopup="true" :aria-expanded="open">
             @trigger()
         </div>
 
@@ -100,8 +100,8 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                @@click.outside="open = false"
-                @@keydown.escape.window="open = false"
+                @click.outside="open = false"
+                @keydown.escape.window="open = false"
                 class="fixed z-[9999] w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none @extra_cls"
                 :style="(side === 'left' || side === 'right')
                     ? `left: ${side === 'right' ? pos.x + 8 : 'auto'}px; right: ${side === 'left' ? (window.innerWidth - pos.x + 8) : 'auto'}px; top: ${pos.y}px; transform: translateY(-50%);`
@@ -138,11 +138,11 @@
 
     @let extra_cls = class
 
-    <div class="inline-block" x-data=@```json {
+    <div class="inline-block" x-data="{
         pos: { x: 0, y: 0 },
         flipTop: false,
-        side: @side_type,
-        align: @align_type,
+        side: '@side_type',
+        align: '@align_type',
         updatePos() {
             const trigger = this.$refs.trigger;
             if (!trigger) return;
@@ -172,8 +172,8 @@
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
         }
-    } ```@ x-init="init()" @@destroy="destroy()">
-        <div x-ref="trigger" @@click="@open_var = !@open_var; $nextTick(() => updatePos())" aria-haspopup="true" :aria-expanded=@open_var>
+    }" x-init="init()" @destroy="destroy()">
+        <div x-ref="trigger" @click="@open_var = !@open_var; $nextTick(() => updatePos())" aria-haspopup="true" :aria-expanded=@open_var>
             @trigger()
         </div>
 

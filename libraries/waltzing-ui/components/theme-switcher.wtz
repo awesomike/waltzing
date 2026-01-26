@@ -52,7 +52,7 @@
     @let classes = [base, extra_class]
 
     <div
-        class=@cn(@classes)
+        class=@cn(classes)
         x-data="{
             open: false,
             theme: window.themeManager ? window.themeManager.current() : 'system',
@@ -140,7 +140,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class=@icon_size opacity-50
+                class="@icon_size opacity-50"
             >
                 <path d="m6 9 6 6 6-6"></path>
             </svg>
@@ -263,7 +263,7 @@
     @let classes = [base, extra_class]
 
     <div
-        class=@cn(@classes)
+        class=@cn(classes)
         x-data="{
             open: false,
             theme: window.themeManager ? window.themeManager.current() : 'system',
@@ -353,7 +353,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class=@icon_size opacity-50
+                class="@icon_size opacity-50"
             >
                 <path d="m6 9 6 6 6-6"></path>
             </svg>
@@ -477,7 +477,7 @@
 
     <button
         type="button"
-        class=@cn(@classes)
+        class=@cn(classes)
         x-data="{ dark: document.documentElement.classList.contains('dark') }"
         x-init="window.addEventListener('theme-change', () => dark = document.documentElement.classList.contains('dark'))"
         @@click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"
@@ -548,7 +548,7 @@
 
     <button
         type="button"
-        class=@cn(@classes)
+        class=@cn(classes)
         x-data="{ dark: document.documentElement.classList.contains('dark') }"
         x-init="window.addEventListener('theme-change', () => dark = document.documentElement.classList.contains('dark'))"
         @@click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"

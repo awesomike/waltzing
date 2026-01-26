@@ -98,7 +98,7 @@
                     x-transition:leave="ease-in duration-200"
                     x-transition:leave-start=@enter_end_cls
                     x-transition:leave-end=@enter_start_cls
-                    class=@cn(@sheet_cls)
+                    class=@cn(sheet_cls)
                     x-trap.inert.noscroll="open"
                     @keydown.escape.window="open = false"
                     role="dialog"
@@ -197,7 +197,7 @@
                 x-transition:leave="ease-in duration-200"
                 x-transition:leave-start=@enter_end_cls
                 x-transition:leave-end=@enter_start_cls
-                class=@cn(@sheet_cls)
+                class=@cn(sheet_cls)
                 x-trap.inert.noscroll=@open_var
                 @keydown.escape.window="@open_var = false"
                 role="dialog"

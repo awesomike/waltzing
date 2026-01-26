@@ -46,9 +46,9 @@
 
     <div
         class="inline-block w-full"
-        x-data=@```json {
+        x-data="{
             open: false,
-            value: @initial_value,
+            value: '@initial_value',
             displayValue: '',
             currentMonth: null,
             currentYear: null,
@@ -60,8 +60,8 @@
             weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
             months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
             monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            min: @min_date,
-            max: @max_date,
+            min: '@min_date',
+            max: '@max_date',
             pos: { x: 0, y: 0, width: 0 },
             flipTop: false,
 
@@ -335,7 +335,7 @@
                     });
                 }
             }
-        } ```@
+        }"
         x-init="init()"
         @@destroy="destroy()"
     >

@@ -34,8 +34,8 @@
 
     <div
         role="radiogroup"
-        class=@cn(&[@group_base, @class])
-        x-data=@```json { radioName: @name, radioSelected: @sel } ```@
+        class="@cn(&[@group_base, @class])"
+        x-data="{ radioName: '@name', radioSelected: '@sel' }"
     >
         @if options.is_empty() {
             @content()
@@ -52,8 +52,8 @@
                             type="radio"
                             id=@item_id
                             name=@name
-                            value="@opt.value"
-                            class=@radio_base peer col-start-1 row-start-1
+                            value=@opt.value
+                            class="@radio_base peer col-start-1 row-start-1"
                             @if is_checked { checked }
                             @if opt.disabled { disabled }
                         />
@@ -87,8 +87,8 @@
 
     <div
         role="radiogroup"
-        class=@cn(&[@group_base, @class])
-        x-data=@```json { radioName: @name, radioSelected: @sel } ```@
+        class="@cn(&[@group_base, @class])"
+        x-data="{ radioName: '@name', radioSelected: '@sel' }"
     >
         @if options.is_empty() {
             @content()
@@ -105,8 +105,8 @@
                             type="radio"
                             id=@item_id
                             name=@name
-                            value="@opt.value"
-                            class=@radio_base peer col-start-1 row-start-1
+                            value=@opt.value
+                            class="@radio_base peer col-start-1 row-start-1"
                             @if is_checked { checked }
                             @if opt.disabled { disabled }
                         />
@@ -135,7 +135,7 @@
                 :id="radioName + '_@value'"
                 :name="radioName"
                 value=@value
-                class=@radio_base peer col-start-1 row-start-1
+                class="@radio_base peer col-start-1 row-start-1"
                 :checked="radioSelected === '@value'"
                 @if disabled { disabled }
             />

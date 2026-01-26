@@ -38,14 +38,14 @@
 
     <select
         name=@name
-        class=@cn(@classes)
+        class=@cn(classes)
         @if disabled { disabled }
         @if required { required }
         @if error.is_some() { aria-invalid="true" }
     >
         @for opt in options {
             <option
-                value="@opt.value"
+                value=@opt.value
                 @if opt.disabled { disabled }
                 @if let Some(sel) = selected {
                     @if sel == opt.value { selected }

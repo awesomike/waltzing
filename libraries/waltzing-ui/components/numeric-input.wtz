@@ -49,7 +49,7 @@
     @let cls = class
     @let container_classes = [container_base, disabled_cls, cls]
     <div
-        class=@cn(@container_classes)
+        class=@cn(container_classes)
         x-data=@```json {
             value: @initial_value,
             min: @min_str,
@@ -80,7 +80,7 @@
         @* Decrement button *@
         <button
             type="button"
-            class=@cn(@btn_left_classes)
+            class=@cn(btn_left_classes)
             @@click="decrement()"
             :disabled="min !== null && value <= min"
             @if disabled { disabled }
@@ -95,7 +95,7 @@
         @* Number input *@
         <input
             type="number"
-            class=@cn(@input_classes)
+            class=@cn(input_classes)
             :value="value"
             @@change="handleInput($event)"
             @@keydown.up.prevent="increment()"
@@ -111,7 +111,7 @@
         @* Increment button *@
         <button
             type="button"
-            class=@cn(@btn_right_classes)
+            class=@cn(btn_right_classes)
             @@click="increment()"
             :disabled="max !== null && value >= max"
             @if disabled { disabled }
@@ -151,7 +151,7 @@
     @let cls = class
     @let container_classes = [container_base, disabled_cls, cls]
     <div
-        class=@cn(@container_classes)
+        class=@cn(container_classes)
         x-data=@```json {
             min: @min_str,
             max: @max_str,
@@ -180,7 +180,7 @@
         @* Decrement button *@
         <button
             type="button"
-            class=@cn(@btn_left_classes2)
+            class=@cn(btn_left_classes2)
             @@click="decrement()"
             :disabled="min !== null && @x_model <= min"
             @if disabled { disabled }
@@ -195,7 +195,7 @@
         @* Number input with x-model binding *@
         <input
             type="number"
-            class=@cn(@input_classes2)
+            class=@cn(input_classes2)
             x-model.number=@x_model
             @@change="@x_model = clamp($event.target.value)"
             @@keydown.up.prevent="increment()"
@@ -210,7 +210,7 @@
         @* Increment button *@
         <button
             type="button"
-            class=@cn(@btn_right_classes2)
+            class=@cn(btn_right_classes2)
             @@click="increment()"
             :disabled="max !== null && @x_model >= max"
             @if disabled { disabled }
@@ -241,7 +241,7 @@
 
     @let label_classes = [label_cls, disabled_label]
     <div class="space-y-2">
-        <label for=@name class=@cn(@label_classes)>
+        <label for=@name class=@cn(label_classes)>
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>

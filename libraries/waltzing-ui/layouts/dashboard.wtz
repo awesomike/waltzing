@@ -135,8 +135,8 @@
                                                 @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
                                                 @let link_classes = ["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                                 <a
-                                                    href="@item.href"
-                                                    class=@cn(@link_classes)
+                                                    href=@item.href
+                                                    class=@cn(link_classes)
                                                     @click="mobileMenuOpen = false"
                                                 >
                                                     @if let Some(icon) = &item.icon {
@@ -197,9 +197,9 @@
                                         <a
                                             x-show="sidebarOpen"
                                             x-cloak
-                                            href="@item.href"
-                                            class=@cn(@expanded_classes)
-                                            title="@item.label"
+                                            href=@item.href
+                                            class=@cn(expanded_classes)
+                                            title=@item.label
                                         >
                                             @if let Some(icon) = &item.icon {
                                                 <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
@@ -211,9 +211,9 @@
                                         <a
                                             x-show="!sidebarOpen"
                                             x-cloak
-                                            href="@item.href"
-                                            class=@cn(@collapsed_classes)
-                                            title="@item.label"
+                                            href=@item.href
+                                            class=@cn(collapsed_classes)
+                                            title=@item.label
                                         >
                                             @if let Some(icon) = &item.icon {
                                                 <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
@@ -328,7 +328,7 @@
                     @if let Some(src) = &user.avatar_src {
                         <img
                             src=@src
-                            alt="@user.name"
+                            alt=@user.name
                             class="aspect-square h-full w-full object-cover"
                             x-data="{ failed: false }"
                             x-on:error="failed = true"

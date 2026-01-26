@@ -277,7 +277,7 @@
         class=@container_cls
         role="region"
         aria-label="Flash messages"
-        x-data=@```json { messages: [], maxMessages: @max_messages } ```@
+        x-data="{ messages: [], maxMessages: @max_messages }"
         @flash.window="
             const id = Date.now();
             if (messages.length >= maxMessages) {

@@ -69,8 +69,8 @@
     <div
         class=@cn(&["w-full", class])
         x-data=@```json {
-            sortKey: @sort_key,
-            sortDir: @sort_dir,
+            sortKey: '@sort_key',
+            sortDir: '@sort_dir',
             search: '',
             selectedRows: new Set(),
             allSelected: false,

@@ -23,11 +23,11 @@
         Align::End => "end",
     }
 
-    <div class="inline-block text-left" x-data=@```json {
+    <div class="inline-block text-left" x-data="{
         open: false,
         pos: { x: 0, y: 0, width: 0 },
         flipTop: false,
-        align: @align_type,
+        align: '@align_type',
         updatePos() {
             const trigger = this.$refs.trigger;
             if (!trigger) return;
@@ -56,7 +56,7 @@
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
         }
-    } ```@ x-init="init()" @destroy="destroy()">
+    }" x-init="init()" @destroy="destroy()">
         @* Trigger *@
         <div x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())">
             @trigger()
@@ -94,7 +94,7 @@
     @let extra_class = class
     @let classes = ["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", class_if(disabled, "pointer-events-none opacity-50"), extra_class]
     <button
-        class=@cn(@classes)
+        class=@cn(classes)
         role="menuitem"
         @if disabled { disabled }
         @click="open = false"
@@ -113,7 +113,7 @@
     @let classes = ["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", extra_class]
     <a
         href=@href
-        class=@cn(@classes)
+        class=@cn(classes)
         role="menuitem"
         @click="open = false"
     >

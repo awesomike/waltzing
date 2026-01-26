@@ -54,7 +54,7 @@
                     if (val && index < @length - 1) this.focusInput(index + 1);
                 }
                 this.$refs.hidden.value = this.value;
-                this.$dispatch('input', { name: @name, value: this.value });
+                this.$dispatch('input', { name: '@name', value: this.value });
             },
             handleKeydown(index, event) {
                 if (event.key === 'Backspace') {
@@ -77,7 +77,7 @@
                 chars.forEach((c, i) => { this.digits[i] = c; });
                 this.focusInput(Math.min(chars.length, @length - 1));
                 this.$refs.hidden.value = this.value;
-                this.$dispatch('input', { name: @name, value: this.value });
+                this.$dispatch('input', { name: '@name', value: this.value });
             }
         } ```@
     >
@@ -141,7 +141,7 @@
                     if (val && index < @length - 1) this.focusInput(index + 1);
                 }
                 this.$refs.hidden.value = this.value;
-                this.$dispatch('input', { name: @name, value: this.value });
+                this.$dispatch('input', { name: '@name', value: this.value });
             },
             handleKeydown(index, event) {
                 if (event.key === 'Backspace') {
@@ -164,7 +164,7 @@
                 chars.forEach((c, i) => { this.digits[i] = c; });
                 this.focusInput(Math.min(chars.length, @length - 1));
                 this.$refs.hidden.value = this.value;
-                this.$dispatch('input', { name: @name, value: this.value });
+                this.$dispatch('input', { name: '@name', value: this.value });
             }
         } ```@
     >

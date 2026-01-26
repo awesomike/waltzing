@@ -70,7 +70,7 @@
     @match direction {
         Direction::Vertical => {
             @let container = vec!["flex flex-col gap-2", extra_class]
-            <div class=@cn(@container)>
+            <div class=@cn(container)>
                 <div class="flex items-end gap-2 @height">
                     @for point in data {
                         @let pct = (point.value / safe_max * 100.0)
@@ -105,7 +105,7 @@
         }
         Direction::Horizontal => {
             @let container = vec!["flex flex-col gap-3", extra_class]
-            <div class=@cn(@container)>
+            <div class=@cn(container)>
                 @for point in data {
                     @let pct = (point.value / safe_max * 100.0)
                     @let bar_color = match &point.color {
@@ -182,7 +182,7 @@
     @let extra_class = class
     @let container = vec!["w-full", extra_class]
 
-    <div class=@cn(@container)>
+    <div class=@cn(container)>
         <svg
             viewBox="0 0 @width @height"
             class="w-full h-auto"
@@ -297,7 +297,7 @@
     }
     @let center_radius = (radius - thickness / 2) as i32
 
-    <div class=@cn(@container)>
+    <div class=@cn(container)>
         <svg
             width=@size
             height=@size
@@ -429,7 +429,7 @@
         width=@width
         height=@height
         viewBox="0 0 @width @height"
-        class=@cn(@container)
+        class=@cn(container)
         role="img"
         aria-label="Sparkline"
     >
@@ -472,7 +472,7 @@
     @let extra_class = class
     @let container = vec!["inline-flex items-center gap-2", extra_class]
 
-    <div class=@cn(@container)>
+    <div class=@cn(container)>
         <@sparkline
             data=@data
             width=@width
@@ -512,7 +512,7 @@
     @let extra_class = class
     @let container = vec!["flex flex-col gap-2", extra_class]
 
-    <div class=@cn(@container)>
+    <div class=@cn(container)>
         <div class="flex items-end gap-2 @height">
             @for (i, label) in labels.iter().enumerate() {
                 @let total = series.iter().map(|s| s.get(i).copied().unwrap_or(0.0)).sum::<f64>()
@@ -567,7 +567,7 @@
     @let extra_class = class
     @let container = vec!["w-full", extra_class]
 
-    <div class=@cn(@container)>
+    <div class=@cn(container)>
         @if let Some(lbl) = label {
             <div class="flex justify-between mb-1">
                 <span class="text-sm text-muted-foreground">@lbl</span>
@@ -612,7 +612,7 @@
     @let extra_class = class
     @let container = vec!["inline-flex flex-col items-center gap-2", extra_class]
 
-    <div class=@cn(@container)>
+    <div class=@cn(container)>
         <div class="relative">
             <svg
                 width=@size

@@ -45,13 +45,13 @@
 
     <div
         class="relative w-full"
-        x-data=@```json {
+        x-data="{
             open: false,
             flipTop: false,
             pos: { x: 0, y: 0, width: 0 },
-            selected: @sel,
+            selected: '@sel',
             selectedLabel: '',
-            selectName: @name,
+            selectName: '@name',
             init() {
                 const initial = this.$refs.options?.querySelector(`[data-value='${this.selected}']`);
                 if (initial) this.selectedLabel = initial.dataset.label || initial.textContent.trim();
@@ -82,7 +82,7 @@
                 this.$refs.hiddenInput.value = value;
                 this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
             }
-        } ```@
+        }"
         x-init="init()"
         @destroy="destroy()"
         @keydown.escape="open = false"
@@ -157,7 +157,7 @@
         data-label
         x-data="{ get label() { return this.$el.textContent.trim(); } }"
         x-init="$el.dataset.label = label"
-        class=@option_base @if disabled { pointer-events-none opacity-50 }
+        class="@option_base @if disabled { pointer-events-none opacity-50 }"
         :class="selected === '@value' ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'"
         @click="@if !disabled { selectOption('@value', label) }"
         role="option"

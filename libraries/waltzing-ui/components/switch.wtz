@@ -42,7 +42,7 @@
         data-state=@data_state_val
         @if disabled { disabled aria-disabled="true" }
         x-data=@```json { on: @checked } ```@
-        x-on:click=@```js on = !on; $dispatch('input', { name: @name, value: on }) ```@
+        x-on:click="on = !on; $dispatch('input', { name: '@name', value: on })"
         :aria-checked="on.toString()"
         :data-state="on ? 'checked' : 'unchecked'"
         :class="on ? 'bg-primary' : 'bg-input'"
