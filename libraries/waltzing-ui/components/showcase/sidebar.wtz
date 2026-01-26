@@ -3,6 +3,9 @@
  * Includes library info, search, and navigation sections
  *@
 
+@import /lib/utils.wtz as utils
+@use utils::cn
+
 @struct NavItem {
     name: String,
     url: String,
@@ -20,12 +23,13 @@
 
 @fn nav_item(item: &NavItem) {
     @let active_cls = if item.active { "bg-accent text-accent-foreground" } else { "text-muted-foreground hover:text-foreground hover:bg-accent/50" }
+    @let cls = cn(&["block pl-8 pr-4 py-1.5 text-sm rounded-md transition-colors", active_cls])
     <a
-        href="@item.url"
-        hx-get="@item.url"
+        href=@item.url
+        hx-get=@item.url
         hx-target="#main-content"
         hx-push-url="true"
-        class="block px-4 py-1.5 text-sm rounded-md transition-colors @active_cls"
+        class=@cls
     >
         @item.name
     </a>
