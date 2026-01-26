@@ -11,13 +11,13 @@
  *     brand_name="Acme Inc"
  *     user_name="John Doe"
  *     user_email="john@example.com"
- *     stats=vec![
+ *     stats=[
  *         dashboard::Stat { label: "Total Revenue", value: "$45,231.89", change: Some("+20.1%"), trend: dashboard::Trend::Up },
  *         dashboard::Stat { label: "Subscriptions", value: "+2,350", change: Some("+180.1%"), trend: dashboard::Trend::Up },
  *         dashboard::Stat { label: "Sales", value: "+12,234", change: Some("+19%"), trend: dashboard::Trend::Up },
  *         dashboard::Stat { label: "Active Now", value: "+573", change: Some("+201"), trend: dashboard::Trend::Up },
  *     ]
- *     recent_sales=vec![
+ *     recent_sales=[
  *         dashboard::Sale { name: "Olivia Martin", email: "olivia@example.com", amount: "+$1,999.00" },
  *         dashboard::Sale { name: "Jackson Lee", email: "jackson@example.com", amount: "+$39.00" },
  *     ]
@@ -100,7 +100,7 @@
                         @for item in &nav_items {
                             <li>
                                 @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                @let link_classes = vec!["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
+                                @let link_classes = ["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                 <a
                                     href="@item.href"
                                     class="@cn(@link_classes)"
@@ -320,8 +320,8 @@
 @* Placeholder bar chart using CSS *@
 @fn chart_placeholder() {
     <div class="flex h-full w-full items-end justify-between gap-2 px-4 pb-4 pt-8">
-        @let heights = vec!["45%", "65%", "40%", "80%", "55%", "75%", "60%", "90%", "70%", "85%", "50%", "95%"]
-        @let months = vec!["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        @let heights = ["45%", "65%", "40%", "80%", "55%", "75%", "60%", "90%", "70%", "85%", "50%", "95%"]
+        @let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         @for (i, height) in heights.iter().enumerate() {
             <div class="flex flex-1 flex-col items-center gap-2">
                 <div

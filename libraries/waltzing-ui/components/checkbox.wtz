@@ -38,7 +38,7 @@
     @let data_state = if checked { "checked" } else { "unchecked" }
 
     @let extra_class = class
-    @let classes = vec![@base, @checked_cls, @extra_class]
+    @let classes = [base, checked_cls, extra_class]
 
     <div class="relative inline-flex items-center justify-center">
         <input

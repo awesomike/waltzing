@@ -37,7 +37,7 @@
 ) {
     @let base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
-    @let trigger_classes = vec![@base, @error_cls, @class]
+    @let trigger_classes = [base, error_cls, class]
     @let trigger_cls = cn(@trigger_classes)
 
     @let sel = selected.unwrap_or("")

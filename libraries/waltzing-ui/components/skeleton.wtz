@@ -15,7 +15,7 @@
 @fn apply(class: &str = "") {
     @let base = "animate-pulse rounded-md bg-muted"
     @let extra = class
-    @let classes = vec![@base, @extra]
+    @let classes = [base, extra]
 
     <div class="@cn(@classes)"></div>
 }
@@ -23,7 +23,7 @@
 @* Circular skeleton (for avatars, icons) *@
 @fn circle(size: &str) {
     @let base = "animate-pulse rounded-full bg-muted"
-    @let classes = vec![@base, @size]
+    @let classes = [base, size]
 
     <div class="@cn(@classes)"></div>
 }

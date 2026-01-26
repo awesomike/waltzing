@@ -5,7 +5,7 @@
  * Usage:
  *   @import ui/components/breadcrumb.wtz as breadcrumb
  *
- *   @let items = vec![
+ *   @let items = [
  *       breadcrumb::BreadcrumbItem { label: "Home".to_string(), href: Some("/".to_string()) },
  *       breadcrumb::BreadcrumbItem { label: "Products".to_string(), href: Some("/products".to_string()) },
  *       breadcrumb::BreadcrumbItem { label: "Widgets".to_string(), href: None },

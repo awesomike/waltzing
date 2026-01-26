@@ -7,7 +7,7 @@
  * @example
  * @import components/accordion.wtz as accordion
  *
- * @let items = vec![
+ * @let items = [
  *     accordion::AccordionItem { id: "faq-1".into(), title: "What is Waltzing?".into() },
  *     accordion::AccordionItem { id: "faq-2".into(), title: "How do I get started?".into() },
  * ]

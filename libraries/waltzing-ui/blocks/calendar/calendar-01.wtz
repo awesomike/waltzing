@@ -10,7 +10,7 @@
  * <@calendar_view::apply />
  *
  * // Calendar with events
- * @let events = vec![
+ * @let events = [
  *     calendar_view::Event {
  *         date: "2024-03-15",
  *         title: "Team Meeting",
@@ -56,7 +56,7 @@
 
     @* Build events JSON for Alpine.js *@
     @let events_json = {
-        let mut parts = vec![];
+        let mut parts = [];
         for e in &events {
             let color = e.color.as_ref().map(|c| c.as_str()).unwrap_or("bg-primary");
             parts.push(format!("{{ date: '{}', title: '{}', color: '{}' }}", e.date, e.title, color));
@@ -321,7 +321,7 @@
 
     @* Build events JSON for Alpine.js *@
     @let events_json = {
-        let mut parts = vec![];
+        let mut parts = [];
         for e in &events {
             let color = e.color.as_ref().map(|c| c.as_str()).unwrap_or("bg-primary");
             parts.push(format!("{{ date: '{}', title: '{}', color: '{}' }}", e.date, e.title, color));

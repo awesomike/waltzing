@@ -39,7 +39,7 @@
         Variant::Compact => { "px-2 py-2" }
     }
 
-    @let container_classes = vec![@base, @variant_cls, @class]
+    @let container_classes = [base, variant_cls, class]
     @let container_cls = cn(@container_classes)
 
     <div class="@container_cls">

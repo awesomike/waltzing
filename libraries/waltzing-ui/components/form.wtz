@@ -45,7 +45,7 @@
 ) {
     @let base = "space-y-6"
     @let class_val = class
-    @let class_vec = vec![base, class_val]
+    @let class_vec = [base, class_val]
     @let classes = cn(class_vec)
 
     <form
@@ -71,7 +71,7 @@
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
     @let class_val = class
-    @let field_vec = vec!["space-y-2", class_val]
+    @let field_vec = ["space-y-2", class_val]
     @let field_cls = cn(field_vec)
 
     <div class="@field_cls">
@@ -108,7 +108,7 @@
     content: @(),
 ) {
     @let class_val = class
-    @let section_vec = vec!["space-y-4", class_val]
+    @let section_vec = ["space-y-4", class_val]
     @let section_cls = cn(section_vec)
 
     <div class="@section_cls">
@@ -134,7 +134,7 @@
     content: @(),
 ) {
     @let class_val = class
-    @let row_vec = vec!["grid gap-4 sm:grid-cols-2", class_val]
+    @let row_vec = ["grid gap-4 sm:grid-cols-2", class_val]
     @let row_cls = cn(row_vec)
 
     <div class="@row_cls">
@@ -157,7 +157,7 @@
         _ => { "justify-end" }
     }
     @let class_val = class
-    @let actions_vec = vec!["flex flex-col-reverse gap-2 sm:flex-row", align_cls, class_val]
+    @let actions_vec = ["flex flex-col-reverse gap-2 sm:flex-row", align_cls, class_val]
     @let actions_cls = cn(actions_vec)
 
     <div class="@actions_cls">

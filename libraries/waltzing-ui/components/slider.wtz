@@ -42,7 +42,7 @@
     @let filled = "absolute h-full bg-primary"
     @let thumb = "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none"
     @let extra_class = class
-    @let container_classes = vec![@container_base, @disabled_cls, @extra_class]
+    @let container_classes = [container_base, disabled_cls, extra_class]
 
     <div
         class="@cn(@container_classes)"
@@ -109,7 +109,7 @@
 ) {
     @let label_cls = "text-sm font-medium leading-none"
     @let disabled_label = if disabled { "opacity-70" } else { "" }
-    @let label_classes = vec![@label_cls, @disabled_label]
+    @let label_classes = [label_cls, disabled_label]
 
     <div class="space-y-2" x-data=@```json { displayValue: @value } ```@>
         <div class="flex justify-between">
@@ -151,7 +151,7 @@
     @let filled = "absolute h-full bg-primary"
     @let thumb = "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none"
     @let extra_class = class
-    @let container_classes = vec![@container_base, @disabled_cls, @extra_class]
+    @let container_classes = [container_base, disabled_cls, extra_class]
 
     <div
         class="@cn(@container_classes)"
@@ -252,7 +252,7 @@
 ) {
     @let label_cls = "text-sm font-medium leading-none"
     @let disabled_label = if disabled { "opacity-70" } else { "" }
-    @let label_classes = vec![@label_cls, @disabled_label]
+    @let label_classes = [label_cls, disabled_label]
 
     <div class="space-y-2" x-data=@```json { displayMin: @value_min, displayMax: @value_max } ```@>
         <div class="flex justify-between">

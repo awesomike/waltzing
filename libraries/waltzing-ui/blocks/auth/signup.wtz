@@ -51,7 +51,7 @@
     class: &str = "",
 ) {
     @let cls = class
-    @let form_classes = vec!["w-full max-w-md", cls]
+    @let form_classes = ["w-full max-w-md", cls]
 
     <@form::apply
         action=@Some(action)

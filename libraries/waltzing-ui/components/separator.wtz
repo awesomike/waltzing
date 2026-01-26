@@ -39,7 +39,7 @@
     }
 
     @let cls = class
-    @let classes = vec![base, orientation_cls, cls]
+    @let classes = [base, orientation_cls, cls]
     <div
         role="separator"
         aria-orientation="@aria_orientation"

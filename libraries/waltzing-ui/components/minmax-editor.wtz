@@ -58,7 +58,7 @@
     @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
 
     @let cls = class
-    @let classes = vec![@container_cls, @cls]
+    @let classes = [container_cls, cls]
 
     <div
         class="@cn(@classes)"
@@ -187,7 +187,7 @@
     @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
 
     @let cls = class
-    @let classes = vec![@container_cls, @cls]
+    @let classes = [container_cls, cls]
 
     @let x_data_init = format!("{{ expanded: ({} !== null && {} !== null && {} !== {}) }}", model_min, model_max, model_min, model_max)
     @let input_handler = format!("{} = {}", model_max, model_min)

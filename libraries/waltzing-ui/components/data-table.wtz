@@ -7,7 +7,7 @@
  *   @import ui/components/data-table.wtz as data_table
  *
  *   Define columns:
- *   @let columns = vec![
+ *   @let columns = [
  *       data_table::Column { key: "name".into(), label: "Name".into(), sortable: true },
  *       data_table::Column { key: "email".into(), label: "Email".into(), sortable: true },
  *       data_table::Column { key: "status".into(), label: "Status".into(), sortable: false },

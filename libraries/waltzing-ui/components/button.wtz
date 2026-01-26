@@ -46,7 +46,7 @@
     }
 
     @let extra_class = class
-    @let classes = vec![@base, @variant_cls, @size_cls, @extra_class]
+    @let classes = [base, variant_cls, size_cls, extra_class]
 
     <button
         class="@cn(@classes)"

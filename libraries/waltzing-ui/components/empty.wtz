@@ -56,7 +56,7 @@
     }
 
     @let extra_cls = class
-    @let classes = vec![base, variant_cls, extra_cls]
+    @let classes = [base, variant_cls, extra_cls]
 
     <div class="@cn(@classes)">
         @content()
@@ -74,7 +74,7 @@
 ) {
     @let base = "mb-4 text-muted-foreground"
     @let extra_cls = class
-    @let classes = vec![base, extra_cls]
+    @let classes = [base, extra_cls]
 
     <div class="@cn(@classes)">
         @content()
@@ -88,7 +88,7 @@
 ) {
     @let base = "mt-4"
     @let extra_cls = class
-    @let classes = vec![base, extra_cls]
+    @let classes = [base, extra_cls]
 
     <div class="@cn(@classes)">
         @content()

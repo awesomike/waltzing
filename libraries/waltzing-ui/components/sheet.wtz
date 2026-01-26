@@ -61,7 +61,7 @@
 
     @let base_cls = "fixed z-50 gap-4 bg-background p-6 shadow-lg"
     @let extra_cls = class
-    @let sheet_cls = vec![@base_cls, @position_cls, @extra_cls]
+    @let sheet_cls = [base_cls, position_cls, extra_cls]
 
     <div x-data="{ open: false }">
         @* Trigger *@
@@ -169,7 +169,7 @@
 
     @let base_cls = "fixed z-50 gap-4 bg-background p-6 shadow-lg"
     @let extra_cls = class
-    @let sheet_cls = vec![@base_cls, @position_cls, @extra_cls]
+    @let sheet_cls = [base_cls, position_cls, extra_cls]
 
     <template x-teleport="body">
         <div

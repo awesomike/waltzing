@@ -9,7 +9,7 @@
  * @import components/flash-messages.wtz as flash
  *
  * Flash container (place once in your layout):
- * @let messages = vec![
+ * @let messages = [
  *     flash::FlashMessage { level: "success".into(), message: "Profile updated!".into() },
  *     flash::FlashMessage { level: "warning".into(), message: "Session expires soon.".into() },
  * ]

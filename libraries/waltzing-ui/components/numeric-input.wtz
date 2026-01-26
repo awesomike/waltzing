@@ -47,7 +47,7 @@
     @let btn_right = "rounded-r-md border-l-0"
 
     @let cls = class
-    @let container_classes = vec![container_base, disabled_cls, cls]
+    @let container_classes = [container_base, disabled_cls, cls]
     <div
         class="@cn(@container_classes)"
         x-data=@```json {
@@ -76,7 +76,7 @@
         @* Hidden input for form submission *@
         <input type="hidden" name="@name" :value="value" />
 
-        @let btn_left_classes = vec![btn_base, btn_left]
+        @let btn_left_classes = [btn_base, btn_left]
         @* Decrement button *@
         <button
             type="button"
@@ -91,7 +91,7 @@
             </svg>
         </button>
 
-        @let input_classes = vec![input_base, input_disabled]
+        @let input_classes = [input_base, input_disabled]
         @* Number input *@
         <input
             type="number"
@@ -107,7 +107,7 @@
             aria-label="@name"
         />
 
-        @let btn_right_classes = vec![btn_base, btn_right]
+        @let btn_right_classes = [btn_base, btn_right]
         @* Increment button *@
         <button
             type="button"
@@ -149,7 +149,7 @@
     @let btn_right = "rounded-r-md border-l-0"
 
     @let cls = class
-    @let container_classes = vec![container_base, disabled_cls, cls]
+    @let container_classes = [container_base, disabled_cls, cls]
     <div
         class="@cn(@container_classes)"
         x-data=@```json {
@@ -176,7 +176,7 @@
             }
         } ```@
     >
-        @let btn_left_classes2 = vec![btn_base, btn_left]
+        @let btn_left_classes2 = [btn_base, btn_left]
         @* Decrement button *@
         <button
             type="button"
@@ -191,7 +191,7 @@
             </svg>
         </button>
 
-        @let input_classes2 = vec![input_base, input_disabled]
+        @let input_classes2 = [input_base, input_disabled]
         @* Number input with x-model binding *@
         <input
             type="number"
@@ -206,7 +206,7 @@
             @if disabled { disabled }
         />
 
-        @let btn_right_classes2 = vec![btn_base, btn_right]
+        @let btn_right_classes2 = [btn_base, btn_right]
         @* Increment button *@
         <button
             type="button"
@@ -239,7 +239,7 @@
     @let label_cls = "text-sm font-medium leading-none"
     @let disabled_label = if disabled { "opacity-70" } else { "" }
 
-    @let label_classes = vec![label_cls, disabled_label]
+    @let label_classes = [label_cls, disabled_label]
     <div class="space-y-2">
         <label for="@name" class="@cn(@label_classes)">
             @label

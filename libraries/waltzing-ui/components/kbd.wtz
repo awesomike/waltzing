@@ -10,11 +10,11 @@
  * <@kbd::apply>K</@kbd::apply>
  *
  * Key combinations:
- * <@kbd::combo keys=vec!["⌘", "K"] />
- * <@kbd::combo keys=vec!["Ctrl", "Shift", "P"] />
+ * <@kbd::combo keys=["⌘", "K"] />
+ * <@kbd::combo keys=["Ctrl", "Shift", "P"] />
  *
  * With custom separator:
- * <@kbd::combo keys=vec!["⌘", "K"] separator="+" />
+ * <@kbd::combo keys=["⌘", "K"] separator="+" />
  *@
 
 @* Single keyboard key *@

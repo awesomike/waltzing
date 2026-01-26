@@ -57,7 +57,7 @@
     }
 
     @let cls = class
-    @let container_classes = vec![container_cls, cls]
+    @let container_classes = [container_cls, cls]
     <div
         x-data="resizableGroup(@is_horizontal)"
         x-ref="container"
@@ -81,7 +81,7 @@
     @let max_val = max_size.unwrap_or(100.0)
 
     @let cls = class
-    @let panel_classes = vec![base, cls]
+    @let panel_classes = [base, cls]
     <div
         class="@cn(@panel_classes)"
         style=@format!("flex-basis: {}%; flex-shrink: 0; flex-grow: 0;", default_size)
@@ -98,7 +98,7 @@
     @let base = "relative flex items-center justify-center bg-border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1"
 
     @let cls = class
-    @let handle_classes = vec![base, cls]
+    @let handle_classes = [base, cls]
     <div
         class="@cn(@handle_classes)"
         :data-horizontal="isHorizontal"

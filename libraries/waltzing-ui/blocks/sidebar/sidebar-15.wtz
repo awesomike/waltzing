@@ -9,7 +9,7 @@
  * @example
  * @import blocks/sidebar/sidebar-15.wtz as sidebar15
  *
- * @let nav_groups = vec![
+ * @let nav_groups = [
  *     sidebar15::NavGroup {
  *         label: Some("Main"),
  *         items: vec![
@@ -19,7 +19,7 @@
  *     },
  * ]
  *
- * @let toc_items = vec![
+ * @let toc_items = [
  *     sidebar15::TocItem { label: "Introduction", href: "#intro", level: 1 },
  *     sidebar15::TocItem { label: "Getting Started", href: "#getting-started", level: 2 },
  * ]
@@ -141,7 +141,7 @@
                             @for item in &group.items {
                                 <li class="relative group/item">
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = vec![
+                                    @let link_classes = [
                                         "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                         active_cls
                                     ]
@@ -415,7 +415,7 @@
                             @for item in &group.items {
                                 <li class="relative group/item">
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = vec![
+                                    @let link_classes = [
                                         "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                         active_cls
                                     ]
@@ -663,7 +663,7 @@
                             @for item in &group.items {
                                 <li class="relative group/item">
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = vec![
+                                    @let link_classes = [
                                         "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                         active_cls
                                     ]
@@ -932,7 +932,7 @@
                             @for item in &group.items {
                                 <li class="relative group/item">
                                     @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                    @let link_classes = vec![
+                                    @let link_classes = [
                                         "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                         active_cls
                                     ]

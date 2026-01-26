@@ -8,7 +8,7 @@
  * @example
  * @import blocks/sidebar/sidebar-11.wtz as filetree
  *
- * @let nodes = vec![
+ * @let nodes = [
  *     filetree::FileNode {
  *         name: "src",
  *         node_type: filetree::NodeType::Folder,

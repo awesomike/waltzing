@@ -49,7 +49,7 @@
     @let data_state_val = if pressed { "on" } else { "off" }
 
     @let extra_class = class
-    @let classes = vec![@base, @variant_cls, @size_cls, @extra_class]
+    @let classes = [base, variant_cls, size_cls, extra_class]
 
     <button
         type="button"
@@ -160,7 +160,7 @@
 @fn group(class: &str = "", content: @()) {
     @let base = "inline-flex items-center gap-1"
     @let extra_class = class
-    @let classes = vec![@base, @extra_class]
+    @let classes = [base, extra_class]
     <div
         class="@cn(@classes)"
         role="group"

@@ -115,7 +115,7 @@
     separator_cls: &str,
 ) {
     @let extra_cls = class
-    @let container_cls = cn(vec![container_base, extra_cls])
+    @let container_cls = cn([container_base, extra_cls])
     <div
         class="@container_cls"
         x-data=@```json {
@@ -230,7 +230,7 @@
     separator_cls: &str,
 ) {
     @let extra_cls = class
-    @let container_cls = cn(vec![container_base, extra_cls])
+    @let container_cls = cn([container_base, extra_cls])
     <div
         class="@container_cls"
         x-data=@```json {
@@ -334,7 +334,7 @@
     separator_cls: &str,
 ) {
     @let extra_cls = class
-    @let container_cls = cn(vec![container_base, extra_cls])
+    @let container_cls = cn([container_base, extra_cls])
     <div
         class="@container_cls"
         x-data=@```json {
@@ -515,7 +515,7 @@
 ) {
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
     @let disabled_label = if disabled { "opacity-70" } else { "" }
-    @let label_classes = cn(vec![label_cls, disabled_label])
+    @let label_classes = cn([label_cls, disabled_label])
 
     <div class="space-y-2">
         <label for="@name" class="@label_classes">
@@ -555,7 +555,7 @@
 ) {
     @let label_cls = "text-xs font-medium text-muted-foreground"
     @let extra_cls = class
-    @let container_cls = cn(vec!["inline-flex items-center gap-2", extra_cls])
+    @let container_cls = cn(["inline-flex items-center gap-2", extra_cls])
 
     <div class="@container_cls">
         <label for="@name" class="@label_cls">@label</label>

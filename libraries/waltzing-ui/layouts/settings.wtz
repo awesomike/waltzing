@@ -6,7 +6,7 @@
  * @example
  * @import /layouts/settings.wtz as settings
  *
- * @let nav_items = vec![
+ * @let nav_items = [
  *     settings::NavItem {
  *         id: "profile".to_string(),
  *         label: "Profile".to_string(),
@@ -135,7 +135,7 @@
                         @for item in &nav_items {
                             @let is_active = (item.id == active_item)
                             @let active_cls = class_if(is_active, "bg-accent text-accent-foreground")
-                            @let link_classes = vec!["flex items-center gap-2 rounded-sm px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
+                            @let link_classes = ["flex items-center gap-2 rounded-sm px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                             @if let Some(href) = &item.href {
                                 <a href="@href" class="@cn(@link_classes)" @click="open = false">
                                     @if let Some(icon) = &item.icon {
@@ -163,7 +163,7 @@
                             @for item in nav_items {
                                 @let is_active = (item.id == active_item)
                                 @let active_cls = class_if(is_active, "bg-muted font-medium")
-                                @let link_classes = vec!["flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted", active_cls]
+                                @let link_classes = ["flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted", active_cls]
                                 @if let Some(href) = &item.href {
                                     <a href="@href" class="@cn(@link_classes)">
                                         @if let Some(icon) = &item.icon {
@@ -253,7 +253,7 @@
                 @for item in &nav_items {
                     @let is_active = (item.id == active_item)
                     @let active_cls = class_if(is_active, "bg-accent text-accent-foreground")
-                    @let link_classes = vec!["flex items-center gap-2 rounded-sm px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
+                    @let link_classes = ["flex items-center gap-2 rounded-sm px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                     @if let Some(href) = &item.href {
                         <a href="@href" class="@cn(@link_classes)" @click="open = false">
                             @if let Some(icon) = &item.icon {
@@ -281,7 +281,7 @@
                     @for item in nav_items {
                         @let is_active = (item.id == active_item)
                         @let active_cls = class_if(is_active, "bg-muted font-medium")
-                        @let link_classes = vec!["flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted", active_cls]
+                        @let link_classes = ["flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted", active_cls]
                         @if let Some(href) = &item.href {
                             <a href="@href" class="@cn(@link_classes)">
                                 @if let Some(icon) = &item.icon {
@@ -404,7 +404,7 @@
  * Example navigation items for a typical settings page.
  * Copy and customize these in your own template:
  *
- * @let nav_items = vec![
+ * @let nav_items = [
  *     settings::NavItem {
  *         id: "profile".to_string(),
  *         label: "Profile".to_string(),

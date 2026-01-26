@@ -57,7 +57,7 @@
                                 @for item in &group.items {
                                     <li>
                                         @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                        @let link_classes = vec!["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
+                                        @let link_classes = ["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                         <a
                                             href="@item.href"
                                             class="@cn(@link_classes)"

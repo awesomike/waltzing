@@ -6,7 +6,7 @@
  * @example
  * @import components/searchable-select.wtz as searchable_select
  *
- * @let options = vec![
+ * @let options = [
  *     searchable_select::SelectOption {
  *         value: "react".into(),
  *         label: "React".into(),

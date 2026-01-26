@@ -36,7 +36,7 @@
     @let base = "flex h-9 items-center space-x-1 rounded-md border bg-background p-1 shadow-sm"
     @let empty = ""
     @let cls = class
-    @let parts = vec![@base, @cls]
+    @let parts = [base, cls]
     @let classes = cn(@parts)
 
     <div
@@ -106,7 +106,7 @@
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
     @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
-    @let parts = vec![@base, @disabled_cls]
+    @let parts = [base, disabled_cls]
     @let classes = cn(@parts)
 
     <button
@@ -173,7 +173,7 @@
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
     @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
-    @let parts = vec![@base, @disabled_cls]
+    @let parts = [base, disabled_cls]
     @let classes = cn(@parts)
 
     <button

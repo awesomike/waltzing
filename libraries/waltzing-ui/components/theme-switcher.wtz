@@ -49,7 +49,7 @@
     }
     @let extra_class = class
     @let base = "relative inline-block text-left"
-    @let classes = vec![@base, @extra_class]
+    @let classes = [base, extra_class]
 
     <div
         class="@cn(@classes)"
@@ -260,7 +260,7 @@
     }
     @let extra_class = class
     @let base = "relative inline-block text-left"
-    @let classes = vec![@base, @extra_class]
+    @let classes = [base, extra_class]
 
     <div
         class="@cn(@classes)"
@@ -473,7 +473,7 @@
     }
     @let extra_class = class
     @let base = "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-    @let classes = vec![@base, @size_cls, @extra_class]
+    @let classes = [base, size_cls, extra_class]
 
     <button
         type="button"
@@ -544,7 +544,7 @@
     }
     @let extra_class = class
     @let base = "inline-flex items-center justify-center rounded-md border border-input bg-background p-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-    @let classes = vec![@base, @size_cls, @extra_class]
+    @let classes = [base, size_cls, extra_class]
 
     <button
         type="button"

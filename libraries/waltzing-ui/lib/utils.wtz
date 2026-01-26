@@ -5,7 +5,7 @@
 
 @*
  * Concatenate class names, filtering out empty strings
- * Usage: @cn(vec!["base-class", @conditional_class, "always-class"])
+ * Usage: @cn(["base-class", conditional_class, "always-class"])
  *@
 @fn cn(classes: Vec<&str>) {
     @(classes.iter().filter(|s| !s.is_empty()).copied().collect::<Vec<_>>().join(" "))

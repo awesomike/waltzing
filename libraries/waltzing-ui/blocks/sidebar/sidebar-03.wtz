@@ -8,7 +8,7 @@
  * @example
  * @import blocks/sidebar/sidebar-03.wtz as sidebar
  *
- * @let nav_items = vec![
+ * @let nav_items = [
  *     sidebar::NavItem {
  *         label: "Dashboard",
  *         href: Some("/"),

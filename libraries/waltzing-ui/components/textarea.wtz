@@ -38,7 +38,7 @@
     @let error_cls = if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
 
     @let extra_class = class
-    @let classes = vec![@base, @error_cls, @extra_class]
+    @let classes = [base, error_cls, extra_class]
 
     <textarea
         name="@name"

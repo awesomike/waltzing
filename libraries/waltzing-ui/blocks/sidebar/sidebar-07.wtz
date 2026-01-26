@@ -8,7 +8,7 @@
  * @example
  * @import blocks/sidebar/sidebar-07.wtz as sidebar
  *
- * @let nav_groups = vec![
+ * @let nav_groups = [
  *     sidebar::NavGroup {
  *         label: Some("Main"),
  *         items: vec![
@@ -110,7 +110,7 @@
                         @for item in &group.items {
                             <li class="relative group/item">
                                 @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                @let link_classes = vec![
+                                @let link_classes = [
                                     "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                     active_cls
                                 ]
@@ -250,7 +250,7 @@
                         @for item in &group.items {
                             <li class="relative group/item">
                                 @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                @let link_classes = vec![
+                                @let link_classes = [
                                     "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                     active_cls
                                 ]
@@ -398,7 +398,7 @@
                         @for item in &group.items {
                             <li class="relative group/item">
                                 @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
-                                @let link_classes = vec![
+                                @let link_classes = [
                                     "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                     active_cls
                                 ]
