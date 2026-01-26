@@ -339,7 +339,7 @@ async fn library_showcase(Path(id): Path<String>) -> impl IntoResponse {
             let layouts = get_layout_list(&id);
             let blocks = get_block_list(&id);
             let sidebar = generate_sidebar(&id, &components, &layouts, &blocks, None);
-            let content = generate_all_components_preview(&id, &components);
+            let content = generate_all_items_preview(&id, &components, &layouts, &blocks);
 
             let html = format!(
                 r#"<!DOCTYPE html>
@@ -371,7 +371,7 @@ async fn library_showcase(Path(id): Path<String>) -> impl IntoResponse {
                             <line x1="4" x2="20" y1="18" y2="18"></line>
                         </svg>
                     </button>
-                    <h2 class="text-xl font-semibold">All Components</h2>
+                    <h2 class="text-xl font-semibold">All Items</h2>
                 </div>
                 {toggle}
             </header>
@@ -889,6 +889,14 @@ fn generate_sidebar(
                 </div>
             </div>
 
+            <!-- All Items link -->
+            <div class="px-4 py-2">
+                <a href="/library/{library_id}" class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-accent transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>
+                    All Items
+                </a>
+            </div>
+
             <!-- Navigation sections -->
             <nav class="flex-1 overflow-y-auto py-2">
                 {components_section}
@@ -896,6 +904,7 @@ fn generate_sidebar(
                 {blocks_section}
             </nav>
         </div>"##,
+        library_id = library_id,
         search_options = search_options,
         components_section = components_section,
         layouts_section = layouts_section,
@@ -903,40 +912,97 @@ fn generate_sidebar(
     )
 }
 
-fn generate_all_components_preview(library_id: &str, components: &[(String, String)]) -> String {
-    let cards: String = components
-        .iter()
-        .map(|(id, name)| {
-            let preview = get_component_preview(id);
-            format!(
-                r#"
-                <a href="/library/{lib}/component/{comp}" class="block group">
-                    <div class="rounded-lg border border-border overflow-hidden hover:border-primary transition-colors">
-                        <div class="p-6 bg-card/50 component-preview min-h-[120px] flex items-center justify-center">
-                            {preview}
+fn generate_all_items_preview(
+    library_id: &str,
+    components: &[(String, String)],
+    layouts: &[(String, String)],
+    blocks: &[(String, String)],
+) -> String {
+    let generate_cards = |items: &[(String, String)], item_type: &str| -> String {
+        items
+            .iter()
+            .map(|(id, name)| {
+                let preview: &str = match item_type {
+                    "component" => get_component_preview(id),
+                    "layout" => get_layout_preview(id),
+                    "block" => get_block_preview(id),
+                    _ => "",
+                };
+                format!(
+                    r#"
+                    <a href="/library/{lib}/{type}/{id}" class="block group">
+                        <div class="rounded-lg border border-border overflow-hidden hover:border-primary transition-colors">
+                            <div class="p-6 bg-card/50 component-preview min-h-[120px] flex items-center justify-center">
+                                {preview}
+                            </div>
+                            <div class="p-4 border-t border-border bg-card">
+                                <h3 class="font-medium group-hover:text-primary transition-colors">{name}</h3>
+                            </div>
                         </div>
-                        <div class="p-4 border-t border-border bg-card">
-                            <h3 class="font-medium group-hover:text-primary transition-colors">{name}</h3>
-                        </div>
-                    </div>
-                </a>
-                "#,
-                lib = library_id,
-                comp = id,
-                preview = preview,
-                name = name
-            )
-        })
-        .collect();
+                    </a>
+                    "#,
+                    lib = library_id,
+                    type = item_type,
+                    id = id,
+                    preview = preview,
+                    name = name
+                )
+            })
+            .collect()
+    };
 
-    format!(
-        r#"
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cards}
-        </div>
-        "#,
-        cards = cards
-    )
+    let component_cards = generate_cards(components, "component");
+    let layout_cards = generate_cards(layouts, "layout");
+    let block_cards = generate_cards(blocks, "block");
+
+    let mut html = String::new();
+
+    if !components.is_empty() {
+        html.push_str(&format!(
+            r#"
+            <section class="mb-12">
+                <h2 class="text-2xl font-semibold mb-6">Components ({count})</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {cards}
+                </div>
+            </section>
+            "#,
+            count = components.len(),
+            cards = component_cards
+        ));
+    }
+
+    if !layouts.is_empty() {
+        html.push_str(&format!(
+            r#"
+            <section class="mb-12">
+                <h2 class="text-2xl font-semibold mb-6">Layouts ({count})</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {cards}
+                </div>
+            </section>
+            "#,
+            count = layouts.len(),
+            cards = layout_cards
+        ));
+    }
+
+    if !blocks.is_empty() {
+        html.push_str(&format!(
+            r#"
+            <section class="mb-12">
+                <h2 class="text-2xl font-semibold mb-6">Blocks ({count})</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {cards}
+                </div>
+            </section>
+            "#,
+            count = blocks.len(),
+            cards = block_cards
+        ));
+    }
+
+    html
 }
 
 fn generate_component_detail(component: &str) -> String {
