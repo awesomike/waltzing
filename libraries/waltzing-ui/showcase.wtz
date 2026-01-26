@@ -46,7 +46,7 @@
 
 @* Section wrapper for consistent styling *@
 @fn section(title: &str, id: &str, content: @()) {
-    <section id="@id" class="scroll-mt-8">
+    <section id=@id class="scroll-mt-8">
         <h2 class="text-2xl font-semibold tracking-tight mb-4">@title</h2>
         @content()
     </section>
@@ -54,7 +54,7 @@
 
 @* Subsection for block categories *@
 @fn subsection(title: &str, id: &str, content: @()) {
-    <div id="@id" class="scroll-mt-8">
+    <div id=@id class="scroll-mt-8">
         <h3 class="text-xl font-semibold tracking-tight mb-3">@title</h3>
         @content()
     </div>
@@ -67,7 +67,7 @@
         <@card::description>@description</@card::description>
         <p class="mt-2"><code class="text-xs bg-muted px-1 py-0.5 rounded">@path</code></p>
         @if let Some(href) = demo_href {
-            <a href="@href" class="mt-2 inline-flex text-xs text-primary hover:underline">View Demo &rarr;</a>
+            <a href=@href class="mt-2 inline-flex text-xs text-primary hover:underline">View Demo &rarr;</a>
         }
     </@card::simple>
 }

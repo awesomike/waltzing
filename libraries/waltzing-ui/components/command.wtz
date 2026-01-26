@@ -38,7 +38,7 @@
     ])
 
     <div
-        class="@container_cls"
+        class=@container_cls
         x-data="{
             search: '',
             selectedIndex: 0,
@@ -101,8 +101,8 @@
         <input
             x-model="search"
             @@input="resetSelection()"
-            class="@input_cls"
-            placeholder="@ph"
+            class=@input_cls
+            placeholder=@ph
             type="text"
             autocomplete="off"
             autocorrect="off"
@@ -121,7 +121,7 @@
         class
     ])
 
-    <div class="@list_cls" role="listbox">
+    <div class=@list_cls role="listbox">
         @content()
     </div>
 }
@@ -137,7 +137,7 @@
         class
     ])
 
-    <div class="@group_cls" role="group">
+    <div class=@group_cls role="group">
         <div class="px-2 py-1.5 text-xs font-medium text-muted-foreground">
             @heading
         </div>
@@ -160,14 +160,14 @@
     ])
 
     <div
-        class="@item_cls"
+        class=@item_cls
         role="option"
         tabindex="-1"
         @if disabled { aria-disabled="true" }
         x-data="{ index: -1 }"
         x-init="index = items.length; registerItem($el.dataset.id || '@label', '@label')"
         :data-selected="selectedIndex === index && search ? filteredItems.some(i => i.label === '@label') : selectedIndex === index"
-        data-id="@label"
+        data-id=@label
         @@click="selectedIndex = index; selectItem()"
         @@mouseenter="selectedIndex = index"
     >
@@ -192,7 +192,7 @@
         class
     ])
 
-    <div class="@empty_cls" x-show="search && totalItems === 0">
+    <div class=@empty_cls x-show="search && totalItems === 0">
         @msg
     </div>
 }
@@ -204,7 +204,7 @@
         class
     ])
 
-    <div class="@sep_cls" role="separator"></div>
+    <div class=@sep_cls role="separator"></div>
 }
 
 @** Command shortcut display **@
@@ -214,7 +214,7 @@
         class
     ])
 
-    <kbd class="@shortcut_cls">@keys</kbd>
+    <kbd class=@shortcut_cls>@keys</kbd>
 }
 
 @** Dialog-wrapped command palette (like Cmd+K) **@
@@ -252,7 +252,7 @@
                 ></div>
 
                 <div
-                    class="@dialog_cls"
+                    class=@dialog_cls
                     @@keydown.escape.window="open = false"
                     @@command-select.window="open = false"
                     role="dialog"

@@ -36,7 +36,7 @@
 ) {
     @let cls = cn(&["relative", class])
     <div
-        class="@cls"
+        class=@cls
         x-data="{ open: false, x: 0, y: 0 }"
         @@contextmenu.prevent="open = true; x = $event.clientX; y = $event.clientY"
     >
@@ -78,7 +78,7 @@
     @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
     @let cls = cn(&[base, disabled_cls, class])
     <button
-        class="@cls"
+        class=@cls
         role="menuitem"
         @if disabled { disabled }
         @@click="open = false"
@@ -100,7 +100,7 @@
     @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
     @let cls = cn(&[base, disabled_cls, class])
     <button
-        class="@cls"
+        class=@cls
         role="menuitem"
         @if disabled { disabled }
         @@click="open = false"
@@ -120,7 +120,7 @@
     content: @() = @{},
 ) {
     @let cls = cn(&["px-2 py-1.5 text-sm font-semibold", class])
-    <div class="@cls">
+    <div class=@cls>
         @content()
     </div>
 }
@@ -140,7 +140,7 @@
     >
         @* Submenu trigger *@
         <button
-            class="@btn_cls"
+            class=@btn_cls
             role="menuitem"
             aria-haspopup="true"
             :aria-expanded="subOpen"
@@ -182,9 +182,9 @@
     @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
     @let cls = cn(&[base, disabled_cls, class])
     <button
-        class="@cls"
+        class=@cls
         role="menuitemcheckbox"
-        :aria-checked="@checked"
+        :aria-checked=@checked
         @if disabled { disabled }
     >
         <span class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">

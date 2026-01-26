@@ -56,9 +56,9 @@
     @let sidebar_cls = cn(&["flex flex-col border-r bg-card transition-all duration-300 ease-in-out", class])
 
     <aside
-        x-data="{ collapsed: @initial_state }"
+        x-data=@```json { collapsed: @initial_state } ```@
         :class="collapsed ? 'w-16' : 'w-64'"
-        class="@sidebar_cls"
+        class=@sidebar_cls
     >
         @* Brand area *@
         <div class="flex h-16 items-center border-b px-4">
@@ -116,7 +116,7 @@
                                 ]
                                 <a
                                     href="@item.href"
-                                    class="@cn(@link_classes)"
+                                    class=@cn(@link_classes)
                                     :class="collapsed ? 'justify-center' : 'gap-3'"
                                 >
                                     @* Icon *@
@@ -199,9 +199,9 @@
     @let sidebar_cls = cn(&["flex flex-col border-r bg-card transition-all duration-300 ease-in-out", class])
 
     <aside
-        x-data="{ collapsed: @initial_state }"
+        x-data=@```json { collapsed: @initial_state } ```@
         :class="collapsed ? 'w-16' : 'w-64'"
-        class="@sidebar_cls"
+        class=@sidebar_cls
     >
         @* Brand area *@
         <div class="flex h-16 items-center border-b px-4">
@@ -256,7 +256,7 @@
                                 ]
                                 <a
                                     href="@item.href"
-                                    class="@cn(@link_classes)"
+                                    class=@cn(@link_classes)
                                     :class="collapsed ? 'justify-center' : 'gap-3'"
                                 >
                                     @if let Some(icon) = &item.icon {
@@ -348,8 +348,8 @@
     @let sidebar_cls = cn(&["flex flex-col border-r bg-card transition-all duration-300 ease-in-out", class])
 
     <aside
-        :class="@collapsed_var ? 'w-16' : 'w-64'"
-        class="@sidebar_cls"
+        :class=@collapsed_var ? 'w-16' : 'w-64'
+        class=@sidebar_cls
     >
         @* Brand area *@
         <div class="flex h-16 items-center border-b px-4">
@@ -366,7 +366,7 @@
                 @brand()
             </div>
             <div
-                x-show="@collapsed_var"
+                x-show=@collapsed_var
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
@@ -404,8 +404,8 @@
                                 ]
                                 <a
                                     href="@item.href"
-                                    class="@cn(@link_classes)"
-                                    :class="@collapsed_var ? 'justify-center' : 'gap-3'"
+                                    class=@cn(@link_classes)
+                                    :class=@collapsed_var ? 'justify-center' : 'gap-3'
                                 >
                                     @if let Some(icon) = &item.icon {
                                         <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
@@ -424,7 +424,7 @@
                                     </span>
                                 </a>
                                 <div
-                                    x-show="@collapsed_var"
+                                    x-show=@collapsed_var
                                     class="absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 rounded-md bg-popover px-2 py-1 text-sm text-popover-foreground shadow-md opacity-0 pointer-events-none group-hover/item:opacity-100 transition-opacity duration-200 whitespace-nowrap"
                                 >
                                     @item.label
@@ -454,7 +454,7 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     class="transition-transform duration-300"
-                    :class="@collapsed_var ? 'rotate-180' : ''"
+                    :class=@collapsed_var ? 'rotate-180' : ''
                 >
                     <path d="m15 18-6-6 6-6"/>
                 </svg>

@@ -92,7 +92,7 @@
 
     @let active_styles = styles.unwrap_or(default_styles)
 
-    <div class="@container_cls" role="region" aria-label="Flash messages">
+    <div class=@container_cls role="region" aria-label="Flash messages">
         @for (index, msg) in display_messages.iter().enumerate() {
             <@message
                 level=@msg.level.as_str()
@@ -134,7 +134,7 @@
     @let total_duration = (duration + stagger_delay as u32)
 
     <div
-        class="@flash_cls"
+        class=@flash_cls
         role="alert"
         aria-live="polite"
         x-data="{ show: true }"
@@ -274,10 +274,10 @@
 
     <div
         id="flash-container"
-        class="@container_cls"
+        class=@container_cls
         role="region"
         aria-label="Flash messages"
-        x-data="{ messages: [], maxMessages: @max_messages }"
+        x-data=@```json { messages: [], maxMessages: @max_messages } ```@
         @flash.window="
             const id = Date.now();
             if (messages.length >= maxMessages) {

@@ -136,7 +136,7 @@
                                                 @let link_classes = ["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                                 <a
                                                     href="@item.href"
-                                                    class="@cn(@link_classes)"
+                                                    class=@cn(@link_classes)
                                                     @click="mobileMenuOpen = false"
                                                 >
                                                     @if let Some(icon) = &item.icon {
@@ -198,7 +198,7 @@
                                             x-show="sidebarOpen"
                                             x-cloak
                                             href="@item.href"
-                                            class="@cn(@expanded_classes)"
+                                            class=@cn(@expanded_classes)
                                             title="@item.label"
                                         >
                                             @if let Some(icon) = &item.icon {
@@ -212,7 +212,7 @@
                                             x-show="!sidebarOpen"
                                             x-cloak
                                             href="@item.href"
-                                            class="@cn(@collapsed_classes)"
+                                            class=@cn(@collapsed_classes)
                                             title="@item.label"
                                         >
                                             @if let Some(icon) = &item.icon {
@@ -327,7 +327,7 @@
                 <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
                     @if let Some(src) = &user.avatar_src {
                         <img
-                            src="@src"
+                            src=@src
                             alt="@user.name"
                             class="aspect-square h-full w-full object-cover"
                             x-data="{ failed: false }"

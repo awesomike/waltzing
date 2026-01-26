@@ -17,7 +17,7 @@
     @let extra = class
     @let classes = [base, extra]
 
-    <div class="@cn(@classes)"></div>
+    <div class=@cn(@classes)></div>
 }
 
 @* Circular skeleton (for avatars, icons) *@
@@ -25,7 +25,7 @@
     @let base = "animate-pulse rounded-full bg-muted"
     @let classes = [base, size]
 
-    <div class="@cn(@classes)"></div>
+    <div class=@cn(@classes)></div>
 }
 
 @* Multiple line text skeleton *@

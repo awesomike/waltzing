@@ -49,7 +49,7 @@
 
     <div
         id="toast-container"
-        class="@container_cls"
+        class=@container_cls
         x-data="{ toasts: [] }"
         @toast.window="
             const id = Date.now();
@@ -152,7 +152,7 @@
     @let duration_ms = duration.unwrap_or(5000)
 
     <div
-        class="@toast_cls"
+        class=@toast_cls
         role="alert"
         aria-live="assertive"
         x-data="{ show: true }"

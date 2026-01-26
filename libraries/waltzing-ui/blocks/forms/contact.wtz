@@ -46,7 +46,7 @@
     @let message_ph = Some("Your message...")
     @let message_rows = Some(5)
 
-    <form action="@action" method="@method" class="@form_cls">
+    <form action=@action method=@method class=@form_cls>
         <@field::apply label="Name" required=true error=@name_error>
             <@input::apply
                 input_type=input::InputType::Text
@@ -119,7 +119,7 @@
     @let message_ph = Some("Your message...")
     @let message_rows = Some(5)
 
-    <form action="@action" method="@method" class="@form_cls">
+    <form action=@action method=@method class=@form_cls>
         <@field::apply label="Name" required=true error=@name_error>
             <@input::apply
                 input_type=input::InputType::Text

@@ -36,8 +36,8 @@
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
     @let field_cls = cn(&["space-y-2", class])
 
-    <div class="@field_cls">
-        <label class="@label_cls">
+    <div class=@field_cls>
+        <label class=@label_cls>
             @label
             @if required { <span class="text-destructive ml-0.5">*</span> }
         </label>

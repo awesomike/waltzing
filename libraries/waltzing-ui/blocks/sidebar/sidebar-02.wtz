@@ -70,7 +70,7 @@
     @let storage_key = persist_key.unwrap_or("")
     @let use_storage = persist_key.is_some()
 
-    <aside class="@sidebar_cls">
+    <aside class=@sidebar_cls>
         @* Brand header *@
         <div class="flex h-16 items-center border-b px-4">
             @brand()
@@ -138,7 +138,7 @@
                                         "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                         active_cls
                                     ]
-                                    <a href="@item.href" class="@cn(@link_classes)">
+                                    <a href="@item.href" class=@cn(@link_classes)>
                                         @if let Some(icon) = &item.icon {
                                             <span class="h-4 w-4 flex-shrink-0">@safe(icon)</span>
                                         }
@@ -173,7 +173,7 @@
     @let storage_key = persist_key.unwrap_or("")
     @let use_storage = persist_key.is_some()
 
-    <aside class="@sidebar_cls">
+    <aside class=@sidebar_cls>
         @* Brand header *@
         <div class="flex h-16 items-center border-b px-4">
             @brand()
@@ -239,7 +239,7 @@
                                         "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                         active_cls
                                     ]
-                                    <a href="@item.href" class="@cn(@link_classes)">
+                                    <a href="@item.href" class=@cn(@link_classes)>
                                         @if let Some(icon) = &item.icon {
                                             <span class="h-4 w-4 flex-shrink-0">@safe(icon)</span>
                                         }

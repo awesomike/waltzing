@@ -70,7 +70,7 @@
     @match direction {
         Direction::Vertical => {
             @let container = vec!["flex flex-col gap-2", extra_class]
-            <div class="@cn(@container)">
+            <div class=@cn(@container)>
                 <div class="flex items-end gap-2 @height">
                     @for point in data {
                         @let pct = (point.value / safe_max * 100.0)
@@ -105,7 +105,7 @@
         }
         Direction::Horizontal => {
             @let container = vec!["flex flex-col gap-3", extra_class]
-            <div class="@cn(@container)">
+            <div class=@cn(@container)>
                 @for point in data {
                     @let pct = (point.value / safe_max * 100.0)
                     @let bar_color = match &point.color {
@@ -182,7 +182,7 @@
     @let extra_class = class
     @let container = vec!["w-full", extra_class]
 
-    <div class="@cn(@container)">
+    <div class=@cn(@container)>
         <svg
             viewBox="0 0 @width @height"
             class="w-full h-auto"
@@ -195,7 +195,7 @@
                     @* Horizontal grid lines *@
                     @for i in 0..5 {
                         @let y = (padding + (chart_height / 4 * i as u32))
-                        <line x1="@padding" y1="@y" x2="@(padding + chart_width)" y2="@y" />
+                        <line x1=@padding y1=@y x2="@(padding + chart_width)" y2=@y />
                     }
                 </g>
             }
@@ -203,7 +203,7 @@
             @* Fill area *@
             @if fill {
                 <polygon
-                    points="@fill_points"
+                    points=@fill_points
                     fill="hsl(var(--primary))"
                     fill-opacity="0.1"
                 />
@@ -211,7 +211,7 @@
 
             @* Line *@
             <polyline
-                points="@points"
+                points=@points
                 fill="none"
                 stroke="hsl(var(--primary))"
                 stroke-width="2"
@@ -225,8 +225,8 @@
                     @let x = (padding as f64 + (i as f64 * step_x)) as i32
                     @let y = (padding as f64 + chart_height as f64 - ((point.value - min_value) / safe_range * chart_height as f64)) as i32
                     <circle
-                        cx="@x"
-                        cy="@y"
+                        cx=@x
+                        cy=@y
                         r="4"
                         fill="hsl(var(--background))"
                         stroke="hsl(var(--primary))"
@@ -243,8 +243,8 @@
                     @let x = (padding as f64 + (i as f64 * step_x)) as i32
                     @let y = (height - 10)
                     <text
-                        x="@x"
-                        y="@y"
+                        x=@x
+                        y=@y
                         text-anchor="middle"
                         class="text-xs fill-muted-foreground"
                         style="font-size: 10px; fill: hsl(var(--muted-foreground));"
@@ -297,10 +297,10 @@
     }
     @let center_radius = (radius - thickness / 2) as i32
 
-    <div class="@cn(@container)">
+    <div class=@cn(@container)>
         <svg
-            width="@size"
-            height="@size"
+            width=@size
+            height=@size
             viewBox="0 0 @size @size"
             class="transform -rotate-90"
             role="img"
@@ -319,14 +319,14 @@
                 @let pct_int = (pct * 100.0) as i32
 
                 <circle
-                    cx="@center"
-                    cy="@center"
-                    r="@radius"
+                    cx=@center
+                    cy=@center
+                    r=@radius
                     fill="none"
-                    stroke="@color"
-                    stroke-width="@thickness"
+                    stroke=@color
+                    stroke-width=@thickness
                     stroke-dasharray="@dash @gap"
-                    stroke-dashoffset="@neg_offset"
+                    stroke-dashoffset=@neg_offset
                     class="transition-all duration-300 hover:opacity-80"
                 >
                     <title>@(segment.label): @(segment.value) (@(pct_int)%)</title>
@@ -335,9 +335,9 @@
 
             @* Center hole (for better visual) *@
             <circle
-                cx="@center"
-                cy="@center"
-                r="@center_radius"
+                cx=@center
+                cy=@center
+                r=@center_radius
                 fill="hsl(var(--background))"
             />
         </svg>
@@ -426,24 +426,24 @@
     @let container = vec!["inline-block", extra_class]
 
     <svg
-        width="@width"
-        height="@height"
+        width=@width
+        height=@height
         viewBox="0 0 @width @height"
-        class="@cn(@container)"
+        class=@cn(@container)
         role="img"
         aria-label="Sparkline"
     >
         @if fill {
             <polygon
-                points="@fill_points"
-                fill="@stroke_color"
+                points=@fill_points
+                fill=@stroke_color
                 fill-opacity="0.1"
             />
         }
         <polyline
-            points="@points"
+            points=@points
             fill="none"
-            stroke="@stroke_color"
+            stroke=@stroke_color
             stroke-width="1.5"
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -472,7 +472,7 @@
     @let extra_class = class
     @let container = vec!["inline-flex items-center gap-2", extra_class]
 
-    <div class="@cn(@container)">
+    <div class=@cn(@container)>
         <@sparkline
             data=@data
             width=@width
@@ -512,7 +512,7 @@
     @let extra_class = class
     @let container = vec!["flex flex-col gap-2", extra_class]
 
-    <div class="@cn(@container)">
+    <div class=@cn(@container)>
         <div class="flex items-end gap-2 @height">
             @for (i, label) in labels.iter().enumerate() {
                 @let total = series.iter().map(|s| s.get(i).copied().unwrap_or(0.0)).sum::<f64>()
@@ -567,7 +567,7 @@
     @let extra_class = class
     @let container = vec!["w-full", extra_class]
 
-    <div class="@cn(@container)">
+    <div class=@cn(@container)>
         @if let Some(lbl) = label {
             <div class="flex justify-between mb-1">
                 <span class="text-sm text-muted-foreground">@lbl</span>
@@ -581,9 +581,9 @@
                 class="h-full rounded-full transition-all duration-300"
                 style="width: @(clamped)%; background-color: @color;"
                 role="progressbar"
-                aria-valuenow="@value"
+                aria-valuenow=@value
                 aria-valuemin="0"
-                aria-valuemax="@max"
+                aria-valuemax=@max
             ></div>
         </div>
     </div>
@@ -612,11 +612,11 @@
     @let extra_class = class
     @let container = vec!["inline-flex flex-col items-center gap-2", extra_class]
 
-    <div class="@cn(@container)">
+    <div class=@cn(@container)>
         <div class="relative">
             <svg
-                width="@size"
-                height="@size"
+                width=@size
+                height=@size
                 viewBox="0 0 @size @size"
                 class="transform -rotate-90"
                 role="img"
@@ -624,21 +624,21 @@
             >
                 @* Background track *@
                 <circle
-                    cx="@center"
-                    cy="@center"
-                    r="@radius"
+                    cx=@center
+                    cy=@center
+                    r=@radius
                     fill="none"
                     stroke="hsl(var(--muted))"
-                    stroke-width="@thickness"
+                    stroke-width=@thickness
                 />
                 @* Value arc *@
                 <circle
-                    cx="@center"
-                    cy="@center"
-                    r="@radius"
+                    cx=@center
+                    cy=@center
+                    r=@radius
                     fill="none"
-                    stroke="@color"
-                    stroke-width="@thickness"
+                    stroke=@color
+                    stroke-width=@thickness
                     stroke-dasharray="@dash @circumference"
                     stroke-linecap="round"
                     class="transition-all duration-500"

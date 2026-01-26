@@ -44,9 +44,9 @@
     @let email_ph = Some("you@example.com")
     @let password_ph = Some("Enter your password")
 
-    <div class="@wrapper_cls">
+    <div class=@wrapper_cls>
         <@card::apply header=@Some(@() { <@header title=@title description=@description /> }) footer=@None>
-            <form action="@action" method="@method" class="space-y-4">
+            <form action=@action method=@method class="space-y-4">
                 <@field::apply label="Name" required=true error=@name_error>
                     <@input::apply
                         input_type=input::InputType::Text
@@ -86,7 +86,7 @@
                 @if let Some(url) = login_url {
                     <p class="text-center text-sm text-muted-foreground">
                         @login_text
-                        <a href="@url" class="text-primary underline-offset-4 hover:underline ml-1">
+                        <a href=@url class="text-primary underline-offset-4 hover:underline ml-1">
                             Log in
                         </a>
                     </p>

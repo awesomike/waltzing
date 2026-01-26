@@ -54,25 +54,25 @@
     @let fallback_classes = [fallback_base, fallback_text_size]
     @let fallback_cls = cn(@fallback_classes)
 
-    <span class="@container_cls">
+    <span class=@container_cls>
         @if let Some(image_src) = src {
             <img
-                src="@image_src"
-                alt="@alt"
+                src=@image_src
+                alt=@alt
                 class="aspect-square h-full w-full object-cover"
                 x-data="{ failed: false }"
                 x-on:error="failed = true"
                 x-show="!failed"
             />
             <span
-                class="@fallback_cls"
+                class=@fallback_cls
                 x-show="failed"
                 x-cloak
             >
                 @fallback
             </span>
         } else {
-            <span class="@fallback_cls">
+            <span class=@fallback_cls>
                 @fallback
             </span>
         }

@@ -113,7 +113,7 @@
                 />
                 <div class="grid gap-1.5 leading-none">
                     <label for="terms" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        I agree to the <a href="@terms_url" class="text-primary underline underline-offset-4 hover:text-primary/80">Terms of Service</a> and <a href="@privacy_url" class="text-primary underline underline-offset-4 hover:text-primary/80">Privacy Policy</a>
+                        I agree to the <a href=@terms_url class="text-primary underline underline-offset-4 hover:text-primary/80">Terms of Service</a> and <a href=@privacy_url class="text-primary underline underline-offset-4 hover:text-primary/80">Privacy Policy</a>
                     </label>
                 </div>
             </div>
@@ -171,7 +171,7 @@
         @* Login Link *@
         <p class="text-center text-sm text-muted-foreground">
             Already have an account?
-            <a href="@login_url" class="text-primary underline underline-offset-4 hover:text-primary/80">
+            <a href=@login_url class="text-primary underline underline-offset-4 hover:text-primary/80">
                 Sign in
             </a>
         </p>
@@ -268,7 +268,7 @@
         @* Login Link *@
         <p class="text-center text-sm text-muted-foreground">
             Already have an account?
-            <a href="@login_url" class="text-primary underline underline-offset-4 hover:text-primary/80">
+            <a href=@login_url class="text-primary underline underline-offset-4 hover:text-primary/80">
                 Sign in
             </a>
         </p>

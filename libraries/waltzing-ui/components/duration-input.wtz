@@ -117,7 +117,7 @@
     @let extra_cls = class
     @let container_cls = cn([container_base, extra_cls])
     <div
-        class="@container_cls"
+        class=@container_cls
         x-data=@```json {
             totalSeconds: @initial_seconds,
             hours: 0,
@@ -144,7 +144,7 @@
                 total = Math.max(this.min, Math.min(this.max, total));
                 this.totalSeconds = total;
                 this.fromSeconds(total);
-                this.$dispatch('input', { name: '@name', value: total });
+                this.$dispatch('input', { name: @name, value: total });
             },
 
             handleInput(field, event) {
@@ -202,18 +202,18 @@
                 const parsed = this.parseFlexible(text);
                 if (parsed !== null) {
                     this.fromSeconds(parsed);
-                    this.$dispatch('input', { name: '@name', value: this.totalSeconds });
+                    this.$dispatch('input', { name: @name, value: this.totalSeconds });
                 }
             }
         } ```@
         x-init="init()"
     >
-        <input type="hidden" name="@name" :value="totalSeconds" />
-        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="hours" class="@input_base" :value="String(hours).padStart(2, '0')" x-on:input="handleInput('hours', $event)" x-on:keydown="handleKeydown('hours', $event)" x-on:blur="handleBlur('hours')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Hours" @if disabled { disabled } />
-        <span class="@separator_cls">:</span>
-        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="minutes" class="@input_base" :value="String(minutes).padStart(2, '0')" x-on:input="handleInput('minutes', $event)" x-on:keydown="handleKeydown('minutes', $event)" x-on:blur="handleBlur('minutes')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Minutes" @if disabled { disabled } />
-        <span class="@separator_cls">:</span>
-        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="seconds" class="@input_base" :value="String(seconds).padStart(2, '0')" x-on:input="handleInput('seconds', $event)" x-on:keydown="handleKeydown('seconds', $event)" x-on:blur="handleBlur('seconds')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Seconds" @if disabled { disabled } />
+        <input type="hidden" name=@name :value="totalSeconds" />
+        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="hours" class=@input_base :value="String(hours).padStart(2, '0')" x-on:input="handleInput('hours', $event)" x-on:keydown="handleKeydown('hours', $event)" x-on:blur="handleBlur('hours')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Hours" @if disabled { disabled } />
+        <span class=@separator_cls>:</span>
+        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="minutes" class=@input_base :value="String(minutes).padStart(2, '0')" x-on:input="handleInput('minutes', $event)" x-on:keydown="handleKeydown('minutes', $event)" x-on:blur="handleBlur('minutes')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Minutes" @if disabled { disabled } />
+        <span class=@separator_cls>:</span>
+        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="seconds" class=@input_base :value="String(seconds).padStart(2, '0')" x-on:input="handleInput('seconds', $event)" x-on:keydown="handleKeydown('seconds', $event)" x-on:blur="handleBlur('seconds')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Seconds" @if disabled { disabled } />
     </div>
 }
 
@@ -232,7 +232,7 @@
     @let extra_cls = class
     @let container_cls = cn([container_base, extra_cls])
     <div
-        class="@container_cls"
+        class=@container_cls
         x-data=@```json {
             totalSeconds: @initial_seconds,
             minutes: 0,
@@ -256,7 +256,7 @@
                 total = Math.max(this.min, Math.min(this.max, total));
                 this.totalSeconds = total;
                 this.fromSeconds(total);
-                this.$dispatch('input', { name: '@name', value: total });
+                this.$dispatch('input', { name: @name, value: total });
             },
 
             handleInput(field, event) {
@@ -308,16 +308,16 @@
                 const parsed = this.parseFlexible(text);
                 if (parsed !== null) {
                     this.fromSeconds(parsed);
-                    this.$dispatch('input', { name: '@name', value: this.totalSeconds });
+                    this.$dispatch('input', { name: @name, value: this.totalSeconds });
                 }
             }
         } ```@
         x-init="init()"
     >
-        <input type="hidden" name="@name" :value="totalSeconds" />
-        <input type="text" inputmode="numeric" maxlength="3" data-duration-field="minutes" class="@input_base" :value="String(minutes).padStart(2, '0')" x-on:input="handleInput('minutes', $event)" x-on:keydown="handleKeydown('minutes', $event)" x-on:blur="handleBlur('minutes')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Minutes" @if disabled { disabled } />
-        <span class="@separator_cls">:</span>
-        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="seconds" class="@input_base" :value="String(seconds).padStart(2, '0')" x-on:input="handleInput('seconds', $event)" x-on:keydown="handleKeydown('seconds', $event)" x-on:blur="handleBlur('seconds')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Seconds" @if disabled { disabled } />
+        <input type="hidden" name=@name :value="totalSeconds" />
+        <input type="text" inputmode="numeric" maxlength="3" data-duration-field="minutes" class=@input_base :value="String(minutes).padStart(2, '0')" x-on:input="handleInput('minutes', $event)" x-on:keydown="handleKeydown('minutes', $event)" x-on:blur="handleBlur('minutes')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Minutes" @if disabled { disabled } />
+        <span class=@separator_cls>:</span>
+        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="seconds" class=@input_base :value="String(seconds).padStart(2, '0')" x-on:input="handleInput('seconds', $event)" x-on:keydown="handleKeydown('seconds', $event)" x-on:blur="handleBlur('seconds')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Seconds" @if disabled { disabled } />
     </div>
 }
 
@@ -336,7 +336,7 @@
     @let extra_cls = class
     @let container_cls = cn([container_base, extra_cls])
     <div
-        class="@container_cls"
+        class=@container_cls
         x-data=@```json {
             totalSeconds: @initial_seconds,
             hours: 0,
@@ -360,7 +360,7 @@
                 total = Math.max(this.min, Math.min(this.max, total));
                 this.totalSeconds = total;
                 this.fromSeconds(total);
-                this.$dispatch('input', { name: '@name', value: total });
+                this.$dispatch('input', { name: @name, value: total });
             },
 
             handleInput(field, event) {
@@ -412,16 +412,16 @@
                 const parsed = this.parseFlexible(text);
                 if (parsed !== null) {
                     this.fromSeconds(parsed);
-                    this.$dispatch('input', { name: '@name', value: this.totalSeconds });
+                    this.$dispatch('input', { name: @name, value: this.totalSeconds });
                 }
             }
         } ```@
         x-init="init()"
     >
-        <input type="hidden" name="@name" :value="totalSeconds" />
-        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="hours" class="@input_base" :value="String(hours).padStart(2, '0')" x-on:input="handleInput('hours', $event)" x-on:keydown="handleKeydown('hours', $event)" x-on:blur="handleBlur('hours')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Hours" @if disabled { disabled } />
-        <span class="@separator_cls">:</span>
-        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="minutes" class="@input_base" :value="String(minutes).padStart(2, '0')" x-on:input="handleInput('minutes', $event)" x-on:keydown="handleKeydown('minutes', $event)" x-on:blur="handleBlur('minutes')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Minutes" @if disabled { disabled } />
+        <input type="hidden" name=@name :value="totalSeconds" />
+        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="hours" class=@input_base :value="String(hours).padStart(2, '0')" x-on:input="handleInput('hours', $event)" x-on:keydown="handleKeydown('hours', $event)" x-on:blur="handleBlur('hours')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Hours" @if disabled { disabled } />
+        <span class=@separator_cls>:</span>
+        <input type="text" inputmode="numeric" maxlength="2" data-duration-field="minutes" class=@input_base :value="String(minutes).padStart(2, '0')" x-on:input="handleInput('minutes', $event)" x-on:keydown="handleKeydown('minutes', $event)" x-on:blur="handleBlur('minutes')" x-on:paste="handlePaste($event)" x-on:focus="$event.target.select()" placeholder="00" aria-label="Minutes" @if disabled { disabled } />
     </div>
 }
 
@@ -518,7 +518,7 @@
     @let label_classes = cn([label_cls, disabled_label])
 
     <div class="space-y-2">
-        <label for="@name" class="@label_classes">
+        <label for=@name class=@label_classes>
             @label
             @if required { <span class="text-destructive ml-0.5">*</span> }
         </label>
@@ -557,8 +557,8 @@
     @let extra_cls = class
     @let container_cls = cn(["inline-flex items-center gap-2", extra_cls])
 
-    <div class="@container_cls">
-        <label for="@name" class="@label_cls">@label</label>
+    <div class=@container_cls>
+        <label for=@name class=@label_cls>@label</label>
         <@inline
             name=@name
             value=@value

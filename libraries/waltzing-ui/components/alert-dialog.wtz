@@ -89,7 +89,7 @@
                             @cancel_label
                         </button>
                         <button
-                            class="@cn(@confirm_classes)"
+                            class=@cn(@confirm_classes)
                             @if let Some(handler) = on_confirm {
                                 @click="@handler; open = false"
                             }
@@ -123,7 +123,7 @@
 
     <template x-teleport="body">
         <div
-            x-show="@open_var"
+            x-show=@open_var
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
@@ -140,7 +140,7 @@
 
             <div
                 class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg"
-                x-trap.inert.noscroll="@open_var"
+                x-trap.inert.noscroll=@open_var
                 @keydown.escape.window="@open_var = false"
                 role="alertdialog"
                 aria-modal="true"
@@ -158,7 +158,7 @@
                         @cancel_label
                     </button>
                     <button
-                        class="@cn(@confirm_classes)"
+                        class=@cn(@confirm_classes)
                         @if let Some(handler) = on_confirm {
                             @click="@handler; @open_var = false"
                         }

@@ -69,8 +69,8 @@
     <div
         class=@cn(&["w-full", class])
         x-data=@```json {
-            sortKey: '@sort_key',
-            sortDir: '@sort_dir',
+            sortKey: @sort_key,
+            sortDir: @sort_dir,
             search: '',
             selectedRows: new Set(),
             allSelected: false,
@@ -130,7 +130,7 @@
                     type="text"
                     x-model="search"
                     x-on:input.debounce.300ms="onSearch()"
-                    placeholder="@search_placeholder"
+                    placeholder=@search_placeholder
                     class="flex h-9 w-full max-w-sm rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 />
             </div>
@@ -335,7 +335,7 @@
 
     <tr
         class=@cn(&[base, class])
-        data-row-id="@row_id"
+        data-row-id=@row_id
         :class="isSelected('@row_id') && 'bg-muted'"
     >
         @content()
@@ -352,7 +352,7 @@
 
     <tr
         class=@cn(&[base, class])
-        data-row-id="@row_id"
+        data-row-id=@row_id
         :class="isSelected('@row_id') && 'bg-muted'"
     >
         <td class="w-12 p-2 align-middle">
@@ -388,7 +388,7 @@
     content: @(),
 ) {
     <tr>
-        <td colspan="@colspan" class="h-24 text-center text-muted-foreground">
+        <td colspan=@colspan class="h-24 text-center text-muted-foreground">
             @content()
         </td>
     </tr>

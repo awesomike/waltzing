@@ -65,7 +65,7 @@
     }
 
     <div
-        class="@container_cls"
+        class=@container_cls
         x-data=@```json {
             currentMonth: null,
             currentYear: null,
@@ -330,7 +330,7 @@
     }
 
     <div
-        class="@container_cls"
+        class=@container_cls
         x-data=@```json {
             currentMonth: null,
             currentYear: null,

@@ -140,7 +140,7 @@
 
                 @* Command palette dialog *@
                 <div
-                    class="@dialog_cls"
+                    class=@dialog_cls
                     @@keydown.escape.prevent="close()"
                     @@keydown.down.prevent="selectNext()"
                     @@keydown.up.prevent="selectPrev()"
@@ -149,7 +149,7 @@
                     aria-modal="true"
                     aria-label="Command palette"
                 >
-                    <div class="@container_cls">
+                    <div class=@container_cls>
                         @* Search input *@
                         <div class="flex items-center border-b px-3">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4 shrink-0 opacity-50">
@@ -161,7 +161,7 @@
                                 x-model="search"
                                 @@input="resetSelection()"
                                 class="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="@ph"
+                                placeholder=@ph
                                 type="text"
                                 autocomplete="off"
                                 autocorrect="off"
@@ -197,9 +197,9 @@
     ])
 
     <div
-        class="@group_cls"
+        class=@group_cls
         role="group"
-        x-data="{ groupLabel: '@label' }"
+        x-data=@```json { groupLabel: @label } ```@
         x-show="!search || filteredItems.some(i => i.group === '@label')"
     >
         <div class="px-2 py-1.5 text-xs font-medium text-muted-foreground">
@@ -226,11 +226,11 @@
     ])
 
     <div
-        class="@item_cls"
+        class=@item_cls
         role="option"
         tabindex="-1"
         @if disabled { aria-disabled="true" }
-        x-data="{ itemIndex: -1, itemLabel: '@label', itemId: '@item_id' }"
+        x-data=@```json { itemIndex: -1, itemLabel: @label, itemId: @item_id } ```@
         x-init="itemIndex = items.length; registerItem('@item_id', '@label', groupLabel || '')"
         :data-selected="(() => {
             if (!search) return selectedIndex === itemIndex;
@@ -238,7 +238,7 @@
             return idx !== -1 && selectedIndex === idx;
         })()"
         x-show="!search || filteredItems.some(i => i.id === '@item_id')"
-        data-id="@item_id"
+        data-id=@item_id
         @@click="(() => {
             if (!search) {
                 selectedIndex = itemIndex;
@@ -274,5 +274,5 @@
         class
     ])
 
-    <div class="@sep_cls" role="separator"></div>
+    <div class=@sep_cls role="separator"></div>
 }

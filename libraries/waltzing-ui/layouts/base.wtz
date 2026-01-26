@@ -16,7 +16,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>@title</title>
         @if let Some(desc) = description {
-            <meta name="description" content="@desc" />
+            <meta name="description" content=@desc />
         }
 
         @* Tailwind CSS *@

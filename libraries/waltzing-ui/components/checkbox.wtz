@@ -43,16 +43,16 @@
     <div class="relative inline-flex items-center justify-center">
         <input
             type="checkbox"
-            name="@name"
-            id="@name"
+            name=@name
+            id=@name
             class="sr-only peer"
-            data-state="@data_state"
+            data-state=@data_state
             @if checked { checked }
             @if disabled { disabled }
         />
         <div
-            class="@cn(@classes)"
-            data-state="@data_state"
+            class=@cn(@classes)
+            data-state=@data_state
         >
             @if checked {
                 <svg
@@ -91,7 +91,7 @@
             class=@checkbox_cls
         />
         <div class="grid gap-1.5 leading-none">
-            <label for="@name" class="@label_cls">@label</label>
+            <label for=@name class=@label_cls>@label</label>
             @if let Some(desc) = description {
                 <p class="text-sm text-muted-foreground">@desc</p>
             }

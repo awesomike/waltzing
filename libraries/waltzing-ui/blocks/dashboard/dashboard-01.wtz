@@ -103,7 +103,7 @@
                                 @let link_classes = ["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                 <a
                                     href="@item.href"
-                                    class="@cn(@link_classes)"
+                                    class=@cn(@link_classes)
                                 >
                                     @if let Some(icon) = &item.icon {
                                         <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>

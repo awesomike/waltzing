@@ -46,9 +46,9 @@
 
     <div
         class="inline-block w-full"
-        x-data="{
+        x-data=@```json {
             open: false,
-            value: '@initial_value',
+            value: @initial_value,
             displayValue: '',
             currentMonth: null,
             currentYear: null,
@@ -60,8 +60,8 @@
             weekdays: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
             months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
             monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            min: '@min_date',
-            max: '@max_date',
+            min: @min_date,
+            max: @max_date,
             pos: { x: 0, y: 0, width: 0 },
             flipTop: false,
 
@@ -335,11 +335,11 @@
                     });
                 }
             }
-        }"
+        } ```@
         x-init="init()"
         @@destroy="destroy()"
     >
-        <input type="hidden" name="@name" x-model="value" />
+        <input type="hidden" name=@name x-model="value" />
 
         <div
             class="relative"
@@ -350,8 +350,8 @@
                 type="text"
                 readonly
                 x-model="displayValue"
-                placeholder="@placeholder_text"
-                class="@input_cls"
+                placeholder=@placeholder_text
+                class=@input_cls
                 @if disabled { disabled }
                 aria-haspopup="dialog"
                 :aria-expanded="open"
@@ -586,7 +586,7 @@
     class: &str = "",
 ) {
     <div class="space-y-2">
-        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label for=@name class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>

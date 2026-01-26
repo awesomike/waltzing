@@ -64,7 +64,7 @@
         ImagePosition::Right => "order-2",
     }
 
-    <div class="@container_cls">
+    <div class=@container_cls>
         @* Form side *@
         <div class="flex w-full items-center justify-center p-6 lg:w-1/2 lg:p-12 @form_order">
             <div class="w-full max-w-md space-y-8">
@@ -89,7 +89,7 @@
                 @if let Some(url) = register_url {
                     <p class="text-center text-sm text-muted-foreground">
                         Don't have an account?
-                        <a href="@url" class="font-medium text-primary underline-offset-4 hover:underline">
+                        <a href=@url class="font-medium text-primary underline-offset-4 hover:underline">
                             Create an account
                         </a>
                     </p>
@@ -100,8 +100,8 @@
         @* Image side *@
         <div class="hidden bg-muted lg:block lg:w-1/2 @image_order">
             <img
-                src="@image_src"
-                alt="@image_alt"
+                src=@image_src
+                alt=@image_alt
                 class="h-full w-full object-cover"
             />
         </div>
@@ -136,7 +136,7 @@
         ImagePosition::Right => "order-2",
     }
 
-    <div class="@container_cls">
+    <div class=@container_cls>
         <div class="grid w-full max-w-4xl overflow-hidden rounded-xl border bg-card shadow-lg lg:grid-cols-2">
             @* Form side *@
             <div class="p-8 lg:p-12 @form_order">
@@ -162,7 +162,7 @@
                     @if let Some(url) = register_url {
                         <p class="text-center text-sm text-muted-foreground">
                             Don't have an account?
-                            <a href="@url" class="font-medium text-primary underline-offset-4 hover:underline">
+                            <a href=@url class="font-medium text-primary underline-offset-4 hover:underline">
                                 Create an account
                             </a>
                         </p>
@@ -173,8 +173,8 @@
             @* Image side *@
             <div class="hidden bg-muted lg:block @image_order">
                 <img
-                    src="@image_src"
-                    alt="@image_alt"
+                    src=@image_src
+                    alt=@image_alt
                     class="h-full w-full object-cover"
                 />
             </div>
@@ -205,12 +205,12 @@
         <@card::description>@description</@card::description>
     })
 
-    <div class="@container_cls">
+    <div class=@container_cls>
         @* Background image *@
         <div class="absolute inset-0 z-0">
             <img
-                src="@image_src"
-                alt="@image_alt"
+                src=@image_src
+                alt=@image_alt
                 class="h-full w-full object-cover"
             />
             <div class="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
@@ -223,7 +223,7 @@
                 footer=@Some(@() {
                     <p class="w-full text-center text-sm text-muted-foreground">
                         Don't have an account?
-                        <a href="@url" class="font-medium text-primary underline-offset-4 hover:underline">
+                        <a href=@url class="font-medium text-primary underline-offset-4 hover:underline">
                             Create an account
                         </a>
                     </p>
@@ -270,7 +270,7 @@
     @let email_ph = Some("you@example.com")
     @let password_ph = Some("Enter your password")
 
-    <form action="@action" method="@method" class="space-y-4">
+    <form action=@action method=@method class="space-y-4">
         <@field::apply label="Email" required=true error=@email_error>
             <@input::apply
                 input_type=input::InputType::Email
@@ -294,7 +294,7 @@
 
         @if let Some(url) = forgot_password_url {
             <div class="text-right">
-                <a href="@url" class="text-sm text-primary underline-offset-4 hover:underline">
+                <a href=@url class="text-sm text-primary underline-offset-4 hover:underline">
                     Forgot password?
                 </a>
             </div>

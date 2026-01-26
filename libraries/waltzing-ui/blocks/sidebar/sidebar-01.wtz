@@ -55,7 +55,7 @@
 ) {
     @let sidebar_cls = cn(&["flex h-full w-64 flex-col border-r bg-card", class])
 
-    <aside class="@sidebar_cls">
+    <aside class=@sidebar_cls>
         @* Brand header *@
         <div class="flex h-16 items-center border-b px-4">
             @brand()
@@ -80,7 +80,7 @@
                                     "flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                     active_cls
                                 ]
-                                <a href="@item.href" class="@cn(@link_classes)">
+                                <a href="@item.href" class=@cn(@link_classes)>
                                     @* Icon *@
                                     @if let Some(icon) = &item.icon {
                                         <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
@@ -112,7 +112,7 @@
 ) {
     @let sidebar_cls = cn(&["flex h-full w-64 flex-col border-r bg-card", class])
 
-    <aside class="@sidebar_cls">
+    <aside class=@sidebar_cls>
         @* Brand header *@
         <div class="flex h-16 items-center border-b px-4">
             @brand()
@@ -135,7 +135,7 @@
                                     "flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                     active_cls
                                 ]
-                                <a href="@item.href" class="@cn(@link_classes)">
+                                <a href="@item.href" class=@cn(@link_classes)>
                                     @if let Some(icon) = &item.icon {
                                         <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
                                     }

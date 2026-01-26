@@ -93,13 +93,13 @@
 
         <div
             class="w-full"
-            x-data="{
+            x-data=@```json {
                 rawValue: @initial_raw,
                 displayValue: '',
                 multiplier: @multiplier,
                 decimals: @decimals,
-                thousandSep: '@thousand_separator',
-                decimalSep: '@decimal_separator',
+                thousandSep: @thousand_separator,
+                decimalSep: @decimal_separator,
                 minVal: @if let Some(m) = min { @m } @else { null },
                 maxVal: @if let Some(m) = max { @m } @else { null },
                 validationError: null,
@@ -148,23 +148,23 @@
                     if (this.rawValue === null) return '';
                     return (this.rawValue * this.multiplier).toString();
                 }
-            }"
+            } ```@
         >
             @* Hidden input stores the actual value (multiplied) *@
-            <input type="hidden" name="@name" :value="getStoredValue()" />
+            <input type="hidden" name=@name :value="getStoredValue()" />
 
             @* Visible formatted input *@
             <input
                 type="text"
                 inputmode="decimal"
-                class="@input_cls"
+                class=@input_cls
                 x-model="displayValue"
                 @input="onInput($event)"
                 @blur="onBlur()"
-                @if let Some(p) = placeholder { placeholder="@p" }
+                @if let Some(p) = placeholder { placeholder=@p }
                 @if disabled { disabled }
                 @if required { required }
-                @if let Some(s) = step { step="@s" }
+                @if let Some(s) = step { step=@s }
                 @if error.is_some() { aria-invalid="true" }
             />
 

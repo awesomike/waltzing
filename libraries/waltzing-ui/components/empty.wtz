@@ -58,11 +58,11 @@
     @let extra_cls = class
     @let classes = [base, variant_cls, extra_cls]
 
-    <div class="@cn(@classes)">
+    <div class=@cn(@classes)>
         @content()
-        <h3 class="@title_cls">@title</h3>
+        <h3 class=@title_cls>@title</h3>
         @if let Some(desc) = description {
-            <p class="@desc_cls">@desc</p>
+            <p class=@desc_cls>@desc</p>
         }
     </div>
 }
@@ -76,7 +76,7 @@
     @let extra_cls = class
     @let classes = [base, extra_cls]
 
-    <div class="@cn(@classes)">
+    <div class=@cn(@classes)>
         @content()
     </div>
 }
@@ -90,7 +90,7 @@
     @let extra_cls = class
     @let classes = [base, extra_cls]
 
-    <div class="@cn(@classes)">
+    <div class=@cn(@classes)>
         @content()
     </div>
 }
@@ -142,7 +142,7 @@
                 stroke-width="1.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="@icon_size"
+                class=@icon_size
             >
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M8 12h8"/>

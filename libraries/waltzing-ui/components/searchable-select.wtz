@@ -91,11 +91,11 @@
 
     <div
         class="relative w-full"
-        x-data="{
+        x-data=@```json {
             open: false,
             search: '',
-            selected: '@sel',
-            selectedLabel: '@initial_label',
+            selected: @sel,
+            selectedLabel: @initial_label,
             highlightedIndex: -1,
             get filteredOptions() {
                 const searchLower = this.search.toLowerCase();
@@ -140,7 +140,7 @@
                     }
                 }
             }
-        }"
+        } ```@
         @@keydown.down.prevent="if(open) highlightNext()"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -149,7 +149,7 @@
         @* Hidden input for form submission *@
         <input
             type="hidden"
-            name="@name"
+            name=@name
             x-ref="hiddenInput"
             :value="selected"
             @if required { required }
@@ -158,7 +158,7 @@
         @* Trigger button *@
         <button
             type="button"
-            class="@trigger_cls"
+            class=@trigger_cls
             @@click="open = !open; if(open) { $nextTick(() => $refs.searchInput?.focus()); highlightedIndex = -1; }"
             @if disabled { disabled }
             @if error.is_some() { aria-invalid="true" }
@@ -211,7 +211,7 @@
                     x-model="search"
                     @@input="highlightedIndex = -1"
                     class="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
-                    placeholder="@search_ph"
+                    placeholder=@search_ph
                     autocomplete="off"
                 />
             </div>
@@ -229,9 +229,9 @@
                         data-option
                         data-value="@opt.value"
                         data-label="@opt.label"
-                        @if let Some(desc) = &opt.description { data-description="@desc" }
+                        @if let Some(desc) = &opt.description { data-description=@desc }
                         @if opt.disabled { data-disabled="true" }
-                        class="@option_cls"
+                        class=@option_cls
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx || selected === '@opt.value',
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
@@ -243,7 +243,7 @@
                         :aria-selected="selected === '@opt.value'"
                     >
                         @if let Some(img) = &opt.image {
-                            <img src="@img" alt="" class="mr-2 h-5 w-5 rounded-full object-cover" />
+                            <img src=@img alt="" class="mr-2 h-5 w-5 rounded-full object-cover" />
                         }
                         <div class="flex flex-col">
                             <span>@opt.label</span>
@@ -322,7 +322,7 @@
 
     <div
         class="relative w-full"
-        x-data="{
+        x-data=@```json {
             open: false,
             search: '',
             selected: @selected_json,
@@ -385,7 +385,7 @@
                     }
                 }
             }
-        }"
+        } ```@
         @@keydown.down.prevent="if(open) highlightNext()"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -394,7 +394,7 @@
         @* Hidden input for form submission *@
         <input
             type="hidden"
-            name="@name"
+            name=@name
             x-ref="hiddenInput"
             :value="JSON.stringify(selected)"
             @if required { required }
@@ -402,7 +402,7 @@
 
         @* Trigger area with tags *@
         <div
-            class="@trigger_cls"
+            class=@trigger_cls
             @@click="if(!$event.target.closest('[data-tag]')) { open = !open; if(open) { $nextTick(() => $refs.searchInput?.focus()); highlightedIndex = -1; } }"
             @if disabled { tabindex="-1" }
             @if error.is_some() { aria-invalid="true" }
@@ -477,7 +477,7 @@
                     x-model="search"
                     @@input="highlightedIndex = -1"
                     class="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
-                    placeholder="@search_ph"
+                    placeholder=@search_ph
                     autocomplete="off"
                 />
             </div>
@@ -496,9 +496,9 @@
                         data-option
                         data-value="@opt.value"
                         data-label="@opt.label"
-                        @if let Some(desc) = &opt.description { data-description="@desc" }
+                        @if let Some(desc) = &opt.description { data-description=@desc }
                         @if opt.disabled { data-disabled="true" }
-                        class="@option_cls"
+                        class=@option_cls
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx,
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
@@ -527,7 +527,7 @@
                             </svg>
                         </div>
                         @if let Some(img) = &opt.image {
-                            <img src="@img" alt="" class="mr-2 h-5 w-5 rounded-full object-cover" />
+                            <img src=@img alt="" class="mr-2 h-5 w-5 rounded-full object-cover" />
                         }
                         <div class="flex flex-col">
                             <span>@opt.label</span>
@@ -579,10 +579,10 @@
 
     <div
         class="relative w-full"
-        x-data="{
+        x-data=@```json {
             open: false,
-            selected: '@sel',
-            selectedLabel: '@initial_label',
+            selected: @sel,
+            selectedLabel: @initial_label,
             highlightedIndex: -1,
             selectOption(value, label) {
                 this.selected = value;
@@ -616,7 +616,7 @@
                     this.selectOption(el.dataset.value, el.dataset.label);
                 }
             }
-        }"
+        } ```@
         @@keydown.down.prevent="if(open) highlightNext(); else open = true"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -625,7 +625,7 @@
         @* Hidden input for form submission *@
         <input
             type="hidden"
-            name="@name"
+            name=@name
             x-ref="hiddenInput"
             :value="selected"
             @if required { required }
@@ -634,7 +634,7 @@
         @* Trigger button *@
         <button
             type="button"
-            class="@trigger_cls"
+            class=@trigger_cls
             @@click="open = !open; highlightedIndex = -1"
             @if disabled { disabled }
             @if error.is_some() { aria-invalid="true" }
@@ -685,7 +685,7 @@
                         data-value="@opt.value"
                         data-label="@opt.label"
                         @if opt.disabled { data-disabled="true" }
-                        class="@option_cls"
+                        class=@option_cls
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx || selected === '@opt.value',
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
@@ -696,7 +696,7 @@
                         :aria-selected="selected === '@opt.value'"
                     >
                         @if let Some(img) = &opt.image {
-                            <img src="@img" alt="" class="mr-2 h-5 w-5 rounded-full object-cover" />
+                            <img src=@img alt="" class="mr-2 h-5 w-5 rounded-full object-cover" />
                         }
                         <div class="flex flex-col">
                             <span>@opt.label</span>
@@ -760,11 +760,11 @@
 
     <div
         class="relative w-full"
-        x-data="{
+        x-data=@```json {
             open: false,
             search: '',
-            selected: '@sel',
-            selectedLabel: '@initial_label',
+            selected: @sel,
+            selectedLabel: @initial_label,
             highlightedIndex: -1,
             get filteredOptions() {
                 const searchLower = this.search.toLowerCase();
@@ -808,7 +808,7 @@
                     }
                 }
             }
-        }"
+        } ```@
         @@keydown.down.prevent="if(open) highlightNext()"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -817,7 +817,7 @@
         @* Hidden input for form submission *@
         <input
             type="hidden"
-            name="@name"
+            name=@name
             x-ref="hiddenInput"
             :value="selected"
             @if required { required }
@@ -826,7 +826,7 @@
         @* Trigger button *@
         <button
             type="button"
-            class="@trigger_cls"
+            class=@trigger_cls
             @@click="open = !open; if(open) { $nextTick(() => $refs.searchInput?.focus()); highlightedIndex = -1; }"
             @if disabled { disabled }
             @if error.is_some() { aria-invalid="true" }
@@ -879,7 +879,7 @@
                     x-model="search"
                     @@input="highlightedIndex = -1"
                     class="flex h-8 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
-                    placeholder="@search_ph"
+                    placeholder=@search_ph
                     autocomplete="off"
                 />
             </div>
@@ -898,7 +898,7 @@
                         data-value="@opt.value"
                         data-label="@opt.label"
                         @if opt.disabled { data-disabled="true" }
-                        class="@option_cls"
+                        class=@option_cls
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx || selected === '@opt.value',
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
@@ -978,7 +978,7 @@
 
     <div
         class="relative w-full"
-        x-data="{
+        x-data=@```json {
             open: false,
             search: '',
             selected: @selected_json,
@@ -1040,7 +1040,7 @@
                     }
                 }
             }
-        }"
+        } ```@
         @@keydown.down.prevent="if(open) highlightNext()"
         @@keydown.up.prevent="if(open) highlightPrev()"
         @@keydown.enter.prevent="if(open) selectHighlighted()"
@@ -1049,7 +1049,7 @@
         @* Hidden input for form submission *@
         <input
             type="hidden"
-            name="@name"
+            name=@name
             x-ref="hiddenInput"
             :value="JSON.stringify(selected)"
             @if required { required }
@@ -1057,7 +1057,7 @@
 
         @* Trigger area with tags *@
         <div
-            class="@trigger_cls"
+            class=@trigger_cls
             @@click="if(!$event.target.closest('[data-tag]')) { open = !open; if(open) { $nextTick(() => $refs.searchInput?.focus()); highlightedIndex = -1; } }"
             @if disabled { tabindex="-1" }
             @if error.is_some() { aria-invalid="true" }
@@ -1132,7 +1132,7 @@
                     x-model="search"
                     @@input="highlightedIndex = -1"
                     class="flex h-8 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
-                    placeholder="@search_ph"
+                    placeholder=@search_ph
                     autocomplete="off"
                 />
             </div>
@@ -1152,7 +1152,7 @@
                         data-value="@opt.value"
                         data-label="@opt.label"
                         @if opt.disabled { data-disabled="true" }
-                        class="@option_cls"
+                        class=@option_cls
                         :class="{
                             'bg-accent text-accent-foreground': highlightedIndex === @idx,
                             'hover:bg-accent hover:text-accent-foreground': !('@opt.disabled' === 'true')
@@ -1212,7 +1212,7 @@
     class: &str = "",
 ) {
     <div class="space-y-2">
-        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label for=@name class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>
@@ -1251,7 +1251,7 @@
     class: &str = "",
 ) {
     <div class="space-y-2">
-        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label for=@name class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>

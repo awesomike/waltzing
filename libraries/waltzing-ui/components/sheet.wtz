@@ -93,12 +93,12 @@
                 <div
                     x-show="open"
                     x-transition:enter="ease-out duration-300"
-                    x-transition:enter-start="@enter_start_cls"
-                    x-transition:enter-end="@enter_end_cls"
+                    x-transition:enter-start=@enter_start_cls
+                    x-transition:enter-end=@enter_end_cls
                     x-transition:leave="ease-in duration-200"
-                    x-transition:leave-start="@enter_end_cls"
-                    x-transition:leave-end="@enter_start_cls"
-                    class="@cn(@sheet_cls)"
+                    x-transition:leave-start=@enter_end_cls
+                    x-transition:leave-end=@enter_start_cls
+                    class=@cn(@sheet_cls)
                     x-trap.inert.noscroll="open"
                     @keydown.escape.window="open = false"
                     role="dialog"
@@ -173,7 +173,7 @@
 
     <template x-teleport="body">
         <div
-            x-show="@open_var"
+            x-show=@open_var
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
@@ -190,15 +190,15 @@
             ></div>
 
             <div
-                x-show="@open_var"
+                x-show=@open_var
                 x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="@enter_start_cls"
-                x-transition:enter-end="@enter_end_cls"
+                x-transition:enter-start=@enter_start_cls
+                x-transition:enter-end=@enter_end_cls
                 x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="@enter_end_cls"
-                x-transition:leave-end="@enter_start_cls"
-                class="@cn(@sheet_cls)"
-                x-trap.inert.noscroll="@open_var"
+                x-transition:leave-start=@enter_end_cls
+                x-transition:leave-end=@enter_start_cls
+                class=@cn(@sheet_cls)
+                x-trap.inert.noscroll=@open_var
                 @keydown.escape.window="@open_var = false"
                 role="dialog"
                 aria-modal="true"

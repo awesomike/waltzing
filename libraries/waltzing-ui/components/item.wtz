@@ -42,7 +42,7 @@
     @let container_classes = [base, variant_cls, class]
     @let container_cls = cn(@container_classes)
 
-    <div class="@container_cls">
+    <div class=@container_cls>
         @if let Some(icon_content) = icon {
             <div class="flex-shrink-0 text-muted-foreground">
                 @icon_content()

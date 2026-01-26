@@ -36,9 +36,9 @@
     @let container_cls = cn(&["p-3", class])
 
     <div
-        class="@container_cls"
+        class=@container_cls
         x-data=@```json {
-            selected: '@initial_selected',
+            selected: @initial_selected,
             currentMonth: null,
             currentYear: null,
             today: new Date(),
@@ -232,10 +232,10 @@
     @let container_cls = cn(&["p-3", class])
 
     <div
-        class="@container_cls"
+        class=@container_cls
         x-data=@```json {
-            rangeStart: '@initial_start',
-            rangeEnd: '@initial_end',
+            rangeStart: @initial_start,
+            rangeEnd: @initial_end,
             selecting: 'start',
             currentMonth: null,
             currentYear: null,
@@ -454,7 +454,7 @@
     @let container_cls = cn(&["p-3", class])
 
     <div
-        class="@container_cls"
+        class=@container_cls
         x-data=@```json {
             currentMonth: @(month - 1),
             currentYear: @year,

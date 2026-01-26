@@ -64,14 +64,14 @@
         @if let Some(url) = href {
             <a
                 href=@url
-                class="@item_cls"
+                class=@item_cls
                 role="menuitem"
                 @if active { aria-current="page" }
             >
                 @label
             </a>
         } else {
-            <span class="@item_cls" role="menuitem">
+            <span class=@item_cls role="menuitem">
                 @label
             </span>
         }
@@ -98,7 +98,7 @@
     >
         <button
             type="button"
-            class="@btn_cls"
+            class=@btn_cls
             role="menuitem"
             aria-haspopup="true"
             :aria-expanded="open"
@@ -154,8 +154,8 @@
     @let item_cls = cn(&["block w-full select-none rounded-sm px-3 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground", class])
 
     <a
-        href="@href"
-        class="@item_cls"
+        href=@href
+        class=@item_cls
         role="menuitem"
     >
         @content()

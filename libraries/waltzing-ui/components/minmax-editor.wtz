@@ -61,7 +61,7 @@
     @let classes = [container_cls, cls]
 
     <div
-        class="@cn(@classes)"
+        class=@cn(@classes)
         x-data=@```json {
             expanded: @is_expanded,
             minVal: @min_init,
@@ -77,21 +77,21 @@
         <div x-show="!expanded" class="flex items-center gap-2">
             <input
                 type="number"
-                name="@name_min"
-                step="@step_str"
-                @if let Some(min) = &min_attr { min="@min" }
-                @if let Some(max) = &max_attr { max="@max" }
+                name=@name_min
+                step=@step_str
+                @if let Some(min) = &min_attr { min=@min }
+                @if let Some(max) = &max_attr { max=@max }
                 x-model.number="minVal"
                 @@input="maxVal = minVal"
-                class="@input_cls"
+                class=@input_cls
                 placeholder="-"
             />
             @* Hidden max input synced with min when collapsed *@
-            <input type="hidden" name="@name_max" x-model="maxVal" />
+            <input type="hidden" name=@name_max x-model="maxVal" />
             <button
                 type="button"
                 @@click="expanded = true"
-                class="@btn_cls"
+                class=@btn_cls
                 title="Expand to range"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
@@ -104,26 +104,26 @@
         <div x-show="expanded" class="flex items-center gap-2">
             <input
                 type="number"
-                name="@name_min"
-                step="@step_str"
-                @if let Some(min) = &min_attr { min="@min" }
-                @if let Some(max) = &max_attr { max="@max" }
+                name=@name_min
+                step=@step_str
+                @if let Some(min) = &min_attr { min=@min }
+                @if let Some(max) = &max_attr { max=@max }
                 x-model.number="minVal"
                 @@blur="validateRange()"
-                class="@input_cls"
+                class=@input_cls
                 placeholder="Min"
                 aria-label="Minimum value"
             />
             <span class="text-sm text-muted-foreground">to</span>
             <input
                 type="number"
-                name="@name_max"
-                step="@step_str"
-                @if let Some(min) = &min_attr { min="@min" }
-                @if let Some(max) = &max_attr { max="@max" }
+                name=@name_max
+                step=@step_str
+                @if let Some(min) = &min_attr { min=@min }
+                @if let Some(max) = &max_attr { max=@max }
                 x-model.number="maxVal"
                 @@blur="validateRange()"
-                class="@input_cls"
+                class=@input_cls
                 placeholder="Max"
                 aria-label="Maximum value"
             />
@@ -132,7 +132,7 @@
                 @@click="if (minVal === maxVal || maxVal === null || maxVal === '') expanded = false"
                 :class="(minVal === maxVal || maxVal === null || maxVal === '') ? 'text-muted-foreground hover:text-foreground' : 'text-muted-foreground/30 cursor-not-allowed'"
                 :disabled="minVal !== maxVal && maxVal !== null && maxVal !== ''"
-                class="@btn_cls"
+                class=@btn_cls
                 title="Collapse to single value"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
@@ -197,8 +197,8 @@
     @let collapse_disabled = format!("{} !== {} && {} !== null", model_min, model_max, model_max)
 
     <div
-        class="@cn(@classes)"
-        x-data="@x_data_init"
+        class=@cn(@classes)
+        x-data=@x_data_init
     >
         <label class="text-sm font-medium leading-none">@label</label>
 
@@ -206,18 +206,18 @@
         <div x-show="!expanded" class="flex items-center gap-2">
             <input
                 type="number"
-                step="@step_str"
-                @if let Some(min) = &min_attr { min="@min" }
-                @if let Some(max) = &max_attr { max="@max" }
+                step=@step_str
+                @if let Some(min) = &min_attr { min=@min }
+                @if let Some(max) = &max_attr { max=@max }
                 x-model.number=@model_min
-                @@input="@input_handler"
-                class="@input_cls"
+                @@input=@input_handler
+                class=@input_cls
                 placeholder="-"
             />
             <button
                 type="button"
                 @@click="expanded = true"
-                class="@btn_cls"
+                class=@btn_cls
                 title="Expand to range"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
@@ -230,33 +230,33 @@
         <div x-show="expanded" class="flex items-center gap-2">
             <input
                 type="number"
-                step="@step_str"
-                @if let Some(min) = &min_attr { min="@min" }
-                @if let Some(max) = &max_attr { max="@max" }
+                step=@step_str
+                @if let Some(min) = &min_attr { min=@min }
+                @if let Some(max) = &max_attr { max=@max }
                 x-model.number=@model_min
-                @@blur="@blur_handler"
-                class="@input_cls"
+                @@blur=@blur_handler
+                class=@input_cls
                 placeholder="Min"
                 aria-label="Minimum value"
             />
             <span class="text-sm text-muted-foreground">to</span>
             <input
                 type="number"
-                step="@step_str"
-                @if let Some(min) = &min_attr { min="@min" }
-                @if let Some(max) = &max_attr { max="@max" }
+                step=@step_str
+                @if let Some(min) = &min_attr { min=@min }
+                @if let Some(max) = &max_attr { max=@max }
                 x-model.number=@model_max
-                @@blur="@blur_handler"
-                class="@input_cls"
+                @@blur=@blur_handler
+                class=@input_cls
                 placeholder="Max"
                 aria-label="Maximum value"
             />
             <button
                 type="button"
-                @@click="@collapse_handler"
-                :class="@collapse_class"
-                :disabled="@collapse_disabled"
-                class="@btn_cls"
+                @@click=@collapse_handler
+                :class=@collapse_class
+                :disabled=@collapse_disabled
+                class=@btn_cls
                 title="Collapse to single value"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">

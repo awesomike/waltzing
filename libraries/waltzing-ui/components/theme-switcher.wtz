@@ -52,7 +52,7 @@
     @let classes = [base, extra_class]
 
     <div
-        class="@cn(@classes)"
+        class=@cn(@classes)
         x-data="{
             open: false,
             theme: window.themeManager ? window.themeManager.current() : 'system',
@@ -84,7 +84,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="@icon_size"
+                class=@icon_size
             >
                 <circle cx="12" cy="12" r="4"></circle>
                 <path d="M12 2v2"></path>
@@ -108,7 +108,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="@icon_size"
+                class=@icon_size
             >
                 <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
             </svg>
@@ -124,7 +124,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="@icon_size"
+                class=@icon_size
             >
                 <rect width="20" height="14" x="2" y="3" rx="2"></rect>
                 <line x1="8" x2="16" y1="21" y2="21"></line>
@@ -140,7 +140,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="@icon_size opacity-50"
+                class=@icon_size opacity-50
             >
                 <path d="m6 9 6 6 6-6"></path>
             </svg>
@@ -263,7 +263,7 @@
     @let classes = [base, extra_class]
 
     <div
-        class="@cn(@classes)"
+        class=@cn(@classes)
         x-data="{
             open: false,
             theme: window.themeManager ? window.themeManager.current() : 'system',
@@ -295,7 +295,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="@icon_size"
+                class=@icon_size
             >
                 <circle cx="12" cy="12" r="4"></circle>
                 <path d="M12 2v2"></path>
@@ -319,7 +319,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="@icon_size"
+                class=@icon_size
             >
                 <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
             </svg>
@@ -335,7 +335,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="@icon_size"
+                class=@icon_size
             >
                 <rect width="20" height="14" x="2" y="3" rx="2"></rect>
                 <line x1="8" x2="16" y1="21" y2="21"></line>
@@ -353,7 +353,7 @@
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="@icon_size opacity-50"
+                class=@icon_size opacity-50
             >
                 <path d="m6 9 6 6 6-6"></path>
             </svg>
@@ -477,7 +477,7 @@
 
     <button
         type="button"
-        class="@cn(@classes)"
+        class=@cn(@classes)
         x-data="{ dark: document.documentElement.classList.contains('dark') }"
         x-init="window.addEventListener('theme-change', () => dark = document.documentElement.classList.contains('dark'))"
         @@click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"
@@ -494,7 +494,7 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="@icon_size"
+            class=@icon_size
         >
             <circle cx="12" cy="12" r="4"></circle>
             <path d="M12 2v2"></path>
@@ -518,7 +518,7 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="@icon_size"
+            class=@icon_size
         >
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
         </svg>
@@ -548,7 +548,7 @@
 
     <button
         type="button"
-        class="@cn(@classes)"
+        class=@cn(@classes)
         x-data="{ dark: document.documentElement.classList.contains('dark') }"
         x-init="window.addEventListener('theme-change', () => dark = document.documentElement.classList.contains('dark'))"
         @@click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"
@@ -565,7 +565,7 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="@icon_size"
+            class=@icon_size
         >
             <circle cx="12" cy="12" r="4"></circle>
             <path d="M12 2v2"></path>
@@ -589,7 +589,7 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="@icon_size"
+            class=@icon_size
         >
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
         </svg>

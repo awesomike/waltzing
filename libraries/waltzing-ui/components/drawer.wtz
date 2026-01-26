@@ -140,7 +140,7 @@
 ) {
     <template x-teleport="body">
         <div
-            x-show="@open_var"
+            x-show=@open_var
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
@@ -157,7 +157,7 @@
             ></div>
 
             <div
-                x-show="@open_var"
+                x-show=@open_var
                 x-transition:enter="ease-out duration-300"
                 x-transition:enter-start="translate-y-full"
                 x-transition:enter-end="translate-y-0"
@@ -165,7 +165,7 @@
                 x-transition:leave-start="translate-y-0"
                 x-transition:leave-end="translate-y-full"
                 class="fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[96%] flex-col rounded-t-[10px] border bg-background"
-                x-trap.inert.noscroll="@open_var"
+                x-trap.inert.noscroll=@open_var
                 @keydown.escape.window="@open_var = false"
                 role="dialog"
                 aria-modal="true"

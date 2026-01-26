@@ -48,12 +48,12 @@
     @let email_ph = Some("you@example.com")
     @let password_ph = Some("Enter your password")
 
-    <div class="@container_cls">
+    <div class=@container_cls>
         @** Left side - Cover image (hidden on mobile) **@
         <div class="relative hidden bg-muted lg:block">
             <img
-                src="@image_url"
-                alt="@image_alt"
+                src=@image_url
+                alt=@image_alt
                 class="absolute inset-0 h-full w-full object-cover"
             />
             @** Dark overlay for better text readability **@
@@ -93,7 +93,7 @@
                 </div>
 
                 @** Login form **@
-                <form action="@action" method="@method" class="space-y-4">
+                <form action=@action method=@method class="space-y-4">
                     <@field::apply label="Email" required=true error=@email_error>
                         <@input::apply
                             input_type=input::InputType::Email
@@ -117,7 +117,7 @@
 
                     @if let Some(url) = forgot_password_url {
                         <div class="text-right">
-                            <a href="@url" class="text-sm text-primary hover:underline underline-offset-4">
+                            <a href=@url class="text-sm text-primary hover:underline underline-offset-4">
                                 Forgot password?
                             </a>
                         </div>
@@ -131,7 +131,7 @@
                 @if let Some(url) = register_url {
                     <p class="text-center text-sm text-muted-foreground">
                         Don't have an account?
-                        <a href="@url" class="text-primary hover:underline underline-offset-4">Create account</a>
+                        <a href=@url class="text-primary hover:underline underline-offset-4">Create account</a>
                     </p>
                 }
             </div>

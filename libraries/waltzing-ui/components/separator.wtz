@@ -42,8 +42,8 @@
     @let classes = [base, orientation_cls, cls]
     <div
         role="separator"
-        aria-orientation="@aria_orientation"
-        class="@cn(@classes)"
+        aria-orientation=@aria_orientation
+        class=@cn(@classes)
     ></div>
 }
 

@@ -35,25 +35,25 @@
     <button
         type="button"
         role="switch"
-        id="@name"
-        name="@name"
-        class="@track_classes"
-        aria-checked="@checked_val"
-        data-state="@data_state_val"
+        id=@name
+        name=@name
+        class=@track_classes
+        aria-checked=@checked_val
+        data-state=@data_state_val
         @if disabled { disabled aria-disabled="true" }
         x-data=@```json { on: @checked } ```@
-        x-on:click="on = !on; $dispatch('input', { name: '@name', value: on })"
+        x-on:click=@```js on = !on; $dispatch('input', { name: @name, value: on }) ```@
         :aria-checked="on.toString()"
         :data-state="on ? 'checked' : 'unchecked'"
         :class="on ? 'bg-primary' : 'bg-input'"
     >
         @let thumb_classes = cn([thumb_base, thumb_state])
         <span
-            class="@thumb_classes"
+            class=@thumb_classes
             :class="on ? 'translate-x-4' : 'translate-x-0'"
         ></span>
     </button>
-    <input type="hidden" name="@name" :value="on" />
+    <input type="hidden" name=@name :value="on" />
 }
 
 @* Switch with label *@
@@ -70,7 +70,7 @@
 
     <div class="flex items-center justify-between space-x-4">
         <div class="space-y-0.5">
-            <label for="@name" class="@label_classes">
+            <label for=@name class=@label_classes>
                 @label
             </label>
             @if let Some(desc) = description {
@@ -94,7 +94,7 @@
 
     <div class="flex items-center space-x-2">
         <@apply name=@name checked=@checked disabled=@disabled />
-        <label for="@name" class="@label_classes">
+        <label for=@name class=@label_classes>
             @label
         </label>
     </div>

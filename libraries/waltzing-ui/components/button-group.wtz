@@ -74,8 +74,8 @@
 
     <div
         role="group"
-        class="@cn(&[@group_base, @orientation_cls, @class])"
-        x-data="{ variant: '@variant_str', size: '@size_str', orientation: '@orientation_str' }"
+        class=@cn(&[@group_base, @orientation_cls, @class])
+        x-data=@```json { variant: @variant_str, size: @size_str, orientation: @orientation_str } ```@
     >
         @content()
     </div>
@@ -97,7 +97,7 @@
 
     <button
         type="button"
-        class="@cn(&[@base, @class])"
+        class=@cn(&[@base, @class])
         :class="{
             'h-8 px-3 text-xs': size === 'sm',
             'h-9 px-4 py-2': size === 'default',

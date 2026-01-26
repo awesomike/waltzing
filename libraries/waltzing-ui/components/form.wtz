@@ -49,10 +49,10 @@
     @let classes = cn(class_vec)
 
     <form
-        @if let Some(a) = action { action="@a" }
-        @if let Some(m) = method { method="@m" }
-        @if let Some(e) = enctype { enctype="@e" }
-        class="@classes"
+        @if let Some(a) = action { action=@a }
+        @if let Some(m) = method { method=@m }
+        @if let Some(e) = enctype { enctype=@e }
+        class=@classes
         novalidate
     >
         @content()
@@ -74,9 +74,9 @@
     @let field_vec = ["space-y-2", class_val]
     @let field_cls = cn(field_vec)
 
-    <div class="@field_cls">
+    <div class=@field_cls>
         @if let Some(l) = label {
-            <label for="@name" class="@label_cls">
+            <label for=@name class=@label_cls>
                 @l
                 @if required { <span class="text-destructive ml-0.5">*</span> }
             </label>
@@ -111,7 +111,7 @@
     @let section_vec = ["space-y-4", class_val]
     @let section_cls = cn(section_vec)
 
-    <div class="@section_cls">
+    <div class=@section_cls>
         @if title.is_some() || description.is_some() {
             <div class="space-y-1">
                 @if let Some(t) = title {
@@ -137,7 +137,7 @@
     @let row_vec = ["grid gap-4 sm:grid-cols-2", class_val]
     @let row_cls = cn(row_vec)
 
-    <div class="@row_cls">
+    <div class=@row_cls>
         @content()
     </div>
 }
@@ -160,7 +160,7 @@
     @let actions_vec = ["flex flex-col-reverse gap-2 sm:flex-row", align_cls, class_val]
     @let actions_cls = cn(actions_vec)
 
-    <div class="@actions_cls">
+    <div class=@actions_cls>
         @content()
     </div>
 }

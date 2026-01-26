@@ -61,7 +61,7 @@
 ) {
     @let sidebar_cls = cn(&["flex flex-col w-72 border-r bg-card h-full", class])
 
-    <aside class="@sidebar_cls">
+    <aside class=@sidebar_cls>
         @* Brand header *@
         <div class="flex h-14 items-center border-b px-4">
             <div class="flex items-center gap-2">
@@ -79,7 +79,7 @@
                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                             active_cls
                         ]
-                        <a href="@item.href" class="@cn(@link_classes)">
+                        <a href="@item.href" class=@cn(@link_classes)>
                             @if let Some(icon) = &item.icon {
                                 <span class="h-4 w-4 flex-shrink-0">@safe(icon)</span>
                             }
@@ -151,7 +151,7 @@
     @let sidebar_cls = cn(&["flex flex-col w-72 border-r bg-card h-full", class])
     @let add_handler = on_add_event.unwrap_or("")
 
-    <aside class="@sidebar_cls">
+    <aside class=@sidebar_cls>
         @* Brand header with add button *@
         <div class="flex h-14 items-center justify-between border-b px-4">
             <div class="flex items-center gap-2">
@@ -182,7 +182,7 @@
                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                             active_cls
                         ]
-                        <a href="@item.href" class="@cn(@link_classes)">
+                        <a href="@item.href" class=@cn(@link_classes)>
                             @if let Some(icon) = &item.icon {
                                 <span class="h-4 w-4 flex-shrink-0">@safe(icon)</span>
                             }
@@ -262,7 +262,7 @@
 ) {
     @let sidebar_cls = cn(&["flex flex-col w-64 border-r bg-card h-full", class])
 
-    <aside class="@sidebar_cls">
+    <aside class=@sidebar_cls>
         @* Calendar section *@
         <div class="border-b">
             <@calendar::apply

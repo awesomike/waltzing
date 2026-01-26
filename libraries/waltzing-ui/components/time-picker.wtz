@@ -41,9 +41,9 @@
 
     <div
         class="inline-block w-full"
-        x-data="{
+        x-data=@```json {
             open: false,
-            value: '@initial_value',
+            value: @initial_value,
             displayValue: '',
             hour: 0,
             minute: 0,
@@ -223,11 +223,11 @@
             togglePeriod() {
                 this.period = this.period === 'AM' ? 'PM' : 'AM';
             }
-        }"
+        } ```@
         x-init="init()"
         @@destroy="destroy()"
     >
-        <input type="hidden" name="@name" x-model="value" />
+        <input type="hidden" name=@name x-model="value" />
 
         <div
             class="relative"
@@ -238,8 +238,8 @@
                 type="text"
                 readonly
                 x-model="displayValue"
-                placeholder="@placeholder_text"
-                class="@input_cls"
+                placeholder=@placeholder_text
+                class=@input_cls
                 @if disabled { disabled }
                 @if error.is_some() { aria-invalid="true" }
                 aria-haspopup="dialog"
@@ -445,7 +445,7 @@
     class: &str = "",
 ) {
     <div class="space-y-2">
-        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label for=@name class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>

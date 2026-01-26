@@ -102,7 +102,7 @@
 
     <button
         type="button"
-        class="@cn(@classes)"
+        class=@cn(@classes)
         x-data="{ dark: document.documentElement.classList.contains('dark') }"
         x-init="window.addEventListener('theme-change', () => dark = document.documentElement.classList.contains('dark'))"
         @@click="window.themeManager.toggle(); dark = document.documentElement.classList.contains('dark')"
@@ -161,7 +161,7 @@
     @let classes = [base, cls]
 
     <div
-        class="@cn(@classes)"
+        class=@cn(@classes)
         x-data="{
             open: false,
             theme: window.themeManager ? window.themeManager.current() : 'system',

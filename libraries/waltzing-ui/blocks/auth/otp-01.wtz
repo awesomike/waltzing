@@ -40,9 +40,9 @@
         <@card::description class="text-center">@description</@card::description>
     })
 
-    <div class="@container_cls">
+    <div class=@container_cls>
         <@card::apply header=@header footer=None class="w-full max-w-sm">
-            <form action="@action" method="@method" class="space-y-6">
+            <form action=@action method=@method class="space-y-6">
                 <div class="flex justify-center">
                     <@input_otp::with_separator name="otp" length=6 separator_after=3 />
                 </div>
@@ -58,13 +58,13 @@
                 @if let Some(url) = resend_url {
                     <p class="text-center text-sm text-muted-foreground">
                         Didn't receive a code?
-                        <a href="@url" class="text-primary hover:underline">@resend_text</a>
+                        <a href=@url class="text-primary hover:underline">@resend_text</a>
                     </p>
                 }
 
                 @if let Some(url) = back_url {
                     <div class="text-center">
-                        <a href="@url" class="text-sm text-muted-foreground hover:text-foreground">
+                        <a href=@url class="text-sm text-muted-foreground hover:text-foreground">
                             Back to login
                         </a>
                     </div>

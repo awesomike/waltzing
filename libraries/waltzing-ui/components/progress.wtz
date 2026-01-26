@@ -38,12 +38,12 @@
 
     <div
         role="progressbar"
-        aria-valuenow="@value"
+        aria-valuenow=@value
         aria-valuemin="0"
-        aria-valuemax="@max"
-        class="@cn(@classes)"
+        aria-valuemax=@max
+        class=@cn(@classes)
     >
-        <div class="@indicator" style="width: @(clamped)%"></div>
+        <div class=@indicator style="width: @(clamped)%"></div>
     </div>
 }
 
@@ -58,9 +58,9 @@
         role="progressbar"
         aria-busy="true"
         aria-valuetext="Loading..."
-        class="@cn(@classes)"
+        class=@cn(@classes)
     >
-        <div class="@indicator"></div>
+        <div class=@indicator></div>
     </div>
 }
 

@@ -54,7 +54,7 @@
         <div class="inline-flex items-center gap-2">
             <div
                 role="status"
-                aria-label="@label"
+                aria-label=@label
                 class=@cn(&[base, size_classes, color_classes, class])
             ></div>
             <span class="text-sm text-muted-foreground">@label</span>

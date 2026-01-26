@@ -42,11 +42,11 @@
     @let classes = [base, error_cls, extra_class]
 
     <input
-        type="@type_str"
-        name="@name"
-        class="@cn(@classes)"
-        @if let Some(v) = value { value="@v" }
-        @if let Some(p) = placeholder { placeholder="@p" }
+        type=@type_str
+        name=@name
+        class=@cn(@classes)
+        @if let Some(v) = value { value=@v }
+        @if let Some(p) = placeholder { placeholder=@p }
         @if disabled { disabled }
         @if required { required }
         @if error.is_some() { aria-invalid="true" }
@@ -66,7 +66,7 @@
     class: &str = "",
 ) {
     <div class="space-y-2">
-        <label for="@name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        <label for=@name class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>

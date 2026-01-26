@@ -141,8 +141,8 @@
         type="button"
         class="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
         role="menuitemcheckbox"
-        aria-checked="@checked"
-        data-state="@data_state"
+        aria-checked=@checked
+        data-state=@data_state
         x-on:click="closeMenu()"
         x-on:keydown.enter.prevent="$el.click()"
         x-on:keydown.space.prevent="$el.click()"

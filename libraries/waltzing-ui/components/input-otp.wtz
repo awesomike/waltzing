@@ -54,7 +54,7 @@
                     if (val && index < @length - 1) this.focusInput(index + 1);
                 }
                 this.$refs.hidden.value = this.value;
-                this.$dispatch('input', { name: '@name', value: this.value });
+                this.$dispatch('input', { name: @name, value: this.value });
             },
             handleKeydown(index, event) {
                 if (event.key === 'Backspace') {
@@ -77,21 +77,21 @@
                 chars.forEach((c, i) => { this.digits[i] = c; });
                 this.focusInput(Math.min(chars.length, @length - 1));
                 this.$refs.hidden.value = this.value;
-                this.$dispatch('input', { name: '@name', value: this.value });
+                this.$dispatch('input', { name: @name, value: this.value });
             }
         } ```@
     >
         @* Hidden input for form submission *@
-        <input type="hidden" name="@name" x-ref="hidden" :value="value" />
+        <input type="hidden" name=@name x-ref="hidden" :value="value" />
 
         @for i in 0..length {
             <input
                 type="text"
                 inputmode="numeric"
                 autocomplete="one-time-code"
-                maxlength="@length"
+                maxlength=@length
                 data-otp-input
-                class="@input_base"
+                class=@input_base
                 :value="digits[@i]"
                 x-on:input="handleInput(@i, $event)"
                 x-on:keydown="handleKeydown(@i, $event)"
@@ -141,7 +141,7 @@
                     if (val && index < @length - 1) this.focusInput(index + 1);
                 }
                 this.$refs.hidden.value = this.value;
-                this.$dispatch('input', { name: '@name', value: this.value });
+                this.$dispatch('input', { name: @name, value: this.value });
             },
             handleKeydown(index, event) {
                 if (event.key === 'Backspace') {
@@ -164,25 +164,25 @@
                 chars.forEach((c, i) => { this.digits[i] = c; });
                 this.focusInput(Math.min(chars.length, @length - 1));
                 this.$refs.hidden.value = this.value;
-                this.$dispatch('input', { name: '@name', value: this.value });
+                this.$dispatch('input', { name: @name, value: this.value });
             }
         } ```@
     >
         @* Hidden input for form submission *@
-        <input type="hidden" name="@name" x-ref="hidden" :value="value" />
+        <input type="hidden" name=@name x-ref="hidden" :value="value" />
 
         @for i in 0..length {
             @* Add separator after specified position *@
             @if (i > 0) && ((i % separator_after) == 0) {
-                <span class="@separator_cls">-</span>
+                <span class=@separator_cls>-</span>
             }
             <input
                 type="text"
                 inputmode="numeric"
                 autocomplete="one-time-code"
-                maxlength="@length"
+                maxlength=@length
                 data-otp-input
-                class="@input_base"
+                class=@input_base
                 :value="digits[@i]"
                 x-on:input="handleInput(@i, $event)"
                 x-on:keydown="handleKeydown(@i, $event)"

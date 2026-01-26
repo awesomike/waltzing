@@ -76,7 +76,7 @@
 
     <div
         id="sonner-toaster"
-        class="@container_cls"
+        class=@container_cls
         x-data="{
             toasts: [],
             expanded: @expand,
@@ -260,7 +260,7 @@
 
     <div
         id="sonner-toaster"
-        class="@container_cls"
+        class=@container_cls
         x-data="{
             toasts: [],
             defaultDuration: @duration,
@@ -386,7 +386,7 @@
     @let cls_parts = [base, variant_cls, extra_cls]
     @let toast_cls = cn(cls_parts)
 
-    <div class="@toast_cls" role="alert">
+    <div class=@toast_cls role="alert">
         <div class="flex items-start gap-3">
             @* Icon *@
             @match variant {

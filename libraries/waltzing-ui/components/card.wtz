@@ -12,7 +12,7 @@
 ) {
     @let extra = class
     @let classes = ["rounded-xl border bg-card text-card-foreground shadow", extra]
-    <div class="@cn(classes)">
+    <div class=@cn(classes)>
         @if let Some(h) = header {
             <div class="flex flex-col space-y-1.5 p-6">
                 @h()
@@ -33,7 +33,7 @@
 @fn simple(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["rounded-xl border bg-card text-card-foreground shadow p-6", extra]
-    <div class="@cn(classes)">
+    <div class=@cn(classes)>
         @content()
     </div>
 }
@@ -42,7 +42,7 @@
 @fn header(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["flex flex-col space-y-1.5 p-6", extra]
-    <div class="@cn(classes)">
+    <div class=@cn(classes)>
         @content()
     </div>
 }
@@ -51,7 +51,7 @@
 @fn title(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["font-semibold leading-none tracking-tight", extra]
-    <h3 class="@cn(classes)">
+    <h3 class=@cn(classes)>
         @content()
     </h3>
 }
@@ -60,7 +60,7 @@
 @fn description(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["text-sm text-muted-foreground", extra]
-    <p class="@cn(classes)">
+    <p class=@cn(classes)>
         @content()
     </p>
 }
@@ -69,7 +69,7 @@
 @fn content(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["p-6 pt-0", extra]
-    <div class="@cn(classes)">
+    <div class=@cn(classes)>
         @content()
     </div>
 }
@@ -78,7 +78,7 @@
 @fn footer(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["flex items-center p-6 pt-0", extra]
-    <div class="@cn(classes)">
+    <div class=@cn(classes)>
         @content()
     </div>
 }

@@ -45,13 +45,13 @@
 
     <div
         class="relative w-full"
-        x-data="{
+        x-data=@```json {
             open: false,
             flipTop: false,
             pos: { x: 0, y: 0, width: 0 },
-            selected: '@sel',
+            selected: @sel,
             selectedLabel: '',
-            selectName: '@name',
+            selectName: @name,
             init() {
                 const initial = this.$refs.options?.querySelector(`[data-value='${this.selected}']`);
                 if (initial) this.selectedLabel = initial.dataset.label || initial.textContent.trim();
@@ -82,7 +82,7 @@
                 this.$refs.hiddenInput.value = value;
                 this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
             }
-        }"
+        } ```@
         x-init="init()"
         @destroy="destroy()"
         @keydown.escape="open = false"
@@ -90,7 +90,7 @@
         @* Hidden input for form submission *@
         <input
             type="hidden"
-            name="@name"
+            name=@name
             x-ref="hiddenInput"
             :value="selected"
             @if required { required }
@@ -100,7 +100,7 @@
         <button
             type="button"
             x-ref="trigger"
-            class="@trigger_cls"
+            class=@trigger_cls
             @click="open = !open; if(open) $nextTick(() => updatePos())"
             @if disabled { disabled }
             @if error.is_some() { aria-invalid="true" }
@@ -153,11 +153,11 @@
     @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
 
     <div
-        data-value="@value"
+        data-value=@value
         data-label
         x-data="{ get label() { return this.$el.textContent.trim(); } }"
         x-init="$el.dataset.label = label"
-        class="@option_base @if disabled { pointer-events-none opacity-50 }"
+        class=@option_base @if disabled { pointer-events-none opacity-50 }
         :class="selected === '@value' ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'"
         @click="@if !disabled { selectOption('@value', label) }"
         role="option"
