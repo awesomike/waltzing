@@ -985,8 +985,36 @@ fn generate_all_items_preview(
             .collect()
     };
 
+    // Full-width cards for layouts
+    let generate_layout_cards = |items: &[(String, String)]| -> String {
+        items
+            .iter()
+            .map(|(id, name)| {
+                let preview = get_layout_preview(id);
+                format!(
+                    r#"
+                    <a href="/library/{lib}/layout/{id}" class="block group">
+                        <div class="rounded-lg border border-border overflow-hidden hover:border-primary transition-colors">
+                            <div class="p-6 bg-card/50 min-h-[200px]">
+                                {preview}
+                            </div>
+                            <div class="p-4 border-t border-border bg-card">
+                                <h3 class="font-medium group-hover:text-primary transition-colors">{name}</h3>
+                            </div>
+                        </div>
+                    </a>
+                    "#,
+                    lib = library_id,
+                    id = id,
+                    preview = preview,
+                    name = name
+                )
+            })
+            .collect()
+    };
+
     let component_cards = generate_cards(components, "component");
-    let layout_cards = generate_cards(layouts, "layout");
+    let layout_cards = generate_layout_cards(layouts);
     let block_cards = generate_cards(blocks, "block");
 
     let mut html = String::new();
@@ -1011,7 +1039,7 @@ fn generate_all_items_preview(
             r#"
             <section class="mb-12">
                 <h2 class="text-2xl font-semibold mb-6">Layouts ({count})</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="space-y-6">
                     {cards}
                 </div>
             </section>
