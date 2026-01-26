@@ -85,6 +85,9 @@ tooltip = { path = "components/tooltip.wtz", deps = ["lib/utils"] }
 typography = { path = "components/typography.wtz", deps = ["lib/utils"] }
 validation-errors = { path = "components/validation-errors.wtz", deps = ["lib/utils"] }
 
+# Showcase components (internal)
+showcase-sidebar = { path = "components/showcase/sidebar.wtz", deps = ["lib/utils"] }
+
 [layouts]
 auth = { path = "layouts/auth.wtz", deps = ["base"] }
 base = { path = "layouts/base.wtz", deps = [] }

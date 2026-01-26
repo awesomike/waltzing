@@ -192,6 +192,7 @@ fn head_common() -> &'static str {
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 "#
 }
@@ -340,7 +341,7 @@ async fn library_showcase(Path(id): Path<String>) -> impl IntoResponse {
     <title>{name} - Waltzing Showcase</title>
     {head}
 </head>
-<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: true }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: $persist(true).as('sidebar_open') }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside
@@ -429,7 +430,7 @@ async fn component_showcase(
     <title>{title} - {lib_name} - Waltzing Showcase</title>
     {head}
 </head>
-<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: true }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: $persist(true).as('sidebar_open') }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside
@@ -521,7 +522,7 @@ async fn layout_showcase(
     <title>{title} Layout - {lib_name} - Waltzing Showcase</title>
     {head}
 </head>
-<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: true }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: $persist(true).as('sidebar_open') }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside
@@ -613,7 +614,7 @@ async fn block_showcase(
     <title>{title} Block - {lib_name} - Waltzing Showcase</title>
     {head}
 </head>
-<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: true }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: $persist(true).as('sidebar_open') }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside
@@ -739,158 +740,131 @@ fn generate_sidebar(
     blocks: &[(String, String)],
     active: Option<&str>,
 ) -> String {
-    // Generate options for combobox
-    let combobox_options: String = components
-        .iter()
-        .map(|(id, name)| {
-            format!(
-                r#"<div data-option data-value="/library/{lib}/component/{id}" data-label="{name}" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors" :class="{{ 'bg-accent text-accent-foreground': highlightedIndex === {idx} || selected === '/library/{lib}/component/{id}', 'hover:bg-accent hover:text-accent-foreground': true }}" x-show="'{name}'.toLowerCase().includes(search.toLowerCase())" @click="selectOption('/library/{lib}/component/{id}', '{name}')" @mouseenter="highlightedIndex = {idx}" role="option" :aria-selected="selected === '/library/{lib}/component/{id}'"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4" :class="selected === '/library/{lib}/component/{id}' ? 'opacity-100' : 'opacity-0'"><path d="M20 6 9 17l-5-5"/></svg><span>{name}</span></div>"#,
-                lib = library_id,
-                id = id,
-                name = name,
-                idx = components.iter().position(|(i, _)| i == id).unwrap_or(0)
-            )
-        })
-        .collect();
+    // Icons for sections
+    let components_icon = r#"<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>"#;
+    let layouts_icon = r#"<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>"#;
+    let blocks_icon = r#"<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>"#;
 
-    let nav_items: String = components
-        .iter()
-        .map(|(id, name)| {
-            let is_active = active == Some(id.as_str());
-            let active_class = if is_active {
-                "bg-accent text-accent-foreground"
-            } else {
-                "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-            };
-            let url = format!("/library/{}/component/{}", library_id, id);
-            format!(
-                r##"<a href="{url}" hx-get="{url}" hx-target="#main-content" hx-push-url="true" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"##,
-                url = url,
-                cls = active_class,
-                name = name
-            )
-        })
-        .collect();
+    // Generate nav items for each section
+    fn generate_nav_items(
+        items: &[(String, String)],
+        library_id: &str,
+        item_type: &str,
+        active: Option<&str>,
+    ) -> String {
+        items
+            .iter()
+            .map(|(id, name)| {
+                let is_active = active == Some(id.as_str());
+                let active_class = if is_active {
+                    "bg-accent text-accent-foreground"
+                } else {
+                    "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                };
+                let url = format!("/library/{}/{}/{}", library_id, item_type, id);
+                format!(
+                    r##"<a href="{url}" hx-get="{url}" hx-target="#main-content" hx-push-url="true" class="block px-4 py-1.5 text-sm rounded-md transition-colors {cls}">{name}</a>"##,
+                    url = url,
+                    cls = active_class,
+                    name = name
+                )
+            })
+            .collect()
+    }
 
-    let layout_nav_items: String = layouts
-        .iter()
-        .map(|(id, name)| {
-            let is_active = active == Some(id.as_str());
-            let active_class = if is_active {
-                "bg-accent text-accent-foreground"
-            } else {
-                "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-            };
-            let url = format!("/library/{}/layout/{}", library_id, id);
-            format!(
-                r##"<a href="{url}" hx-get="{url}" hx-target="#main-content" hx-push-url="true" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"##,
-                url = url,
-                cls = active_class,
-                name = name
-            )
-        })
-        .collect();
+    // Generate a collapsible section
+    fn generate_section(
+        title: &str,
+        items_html: &str,
+        section_key: &str,
+        icon: &str,
+        is_empty: bool,
+    ) -> String {
+        if is_empty {
+            return String::new();
+        }
+        format!(
+            r##"<div x-data="{{ open: $persist(true).as('sidebar_{key}') }}" class="mb-2">
+                <button @click="open = !open" class="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+                    <span class="flex items-center gap-2">
+                        {icon}
+                        {title}
+                    </span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform" :class="open ? 'rotate-90' : ''">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </button>
+                <div x-show="open" x-collapse class="space-y-0.5 mt-1">
+                    {items}
+                </div>
+            </div>"##,
+            key = section_key,
+            icon = icon,
+            title = title,
+            items = items_html
+        )
+    }
 
-    let block_nav_items: String = blocks
-        .iter()
-        .map(|(id, name)| {
-            let is_active = active == Some(id.as_str());
-            let active_class = if is_active {
-                "bg-accent text-accent-foreground"
-            } else {
-                "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-            };
-            let url = format!("/library/{}/block/{}", library_id, id);
-            format!(
-                r##"<a href="{url}" hx-get="{url}" hx-target="#main-content" hx-push-url="true" class="block px-4 py-2 text-sm rounded-md transition-colors {cls}">{name}</a>"##,
-                url = url,
-                cls = active_class,
-                name = name
-            )
-        })
-        .collect();
+    let component_items = generate_nav_items(components, library_id, "component", active);
+    let layout_items = generate_nav_items(layouts, library_id, "layout", active);
+    let block_items = generate_nav_items(blocks, library_id, "block", active);
 
-    let all_active = if active.is_none() {
-        "bg-accent text-accent-foreground"
-    } else {
-        "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-    };
+    let components_section = generate_section(
+        "Components",
+        &component_items,
+        &format!("{}_components", library_id),
+        components_icon,
+        components.is_empty(),
+    );
+    let layouts_section = generate_section(
+        "Layouts",
+        &layout_items,
+        &format!("{}_layouts", library_id),
+        layouts_icon,
+        layouts.is_empty(),
+    );
+    let blocks_section = generate_section(
+        "Blocks",
+        &block_items,
+        &format!("{}_blocks", library_id),
+        blocks_icon,
+        blocks.is_empty(),
+    );
 
     format!(
-        r##"
-        <nav class="p-4">
-            <!-- Component Search Combobox -->
-            <div class="mb-4" x-data="{{
-                open: false,
-                search: '',
-                selected: '',
-                highlightedIndex: -1,
-                get filteredOptions() {{
-                    const searchLower = this.search.toLowerCase();
-                    return this.$refs.options ? Array.from(this.$refs.options.querySelectorAll('[data-option]')).filter(el => {{
-                        const label = el.dataset.label.toLowerCase();
-                        return label.includes(searchLower);
-                    }}) : [];
-                }},
-                selectOption(value, label) {{
-                    this.selected = value;
-                    this.search = label;
-                    this.open = false;
-                    window.location.href = value;
-                }},
-                highlightNext() {{
-                    const options = this.filteredOptions;
-                    if (options.length === 0) return;
-                    this.highlightedIndex = Math.min(this.highlightedIndex + 1, options.length - 1);
-                    options[this.highlightedIndex]?.scrollIntoView({{ block: 'nearest' }});
-                }},
-                highlightPrev() {{
-                    const options = this.filteredOptions;
-                    if (options.length === 0) return;
-                    this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
-                    options[this.highlightedIndex]?.scrollIntoView({{ block: 'nearest' }});
-                }},
-                selectHighlighted() {{
-                    const options = this.filteredOptions;
-                    if (this.highlightedIndex >= 0 && this.highlightedIndex < options.length) {{
-                        const el = options[this.highlightedIndex];
-                        this.selectOption(el.dataset.value, el.dataset.label);
-                    }}
-                }}
-            }}" @keydown.down.prevent="highlightNext()" @keydown.up.prevent="highlightPrev()" @keydown.enter.prevent="selectHighlighted()" @keydown.escape="open = false">
-                <div class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    <input type="text" class="flex h-9 w-full items-center rounded-md border border-input bg-transparent pl-8 pr-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring" x-model="search" @focus="open = true; highlightedIndex = -1" @click="open = true" @input="open = true; highlightedIndex = -1" placeholder="Search components..." role="combobox" aria-haspopup="listbox" :aria-expanded="open" aria-autocomplete="list" />
+        r##"<div class="h-full flex flex-col">
+            <!-- Header with back button, library info, and collapse toggle -->
+            <div class="p-4 border-b border-border">
+                <div class="flex items-center justify-between mb-3">
+                    <a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m12 19-7-7 7-7"/>
+                            <path d="M19 12H5"/>
+                        </svg>
+                        <span class="text-sm">Back</span>
+                    </a>
+                    <!-- Collapse toggle button -->
+                    <button @click="sidebarOpen = false" class="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors" title="Collapse sidebar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect width="18" height="18" x="3" y="3" rx="2"/>
+                            <path d="M9 3v18"/>
+                        </svg>
+                    </button>
                 </div>
-                <div x-show="open" x-cloak x-ref="options" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false" class="absolute z-50 mt-1 max-h-60 w-[calc(100%-2rem)] overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md" role="listbox">
-                    {options}
-                    <div x-show="filteredOptions.length === 0" class="py-6 text-center text-sm text-muted-foreground">No components found.</div>
-                </div>
+                <h1 class="text-lg font-semibold">waltzing-ui</h1>
+                <p class="text-sm text-muted-foreground">v0.1.0</p>
             </div>
 
-            <a href="/library/{lib}" class="block px-4 py-2 text-sm rounded-md mb-2 {all_cls} transition-colors">
-                All Components
-            </a>
-            <div class="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 py-2 mt-4">
-                Layouts
-            </div>
-            {layout_items}
-            <div class="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 py-2 mt-4">
-                Blocks
-            </div>
-            {block_items}
-            <div class="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 py-2 mt-4">
-                Components
-            </div>
-            {items}
-        </nav>
-        "##,
-        lib = library_id,
-        all_cls = all_active,
-        layout_items = layout_nav_items,
-        block_items = block_nav_items,
-        items = nav_items,
-        options = combobox_options
+            <!-- Navigation sections -->
+            <nav class="flex-1 overflow-y-auto py-2">
+                {components_section}
+                {layouts_section}
+                {blocks_section}
+            </nav>
+        </div>"##,
+        components_section = components_section,
+        layouts_section = layouts_section,
+        blocks_section = blocks_section
     )
 }
 

@@ -1,0 +1,129 @@
+@*
+ * Showcase sidebar with collapsible sections
+ * Includes library info, search, and navigation sections
+ *@
+
+@struct NavItem {
+    name: String,
+    url: String,
+    active: bool,
+}
+
+@struct SidebarProps {
+    library_name: String,
+    library_version: String,
+    library_id: String,
+    components: Vec<NavItem>,
+    layouts: Vec<NavItem>,
+    blocks: Vec<NavItem>,
+}
+
+@fn nav_item(item: &NavItem) {
+    @let active_cls = if item.active { "bg-accent text-accent-foreground" } else { "text-muted-foreground hover:text-foreground hover:bg-accent/50" }
+    <a
+        href="@item.url"
+        hx-get="@item.url"
+        hx-target="#main-content"
+        hx-push-url="true"
+        class="block px-4 py-1.5 text-sm rounded-md transition-colors @active_cls"
+    >
+        @item.name
+    </a>
+}
+
+@fn apply(props: &SidebarProps) {
+    @let components_icon = r#"<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>"#
+    @let layouts_icon = r#"<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>"#
+    @let blocks_icon = r#"<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>"#
+
+    <div class="h-full flex flex-col">
+        @* Header with back button, library info, and collapse toggle *@
+        <div class="p-4 border-b border-border">
+            <div class="flex items-center justify-between mb-3">
+                <a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m12 19-7-7 7-7"/>
+                        <path d="M19 12H5"/>
+                    </svg>
+                    <span class="text-sm">Back</span>
+                </a>
+                @* Collapse toggle button *@
+                <button
+                    x-on:click="sidebarOpen = false"
+                    class="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                    title="Collapse sidebar"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="18" height="18" x="3" y="3" rx="2"/>
+                        <path d="M9 3v18"/>
+                    </svg>
+                </button>
+            </div>
+            <h1 class="text-lg font-semibold">@props.library_name</h1>
+            <p class="text-sm text-muted-foreground">v@props.library_version</p>
+        </div>
+
+        @* Navigation sections *@
+        <nav class="flex-1 overflow-y-auto py-2">
+            @* Components section *@
+            @if !props.components.is_empty() {
+                <div x-data="{ open: $persist(true).as('sidebar_components') }" class="mb-2">
+                    <button x-on:click="open = !open" class="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+                        <span class="flex items-center gap-2">
+                            @safe(components_icon)
+                            Components
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform" x-bind:class="open ? 'rotate-90' : ''">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-collapse class="space-y-0.5 mt-1">
+                        @for item in &props.components {
+                            <@nav_item item=@item />
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Layouts section *@
+            @if !props.layouts.is_empty() {
+                <div x-data="{ open: $persist(true).as('sidebar_layouts') }" class="mb-2">
+                    <button x-on:click="open = !open" class="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+                        <span class="flex items-center gap-2">
+                            @safe(layouts_icon)
+                            Layouts
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform" x-bind:class="open ? 'rotate-90' : ''">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-collapse class="space-y-0.5 mt-1">
+                        @for item in &props.layouts {
+                            <@nav_item item=@item />
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Blocks section *@
+            @if !props.blocks.is_empty() {
+                <div x-data="{ open: $persist(true).as('sidebar_blocks') }" class="mb-2">
+                    <button x-on:click="open = !open" class="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+                        <span class="flex items-center gap-2">
+                            @safe(blocks_icon)
+                            Blocks
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform" x-bind:class="open ? 'rotate-90' : ''">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-collapse class="space-y-0.5 mt-1">
+                        @for item in &props.blocks {
+                            <@nav_item item=@item />
+                        }
+                    </div>
+                </div>
+            }
+        </nav>
+    </div>
+}

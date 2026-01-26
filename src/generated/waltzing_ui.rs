@@ -61,6 +61,7 @@ pub const COMPONENTS: &[&str] = &[
     "select",
     "separator",
     "sheet",
+    "showcase-sidebar",
     "skeleton",
     "slider",
     "sonner",
