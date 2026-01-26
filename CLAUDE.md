@@ -175,17 +175,18 @@ When an attribute value is a Waltzing expression, do NOT wrap it in quotes:
 ```waltzing
 @* ❌ WRONG - quotes make @ a literal character, NOT evaluated *@
 <div class="@container_cls" id="@my_id" />
-<button class="@cn(&[base, extra])" />
+<button class="@cn(@classes)" />
 
 @* ✅ CORRECT - no quotes, expression is evaluated *@
 <div class=@container_cls id=@my_id />
-<button class=@cn(&[base, extra]) />
+<button class=@cn(classes) />
 ```
 
 **Rule:**
 - `attr="literal"` → literal string value
 - `attr=@expression` → evaluated expression (NO QUOTES!)
 - `attr="prefix @var suffix"` → string interpolation (quotes OK for mixed content)
+- Inside function calls, do NOT use `@` for variables: `@cn(classes)` not `@cn(@classes)`
 
 **#2 Mistake: x-data with variable interpolation**
 
