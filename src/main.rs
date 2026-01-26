@@ -724,7 +724,7 @@ fn generate_sidebar(
                 };
                 let url = format!("/library/{}/{}/{}", library_id, item_type, id);
                 format!(
-                    r##"<a href="{url}" hx-get="{url}" hx-target="#main-content" hx-push-url="true" class="block px-4 py-1.5 text-sm rounded-md transition-colors {cls}">{name}</a>"##,
+                    r##"<a href="{url}" hx-get="{url}" hx-target="#main-content" hx-push-url="true" class="block pl-8 pr-4 py-1.5 text-sm rounded-md transition-colors {cls}">{name}</a>"##,
                     url = url,
                     cls = active_class,
                     name = name
