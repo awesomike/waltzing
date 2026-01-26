@@ -770,6 +770,32 @@ fn generate_sidebar(
     let layout_items = generate_nav_items(layouts, library_id, "layout", active);
     let block_items = generate_nav_items(blocks, library_id, "block", active);
 
+    // Generate search options for all items
+    let mut all_items: Vec<(&str, &str, &str)> = Vec::new();
+    for (id, name) in components {
+        all_items.push((id.as_str(), name.as_str(), "component"));
+    }
+    for (id, name) in layouts {
+        all_items.push((id.as_str(), name.as_str(), "layout"));
+    }
+    for (id, name) in blocks {
+        all_items.push((id.as_str(), name.as_str(), "block"));
+    }
+
+    let search_options: String = all_items
+        .iter()
+        .enumerate()
+        .map(|(idx, (id, name, item_type))| {
+            let url = format!("/library/{}/{}/{}", library_id, item_type, id);
+            format!(
+                r#"<div data-option data-value="{url}" data-label="{name}" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none" :class="highlightedIndex === {idx} ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'" x-show="'{name}'.toLowerCase().includes(search.toLowerCase())" @click="selectOption('{url}', '{name}')" @mouseenter="highlightedIndex = {idx}">{name}</div>"#,
+                url = url,
+                name = name,
+                idx = idx
+            )
+        })
+        .collect();
+
     let components_section = generate_section(
         "Components",
         &component_items,
@@ -816,6 +842,53 @@ fn generate_sidebar(
                 <p class="text-sm text-muted-foreground">v0.1.0</p>
             </div>
 
+            <!-- Search combobox -->
+            <div class="px-4 py-2 border-b border-border" x-data="{{
+                open: false,
+                search: '',
+                highlightedIndex: -1,
+                get filteredOptions() {{
+                    const searchLower = this.search.toLowerCase();
+                    return this.$refs.options ? Array.from(this.$refs.options.querySelectorAll('[data-option]')).filter(el => {{
+                        const label = el.dataset.label.toLowerCase();
+                        return label.includes(searchLower);
+                    }}) : [];
+                }},
+                selectOption(value, label) {{
+                    this.search = '';
+                    this.open = false;
+                    window.location.href = value;
+                }},
+                highlightNext() {{
+                    const options = this.filteredOptions;
+                    if (options.length === 0) return;
+                    this.highlightedIndex = Math.min(this.highlightedIndex + 1, options.length - 1);
+                    options[this.highlightedIndex]?.scrollIntoView({{ block: 'nearest' }});
+                }},
+                highlightPrev() {{
+                    const options = this.filteredOptions;
+                    if (options.length === 0) return;
+                    this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
+                    options[this.highlightedIndex]?.scrollIntoView({{ block: 'nearest' }});
+                }},
+                selectHighlighted() {{
+                    const options = this.filteredOptions;
+                    if (this.highlightedIndex >= 0 && this.highlightedIndex < options.length) {{
+                        const el = options[this.highlightedIndex];
+                        this.selectOption(el.dataset.value, el.dataset.label);
+                    }}
+                }}
+            }}" @keydown.down.prevent="highlightNext()" @keydown.up.prevent="highlightPrev()" @keydown.enter.prevent="selectHighlighted()" @keydown.escape="open = false">
+                <div class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" class="flex h-9 w-full rounded-md border border-input bg-transparent pl-8 pr-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring" x-model="search" @focus="open = true; highlightedIndex = -1" @click="open = true" @input="open = true; highlightedIndex = -1" placeholder="Search..." />
+                </div>
+                <div x-show="open && search.length > 0" x-cloak x-ref="options" @click.outside="open = false" class="absolute z-50 mt-1 max-h-60 w-[calc(100%-2rem)] overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                    {search_options}
+                    <div x-show="filteredOptions.length === 0" class="py-6 text-center text-sm text-muted-foreground">No results found.</div>
+                </div>
+            </div>
+
             <!-- Navigation sections -->
             <nav class="flex-1 overflow-y-auto py-2">
                 {components_section}
@@ -823,6 +896,7 @@ fn generate_sidebar(
                 {blocks_section}
             </nav>
         </div>"##,
+        search_options = search_options,
         components_section = components_section,
         layouts_section = layouts_section,
         blocks_section = blocks_section
