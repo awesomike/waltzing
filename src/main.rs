@@ -32,6 +32,8 @@ async fn main() {
         .route("/", get(index))
         .route("/library/{id}", get(library_showcase))
         .route("/library/{id}/component/{component}", get(component_showcase))
+        .route("/library/{id}/layout/{layout}", get(layout_showcase))
+        .route("/library/{id}/block/{block}", get(block_showcase))
         .nest_service("/static", ServeDir::new("static"));
 
     // Start the server
@@ -450,6 +452,172 @@ async fn component_showcase(Path((id, component)): Path<(String, String)>) -> im
     }
 }
 
+async fn layout_showcase(Path((id, layout)): Path<(String, String)>) -> impl IntoResponse {
+    let library = LIBRARIES.iter().find(|lib| lib.id == id);
+
+    match library {
+        Some(lib) => {
+            let components = get_component_list(&id);
+            let layouts = get_layout_list(&id);
+            let blocks = get_block_list(&id);
+            let sidebar = generate_sidebar(&id, &components, &layouts, &blocks, Some(&layout));
+            let content = generate_layout_detail(&layout);
+
+            let title = id_to_title(&layout);
+
+            let html = format!(
+                r#"<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} Layout - {lib_name} - Waltzing Showcase</title>
+    {head}
+</head>
+<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: true }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside
+            :class="sidebarOpen ? 'w-64' : 'w-0'"
+            class="flex-shrink-0 border-r border-border bg-card overflow-y-auto transition-all duration-300"
+        >
+            <div class="p-4 border-b border-border">
+                <a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 19-7-7 7-7"></path>
+                        <path d="M19 12H5"></path>
+                    </svg>
+                    <span class="text-sm">Back</span>
+                </a>
+                <h1 class="text-lg font-semibold">{lib_name}</h1>
+                <p class="text-sm text-muted-foreground">v{version}</p>
+            </div>
+            {sidebar}
+        </aside>
+
+        <!-- Main content -->
+        <main class="flex-1 overflow-y-auto">
+            <header class="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div class="flex items-center gap-4">
+                    <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-md hover:bg-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" x2="20" y1="12" y2="12"></line>
+                            <line x1="4" x2="20" y1="6" y2="6"></line>
+                            <line x1="4" x2="20" y1="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div>
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Layout</span>
+                        <h2 class="text-xl font-semibold">{title}</h2>
+                    </div>
+                </div>
+                {toggle}
+            </header>
+            <div class="p-6">
+                {content}
+            </div>
+        </main>
+    </div>
+</body>
+</html>"#,
+                title = title,
+                lib_name = lib.name,
+                head = head_common(),
+                version = lib.version,
+                sidebar = sidebar,
+                toggle = theme_toggle(),
+                content = content
+            );
+
+            Html(html)
+        }
+        None => Html(not_found_page(&id)),
+    }
+}
+
+async fn block_showcase(Path((id, block)): Path<(String, String)>) -> impl IntoResponse {
+    let library = LIBRARIES.iter().find(|lib| lib.id == id);
+
+    match library {
+        Some(lib) => {
+            let components = get_component_list(&id);
+            let layouts = get_layout_list(&id);
+            let blocks = get_block_list(&id);
+            let sidebar = generate_sidebar(&id, &components, &layouts, &blocks, Some(&block));
+            let content = generate_block_detail(&block);
+
+            let title = id_to_title(&block);
+
+            let html = format!(
+                r#"<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} Block - {lib_name} - Waltzing Showcase</title>
+    {head}
+</head>
+<body class="min-h-screen" x-data="{{ dark: true, sidebarOpen: true }}" x-init="dark = localStorage.getItem('theme') !== 'light'" x-effect="document.documentElement.classList.toggle('dark', dark); localStorage.setItem('theme', dark ? 'dark' : 'light')">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside
+            :class="sidebarOpen ? 'w-64' : 'w-0'"
+            class="flex-shrink-0 border-r border-border bg-card overflow-y-auto transition-all duration-300"
+        >
+            <div class="p-4 border-b border-border">
+                <a href="/" class="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 19-7-7 7-7"></path>
+                        <path d="M19 12H5"></path>
+                    </svg>
+                    <span class="text-sm">Back</span>
+                </a>
+                <h1 class="text-lg font-semibold">{lib_name}</h1>
+                <p class="text-sm text-muted-foreground">v{version}</p>
+            </div>
+            {sidebar}
+        </aside>
+
+        <!-- Main content -->
+        <main class="flex-1 overflow-y-auto">
+            <header class="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div class="flex items-center gap-4">
+                    <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-md hover:bg-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" x2="20" y1="12" y2="12"></line>
+                            <line x1="4" x2="20" y1="6" y2="6"></line>
+                            <line x1="4" x2="20" y1="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div>
+                        <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Block</span>
+                        <h2 class="text-xl font-semibold">{title}</h2>
+                    </div>
+                </div>
+                {toggle}
+            </header>
+            <div class="p-6">
+                {content}
+            </div>
+        </main>
+    </div>
+</body>
+</html>"#,
+                title = title,
+                lib_name = lib.name,
+                head = head_common(),
+                version = lib.version,
+                sidebar = sidebar,
+                toggle = theme_toggle(),
+                content = content
+            );
+
+            Html(html)
+        }
+        None => Html(not_found_page(&id)),
+    }
+}
+
 fn not_found_page(id: &str) -> String {
     format!(
         r#"<!DOCTYPE html>
@@ -747,6 +915,522 @@ fn generate_component_detail(component: &str) -> String {
         examples = examples,
         usage = usage
     )
+}
+
+fn generate_layout_detail(layout: &str) -> String {
+    let description = get_layout_description(layout);
+    let preview = get_layout_preview(layout);
+    let usage = get_layout_usage(layout);
+
+    format!(
+        r#"
+        <div class="space-y-8">
+            <!-- Description -->
+            <section>
+                <div class="rounded-lg border border-border p-6 bg-card">
+                    <p class="text-muted-foreground">{description}</p>
+                </div>
+            </section>
+
+            <!-- Preview -->
+            <section>
+                <h3 class="text-lg font-semibold mb-4">Preview</h3>
+                <div class="rounded-lg border border-border overflow-hidden">
+                    <div class="bg-card/50 min-h-[400px] relative">
+                        {preview}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Usage -->
+            <section>
+                <h3 class="text-lg font-semibold mb-4">Usage</h3>
+                <div class="rounded-lg border border-border overflow-hidden">
+                    <div class="p-4 bg-muted/30">
+                        <pre class="text-sm overflow-x-auto"><code>{usage}</code></pre>
+                    </div>
+                </div>
+            </section>
+        </div>
+        "#,
+        description = description,
+        preview = preview,
+        usage = usage
+    )
+}
+
+fn get_layout_description(layout: &str) -> &'static str {
+    match layout {
+        "base" => "The base layout provides the foundation for all pages, including HTML document structure, meta tags, theme support, and common scripts/styles.",
+        "auth" => "Authentication layout optimized for login, signup, and password reset pages. Centers content with optional branding areas.",
+        "dashboard" => "Dashboard layout with a collapsible sidebar, header with user menu, and main content area. Ideal for admin panels and data-heavy applications.",
+        "marketing" => "Marketing layout with navigation header, hero sections support, and footer. Perfect for landing pages and marketing sites.",
+        "settings" => "Settings layout with a sidebar navigation for different setting categories. Great for user preferences and configuration pages.",
+        "sidebar" => "Sidebar layout with a persistent navigation sidebar and main content area. Suitable for documentation sites and multi-section applications.",
+        _ => "A layout template for structuring page content.",
+    }
+}
+
+fn get_layout_preview(layout: &str) -> &'static str {
+    match layout {
+        "base" => r#"
+            <div class="p-8 flex flex-col items-center justify-center h-full min-h-[300px] text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground mb-4">
+                    <rect width="18" height="18" x="3" y="3" rx="2"/>
+                    <path d="M3 9h18"/>
+                </svg>
+                <h4 class="text-lg font-medium mb-2">Base Layout</h4>
+                <p class="text-sm text-muted-foreground max-w-md">Provides HTML document structure with head, body, theme support, and script loading.</p>
+            </div>
+        "#,
+        "auth" => r#"
+            <div class="flex h-[400px]">
+                <div class="hidden md:flex md:w-1/2 bg-muted/30 items-center justify-center border-r">
+                    <div class="text-center p-8">
+                        <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-primary"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        </div>
+                        <p class="text-muted-foreground">Brand Area</p>
+                    </div>
+                </div>
+                <div class="flex-1 flex items-center justify-center p-8">
+                    <div class="w-full max-w-sm space-y-4">
+                        <div class="h-8 bg-muted/50 rounded w-3/4"></div>
+                        <div class="h-4 bg-muted/30 rounded w-1/2"></div>
+                        <div class="space-y-3 pt-4">
+                            <div class="h-10 bg-muted/40 rounded"></div>
+                            <div class="h-10 bg-muted/40 rounded"></div>
+                            <div class="h-10 bg-primary/20 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        "#,
+        "dashboard" => r#"
+            <div class="flex h-[400px]">
+                <div class="w-16 bg-card border-r flex flex-col items-center py-4 gap-4">
+                    <div class="w-8 h-8 rounded bg-primary/20"></div>
+                    <div class="w-8 h-8 rounded bg-muted/50"></div>
+                    <div class="w-8 h-8 rounded bg-muted/50"></div>
+                    <div class="w-8 h-8 rounded bg-muted/50"></div>
+                </div>
+                <div class="flex-1 flex flex-col">
+                    <div class="h-14 border-b flex items-center px-4 justify-between">
+                        <div class="h-4 bg-muted/50 rounded w-32"></div>
+                        <div class="w-8 h-8 rounded-full bg-muted/50"></div>
+                    </div>
+                    <div class="flex-1 p-6 grid grid-cols-3 gap-4">
+                        <div class="rounded-lg border bg-card p-4">
+                            <div class="h-4 bg-muted/40 rounded w-1/2 mb-2"></div>
+                            <div class="h-8 bg-muted/30 rounded w-3/4"></div>
+                        </div>
+                        <div class="rounded-lg border bg-card p-4">
+                            <div class="h-4 bg-muted/40 rounded w-1/2 mb-2"></div>
+                            <div class="h-8 bg-muted/30 rounded w-3/4"></div>
+                        </div>
+                        <div class="rounded-lg border bg-card p-4">
+                            <div class="h-4 bg-muted/40 rounded w-1/2 mb-2"></div>
+                            <div class="h-8 bg-muted/30 rounded w-3/4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        "#,
+        "marketing" => r#"
+            <div class="flex flex-col h-[400px]">
+                <div class="h-14 border-b flex items-center justify-between px-6">
+                    <div class="h-6 bg-muted/50 rounded w-24"></div>
+                    <div class="flex gap-4">
+                        <div class="h-4 bg-muted/40 rounded w-16"></div>
+                        <div class="h-4 bg-muted/40 rounded w-16"></div>
+                        <div class="h-4 bg-muted/40 rounded w-16"></div>
+                    </div>
+                    <div class="h-8 bg-primary/20 rounded w-20"></div>
+                </div>
+                <div class="flex-1 flex items-center justify-center p-8">
+                    <div class="text-center max-w-lg">
+                        <div class="h-10 bg-muted/40 rounded w-3/4 mx-auto mb-4"></div>
+                        <div class="h-4 bg-muted/30 rounded w-full mb-2"></div>
+                        <div class="h-4 bg-muted/30 rounded w-5/6 mx-auto mb-6"></div>
+                        <div class="flex gap-3 justify-center">
+                            <div class="h-10 bg-primary/30 rounded w-28"></div>
+                            <div class="h-10 bg-muted/40 rounded w-28"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-12 border-t flex items-center justify-center">
+                    <div class="h-3 bg-muted/30 rounded w-48"></div>
+                </div>
+            </div>
+        "#,
+        "settings" => r#"
+            <div class="flex h-[400px]">
+                <div class="w-48 border-r p-4 space-y-2">
+                    <div class="h-4 bg-muted/30 rounded w-20 mb-4"></div>
+                    <div class="h-8 bg-accent/50 rounded px-3 flex items-center">
+                        <div class="h-3 bg-accent-foreground/30 rounded w-16"></div>
+                    </div>
+                    <div class="h-8 rounded px-3 flex items-center">
+                        <div class="h-3 bg-muted/40 rounded w-20"></div>
+                    </div>
+                    <div class="h-8 rounded px-3 flex items-center">
+                        <div class="h-3 bg-muted/40 rounded w-14"></div>
+                    </div>
+                    <div class="h-8 rounded px-3 flex items-center">
+                        <div class="h-3 bg-muted/40 rounded w-24"></div>
+                    </div>
+                </div>
+                <div class="flex-1 p-6">
+                    <div class="h-6 bg-muted/50 rounded w-32 mb-2"></div>
+                    <div class="h-4 bg-muted/30 rounded w-64 mb-6"></div>
+                    <div class="space-y-4">
+                        <div class="h-10 bg-muted/40 rounded"></div>
+                        <div class="h-10 bg-muted/40 rounded"></div>
+                        <div class="h-20 bg-muted/40 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        "#,
+        "sidebar" => r#"
+            <div class="flex h-[400px]">
+                <div class="w-56 border-r bg-card p-4">
+                    <div class="h-6 bg-muted/50 rounded w-24 mb-6"></div>
+                    <div class="space-y-1">
+                        <div class="h-8 bg-accent/50 rounded flex items-center px-3">
+                            <div class="h-3 bg-accent-foreground/30 rounded w-20"></div>
+                        </div>
+                        <div class="h-8 rounded flex items-center px-3">
+                            <div class="h-3 bg-muted/40 rounded w-24"></div>
+                        </div>
+                        <div class="h-8 rounded flex items-center px-3">
+                            <div class="h-3 bg-muted/40 rounded w-16"></div>
+                        </div>
+                        <div class="h-8 rounded flex items-center px-3">
+                            <div class="h-3 bg-muted/40 rounded w-28"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 p-6">
+                    <div class="h-8 bg-muted/50 rounded w-48 mb-4"></div>
+                    <div class="h-4 bg-muted/30 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-muted/30 rounded w-5/6 mb-2"></div>
+                    <div class="h-4 bg-muted/30 rounded w-4/6"></div>
+                </div>
+            </div>
+        "#,
+        _ => r#"
+            <div class="p-8 flex flex-col items-center justify-center h-full min-h-[300px] text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted-foreground mb-4">
+                    <rect width="18" height="18" x="3" y="3" rx="2"/>
+                    <path d="M3 9h18"/>
+                    <path d="M9 21V9"/>
+                </svg>
+                <h4 class="text-lg font-medium mb-2">Layout Preview</h4>
+                <p class="text-sm text-muted-foreground">Preview not available for this layout.</p>
+            </div>
+        "#,
+    }
+}
+
+fn get_layout_usage(layout: &str) -> &'static str {
+    match layout {
+        "base" => r#"@import /layouts/base.wtz as base
+
+<@base::apply title="My Page">
+    <h1>Welcome</h1>
+    <p>Your content here...</p>
+</@>"#,
+        "auth" => r#"@import /layouts/auth.wtz as auth
+
+<@auth::apply title="Login">
+    <@auth::card>
+        <form>
+            <!-- Login form fields -->
+        </form>
+    </@>
+</@>"#,
+        "dashboard" => r#"@import /layouts/dashboard.wtz as dashboard
+
+<@dashboard::apply
+    title="Dashboard"
+    user_name="John Doe"
+    user_email="john@example.com"
+>
+    <div class="grid gap-4">
+        <!-- Dashboard content -->
+    </div>
+</@>"#,
+        "marketing" => r#"@import /layouts/marketing.wtz as marketing
+
+<@marketing::apply title="Welcome">
+    <@marketing::hero
+        title="Build Something Amazing"
+        description="Get started with our platform"
+    />
+    <@marketing::features />
+</@>"#,
+        "settings" => r#"@import /layouts/settings.wtz as settings
+
+<@settings::apply
+    title="Settings"
+    active_section="profile"
+>
+    <!-- Settings content for active section -->
+</@>"#,
+        "sidebar" => r#"@import /layouts/sidebar.wtz as sidebar
+
+@let nav_items = vec![
+    sidebar::NavItem { label: "Home", href: "/", active: true },
+    sidebar::NavItem { label: "About", href: "/about", active: false },
+]
+
+<@sidebar::apply title="Docs" nav_items=@nav_items>
+    <article>
+        <!-- Page content -->
+    </article>
+</@>"#,
+        _ => r#"@import /layouts/LAYOUT_NAME.wtz as layout
+
+<@layout::apply title="Page Title">
+    <!-- Your content here -->
+</@>"#,
+    }
+}
+
+fn generate_block_detail(block: &str) -> String {
+    let description = get_block_description(block);
+    let preview = get_block_preview(block);
+    let usage = get_block_usage(block);
+
+    format!(
+        r#"
+        <div class="space-y-8">
+            <!-- Description -->
+            <section>
+                <div class="rounded-lg border border-border p-6 bg-card">
+                    <p class="text-muted-foreground">{description}</p>
+                </div>
+            </section>
+
+            <!-- Preview -->
+            <section>
+                <h3 class="text-lg font-semibold mb-4">Preview</h3>
+                <div class="rounded-lg border border-border overflow-hidden">
+                    <div class="p-8 bg-card/50 flex items-center justify-center min-h-[300px]">
+                        {preview}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Usage -->
+            <section>
+                <h3 class="text-lg font-semibold mb-4">Usage</h3>
+                <div class="rounded-lg border border-border overflow-hidden">
+                    <div class="p-4 bg-muted/30">
+                        <pre class="text-sm overflow-x-auto"><code>{usage}</code></pre>
+                    </div>
+                </div>
+            </section>
+        </div>
+        "#,
+        description = description,
+        preview = preview,
+        usage = usage
+    )
+}
+
+fn get_block_description(block: &str) -> &'static str {
+    match block {
+        "login" | "login-01" | "login-02" | "login-03" | "login-04" | "login-05" =>
+            "A complete login form block with email/password fields, remember me option, and forgot password link. Ready to integrate with your authentication backend.",
+        "signup" | "signup-01" =>
+            "A signup form block with name, email, password fields, and terms acceptance. Includes validation states and social signup options.",
+        "otp-01" =>
+            "One-time password verification block with a 6-digit code input. Perfect for two-factor authentication flows.",
+        "sidebar-01" | "sidebar-02" | "sidebar-03" =>
+            "A navigation sidebar block with collapsible sections, icons, and active state highlighting.",
+        "sidebar-07" =>
+            "A sidebar with user profile section, navigation items, and workspace switcher.",
+        "sidebar-11" =>
+            "A file explorer sidebar with collapsible folder tree, file type icons, and search functionality.",
+        "sidebar-12" =>
+            "A calendar sidebar with mini calendar, upcoming events list, and date selection.",
+        "sidebar-15" =>
+            "A settings sidebar with categorized navigation and notification badges.",
+        "dashboard-01" =>
+            "A complete dashboard block with stats cards, recent activity table, and quick actions.",
+        "calendar-01" =>
+            "A full calendar block with month view, event display, and navigation controls.",
+        "confirm-dialog" =>
+            "A confirmation dialog for actions that require user acknowledgment.",
+        "delete-dialog" =>
+            "A destructive action dialog with warning styling for delete confirmations.",
+        "share-dialog" =>
+            "A share dialog with link copying, email sharing, and permission settings.",
+        "contact-form" =>
+            "A contact form block with name, email, subject, and message fields.",
+        "profile-form" =>
+            "A profile settings form with avatar upload, personal info, and social links.",
+        _ => "A pre-built UI block ready to use in your application.",
+    }
+}
+
+fn get_block_preview(block: &str) -> &'static str {
+    match block {
+        "login" | "login-01" => r#"
+            <div class="w-full max-w-sm">
+                <div class="rounded-xl border bg-card p-6 shadow-sm">
+                    <div class="mb-6 text-center">
+                        <h3 class="text-xl font-semibold">Welcome back</h3>
+                        <p class="text-sm text-muted-foreground mt-1">Sign in to your account</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium">Email</label>
+                            <input type="email" placeholder="you@example.com" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium">Password</label>
+                            <input type="password" placeholder="••••••••" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                        </div>
+                        <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">
+                            Sign in
+                        </button>
+                    </div>
+                </div>
+            </div>
+        "#,
+        "signup" | "signup-01" => r#"
+            <div class="w-full max-w-sm">
+                <div class="rounded-xl border bg-card p-6 shadow-sm">
+                    <div class="mb-6 text-center">
+                        <h3 class="text-xl font-semibold">Create account</h3>
+                        <p class="text-sm text-muted-foreground mt-1">Get started for free</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium">Name</label>
+                            <input type="text" placeholder="John Doe" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium">Email</label>
+                            <input type="email" placeholder="you@example.com" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium">Password</label>
+                            <input type="password" placeholder="••••••••" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                        </div>
+                        <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">
+                            Create account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        "#,
+        "dashboard-01" => r#"
+            <div class="w-full max-w-2xl">
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="rounded-lg border bg-card p-4">
+                        <p class="text-sm text-muted-foreground">Total Users</p>
+                        <p class="text-2xl font-bold">2,543</p>
+                        <p class="text-xs text-green-500">+12.5%</p>
+                    </div>
+                    <div class="rounded-lg border bg-card p-4">
+                        <p class="text-sm text-muted-foreground">Revenue</p>
+                        <p class="text-2xl font-bold">$45.2k</p>
+                        <p class="text-xs text-green-500">+8.2%</p>
+                    </div>
+                    <div class="rounded-lg border bg-card p-4">
+                        <p class="text-sm text-muted-foreground">Active Now</p>
+                        <p class="text-2xl font-bold">573</p>
+                        <p class="text-xs text-muted-foreground">+201 today</p>
+                    </div>
+                </div>
+                <div class="rounded-lg border bg-card">
+                    <div class="p-4 border-b">
+                        <h4 class="font-semibold">Recent Activity</h4>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-muted"></div>
+                            <div class="flex-1">
+                                <p class="text-sm">New user registered</p>
+                                <p class="text-xs text-muted-foreground">2 minutes ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-muted"></div>
+                            <div class="flex-1">
+                                <p class="text-sm">Payment received</p>
+                                <p class="text-xs text-muted-foreground">15 minutes ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        "#,
+        _ => r#"
+            <div class="text-center p-8">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted-foreground mx-auto mb-4">
+                    <rect width="7" height="7" x="3" y="3" rx="1"/>
+                    <rect width="7" height="7" x="14" y="3" rx="1"/>
+                    <rect width="7" height="7" x="14" y="14" rx="1"/>
+                    <rect width="7" height="7" x="3" y="14" rx="1"/>
+                </svg>
+                <h4 class="text-lg font-medium mb-2">Block Preview</h4>
+                <p class="text-sm text-muted-foreground">Interactive preview for this block.</p>
+            </div>
+        "#,
+    }
+}
+
+fn get_block_usage(block: &str) -> &'static str {
+    match block {
+        "login" | "login-01" => r#"@import /blocks/auth/login-01.wtz as login
+
+<@login::apply
+    action="/api/login"
+    method="post"
+    forgot_password_url=Some("/forgot-password")
+    signup_url=Some("/signup")
+/>"#,
+        "signup" | "signup-01" => r#"@import /blocks/auth/signup-01.wtz as signup
+
+<@signup::apply
+    action="/api/signup"
+    method="post"
+    login_url=Some("/login")
+    terms_url=Some("/terms")
+/>"#,
+        "dashboard-01" => r#"@import /blocks/dashboard/dashboard-01.wtz as dashboard
+
+@let stats = vec![
+    dashboard::Stat { label: "Users", value: "2,543", change: Some("+12%") },
+    dashboard::Stat { label: "Revenue", value: "$45k", change: Some("+8%") },
+]
+
+<@dashboard::apply stats=@stats />"#,
+        "sidebar-01" | "sidebar-02" | "sidebar-03" => r#"@import /blocks/sidebar/sidebar-01.wtz as sidebar
+
+@let items = vec![
+    sidebar::NavItem { label: "Dashboard", href: "/", icon: Some("..."), active: true },
+    sidebar::NavItem { label: "Settings", href: "/settings", icon: Some("..."), active: false },
+]
+
+<@sidebar::apply nav_items=@items />"#,
+        "calendar-01" => r#"@import /blocks/calendar/calendar-01.wtz as calendar
+
+@let events = vec![
+    calendar::Event { date: "2024-03-15", title: "Meeting", color: None },
+]
+
+<@calendar::apply events=@events />"#,
+        _ => r#"@import /blocks/CATEGORY/BLOCK_NAME.wtz as block
+
+<@block::apply
+    // ... block parameters
+/>"#,
+    }
 }
 
 fn get_component_preview(component: &str) -> &'static str {

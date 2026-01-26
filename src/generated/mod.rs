@@ -25,6 +25,6 @@ pub const LIBRARIES: &[Library] = &[
 ];
 
 /// Path to compiled templates (set by build.rs)
-pub const TEMPLATES_DIR: &str = "/Users/michael/awesomike/waltzing-runtime/target/debug/build/waltzing-showcase-48a663a65cdb5335/out/templates";
+pub const TEMPLATES_DIR: &str = "/Users/michael/awesomike/waltzing-runtime/target/debug/build/waltzing-showcase-b2fb0745b61a6366/out/templates";
 
 pub mod waltzing_ui;

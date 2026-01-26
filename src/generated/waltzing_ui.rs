@@ -116,4 +116,4 @@ pub const BLOCKS: &[&str] = &[
     "signup-01",
 ];
 
-// Compiled templates are in: /Users/michael/awesomike/waltzing-runtime/target/debug/build/waltzing-showcase-48a663a65cdb5335/out/templates/waltzing_ui
+// Compiled templates are in: /Users/michael/awesomike/waltzing-runtime/target/debug/build/waltzing-showcase-b2fb0745b61a6366/out/templates/waltzing_ui
