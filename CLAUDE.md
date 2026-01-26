@@ -166,6 +166,51 @@ Key syntax points:
 - `@* comment *@` - template comments (asterisks must match)
 - `@render(T)` type and `@out` reference for higher-order functions
 
+## CRITICAL: Attribute Syntax (Common Mistakes)
+
+**#1 Mistake: Quotes around dynamic attribute values**
+
+When an attribute value is a Waltzing expression, do NOT wrap it in quotes:
+
+```waltzing
+@* ❌ WRONG - quotes make @ a literal character, NOT evaluated *@
+<div class="@container_cls" id="@my_id" />
+<button class="@cn(&[base, extra])" />
+
+@* ✅ CORRECT - no quotes, expression is evaluated *@
+<div class=@container_cls id=@my_id />
+<button class=@cn(&[base, extra]) />
+```
+
+**Rule:**
+- `attr="literal"` → literal string value
+- `attr=@expression` → evaluated expression (NO QUOTES!)
+- `attr="prefix @var suffix"` → string interpolation (quotes OK for mixed content)
+
+**#2 Mistake: x-data with variable interpolation**
+
+When Alpine.js `x-data` contains Waltzing variables, use the embedded JSON format:
+
+```waltzing
+@* ❌ WRONG - variables inside quoted x-data are not evaluated *@
+<div x-data="{ count: @initial, open: @is_open }">
+
+@* ✅ CORRECT - use embedded JSON format *@
+<div x-data=@```json { count: @initial, open: @is_open } ```@>
+```
+
+**#3 Mistake: Missing parentheses in @let**
+
+```waltzing
+@* ❌ WRONG *@
+@let sum = a + b
+@let valid = x > 0
+
+@* ✅ CORRECT - operators need parentheses *@
+@let sum = (a + b)
+@let valid = (x > 0)
+```
+
 ### Callback Syntax
 
 When passing render callbacks to components:
