@@ -917,13 +917,58 @@ fn generate_component_detail(component: &str) -> String {
     )
 }
 
+fn read_template_file(category: &str, name: &str) -> Option<String> {
+    let path = format!("libraries/waltzing-ui/{}/{}.wtz", category, name);
+    std::fs::read_to_string(&path).ok()
+}
+
+fn extract_doc_comment(content: &str) -> String {
+    let mut in_comment = false;
+    let mut lines = Vec::new();
+
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("@*") {
+            in_comment = true;
+            let after = trimmed.trim_start_matches("@*").trim();
+            if !after.is_empty() && !after.starts_with("*") {
+                lines.push(after.to_string());
+            }
+            continue;
+        }
+        if in_comment {
+            if trimmed.ends_with("*@") || trimmed == "*@" {
+                break;
+            }
+            let cleaned = trimmed.trim_start_matches("*").trim();
+            if !cleaned.starts_with("@") && !cleaned.is_empty() {
+                lines.push(cleaned.to_string());
+            }
+        }
+    }
+
+    lines.join(" ")
+}
+
+fn html_escape(s: &str) -> String {
+    s.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
+}
+
 fn generate_layout_detail(layout: &str) -> String {
-    let description = get_layout_description(layout);
+    let source = read_template_file("layouts", layout).unwrap_or_default();
+    let description = if !source.is_empty() {
+        extract_doc_comment(&source)
+    } else {
+        get_layout_description(layout).to_string()
+    };
     let preview = get_layout_preview(layout);
     let usage = get_layout_usage(layout);
 
     format!(
-        r#"
+        r##"
         <div class="space-y-8">
             <!-- Description -->
             <section>
@@ -932,11 +977,11 @@ fn generate_layout_detail(layout: &str) -> String {
                 </div>
             </section>
 
-            <!-- Preview -->
+            <!-- Live Preview -->
             <section>
                 <h3 class="text-lg font-semibold mb-4">Preview</h3>
                 <div class="rounded-lg border border-border overflow-hidden">
-                    <div class="bg-card/50 min-h-[400px] relative">
+                    <div class="bg-background min-h-[500px] relative">
                         {preview}
                     </div>
                 </div>
@@ -947,15 +992,31 @@ fn generate_layout_detail(layout: &str) -> String {
                 <h3 class="text-lg font-semibold mb-4">Usage</h3>
                 <div class="rounded-lg border border-border overflow-hidden">
                     <div class="p-4 bg-muted/30">
-                        <pre class="text-sm overflow-x-auto"><code>{usage}</code></pre>
+                        <pre class="text-sm overflow-x-auto"><code class="language-waltzing">{usage}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Source -->
+            <section x-data="{{ open: false }}">
+                <button @click="open = !open" class="flex items-center gap-2 text-lg font-semibold mb-4 hover:text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="open ? 'rotate-90' : ''" class="transition-transform">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                    Source Code
+                </button>
+                <div x-show="open" x-collapse class="rounded-lg border border-border overflow-hidden">
+                    <div class="p-4 bg-muted/30 max-h-[600px] overflow-auto">
+                        <pre class="text-sm"><code>{source}</code></pre>
                     </div>
                 </div>
             </section>
         </div>
-        "#,
+        "##,
         description = description,
         preview = preview,
-        usage = usage
+        usage = usage,
+        source = html_escape(&source)
     )
 }
 
@@ -973,152 +1034,259 @@ fn get_layout_description(layout: &str) -> &'static str {
 
 fn get_layout_preview(layout: &str) -> &'static str {
     match layout {
-        "base" => r#"
-            <div class="p-8 flex flex-col items-center justify-center h-full min-h-[300px] text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground mb-4">
-                    <rect width="18" height="18" x="3" y="3" rx="2"/>
-                    <path d="M3 9h18"/>
-                </svg>
-                <h4 class="text-lg font-medium mb-2">Base Layout</h4>
-                <p class="text-sm text-muted-foreground max-w-md">Provides HTML document structure with head, body, theme support, and script loading.</p>
-            </div>
-        "#,
-        "auth" => r#"
-            <div class="flex h-[400px]">
-                <div class="hidden md:flex md:w-1/2 bg-muted/30 items-center justify-center border-r">
-                    <div class="text-center p-8">
-                        <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-primary"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                        </div>
-                        <p class="text-muted-foreground">Brand Area</p>
+        "base" => r##"
+            <div class="h-[500px] flex flex-col">
+                <!-- Simulated browser chrome -->
+                <div class="bg-muted/50 border-b px-4 py-2 flex items-center gap-2">
+                    <div class="flex gap-1.5">
+                        <div class="w-3 h-3 rounded-full bg-red-500/70"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500/70"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500/70"></div>
+                    </div>
+                    <div class="flex-1 mx-4">
+                        <div class="bg-background rounded px-3 py-1 text-xs text-muted-foreground">localhost:3000</div>
                     </div>
                 </div>
+                <!-- Page content -->
+                <div class="flex-1 p-8">
+                    <h1 class="text-3xl font-bold mb-4">Welcome to My App</h1>
+                    <p class="text-muted-foreground mb-6">The base layout provides the HTML document structure, theme support, and script loading.</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="rounded-lg border bg-card p-4">
+                            <h3 class="font-semibold mb-2">Feature One</h3>
+                            <p class="text-sm text-muted-foreground">Content goes here</p>
+                        </div>
+                        <div class="rounded-lg border bg-card p-4">
+                            <h3 class="font-semibold mb-2">Feature Two</h3>
+                            <p class="text-sm text-muted-foreground">More content here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        "##,
+        "auth" => r##"
+            <div class="flex h-[500px]">
+                <!-- Brand side -->
+                <div class="hidden md:flex md:w-1/2 bg-muted p-10 flex-col">
+                    <div class="flex items-center gap-2 text-lg font-semibold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        <span>Acme Inc</span>
+                    </div>
+                    <div class="flex flex-1 items-center justify-center">
+                        <blockquote class="space-y-2 max-w-lg">
+                            <p class="text-lg">"This library has saved me countless hours of work and helped me deliver stunning designs to my clients faster than ever before."</p>
+                            <footer class="text-sm text-muted-foreground">Sofia Davis, CEO</footer>
+                        </blockquote>
+                    </div>
+                </div>
+                <!-- Auth form side -->
+                <div class="flex-1 flex items-center justify-center p-6 lg:p-10">
+                    <div class="w-full max-w-md space-y-6">
+                        <div class="rounded-xl border bg-card text-card-foreground shadow p-6 space-y-6">
+                            <div class="space-y-2 text-center">
+                                <h1 class="text-2xl font-semibold tracking-tight">Welcome back</h1>
+                                <p class="text-sm text-muted-foreground">Enter your email to sign in to your account</p>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-medium">Email</label>
+                                    <input type="email" placeholder="name@example.com" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-medium">Password</label>
+                                    <input type="password" placeholder="••••••••" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                </div>
+                                <button class="inline-flex w-full items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Sign In</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        "##,
+        "dashboard" => r##"
+            <div x-data="{ sidebarOpen: true }" class="flex h-[500px]">
+                <!-- Sidebar -->
+                <aside :class="sidebarOpen ? 'w-64' : 'w-16'" class="border-r bg-card flex flex-col transition-all duration-300">
+                    <div class="flex h-14 items-center border-b px-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        <span x-show="sidebarOpen" class="ml-2 font-semibold">Dashboard</span>
+                    </div>
+                    <nav class="flex-1 p-2 space-y-1">
+                        <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium bg-accent text-accent-foreground">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            <span x-show="sidebarOpen">Home</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <span x-show="sidebarOpen">Users</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span x-show="sidebarOpen">Settings</span>
+                        </a>
+                    </nav>
+                </aside>
+                <!-- Main content -->
+                <div class="flex-1 flex flex-col overflow-hidden">
+                    <header class="h-14 border-b flex items-center justify-between px-4">
+                        <div class="flex items-center gap-4">
+                            <button @click="sidebarOpen = !sidebarOpen" class="p-2 hover:bg-accent rounded-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                            </button>
+                            <span class="font-medium">Overview</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-medium">JD</div>
+                        </div>
+                    </header>
+                    <main class="flex-1 overflow-auto p-6">
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="rounded-lg border bg-card p-4">
+                                <p class="text-sm text-muted-foreground">Total Revenue</p>
+                                <p class="text-2xl font-bold">$45,231.89</p>
+                                <p class="text-xs text-green-500">+20.1% from last month</p>
+                            </div>
+                            <div class="rounded-lg border bg-card p-4">
+                                <p class="text-sm text-muted-foreground">Subscriptions</p>
+                                <p class="text-2xl font-bold">+2350</p>
+                                <p class="text-xs text-green-500">+180.1% from last month</p>
+                            </div>
+                            <div class="rounded-lg border bg-card p-4">
+                                <p class="text-sm text-muted-foreground">Active Now</p>
+                                <p class="text-2xl font-bold">+573</p>
+                                <p class="text-xs text-muted-foreground">+201 since last hour</p>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        "##,
+        "marketing" => r##"
+            <div class="flex flex-col h-[500px]">
+                <!-- Header -->
+                <header class="border-b">
+                    <div class="flex h-14 items-center justify-between px-6">
+                        <div class="flex items-center gap-6">
+                            <a href="#" class="flex items-center gap-2 font-semibold">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                                <span>Acme Inc</span>
+                            </a>
+                            <nav class="hidden md:flex gap-6">
+                                <a href="#" class="text-sm font-medium text-muted-foreground hover:text-foreground">Features</a>
+                                <a href="#" class="text-sm font-medium text-muted-foreground hover:text-foreground">Pricing</a>
+                                <a href="#" class="text-sm font-medium text-muted-foreground hover:text-foreground">About</a>
+                            </nav>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <a href="#" class="text-sm font-medium">Log in</a>
+                            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 bg-primary text-primary-foreground shadow hover:bg-primary/90">Get Started</button>
+                        </div>
+                    </div>
+                </header>
+                <!-- Hero -->
                 <div class="flex-1 flex items-center justify-center p-8">
-                    <div class="w-full max-w-sm space-y-4">
-                        <div class="h-8 bg-muted/50 rounded w-3/4"></div>
-                        <div class="h-4 bg-muted/30 rounded w-1/2"></div>
-                        <div class="space-y-3 pt-4">
-                            <div class="h-10 bg-muted/40 rounded"></div>
-                            <div class="h-10 bg-muted/40 rounded"></div>
-                            <div class="h-10 bg-primary/20 rounded"></div>
+                    <div class="text-center max-w-3xl space-y-6">
+                        <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Build something amazing today</h1>
+                        <p class="text-xl text-muted-foreground">Create beautiful, responsive websites with our component library. Ship faster, build better.</p>
+                        <div class="flex gap-4 justify-center">
+                            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-11 px-8 bg-primary text-primary-foreground shadow hover:bg-primary/90">Get Started</button>
+                            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-11 px-8 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer -->
+                <footer class="border-t py-4 px-6">
+                    <p class="text-center text-sm text-muted-foreground">© 2024 Acme Inc. All rights reserved.</p>
+                </footer>
+            </div>
+        "##,
+        "settings" => r##"
+            <div class="flex h-[500px]">
+                <!-- Settings sidebar -->
+                <aside class="w-56 border-r p-4">
+                    <h2 class="text-lg font-semibold mb-4">Settings</h2>
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium bg-accent text-accent-foreground">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Profile
+                        </a>
+                        <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                            Account
+                        </a>
+                        <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Security
+                        </a>
+                        <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                            Notifications
+                        </a>
+                    </nav>
+                </aside>
+                <!-- Settings content -->
+                <div class="flex-1 p-6 overflow-auto">
+                    <div class="max-w-2xl">
+                        <h1 class="text-2xl font-bold mb-2">Profile</h1>
+                        <p class="text-muted-foreground mb-6">Manage your profile settings and preferences.</p>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Display Name</label>
+                                <input type="text" value="John Doe" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Email</label>
+                                <input type="email" value="john@example.com" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Bio</label>
+                                <textarea rows="3" class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Tell us about yourself"></textarea>
+                            </div>
+                            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 bg-primary text-primary-foreground shadow hover:bg-primary/90">Save Changes</button>
                         </div>
                     </div>
                 </div>
             </div>
-        "#,
-        "dashboard" => r#"
-            <div class="flex h-[400px]">
-                <div class="w-16 bg-card border-r flex flex-col items-center py-4 gap-4">
-                    <div class="w-8 h-8 rounded bg-primary/20"></div>
-                    <div class="w-8 h-8 rounded bg-muted/50"></div>
-                    <div class="w-8 h-8 rounded bg-muted/50"></div>
-                    <div class="w-8 h-8 rounded bg-muted/50"></div>
-                </div>
-                <div class="flex-1 flex flex-col">
-                    <div class="h-14 border-b flex items-center px-4 justify-between">
-                        <div class="h-4 bg-muted/50 rounded w-32"></div>
-                        <div class="w-8 h-8 rounded-full bg-muted/50"></div>
+        "##,
+        "sidebar" => r##"
+            <div class="flex h-[500px]">
+                <!-- Sidebar navigation -->
+                <aside class="w-64 border-r bg-card flex flex-col">
+                    <div class="flex h-14 items-center border-b px-4">
+                        <span class="font-semibold">Documentation</span>
                     </div>
-                    <div class="flex-1 p-6 grid grid-cols-3 gap-4">
-                        <div class="rounded-lg border bg-card p-4">
-                            <div class="h-4 bg-muted/40 rounded w-1/2 mb-2"></div>
-                            <div class="h-8 bg-muted/30 rounded w-3/4"></div>
+                    <nav class="flex-1 p-4 space-y-1 overflow-auto">
+                        <div class="mb-4">
+                            <h3 class="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Getting Started</h3>
+                            <a href="#" class="flex items-center rounded-md px-2 py-1.5 text-sm bg-accent text-accent-foreground">Introduction</a>
+                            <a href="#" class="flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent/50">Installation</a>
+                            <a href="#" class="flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent/50">Quick Start</a>
                         </div>
-                        <div class="rounded-lg border bg-card p-4">
-                            <div class="h-4 bg-muted/40 rounded w-1/2 mb-2"></div>
-                            <div class="h-8 bg-muted/30 rounded w-3/4"></div>
+                        <div class="mb-4">
+                            <h3 class="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Components</h3>
+                            <a href="#" class="flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent/50">Button</a>
+                            <a href="#" class="flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent/50">Card</a>
+                            <a href="#" class="flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent/50">Dialog</a>
+                            <a href="#" class="flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent/50">Input</a>
                         </div>
-                        <div class="rounded-lg border bg-card p-4">
-                            <div class="h-4 bg-muted/40 rounded w-1/2 mb-2"></div>
-                            <div class="h-8 bg-muted/30 rounded w-3/4"></div>
+                    </nav>
+                </aside>
+                <!-- Documentation content -->
+                <div class="flex-1 p-8 overflow-auto">
+                    <article class="prose prose-invert max-w-none">
+                        <h1 class="text-3xl font-bold mb-4">Introduction</h1>
+                        <p class="text-muted-foreground mb-4">Welcome to the documentation. This guide will help you get started with building beautiful user interfaces.</p>
+                        <h2 class="text-xl font-semibold mb-2 mt-6">Overview</h2>
+                        <p class="text-muted-foreground mb-4">Our component library provides a comprehensive set of accessible, reusable components that you can use to build modern web applications.</p>
+                        <div class="rounded-lg border bg-muted/30 p-4 mt-6">
+                            <p class="text-sm font-medium mb-2">Quick Tip</p>
+                            <p class="text-sm text-muted-foreground">Check out the Installation guide to get started with your first project.</p>
                         </div>
-                    </div>
+                    </article>
                 </div>
             </div>
-        "#,
-        "marketing" => r#"
-            <div class="flex flex-col h-[400px]">
-                <div class="h-14 border-b flex items-center justify-between px-6">
-                    <div class="h-6 bg-muted/50 rounded w-24"></div>
-                    <div class="flex gap-4">
-                        <div class="h-4 bg-muted/40 rounded w-16"></div>
-                        <div class="h-4 bg-muted/40 rounded w-16"></div>
-                        <div class="h-4 bg-muted/40 rounded w-16"></div>
-                    </div>
-                    <div class="h-8 bg-primary/20 rounded w-20"></div>
-                </div>
-                <div class="flex-1 flex items-center justify-center p-8">
-                    <div class="text-center max-w-lg">
-                        <div class="h-10 bg-muted/40 rounded w-3/4 mx-auto mb-4"></div>
-                        <div class="h-4 bg-muted/30 rounded w-full mb-2"></div>
-                        <div class="h-4 bg-muted/30 rounded w-5/6 mx-auto mb-6"></div>
-                        <div class="flex gap-3 justify-center">
-                            <div class="h-10 bg-primary/30 rounded w-28"></div>
-                            <div class="h-10 bg-muted/40 rounded w-28"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="h-12 border-t flex items-center justify-center">
-                    <div class="h-3 bg-muted/30 rounded w-48"></div>
-                </div>
-            </div>
-        "#,
-        "settings" => r#"
-            <div class="flex h-[400px]">
-                <div class="w-48 border-r p-4 space-y-2">
-                    <div class="h-4 bg-muted/30 rounded w-20 mb-4"></div>
-                    <div class="h-8 bg-accent/50 rounded px-3 flex items-center">
-                        <div class="h-3 bg-accent-foreground/30 rounded w-16"></div>
-                    </div>
-                    <div class="h-8 rounded px-3 flex items-center">
-                        <div class="h-3 bg-muted/40 rounded w-20"></div>
-                    </div>
-                    <div class="h-8 rounded px-3 flex items-center">
-                        <div class="h-3 bg-muted/40 rounded w-14"></div>
-                    </div>
-                    <div class="h-8 rounded px-3 flex items-center">
-                        <div class="h-3 bg-muted/40 rounded w-24"></div>
-                    </div>
-                </div>
-                <div class="flex-1 p-6">
-                    <div class="h-6 bg-muted/50 rounded w-32 mb-2"></div>
-                    <div class="h-4 bg-muted/30 rounded w-64 mb-6"></div>
-                    <div class="space-y-4">
-                        <div class="h-10 bg-muted/40 rounded"></div>
-                        <div class="h-10 bg-muted/40 rounded"></div>
-                        <div class="h-20 bg-muted/40 rounded"></div>
-                    </div>
-                </div>
-            </div>
-        "#,
-        "sidebar" => r#"
-            <div class="flex h-[400px]">
-                <div class="w-56 border-r bg-card p-4">
-                    <div class="h-6 bg-muted/50 rounded w-24 mb-6"></div>
-                    <div class="space-y-1">
-                        <div class="h-8 bg-accent/50 rounded flex items-center px-3">
-                            <div class="h-3 bg-accent-foreground/30 rounded w-20"></div>
-                        </div>
-                        <div class="h-8 rounded flex items-center px-3">
-                            <div class="h-3 bg-muted/40 rounded w-24"></div>
-                        </div>
-                        <div class="h-8 rounded flex items-center px-3">
-                            <div class="h-3 bg-muted/40 rounded w-16"></div>
-                        </div>
-                        <div class="h-8 rounded flex items-center px-3">
-                            <div class="h-3 bg-muted/40 rounded w-28"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-1 p-6">
-                    <div class="h-8 bg-muted/50 rounded w-48 mb-4"></div>
-                    <div class="h-4 bg-muted/30 rounded w-full mb-2"></div>
-                    <div class="h-4 bg-muted/30 rounded w-5/6 mb-2"></div>
-                    <div class="h-4 bg-muted/30 rounded w-4/6"></div>
-                </div>
-            </div>
-        "#,
-        _ => r#"
+        "##,
+        _ => r##"
             <div class="p-8 flex flex-col items-center justify-center h-full min-h-[300px] text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted-foreground mb-4">
                     <rect width="18" height="18" x="3" y="3" rx="2"/>
@@ -1128,7 +1296,7 @@ fn get_layout_preview(layout: &str) -> &'static str {
                 <h4 class="text-lg font-medium mb-2">Layout Preview</h4>
                 <p class="text-sm text-muted-foreground">Preview not available for this layout.</p>
             </div>
-        "#,
+        "##,
     }
 }
 
@@ -1197,13 +1365,51 @@ fn get_layout_usage(layout: &str) -> &'static str {
     }
 }
 
+fn get_block_category_and_file(block: &str) -> (&'static str, String) {
+    match block {
+        "login" => ("auth", "login".to_string()),
+        "login-01" | "login-02" | "login-03" | "login-04" | "login-05" => ("auth", block.to_string()),
+        "signup" => ("auth", "signup".to_string()),
+        "signup-01" => ("auth", block.to_string()),
+        "otp-01" => ("auth", block.to_string()),
+        "confirm-dialog" => ("dialogs", "confirm".to_string()),
+        "delete-dialog" => ("dialogs", "delete".to_string()),
+        "share-dialog" => ("dialogs", "share".to_string()),
+        "contact-form" => ("forms", "contact".to_string()),
+        "profile-form" => ("forms", "profile".to_string()),
+        "sidebar-01" | "sidebar-02" | "sidebar-03" | "sidebar-07" | "sidebar-11" | "sidebar-12" | "sidebar-15" => ("sidebar", block.to_string()),
+        "dashboard-01" => ("dashboard", block.to_string()),
+        "calendar-01" => ("calendar", block.to_string()),
+        _ => ("", block.to_string()),
+    }
+}
+
+fn read_block_source(block: &str) -> Option<String> {
+    let (category, file) = get_block_category_and_file(block);
+    if category.is_empty() {
+        return None;
+    }
+    let path = format!("libraries/waltzing-ui/blocks/{}/{}.wtz", category, file);
+    std::fs::read_to_string(&path).ok()
+}
+
 fn generate_block_detail(block: &str) -> String {
-    let description = get_block_description(block);
+    let source = read_block_source(block).unwrap_or_default();
+    let description = if !source.is_empty() {
+        let doc = extract_doc_comment(&source);
+        if doc.is_empty() {
+            get_block_description(block).to_string()
+        } else {
+            doc
+        }
+    } else {
+        get_block_description(block).to_string()
+    };
     let preview = get_block_preview(block);
     let usage = get_block_usage(block);
 
     format!(
-        r#"
+        r##"
         <div class="space-y-8">
             <!-- Description -->
             <section>
@@ -1227,15 +1433,31 @@ fn generate_block_detail(block: &str) -> String {
                 <h3 class="text-lg font-semibold mb-4">Usage</h3>
                 <div class="rounded-lg border border-border overflow-hidden">
                     <div class="p-4 bg-muted/30">
-                        <pre class="text-sm overflow-x-auto"><code>{usage}</code></pre>
+                        <pre class="text-sm overflow-x-auto"><code class="language-waltzing">{usage}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Source -->
+            <section x-data="{{ open: false }}">
+                <button @click="open = !open" class="flex items-center gap-2 text-lg font-semibold mb-4 hover:text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="open ? 'rotate-90' : ''" class="transition-transform">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                    Source Code
+                </button>
+                <div x-show="open" x-collapse class="rounded-lg border border-border overflow-hidden">
+                    <div class="p-4 bg-muted/30 max-h-[600px] overflow-auto">
+                        <pre class="text-sm"><code>{source}</code></pre>
                     </div>
                 </div>
             </section>
         </div>
-        "#,
+        "##,
         description = description,
         preview = preview,
-        usage = usage
+        usage = usage,
+        source = html_escape(&source)
     )
 }
 
@@ -1277,7 +1499,7 @@ fn get_block_description(block: &str) -> &'static str {
 
 fn get_block_preview(block: &str) -> &'static str {
     match block {
-        "login" | "login-01" => r#"
+        "login" | "login-01" => r##"
             <div class="w-full max-w-sm">
                 <div class="rounded-xl border bg-card p-6 shadow-sm">
                     <div class="mb-6 text-center">
@@ -1299,8 +1521,104 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "#,
-        "signup" | "signup-01" => r#"
+        "##,
+        "login-02" => r##"
+            <div class="w-full max-w-sm">
+                <div class="rounded-xl border bg-card p-6 shadow-sm">
+                    <div class="mb-6 text-center">
+                        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Sign in</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <button class="inline-flex items-center justify-center gap-2 w-full rounded-md text-sm font-medium h-10 px-4 py-2 border border-input bg-background hover:bg-accent">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                            Continue with Google
+                        </button>
+                        <button class="inline-flex items-center justify-center gap-2 w-full rounded-md text-sm font-medium h-10 px-4 py-2 border border-input bg-background hover:bg-accent">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            Continue with GitHub
+                        </button>
+                        <div class="relative my-4">
+                            <div class="absolute inset-0 flex items-center"><span class="w-full border-t"></span></div>
+                            <div class="relative flex justify-center text-xs uppercase"><span class="bg-background px-2 text-muted-foreground">Or continue with</span></div>
+                        </div>
+                        <input type="email" placeholder="Email" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+                        <input type="password" placeholder="Password" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+                        <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Sign in</button>
+                    </div>
+                </div>
+            </div>
+        "##,
+        "login-03" => r##"
+            <div class="w-full max-w-4xl flex rounded-xl border bg-card shadow-sm overflow-hidden">
+                <div class="flex-1 bg-primary/5 p-8 hidden md:flex flex-col justify-center">
+                    <div class="mb-8">
+                        <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        </div>
+                        <h2 class="text-2xl font-bold">Acme Inc</h2>
+                        <p class="text-muted-foreground mt-2">Manage your business with our powerful platform.</p>
+                    </div>
+                    <blockquote class="border-l-2 border-primary pl-4 italic text-muted-foreground">"This platform has transformed how we work. Highly recommended!"</blockquote>
+                </div>
+                <div class="flex-1 p-8">
+                    <div class="mb-6"><h3 class="text-xl font-semibold">Sign in to your account</h3></div>
+                    <div class="space-y-4">
+                        <div class="space-y-2"><label class="text-sm font-medium">Email</label><input type="email" placeholder="name@example.com" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"></div>
+                        <div class="space-y-2"><label class="text-sm font-medium">Password</label><input type="password" placeholder="••••••••" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"></div>
+                        <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Sign in</button>
+                    </div>
+                </div>
+            </div>
+        "##,
+        "login-04" => r##"
+            <div class="w-full max-w-sm">
+                <div class="rounded-xl border bg-card p-6 shadow-sm">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold">Login</h3>
+                        <p class="text-sm text-muted-foreground mt-1">Enter your credentials below</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex gap-2">
+                            <button class="flex-1 inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-10 px-4 py-2 border border-input bg-background hover:bg-accent">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                            </button>
+                            <button class="flex-1 inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-10 px-4 py-2 border border-input bg-background hover:bg-accent">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z"/></svg>
+                            </button>
+                        </div>
+                        <div class="relative"><div class="absolute inset-0 flex items-center"><span class="w-full border-t"></span></div><div class="relative flex justify-center text-xs uppercase"><span class="bg-background px-2 text-muted-foreground">Or</span></div></div>
+                        <input type="email" placeholder="Email" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+                        <input type="password" placeholder="Password" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+                        <div class="flex items-center justify-between text-sm"><label class="flex items-center gap-2"><input type="checkbox" class="rounded border-input"> Remember me</label><a href="#" class="text-primary hover:underline">Forgot password?</a></div>
+                        <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Login</button>
+                    </div>
+                </div>
+            </div>
+        "##,
+        "login-05" => r##"
+            <div class="w-full max-w-sm">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold">Welcome to App</h3>
+                    <p class="text-muted-foreground mt-1">Enter your email to get started</p>
+                </div>
+                <div class="space-y-4">
+                    <input type="email" placeholder="Email address" class="flex h-11 w-full rounded-lg border border-input bg-transparent px-4 py-2 text-sm">
+                    <button class="inline-flex items-center justify-center w-full rounded-lg text-sm font-medium h-11 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Continue with Email</button>
+                    <div class="relative"><div class="absolute inset-0 flex items-center"><span class="w-full border-t"></span></div><div class="relative flex justify-center text-xs uppercase"><span class="bg-background px-2 text-muted-foreground">Or</span></div></div>
+                    <button class="inline-flex items-center justify-center gap-2 w-full rounded-lg text-sm font-medium h-11 px-4 py-2 border border-input bg-background hover:bg-accent">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        Continue with Google
+                    </button>
+                </div>
+            </div>
+        "##,
+        "signup" | "signup-01" => r##"
             <div class="w-full max-w-sm">
                 <div class="rounded-xl border bg-card p-6 shadow-sm">
                     <div class="mb-6 text-center">
@@ -1326,8 +1644,33 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "#,
-        "dashboard-01" => r#"
+        "##,
+        "otp-01" => r##"
+            <div class="w-full max-w-sm">
+                <div class="rounded-xl border bg-card p-6 shadow-sm">
+                    <div class="mb-6 text-center">
+                        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold">Verify your email</h3>
+                        <p class="text-sm text-muted-foreground mt-1">Enter the 6-digit code sent to your email</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex justify-center gap-2">
+                            <input type="text" maxlength="1" class="w-10 h-12 text-center text-xl font-semibold rounded-md border border-input bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <input type="text" maxlength="1" class="w-10 h-12 text-center text-xl font-semibold rounded-md border border-input bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <input type="text" maxlength="1" class="w-10 h-12 text-center text-xl font-semibold rounded-md border border-input bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <input type="text" maxlength="1" class="w-10 h-12 text-center text-xl font-semibold rounded-md border border-input bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <input type="text" maxlength="1" class="w-10 h-12 text-center text-xl font-semibold rounded-md border border-input bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            <input type="text" maxlength="1" class="w-10 h-12 text-center text-xl font-semibold rounded-md border border-input bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                        </div>
+                        <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Verify</button>
+                        <p class="text-center text-sm text-muted-foreground">Didn't receive a code? <a href="#" class="text-primary hover:underline">Resend</a></p>
+                    </div>
+                </div>
+            </div>
+        "##,
+        "dashboard-01" => r##"
             <div class="w-full max-w-2xl">
                 <div class="grid grid-cols-3 gap-4 mb-6">
                     <div class="rounded-lg border bg-card p-4">
@@ -1352,24 +1695,237 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                     <div class="p-4 space-y-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-muted"></div>
+                            <div class="w-8 h-8 rounded-full bg-muted flex items-center justify-center"><svg class="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
                             <div class="flex-1">
                                 <p class="text-sm">New user registered</p>
                                 <p class="text-xs text-muted-foreground">2 minutes ago</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-muted"></div>
+                            <div class="w-8 h-8 rounded-full bg-muted flex items-center justify-center"><svg class="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
                             <div class="flex-1">
-                                <p class="text-sm">Payment received</p>
+                                <p class="text-sm">Payment received - $250.00</p>
                                 <p class="text-xs text-muted-foreground">15 minutes ago</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        "#,
-        _ => r#"
+        "##,
+        "sidebar-01" | "sidebar-02" | "sidebar-03" => r##"
+            <div class="w-64 h-[400px] rounded-lg border bg-card overflow-hidden">
+                <div class="p-4 border-b">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><svg class="w-4 h-4 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                        <span class="font-semibold">Acme Inc</span>
+                    </div>
+                </div>
+                <nav class="p-2 space-y-1">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md bg-primary/10 text-primary"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="text-sm font-medium">Dashboard</span></a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="text-sm">Users</span></a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg><span class="text-sm">Billing</span></a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span class="text-sm">Settings</span></a>
+                </nav>
+            </div>
+        "##,
+        "sidebar-07" => r##"
+            <div class="w-64 h-[400px] rounded-lg border bg-card overflow-hidden flex flex-col">
+                <div class="p-4 border-b">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-muted"></div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium truncate">John Doe</p>
+                            <p class="text-xs text-muted-foreground truncate">john@example.com</p>
+                        </div>
+                    </div>
+                </div>
+                <nav class="flex-1 p-2 space-y-1">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md bg-primary/10 text-primary"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="text-sm font-medium">Home</span></a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg><span class="text-sm">Projects</span></a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><span class="text-sm">Tasks</span></a>
+                </nav>
+                <div class="p-2 border-t">
+                    <button class="flex items-center gap-3 px-3 py-2 w-full rounded-md hover:bg-muted text-muted-foreground"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg><span class="text-sm">Log out</span></button>
+                </div>
+            </div>
+        "##,
+        "sidebar-11" => r##"
+            <div class="w-64 h-[400px] rounded-lg border bg-card overflow-hidden flex flex-col">
+                <div class="p-4 border-b">
+                    <div class="relative"><svg class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="search" placeholder="Search files..." class="w-full h-9 pl-8 pr-3 rounded-md border border-input bg-transparent text-sm"></div>
+                </div>
+                <div class="flex-1 p-2 overflow-auto">
+                    <div x-data="{ open: true }" class="space-y-1">
+                        <button @click="open = !open" class="flex items-center gap-2 px-2 py-1 w-full rounded hover:bg-muted text-sm"><svg class="w-4 h-4" :class="open ? 'rotate-90' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg><svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg><span>src</span></button>
+                        <div x-show="open" class="pl-6 space-y-1">
+                            <a href="#" class="flex items-center gap-2 px-2 py-1 rounded hover:bg-muted text-sm text-muted-foreground"><svg class="w-4 h-4 text-yellow-500" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/></svg>main.rs</a>
+                            <a href="#" class="flex items-center gap-2 px-2 py-1 rounded hover:bg-muted text-sm text-muted-foreground"><svg class="w-4 h-4 text-yellow-500" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/></svg>lib.rs</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        "##,
+        "sidebar-12" => r##"
+            <div class="w-72 h-[400px] rounded-lg border bg-card overflow-hidden flex flex-col">
+                <div class="p-4 border-b">
+                    <div class="flex items-center justify-between mb-4">
+                        <button class="p-1 hover:bg-muted rounded"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+                        <span class="font-medium">January 2024</span>
+                        <button class="p-1 hover:bg-muted rounded"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                        <span class="text-muted-foreground">Su</span><span class="text-muted-foreground">Mo</span><span class="text-muted-foreground">Tu</span><span class="text-muted-foreground">We</span><span class="text-muted-foreground">Th</span><span class="text-muted-foreground">Fr</span><span class="text-muted-foreground">Sa</span>
+                        <span class="py-1 text-muted-foreground">31</span><span class="py-1">1</span><span class="py-1">2</span><span class="py-1">3</span><span class="py-1">4</span><span class="py-1">5</span><span class="py-1">6</span>
+                        <span class="py-1">7</span><span class="py-1">8</span><span class="py-1">9</span><span class="py-1">10</span><span class="py-1">11</span><span class="py-1">12</span><span class="py-1">13</span>
+                        <span class="py-1">14</span><span class="py-1 rounded bg-primary text-primary-foreground">15</span><span class="py-1">16</span><span class="py-1">17</span><span class="py-1">18</span><span class="py-1">19</span><span class="py-1">20</span>
+                    </div>
+                </div>
+                <div class="flex-1 p-4 overflow-auto">
+                    <h4 class="text-sm font-medium mb-3">Upcoming Events</h4>
+                    <div class="space-y-2">
+                        <div class="p-2 rounded border-l-2 border-blue-500 bg-blue-500/10"><p class="text-sm font-medium">Team Meeting</p><p class="text-xs text-muted-foreground">10:00 AM</p></div>
+                        <div class="p-2 rounded border-l-2 border-green-500 bg-green-500/10"><p class="text-sm font-medium">Project Review</p><p class="text-xs text-muted-foreground">2:00 PM</p></div>
+                    </div>
+                </div>
+            </div>
+        "##,
+        "sidebar-15" => r##"
+            <div class="w-64 h-[400px] rounded-lg border bg-card overflow-hidden flex flex-col">
+                <div class="p-4 border-b"><h3 class="font-semibold">Settings</h3></div>
+                <nav class="flex-1 p-2 space-y-1">
+                    <a href="#" class="flex items-center justify-between px-3 py-2 rounded-md bg-primary/10 text-primary"><span class="flex items-center gap-3"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="text-sm font-medium">Account</span></span></a>
+                    <a href="#" class="flex items-center justify-between px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><span class="flex items-center gap-3"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="text-sm">Security</span></span></a>
+                    <a href="#" class="flex items-center justify-between px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><span class="flex items-center gap-3"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="text-sm">Notifications</span></span><span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">3</span></a>
+                    <a href="#" class="flex items-center justify-between px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><span class="flex items-center gap-3"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg><span class="text-sm">Billing</span></span></a>
+                </nav>
+            </div>
+        "##,
+        "confirm-dialog" => r##"
+            <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold">Confirm Action</h3>
+                    <p class="text-sm text-muted-foreground mt-1">Are you sure you want to proceed with this action? This cannot be undone.</p>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input bg-background hover:bg-accent">Cancel</button>
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Confirm</button>
+                </div>
+            </div>
+        "##,
+        "delete-dialog" => r##"
+            <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-destructive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold">Delete Item</h3>
+                        <p class="text-sm text-muted-foreground mt-1">This action cannot be undone. This will permanently delete the item and remove all associated data.</p>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input bg-background hover:bg-accent">Cancel</button>
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow hover:bg-destructive/90">Delete</button>
+                </div>
+            </div>
+        "##,
+        "share-dialog" => r##"
+            <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
+                <div class="mb-4">
+                    <h3 class="text-lg font-semibold">Share</h3>
+                    <p class="text-sm text-muted-foreground mt-1">Share this item with others</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex gap-2">
+                        <input type="text" value="https://example.com/share/abc123" readonly class="flex-1 h-9 rounded-md border border-input bg-muted/50 px-3 py-1 text-sm">
+                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input bg-background hover:bg-accent"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="email" placeholder="Email address" class="flex-1 h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Send</button>
+                    </div>
+                </div>
+            </div>
+        "##,
+        "contact-form" => r##"
+            <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm">
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold">Contact Us</h3>
+                    <p class="text-sm text-muted-foreground mt-1">Fill out the form and we'll get back to you</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2"><label class="text-sm font-medium">First name</label><input type="text" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"></div>
+                        <div class="space-y-2"><label class="text-sm font-medium">Last name</label><input type="text" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"></div>
+                    </div>
+                    <div class="space-y-2"><label class="text-sm font-medium">Email</label><input type="email" placeholder="you@example.com" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"></div>
+                    <div class="space-y-2"><label class="text-sm font-medium">Subject</label><input type="text" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"></div>
+                    <div class="space-y-2"><label class="text-sm font-medium">Message</label><textarea rows="4" class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></textarea></div>
+                    <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Send Message</button>
+                </div>
+            </div>
+        "##,
+        "profile-form" => r##"
+            <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm">
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold">Profile</h3>
+                    <p class="text-sm text-muted-foreground mt-1">Manage your profile information</p>
+                </div>
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-full bg-muted flex items-center justify-center"><svg class="w-8 h-8 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                        <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input bg-background hover:bg-accent">Change Photo</button>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2"><label class="text-sm font-medium">First name</label><input type="text" value="John" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"></div>
+                            <div class="space-y-2"><label class="text-sm font-medium">Last name</label><input type="text" value="Doe" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"></div>
+                        </div>
+                        <div class="space-y-2"><label class="text-sm font-medium">Email</label><input type="email" value="john@example.com" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"></div>
+                        <div class="space-y-2"><label class="text-sm font-medium">Bio</label><textarea rows="3" placeholder="Tell us about yourself..." class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"></textarea></div>
+                    </div>
+                    <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Save Changes</button>
+                </div>
+            </div>
+        "##,
+        "calendar-01" => r##"
+            <div class="w-full max-w-3xl rounded-lg border bg-card shadow-sm overflow-hidden">
+                <div class="p-4 border-b flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <button class="p-2 hover:bg-muted rounded-md"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+                        <button class="p-2 hover:bg-muted rounded-md"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+                        <h2 class="text-lg font-semibold ml-2">January 2024</h2>
+                    </div>
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Today</button>
+                </div>
+                <div class="grid grid-cols-7 border-b">
+                    <div class="p-2 text-center text-sm font-medium text-muted-foreground border-r">Sun</div>
+                    <div class="p-2 text-center text-sm font-medium text-muted-foreground border-r">Mon</div>
+                    <div class="p-2 text-center text-sm font-medium text-muted-foreground border-r">Tue</div>
+                    <div class="p-2 text-center text-sm font-medium text-muted-foreground border-r">Wed</div>
+                    <div class="p-2 text-center text-sm font-medium text-muted-foreground border-r">Thu</div>
+                    <div class="p-2 text-center text-sm font-medium text-muted-foreground border-r">Fri</div>
+                    <div class="p-2 text-center text-sm font-medium text-muted-foreground">Sat</div>
+                </div>
+                <div class="grid grid-cols-7">
+                    <div class="h-24 p-2 border-r border-b text-muted-foreground">31</div>
+                    <div class="h-24 p-2 border-r border-b">1</div>
+                    <div class="h-24 p-2 border-r border-b">2</div>
+                    <div class="h-24 p-2 border-r border-b">3</div>
+                    <div class="h-24 p-2 border-r border-b">4</div>
+                    <div class="h-24 p-2 border-r border-b">5</div>
+                    <div class="h-24 p-2 border-b">6</div>
+                    <div class="h-24 p-2 border-r border-b">7</div>
+                    <div class="h-24 p-2 border-r border-b">8</div>
+                    <div class="h-24 p-2 border-r border-b">9</div>
+                    <div class="h-24 p-2 border-r border-b relative">10<div class="absolute bottom-1 left-1 right-1 text-xs p-1 rounded bg-blue-500/20 text-blue-600 truncate">Team Meeting</div></div>
+                    <div class="h-24 p-2 border-r border-b">11</div>
+                    <div class="h-24 p-2 border-r border-b">12</div>
+                    <div class="h-24 p-2 border-b">13</div>
+                </div>
+            </div>
+        "##,
+        _ => r##"
             <div class="text-center p-8">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted-foreground mx-auto mb-4">
                     <rect width="7" height="7" x="3" y="3" rx="1"/>
@@ -1380,7 +1936,7 @@ fn get_block_preview(block: &str) -> &'static str {
                 <h4 class="text-lg font-medium mb-2">Block Preview</h4>
                 <p class="text-sm text-muted-foreground">Interactive preview for this block.</p>
             </div>
-        "#,
+        "##,
     }
 }
 

@@ -291,11 +291,8 @@ fn generate_libraries_module(libraries: &[DiscoveredLibrary], out_dir: &str) {
         }
         lib_code.push_str("];\n\n");
 
-        // Include the compiled templates
-        lib_code.push_str(&format!(
-            "// Compiled templates are in: {}/{}\n",
-            out_dir, module_name
-        ));
+        // Note: Compiled templates are in OUT_DIR/templates/{module_name}/
+        // They can be included if needed, but require the waltzing runtime
 
         fs::write(module_path, lib_code).expect("Failed to write library module");
     }
