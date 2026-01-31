@@ -1,227 +1,194 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working with this repository.
 
 ## Overview
 
-This is the **public GitHub repository** for Waltzing editor tooling. It contains only the tree-sitter grammar, editor extensions, and waltzing-ui component library. The main Waltzing compiler source is in a separate private repository.
+Public GitHub repository for Waltzing editor tooling: tree-sitter grammar, editor extensions, and waltzing-ui component library. The main Waltzing compiler is in a separate private repository.
 
 ## Repository Structure
 
-- **tree-sitter/** - Tree-sitter grammar for Waltzing syntax (JavaScript-based grammar definition)
+- **tree-sitter/** - Tree-sitter grammar for Waltzing syntax (JavaScript-based)
 - **extensions/zed/** - Zed editor extension with LSP integration (Rust/WASM)
 - **libraries/waltzing-ui/** - shadcn-style component library for Waltzing templates
 
 ## Build Commands
 
-### Tree-sitter Grammar
-
 ```bash
-cd tree-sitter
-npm install
-npx tree-sitter generate    # Generate parser from grammar.js
-npx tree-sitter test        # Run grammar tests
-npx tree-sitter build-wasm  # Build WASM for web editors
+# Tree-sitter grammar
+cd tree-sitter && npm install
+npx tree-sitter generate    # Generate parser
+npx tree-sitter test        # Run tests
+
+# Zed Extension
+cd extensions/zed && cargo build --release --target wasm32-wasi
+# Install: Command palette → "zed: install dev extension" → select extensions/zed
 ```
 
-### Zed Extension
+## File Types
 
-```bash
-cd extensions/zed
-cargo build --release --target wasm32-wasi
-```
+- `.wtz` - Standard template files
+- `.html.wtz`, `.css.wtz`, `.js.wtz` - Content-specific templates
 
-To install as dev extension in Zed: Command palette → "zed: install dev extension" → select the `extensions/zed` directory.
+## waltzing-ui Library
 
-## GitHub Releases
+shadcn/ui-style component library. Requires Tailwind CSS and Alpine.js with `@alpinejs/focus` and `@alpinejs/collapse` plugins.
 
-Binary releases are published from this repository. The binaries are built in the private repo and uploaded here:
-
-```bash
-VERSION=0.2.27  # Set to current version
-
-# Create release
-gh release create "v${VERSION}" --title "v${VERSION}" --notes "Release ${VERSION}"
-
-# Copy binaries with platform suffix
-mkdir -p /tmp/waltzing-release
-for platform in darwin-aarch64 darwin-x86_64; do
-  for bin in waltzing waltzing-lsp waltzing-mcp; do
-    cp ~/awesomike/tickets/waltzing/target/release-builds/v${VERSION}/${platform}/${bin} \
-       /tmp/waltzing-release/${bin}-${platform}
-  done
-done
-
-# Upload assets and mark as latest
-gh release upload "v${VERSION}" /tmp/waltzing-release/*
-gh release edit "v${VERSION}" --latest
-```
-
-## Architecture
-
-### Tree-sitter Grammar (`tree-sitter/grammar.js`)
-
-Defines the Waltzing template syntax including:
-- Template directives: `@use`, `@import`, `@struct`, `@enum`, `@fn`
-- Control flow: `@if`, `@for`, `@match`, `@let`
-- Special keywords: `@Out`, `@out`, `@render(T1, T2, ...)`
-- HTML integration with template function tags: `<@function_name>...</@>`
-
-Reserved variable names (`__wtz_target`, `out`) are enforced by the compiler, not the grammar.
-
-### Zed Extension (`extensions/zed/src/lib.rs`)
-
-WASM extension that:
-- Implements `zed_extension_api::Extension` trait
-- Locates `waltzing-lsp` binary in common paths (~/.cargo/bin, ~/.local/bin, /usr/local/bin, etc.)
-- Supports custom binary path via Zed settings
-
-### waltzing-ui Library (shadcn/ui for Waltzing)
-
-A shadcn/ui-style component library providing copy-paste or import-based components.
-
-**Dependencies:**
-- Tailwind CSS with CSS variables for theming
-- Alpine.js with `@alpinejs/focus` and `@alpinejs/collapse` plugins
-
-**Components:** button, card, dialog, dropdown, input, select, table, tabs
-**Layouts:** base (with CDN setup), sidebar
-**Utilities:** `cn()`, `class_if()`, `class_toggle()`
-
-**Usage pattern:**
 ```waltzing
 @import ui/components/button.wtz as button
 
 <@button::primary>Click me</@>
 
-@* Or with full control *@
-<@button::apply
-    variant=button::Variant::Destructive
-    size=button::Size::Lg
-    disabled=false
-    class=None
->
+<@button::apply variant=button::Variant::Destructive size=button::Size::Lg>
     Delete
 </@>
 ```
 
-**Key patterns:**
+**Patterns:**
 - Components use `@()` render callbacks for content slots
 - Variants defined with `@enum` (e.g., `Variant::Primary`, `Size::Lg`)
-- `cn()` utility concatenates class names (like shadcn's `cn()`)
-- Theme uses CSS variables (same names as shadcn: `--primary`, `--background`, etc.)
+- `cn()` concatenates class names (like shadcn's `cn()`)
+- Theme uses CSS variables (`--primary`, `--background`, etc.)
+- Dependencies defined in `waltzing-ui.toml`
 
-Component dependencies are defined in `waltzing-ui.toml`.
-
-## File Types
-
-Waltzing templates use these extensions:
-- `.wtz` - Standard template files
-- `.html.wtz`, `.css.wtz`, `.js.wtz` - Content-specific templates
-
-## Agent & Skills
-
-For Waltzing template expertise, see:
-- `.claude/agents/waltzing-expert.md` - Complete syntax reference and best practices
-- `.claude/skills.md` - Available skills for template writing and HTML conversion
-
-## Waltzing MCP Tools
-
-If `waltzing-mcp` is configured, these tools are available:
+## MCP Tools (waltzing-mcp)
 
 | Tool | Description |
 |------|-------------|
-| `validate` | Validate template syntax, returns errors with line/column |
-| `syntax_help` | Get help for constructs (`if`, `for`, `fn`, `let`, `json`, `js`) |
-| `list_constructs` | List constructs by category (`control-flow`, `definitions`, `expressions`, `embedded`) |
-| `get_grammar` | Get documentation (`ebnf`, `reference`, `examples`) |
-| `get_starter_project` | Scaffold a new Waltzing project |
+| `validate` | Validate syntax, returns errors with line/column |
+| `syntax_help` | Help for constructs (`if`, `for`, `fn`, `let`, `json`, `js`) |
+| `list_constructs` | List constructs by category |
 | `inspect_template` | Parse template to extract functions, structs, enums, imports |
+| `lint_template` | Check common mistakes before validation |
 
-**Workflow for using components:**
-1. Read the `.wtz` file containing the component
-2. Call `inspect_template` with the file content
-3. Use the returned signature to call the component with correct parameters
+**Workflow for components:** Read `.wtz` file → `inspect_template` → use returned signature.
 
-## Waltzing Syntax Quick Reference
+### Waltzing Templates (.wtz files)
 
-```waltzing
-@use crate::models::User              @* Import Rust types *@
-@import "layouts/base.wtz" as layout  @* Import other templates *@
+#### IMPORTANT: Common Mistakes to Avoid
 
-@fn apply(title: String, users: Vec<User>) {
-    <@layout title=@title>
-        <h1>@title</h1>
-        @for user in users {
-            <p>@user.name</p>
-        }
-    </@>
-}
-```
-
-Key syntax points:
-- `@variable` for output (auto-escaped), `@(expr)` for complex expressions
-- `@let x = (a + b)` - operators need parentheses
-- `<@component attr=@value>content</@>` - function tags for components
-- `@* comment *@` - template comments (asterisks must match)
-- `@render(T)` type and `@out` reference for higher-order functions
-
-## CRITICAL: Attribute Syntax (Common Mistakes)
-
-**#1 Mistake: Quotes around dynamic attribute values**
-
-When an attribute value is a Waltzing expression, do NOT wrap it in quotes:
+The `@` prefix **enters expression mode** from template mode. Once you're IN expression mode, don't use `@` again:
 
 ```waltzing
-@* ❌ WRONG - quotes make @ a literal character, NOT evaluated *@
-<div class="@container_cls" id="@my_id" />
-<button class="@cn(@classes)" />
+@* ❌ WRONG - no @ after = *@
+@let x = @if cond { a } else { b }
+@let arr = vec![@a, @b]
 
-@* ✅ CORRECT - no quotes, expression is evaluated *@
-<div class=@container_cls id=@my_id />
-<button class=@cn(classes) />
-```
+@* ✅ CORRECT - plain Rust after = *@
+@let x = if cond { a } else { b }
+@let arr = vec![a, b]
 
-**Rule:**
-- `attr="literal"` → literal string value
-- `attr=@expression` → evaluated expression (NO QUOTES!)
-- `attr="prefix @var suffix"` → string interpolation (quotes OK for mixed content)
-- Inside function calls, do NOT use `@` for variables: `@cn(classes)` not `@cn(@classes)`
+@* ❌ WRONG - quotes make it literal *@
+<@component name="@user.name" />
 
-**#2 Mistake: x-data with variable interpolation**
+@* ✅ CORRECT - no quotes for expressions *@
+<@component name=@user.name />
 
-When Alpine.js `x-data` contains Waltzing variables, use the embedded JSON format:
-
-```waltzing
-@* ❌ WRONG - variables inside quoted x-data are not evaluated *@
-<div x-data="{ count: @initial, open: @is_open }">
-
-@* ✅ CORRECT - use embedded JSON format *@
-<div x-data=@```json { count: @initial, open: @is_open } ```@>
-```
-
-**#3 Mistake: Missing parentheses in @let**
-
-```waltzing
-@* ❌ WRONG *@
+@* ❌ WRONG - operators need parentheses *@
 @let sum = a + b
-@let valid = x > 0
 
-@* ✅ CORRECT - operators need parentheses *@
+@* ✅ CORRECT *@
 @let sum = (a + b)
-@let valid = (x > 0)
 ```
 
-### Callback Syntax
+#### Quick Reference
 
-When passing render callbacks to components:
+```waltzing
+@* Imports and definitions *@
+@use crate::models::User
+@import "layouts/base.wtz" as layout
 
-- **`@() { ... }`** - Correct syntax for inline callbacks
-  ```waltzing
-  <@dialog::apply trigger=@() { <button>Open</button> } />
-  @let my_callback = @() { <div>content</div> }
-  ```
+@* Variable bindings - PARENTHESES REQUIRED for operators *@
+@let name = user.name                      @* Simple: OK *@
+@let total = (price * quantity)            @* Arithmetic: needs parens *@
+@let valid = (age > 18 && active)          @* Boolean ops: needs parens *@
 
-- **`@{ ... }`** - NOT valid for inline callbacks (causes parse errors)
+@* Output expressions *@
+@user.name                                 @* Simple variable *@
+@(items.len() + 1)                         @* Complex expr: use parens *@
+@safe(html_content)                        @* Unescaped HTML *@
+@&user.display_name                        @* Reference to avoid move *@
 
-Always use `@() { ... }` when passing callbacks as parameters to function tags.
+@* Control flow *@
+@if condition { ... } else { ... }
+@if let Some(x) = opt { ... }
+@for item in items { ... }
+@match value { Pattern => { ... } }
+```
+
+#### Spread Syntax and cn() Helper
+
+```waltzing
+@* cn() class helper - variadic syntax auto-wraps in array *@
+@cn("btn", "primary", if active { "active" } else { "" })
+
+@* Spread arrays into function arguments with ... *@
+@let extras = ["hover", "focus"]
+@cn("base", extras...)                     @* Spreads extras into cn() *@
+@cn("a", x..., "b", y...)                  @* Multiple spreads, order preserved *@
+
+<div class=@cn("btn", conditional_classes..., "primary") />
+```
+
+#### Control Flow in HTML Attributes
+
+```waltzing
+<button
+    @if is_disabled { disabled }
+    @if is_primary { class="btn-primary" }
+>Submit</button>
+
+@* Nested control flow requires @ prefix *@
+<input @if let Some(x) = opt { @if x.active { checked } } />
+```
+
+#### Function Tags (Components)
+
+```waltzing
+<@button label="Submit" disabled=@is_submitting />
+
+<@layout::page title="Dashboard">
+    <div class="content">@page_content</div>
+</@layout::page>
+
+@* Shorthand closing *@
+<@card title="Stats"><p>Content</p></@>
+```
+
+#### Render Callbacks
+
+```waltzing
+@* Define function with render callback parameter *@
+@fn dropdown(header: String, content: @()) {
+    <div class="header">@header</div>
+    <div class="body">@content()</div>
+}
+
+@* Call with inline template *@
+<@dropdown header="Menu" content=@() {
+    <ul><li>Item 1</li><li>Item 2</li></ul>
+}/>
+```
+
+#### Built-in Helpers (selection)
+
+```waltzing
+@* Text *@
+@truncate(&text, 100)                      @* Truncate with "..." *@
+@pluralize(count, "item")                  @* "1 item" or "5 items" *@
+
+@* Numbers *@
+@number(count)                             @* 1234567 -> "1,234,567" *@
+@currency(1234.50, "USD")                  @* "$1,234.50" *@
+
+@* HTML/CSS *@
+@cn("btn", "primary", if active { "active" } else { "" })
+@class_if(is_active, "active")
+@json(&data)                               @* JSON encode for <script> *@
+@safe_url(user_url)                        @* Validates URL is safe *@
+```
+
+## References
+
+- `.claude/agents/waltzing-expert.md` - Complete syntax reference
+- `.claude/skills.md` - Available skills for template writing
