@@ -1,0 +1,159 @@
+==================
+format expression
+==================
+
+@fn fmt(name: String) { <p>@format("Hello {}", name)</p> }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list
+        (parameter
+          (identifier)
+          (rust_type
+            (primitive_type))))
+      (content_block
+        (template_node
+          (html_element
+            (tag_name)
+            (template_node
+              (template_expression
+                (format_expression
+                  (string_literal)
+                  (expression
+                    (primary_expression
+                      (rust_path))))))
+            (tag_name)))))))
+
+==================
+matches expression
+==================
+
+@fn check(v: Option<u32>) { <p>@matches(v, Some(_))</p> }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list
+        (parameter
+          (identifier)
+          (rust_type
+            (generic_type
+              (rust_path)
+              (rust_type
+                (primitive_type))))))
+      (content_block
+        (template_node
+          (html_element
+            (tag_name)
+            (template_node
+              (template_expression
+                (matches_expression
+                  (expression
+                    (primary_expression
+                      (rust_path)))
+                  (pattern
+                    (tuple_variant_pattern
+                      (rust_path)
+                      (pattern
+                        (wildcard_pattern)))))))
+            (tag_name)))))))
+
+==================
+inferred enum path
+==================
+
+@fn status(s: Status) { <p>@(::Active)</p> }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list
+        (parameter
+          (identifier)
+          (rust_type
+            (path_type
+              (rust_path)))))
+      (content_block
+        (template_node
+          (html_element
+            (tag_name)
+            (template_node
+              (template_expression
+                (complex_expression
+                  (expression
+                    (primary_expression
+                      (inferred_enum_path))))))
+            (tag_name)))))))
+
+==================
+inferred enum tuple variant
+==================
+
+@fn call() { <p>@(::Some(1))</p> }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list)
+      (content_block
+        (template_node
+          (html_element
+            (tag_name)
+            (template_node
+              (template_expression
+                (complex_expression
+                  (expression
+                    (primary_expression
+                      (inferred_enum_call
+                        (inferred_enum_path)
+                        (argument_list
+                          (expression
+                            (primary_expression
+                              (literal
+                                (number_literal
+                                  (integer_literal))))))))))))
+            (tag_name)))))))
+
+==================
+inferred enum struct variant
+==================
+
+@fn data() { @let x = ::User { name: "A" }; }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list)
+      (content_block
+        (template_node
+          (template_control_flow
+            (let_statement
+              (simple_pattern
+                (identifier_pattern
+                  (identifier)))
+              (expression
+                (primary_expression
+                  (inferred_enum_struct
+                    (inferred_enum_path)
+                    (struct_field_init
+                      (identifier)
+                      (expression
+                        (primary_expression
+                          (literal
+                            (string_literal)))))))))))))))

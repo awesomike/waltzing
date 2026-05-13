@@ -1,0 +1,175 @@
+==================
+@if statement
+==================
+
+@fn show(x: bool) { @if x { <p>Yes</p> } }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list
+        (parameter
+          (identifier)
+          (rust_type
+            (primitive_type))))
+      (content_block
+        (template_node
+          (template_control_flow
+            (if_statement
+              (expression
+                (primary_expression
+                  (rust_path)))
+              (content_block
+                (template_node
+                  (html_element
+                    (tag_name)
+                    (template_node
+                      (text_content))
+                    (tag_name)))))))))))
+
+==================
+@for loop
+==================
+
+@fn loop(items: Vec<u32>) { @for n in items { <li>@n</li> } }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list
+        (parameter
+          (identifier)
+          (rust_type
+            (generic_type
+              (rust_path)
+              (rust_type
+                (primitive_type))))))
+      (content_block
+        (template_node
+          (template_control_flow
+            (for_loop
+              (simple_pattern
+                (identifier_pattern
+                  (identifier)))
+              (expression
+                (primary_expression
+                  (rust_path)))
+              (content_block
+                (template_node
+                  (html_element
+                    (tag_name)
+                    (template_node
+                      (template_expression
+                        (simple_expression
+                          (expression_path
+                            (identifier)))))
+                    (tag_name)))))))))))
+
+==================
+@match with literal and wildcard
+==================
+
+@fn pick(v: u32) { @match v { 0 => { <p>zero</p> }, _ => { <p>other</p> } } }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list
+        (parameter
+          (identifier)
+          (rust_type
+            (primitive_type))))
+      (content_block
+        (template_node
+          (template_control_flow
+            (match_statement
+              (expression
+                (primary_expression
+                  (rust_path)))
+              (match_arm
+                (pattern
+                  (literal
+                    (number_literal
+                      (integer_literal))))
+                (content_block
+                  (template_node
+                    (html_element
+                      (tag_name)
+                      (template_node
+                        (text_content))
+                      (tag_name)))))
+              (match_arm
+                (pattern
+                  (wildcard_pattern))
+                (content_block
+                  (template_node
+                    (html_element
+                      (tag_name)
+                      (template_node
+                        (text_content))
+                      (tag_name))))))))))))
+
+==================
+@if in HTML attribute position
+==================
+
+@fn cb(active: bool) { <input @if active { checked } /> }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list
+        (parameter
+          (identifier)
+          (rust_type
+            (primitive_type))))
+      (content_block
+        (template_node
+          (html_element
+            (tag_name)
+            (attribute_or_control
+              (attribute_control_flow
+                (attribute_if_statement
+                  (expression
+                    (primary_expression
+                      (rust_path)))
+                  (attribute_or_control
+                    (html_attribute
+                      (attribute_name))))))))))))
+==================
+@let statement
+==================
+
+@fn calc() { @let n = 42; }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list)
+      (content_block
+        (template_node
+          (template_control_flow
+            (let_statement
+              (simple_pattern
+                (identifier_pattern
+                  (identifier)))
+              (expression
+                (primary_expression
+                  (literal
+                    (number_literal
+                      (integer_literal))))))))))))

@@ -32,16 +32,37 @@
  * not to CSS or JavaScript code.
  */
 
+// REGEN STATUS — read before touching this grammar.
+//
+// `src/parser.c`, `src/grammar.json`, and `src/node-types.json` are generated
+// from this file with tree-sitter-cli v0.25.10. Regeneration is expected to
+// complete quickly on local hardware (last checked: 0.60s, <90 MB RSS).
+//
+// The previous grammar shape made `tree-sitter generate` explore an enormous
+// LR/error-recovery state space. The important constraints that keep regen
+// reliable are:
+//   • All template-content bodies go through `_template_nodes`.
+//   • HTML void elements are explicit; ordinary `<tag>` starts a full element.
+//   • Function tags require `/>` for self-closing form.
+//   • Rust expressions are intentionally opaque (`rust_expression`) except for
+//     literals, paths, inferred enum variants, template blocks, and render
+//     closures. The Waltzing compiler validates Rust expression semantics.
+//   • Multi-depth template comments/raw blocks are not modeled as 22 token
+//     variants; the common one-delimiter forms are tokenized for editor use.
+//
+// If any of those constraints are relaxed, run `tree-sitter generate` before
+// committing and watch memory/time. A return to multi-GB RSS means the grammar
+// has reintroduced exponential table construction.
+
 module.exports = grammar({
   name: "waltzing",
 
   extras: ($) => [/\s/],
 
   conflicts: ($) => [
-    [$.expression, $.pattern],
-    [$.rust_path, $.expression],
-    [$.html_element],
-    [$.self_closing_function_tag, $.container_function_tag],
+    // `|x|` — could be closure that returns `|x|` (no return type) or that's
+    // about to declare a `-> T` return type. cli 0.25 needs both parses.
+    [$.closure_type],
   ],
 
   rules: {
@@ -150,7 +171,9 @@ module.exports = grammar({
 
     default_value: ($) => $.expression,
 
-    content_block: ($) => seq("{", repeat($.template_node), "}"),
+    content_block: ($) => seq("{", optional($._template_nodes), "}"),
+
+    _template_nodes: ($) => repeat1($.template_node),
 
     // Template nodes
     // Note: template_control_flow must come before template_expression
@@ -175,14 +198,14 @@ module.exports = grammar({
         // Self-closing tag
         seq("<", $.tag_name, repeat($.attribute_or_control), "/", ">"),
         // Void elements (no closing tag needed)
-        seq("<", $.tag_name, repeat($.attribute_or_control), ">"),
+        seq("<", alias($.void_tag_name, $.tag_name), repeat($.attribute_or_control), optional("/"), ">"),
         // Full element with content and closing tag
         seq(
           "<",
           $.tag_name,
           repeat($.attribute_or_control),
           ">",
-          repeat($.template_node),
+          optional($._template_nodes),
           "</",
           $.tag_name,
           ">",
@@ -192,8 +215,8 @@ module.exports = grammar({
     // Allow either HTML attributes or control flow (@if/@for) in attribute position
     attribute_or_control: ($) =>
       choice(
-        $.html_attribute,
         $.attribute_control_flow,
+        $.html_attribute,
       ),
 
     // Control flow in attribute context - produces attributes conditionally
@@ -226,11 +249,34 @@ module.exports = grammar({
 
     tag_name: ($) => /[a-zA-Z][a-zA-Z0-9-]*/,
 
+    void_tag_name: ($) =>
+      token(prec(1, choice(
+        "area",
+        "base",
+        "br",
+        "col",
+        "embed",
+        "hr",
+        "img",
+        "input",
+        "link",
+        "meta",
+        "param",
+        "source",
+        "track",
+        "wbr",
+      ))),
+
     html_attribute: ($) =>
       seq($.attribute_name, optional(seq("=", $.attribute_value))),
 
-    // Attribute names: allow @ for directives like @click, but not @if/@for/@let
-    attribute_name: ($) => /[a-zA-Z_:@][a-zA-Z0-9_:.-]*/,
+    // Attribute names: allow @ directives like @click, while keeping @if/@for
+    // visible as `@` + keyword tokens for attribute_control_flow.
+    attribute_name: ($) =>
+      choice(
+        /[a-zA-Z_:][a-zA-Z0-9_:.-]*/,
+        seq("@", /[a-zA-Z_][a-zA-Z0-9_:.-]*/),
+      ),
 
     attribute_value: ($) =>
       choice(
@@ -241,7 +287,15 @@ module.exports = grammar({
 
     // Template expressions
     template_expression: ($) =>
-      choice($.simple_expression, $.complex_expression, $.safe_expression, $.out_ref, $.target_ref),
+      choice(
+        $.simple_expression,
+        $.complex_expression,
+        $.safe_expression,
+        $.format_expression,
+        $.matches_expression,
+        $.out_ref,
+        $.target_ref,
+      ),
 
     // Compiler-injected output reference - resolves to &mut __wtz_buffer or __wtz_target
     out_ref: ($) => seq("@", "out"),
@@ -268,6 +322,60 @@ module.exports = grammar({
         ")",
       ),
 
+    // Format expression: @format("template {}", arg1, arg2, ...)
+    // Compiles to Rust's format!() macro.
+    format_expression: ($) =>
+      seq(
+        "@",
+        "format",
+        "(",
+        $.string_literal,
+        repeat(seq(",", $.expression)),
+        ")",
+      ),
+
+    // Matches expression: @matches(value, pattern) or @matches(value, pattern if guard)
+    // Compiles to Rust's matches!() macro.
+    matches_expression: ($) =>
+      seq(
+        "@",
+        "matches",
+        "(",
+        $.expression,
+        ",",
+        $.pattern,
+        optional(seq("if", $.expression)),
+        ")",
+      ),
+
+    // Inferred enum path: ::Variant — the enum type is resolved from the
+    // surrounding context (function parameter type). Tokenized so `::` and
+    // the variant name parse as one unit.
+    inferred_enum_path: ($) =>
+      token(seq("::", /[a-zA-Z_][a-zA-Z0-9_]*/)),
+
+    // Inferred enum tuple variant: ::Variant(arg1, arg2, ...)
+    inferred_enum_call: ($) =>
+      prec(4, seq($.inferred_enum_path, "(", optional($.argument_list), ")")),
+
+    // Inferred enum struct variant: ::Variant { field: value, ... }
+    inferred_enum_struct: ($) =>
+      prec(
+        4,
+        seq(
+          $.inferred_enum_path,
+          "{",
+          optional(seq(
+            $.struct_field_init,
+            repeat(seq(",", $.struct_field_init)),
+            optional(","),
+          )),
+          "}",
+        ),
+      ),
+
+    struct_field_init: ($) => seq($.identifier, ":", $.expression),
+
     expression_path: ($) =>
       seq(
         $.identifier,
@@ -293,9 +401,13 @@ module.exports = grammar({
       ),
 
     // Let binding: @let name = expression
-    // Use simple_pattern to avoid confusion with if/match expressions containing { }
+    // Use simple_pattern to avoid confusion with if/match expressions
+    // containing { }. The `prec(3)` outranks `simple_expression`'s prec(2)
+    // macro form so that `@let n` commits to let_statement rather than
+    // parsing `@let` as `simple_expression` (= `@` + identifier `let`) and
+    // leaving the `= 42` orphaned.
     let_statement: ($) =>
-      seq(seq("@", "let"), $.simple_pattern, "=", $.expression),
+      prec(3, seq(seq("@", "let"), $.simple_pattern, "=", $.expression, optional(";"))),
 
     if_statement: ($) =>
       seq(
@@ -355,7 +467,7 @@ module.exports = grammar({
         "<@",
         $.function_path,
         repeat($.function_attribute),
-        optional("/"),
+        "/",
         ">",
       ),
 
@@ -365,7 +477,7 @@ module.exports = grammar({
         $.function_path,
         repeat($.function_attribute),
         ">",
-        repeat($.template_node),
+        optional($._template_nodes),
         "</@",
         $.function_path,
         ">",
@@ -402,6 +514,7 @@ module.exports = grammar({
     pattern: ($) =>
       choice(
         $.wildcard_pattern,
+        $.tuple_variant_pattern,
         $.tuple_pattern,
         $.struct_pattern,
         $.literal,
@@ -432,162 +545,49 @@ module.exports = grammar({
 
     field_pattern: ($) => seq($.identifier, optional(seq(":", $.pattern))),
 
+    tuple_variant_pattern: ($) =>
+      seq(
+        $.rust_path,
+        "(",
+        optional(seq($.pattern, repeat(seq(",", $.pattern)), optional(","))),
+        ")",
+      ),
+
     tuple_pattern: ($) =>
       seq("(", $.pattern, repeat(seq(",", $.pattern)), optional(","), ")"),
 
     // Expressions
+    //
+    // Rust expressions are intentionally kept mostly opaque here. Earlier
+    // versions modeled Rust expressions recursively (`binary_expression`,
+    // `method_call`, `statement_block`, etc.), but that gave the LR generator
+    // too many paths across every Waltzing template-content boundary. The
+    // compiler remains the authority for Rust expression validity; this grammar
+    // only needs a stable editor tree around the template syntax.
     expression: ($) =>
-      choice($.binary_expression, $.unary_expression, $.primary_expression),
-
-    binary_expression: ($) =>
-      prec.left(1, seq($.expression, $.binary_operator, $.expression)),
-
-    unary_expression: ($) => prec(2, seq($.unary_operator, $.expression)),
+      choice(
+        $.template_block,
+        $.render_closure,
+        $.primary_expression,
+      ),
 
     primary_expression: ($) =>
       choice(
-        // if/match expressions must come first to match the keywords before rust_path
-        $.if_expression,
-        $.match_expression,
         $.literal,
-        $.macro_call,
-        $.method_call,
-        $.field_access,
-        $.index_access,
-        $.parenthesized_expression,
-        $.array_literal,
-        $.closure_expression,
-        $.render_closure,
-        $.statement_block,
-        $.template_block,
-        // rust_path last as fallback for identifiers
+        $.inferred_enum_call,
+        $.inferred_enum_struct,
+        $.inferred_enum_path,
         $.rust_path,
+        $.rust_expression,
       ),
 
-    // Statement block - Rust statements in expression position
-    // The last expression is the value (like in Rust)
-    // Example: { let x = 1; x * 2 } evaluates to 2
-    statement_block: ($) =>
-      seq("{", repeat($.rust_statement), optional($.expression), "}"),
-
-    // Rust statement inside a statement block
-    rust_statement: ($) =>
-      seq(
-        choice(
-          seq("let", $.simple_pattern, optional(seq(":", $.rust_type)), "=", $.expression),
-          $.expression,
-        ),
-        ";",
-      ),
+    rust_expression: ($) =>
+      token(prec(-1, /[^{}<@,;)\]\s][^{}<@,;)\]]*/)),
 
     // Template block - explicit template content in expression position
     // Use @{ ... } to create template content as an expression
     // Example: @let html = @{ <div>Hello</div> }
-    template_block: ($) => seq("@", "{", repeat($.template_node), "}"),
-
-    // If expression (returns a value): if cond { expr } else { expr }
-    if_expression: ($) =>
-      prec.right(
-        10,
-        seq(
-          "if",
-          $.expression,
-          "{",
-          $.expression,
-          "}",
-          "else",
-          choice(
-            $.if_expression,
-            seq("{", $.expression, "}"),
-          ),
-        ),
-      ),
-
-    // Match expression (returns a value): match expr { pat => expr, ... }
-    match_expression: ($) =>
-      prec.right(
-        10,
-        seq(
-          "match",
-          $.expression,
-          "{",
-          repeat($.expression_match_arm),
-          "}",
-        ),
-      ),
-
-    expression_match_arm: ($) =>
-      seq(
-        $.pattern,
-        optional(seq("if", $.expression)),
-        "=>",
-        $.expression,
-        optional(","),
-      ),
-
-    // Rust macro calls: format!(), vec![], println!(), etc.
-    macro_call: ($) =>
-      prec(
-        5,
-        seq(
-          $.identifier,
-          "!",
-          choice(
-            seq("(", optional($.macro_args), ")"),
-            seq("[", optional($.macro_args), "]"),
-            seq("{", optional($.macro_args), "}"),
-          ),
-        ),
-      ),
-
-    // Macro arguments
-    macro_args: ($) =>
-      seq(
-        $.macro_arg,
-        repeat(seq(",", $.macro_arg)),
-        optional(","),
-      ),
-
-    // Macro argument - just use expression
-    macro_arg: ($) => $.expression,
-
-    method_call: ($) =>
-      prec.left(
-        3,
-        seq(
-          $.primary_expression,
-          ".",
-          $.identifier,
-          "(",
-          optional($.argument_list),
-          ")",
-        ),
-      ),
-
-    field_access: ($) =>
-      prec.left(3, seq($.primary_expression, ".", $.identifier)),
-
-    index_access: ($) =>
-      prec.left(3, seq($.primary_expression, "[", $.expression, "]")),
-
-    parenthesized_expression: ($) => seq("(", $.expression, ")"),
-
-    array_literal: ($) =>
-      seq(
-        "[",
-        optional(
-          seq($.expression, repeat(seq(",", $.expression)), optional(",")),
-        ),
-        "]",
-      ),
-
-    closure_expression: ($) =>
-      seq(
-        "|",
-        optional($.closure_params),
-        "|",
-        choice($.expression, $.content_block),
-      ),
+    template_block: ($) => seq("@", "{", optional($._template_nodes), "}"),
 
     // Render closure - inline closure that writes to output target
     // Generates: |params..., __wtz_target: &mut _WtzTarget| { template_content }
@@ -600,36 +600,8 @@ module.exports = grammar({
         ")",
         $.content_block,
       ),
-
-    closure_params: ($) => seq($.identifier, repeat(seq(",", $.identifier))),
-
     argument_list: ($) =>
       seq($.expression, repeat(seq(",", $.expression)), optional(",")),
-
-    // Operators
-    binary_operator: ($) =>
-      choice(
-        "+",
-        "-",
-        "*",
-        "/",
-        "%",
-        "==",
-        "!=",
-        "<",
-        ">",
-        "<=",
-        ">=",
-        "&&",
-        "||",
-        "&",
-        "|",
-        "^",
-        "<<",
-        ">>",
-      ),
-
-    unary_operator: ($) => choice("!", "-", "*", "&"),
 
     // Literals
     literal: ($) =>
@@ -750,10 +722,13 @@ module.exports = grammar({
     // Comments
     comment: ($) => choice($.template_comment, $.html_comment),
 
-    // Template comments: @* ... *@ with varying asterisk counts
-    template_comment: ($) => choice(
-      ...Array.from({ length: 22 }, (_, i) => $[`template_comment_${i + 1}`])
-    ),
+    // Template comments: @* ... *@.
+    //
+    // The compiler supports arbitrary delimiter depth (`@** ... **@`, etc.),
+    // but modeling each depth as a separate token made error-recovery table
+    // construction explode. Keep the common editor token here; deeper comments
+    // still parse as ordinary text/error recovery until a scanner is added.
+    template_comment: ($) => $.template_comment_1,
     template_comment_1: ($) => /@\*([^*]|\*[^@])*\*@/,
     template_comment_2: ($) => /@\*\*([^*]|\*[^*]|\*\*[^@])*\*\*@/,
     template_comment_3: ($) => /@\*\*\*([^*]|\*[^*]|\*\*[^*]|\*\*\*[^@])*\*\*\*@/,
@@ -780,10 +755,11 @@ module.exports = grammar({
     // HTML comment: <!-- ... -->
     html_comment: ($) => /<!--([^-]|-[^-]|--[^>])*-->/,
 
-    // Raw blocks: @# ... #@ with varying hash counts
-    raw_block: ($) => choice(
-      ...Array.from({ length: 22 }, (_, i) => $[`raw_block_${i + 1}`])
-    ),
+    // Raw blocks: @# ... #@.
+    //
+    // See template_comment: deeper delimiter variants are compiler-supported,
+    // but keeping 22 separate tokens prevents reliable parser regeneration.
+    raw_block: ($) => $.raw_block_1,
     raw_block_1: ($) => /@#([^#]|#[^@])*#@/,
     raw_block_2: ($) => /@##([^#]|#[^#]|##[^@])*##@/,
     raw_block_3: ($) => /@###([^#]|#{1,2}[^#]|###[^@])*###@/,
@@ -812,7 +788,7 @@ module.exports = grammar({
       seq("@```", $.language_name, /([^`]|`[^`]|``[^`]|```[^@])*/, "```@"),
 
     language_name: ($) =>
-      choice("html", "css", "js", "javascript", "json", "style"),
+      choice("html", "css", "js", "javascript", "json", "alpine", "style"),
 
     // Escape sequence for literal @
     escape_at: ($) => "@@",

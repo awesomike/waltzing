@@ -1,0 +1,90 @@
+==================
+empty function
+==================
+
+@fn empty() { }
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list)
+      (content_block))))
+
+==================
+use statement
+==================
+
+@use std::collections::HashMap
+
+---
+
+(template
+  (template_element
+    (use_statement
+      (rust_path))))
+
+==================
+import with alias
+==================
+
+@import "/components/button" as btn
+
+---
+
+(template
+  (template_element
+    (import_statement
+      (string_literal)
+      (identifier))))
+
+==================
+struct definition
+==================
+
+@struct User {
+  name: String,
+  age: u32,
+}
+
+---
+
+(template
+  (template_element
+    (struct_definition
+      (identifier)
+      (struct_field
+        (identifier)
+        (type_expression
+          (rust_type
+            (primitive_type))))
+      (struct_field
+        (identifier)
+        (type_expression
+          (rust_type
+            (primitive_type)))))))
+
+==================
+html element with text
+==================
+
+@fn greet() {
+  <h1>Hello</h1>
+}
+
+---
+
+(template
+  (template_element
+    (function_definition
+      (identifier)
+      (parameter_list)
+      (content_block
+        (template_node
+          (html_element
+            (tag_name)
+            (template_node
+              (text_content))
+            (tag_name)))))))
