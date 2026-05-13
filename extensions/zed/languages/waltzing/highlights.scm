@@ -8,19 +8,19 @@
 (raw_block) @string.special
 
 ; Keywords - only in proper syntactic contexts
-(use_statement "@use" @keyword)
-(import_statement "@import" @keyword)
-(struct_definition "@struct" @keyword)
-(enum_definition "@enum" @keyword)
-(function_definition "@fn" @keyword)
-(let_statement "@let" @keyword)
-(if_statement "@if" @keyword)
-(for_loop "@for" @keyword)
-(match_statement "@match" @keyword)
-(break_statement "@break" @keyword)
-(continue_statement "@continue" @keyword)
-(attribute_if_statement "@if" @keyword)
-(attribute_for_loop "@for" @keyword)
+(use_statement "@" @keyword "use" @keyword)
+(import_statement "@" @keyword "import" @keyword)
+(struct_definition "@" @keyword "struct" @keyword)
+(enum_definition "@" @keyword "enum" @keyword)
+(function_definition "@" @keyword "fn" @keyword)
+(let_statement "@" @keyword "let" @keyword)
+(if_statement "@" @keyword "if" @keyword)
+(for_loop "@" @keyword "for" @keyword)
+(match_statement "@" @keyword "match" @keyword)
+(break_statement "@" @keyword "break" @keyword)
+(continue_statement "@" @keyword "continue" @keyword)
+(attribute_if_statement "@" @keyword "if" @keyword)
+(attribute_for_loop "@" @keyword "for" @keyword)
 (else_if_branch "else" @keyword)
 (else_if_branch "if" @keyword)
 (else_branch "else" @keyword)
@@ -39,15 +39,14 @@
 ; Functions
 (function_definition (identifier) @fn)
 (function_path) @fn
-(method_call (identifier) @fn)
 
 ; Parameters
 (parameter (identifier) @variable)
 
 ; Properties
 (struct_field (identifier) @property)
-(field_access (identifier) @property)
 (field_pattern (identifier) @property)
+(struct_field_init (identifier) @property)
 
 ; Constructors
 (enum_variant (identifier) @constructor)
@@ -65,8 +64,6 @@
 (boolean_literal) @boolean
 
 ; Operators
-(binary_operator) @operator
-(unary_operator) @operator
 "=>" @operator
 "=" @operator
 
@@ -93,7 +90,6 @@
 
 ; Module paths
 (use_statement (rust_path) @type)
-(import_statement (import_path) @string)
 (rust_path) @variable
 
 ; Escape
@@ -102,6 +98,7 @@
 
 ; Embedded language names
 "json" @label
+"alpine" @label
 "js" @label
 "javascript" @label
 "css" @label
