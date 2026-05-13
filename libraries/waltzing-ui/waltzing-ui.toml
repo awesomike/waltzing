@@ -75,3 +75,7 @@ dashboard = { path = "layouts/dashboard.wtz", deps = ["base"] }
 sidebar = { path = "layouts/sidebar.wtz", deps = ["base"] }
 
 [blocks]
+contact-card = { path = "blocks/forms/contact-card.wtz", deps = ["button", "card", "input", "textarea"] }
+login-card = { path = "blocks/auth/login-card.wtz", deps = ["button", "card", "checkbox", "input"] }
+signup-card = { path = "blocks/auth/signup-card.wtz", deps = ["button", "card", "checkbox", "input"] }
+stats-grid = { path = "blocks/dashboard/stats-grid.wtz", deps = ["card"] }

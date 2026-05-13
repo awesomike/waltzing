@@ -223,8 +223,8 @@
       "description": "Form wrapper with validation display and field layouts",
       "dependencies": [
         "lib/utils",
-        "components/input",
-        "components/button"
+        "input",
+        "button"
       ]
     },
     {
@@ -450,7 +450,8 @@
     {
       "name": "base",
       "path": "layouts/base.wtz",
-      "description": "HTML document structure with head and body"
+      "description": "HTML document structure with head and body",
+      "dependencies": []
     },
     {
       "name": "dashboard",
@@ -465,7 +466,6 @@
       "path": "layouts/sidebar.wtz",
       "description": "Dashboard layout with collapsible sidebar",
       "dependencies": [
-        "layouts/base",
         "lib/utils"
       ]
     }
@@ -502,5 +502,47 @@
       ]
     }
   },
-  "blocks": []
+  "blocks": [
+    {
+      "name": "login-card",
+      "path": "blocks/auth/login-card.wtz",
+      "description": "Accessible email/password sign-in card with validation message slots",
+      "dependencies": [
+        "button",
+        "card",
+        "checkbox",
+        "input"
+      ]
+    },
+    {
+      "name": "signup-card",
+      "path": "blocks/auth/signup-card.wtz",
+      "description": "Accessible registration card with required fields and terms checkbox",
+      "dependencies": [
+        "button",
+        "card",
+        "checkbox",
+        "input"
+      ]
+    },
+    {
+      "name": "contact-card",
+      "path": "blocks/forms/contact-card.wtz",
+      "description": "Labeled contact form card with name, email, message, and validation slots",
+      "dependencies": [
+        "button",
+        "card",
+        "input",
+        "textarea"
+      ]
+    },
+    {
+      "name": "stats-grid",
+      "path": "blocks/dashboard/stats-grid.wtz",
+      "description": "Responsive dashboard KPI card grid",
+      "dependencies": [
+        "card"
+      ]
+    }
+  ]
 }

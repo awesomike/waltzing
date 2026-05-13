@@ -14,6 +14,11 @@ The runtime build validates:
 
 - every `waltzing-ui.toml` path exists;
 - every manifest dependency points at a known entry or `lib/*` helper;
+- every registry entry points at a manifest entry with valid dependencies;
+- the stable library surface keeps real breadth across components, layouts, and
+  blocks;
+- block and dialog templates keep basic accessibility markers such as labels,
+  alerts, dialog roles, and accessible names;
 - the whole directory compiles with the Waltzing CLI.
 
 Run the same gate directly:
@@ -71,6 +76,18 @@ Navigation and layout:
 Advanced inputs:
 
 - `multi-select`
+
+## Included Blocks
+
+The stable block set covers common application starting points:
+
+- `login-card` and `signup-card` for accessible auth forms;
+- `contact-card` for labeled contact forms with validation message slots;
+- `stats-grid` for dashboard KPI summaries.
+
+Blocks are intentionally held to the same parser and registry checks as
+components. Experimental blocks should land outside `libraries/waltzing-ui`
+until they compile with the current Waltzing parser.
 
 ## Runtime Dependencies
 

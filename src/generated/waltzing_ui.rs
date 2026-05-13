@@ -70,5 +70,9 @@ pub const LAYOUTS: &[&str] = &[
 
 /// List of blocks in this library
 pub const BLOCKS: &[&str] = &[
+    "contact-card",
+    "login-card",
+    "signup-card",
+    "stats-grid",
 ];
 

@@ -1,0 +1,61 @@
+@*
+ * Login card block
+ * Accessible email/password sign-in form with optional validation messages.
+ *@
+
+@import /components/card.wtz as card
+@import /components/button.wtz as button
+@import /components/checkbox.wtz as checkbox
+
+@fn apply(
+    action: &str,
+    method: &str = "post",
+    title: &str = "Sign in",
+    description: &str = "Use your email and password to continue.",
+    email_value: Option<&str> = None,
+    email_error: Option<&str> = None,
+    password_error: Option<&str> = None,
+    remember_name: &str = "remember",
+    submit_text: &str = "Sign in",
+    class: &str = "",
+) {
+    @let email_help_id = "login-email-error"
+    @let password_help_id = "login-password-error"
+    @let email_placeholder = "you@example.com"
+    @let input_cls = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+
+    <@card::base class=@class>
+        <@card::header>
+            <@card::title>@title</@card::title>
+            <@card::description>@description</@card::description>
+        </@card::header>
+        <@card::content>
+            <form action=@action method=@method class="space-y-4">
+                <div class="space-y-2">
+                    <label for="email" class="text-sm font-medium leading-none">Email</label>
+                    <input id="email" name="email" type="email" class=@input_cls placeholder=@email_placeholder required />
+                    @if let Some(error) = email_error {
+                        <p id=@email_help_id class="text-sm text-destructive" role="alert">@error</p>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="password" class="text-sm font-medium leading-none">Password</label>
+                    <input id="password" name="password" type="password" class=@input_cls placeholder="Password" required />
+                    @if let Some(error) = password_error {
+                        <p id=@password_help_id class="text-sm text-destructive" role="alert">@error</p>
+                    }
+                </div>
+
+                <label class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <@checkbox::apply name=@remember_name checked=false />
+                    Remember this device
+                </label>
+
+                <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
+                    @submit_text
+                </@button::apply>
+            </form>
+        </@card::content>
+    </@card::base>
+}

@@ -1,0 +1,67 @@
+@*
+ * Signup card block
+ * Registration form with accessible labels and optional validation messages.
+ *@
+
+@import /components/card.wtz as card
+@import /components/button.wtz as button
+@import /components/checkbox.wtz as checkbox
+
+@fn apply(
+    action: &str,
+    method: &str = "post",
+    title: &str = "Create account",
+    description: &str = "Enter your details to get started.",
+    name_error: Option<&str> = None,
+    email_error: Option<&str> = None,
+    password_error: Option<&str> = None,
+    terms_name: &str = "terms",
+    submit_text: &str = "Create account",
+    class: &str = "",
+) {
+    @let email_placeholder = "you@example.com"
+    @let input_cls = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+
+    <@card::base class=@class>
+        <@card::header>
+            <@card::title>@title</@card::title>
+            <@card::description>@description</@card::description>
+        </@card::header>
+        <@card::content>
+            <form action=@action method=@method class="space-y-4">
+                <div class="space-y-2">
+                    <label for="name" class="text-sm font-medium leading-none">Name</label>
+                    <input id="name" name="name" type="text" class=@input_cls placeholder="Jane Doe" required />
+                    @if let Some(error) = name_error {
+                        <p class="text-sm text-destructive" role="alert">@error</p>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="email" class="text-sm font-medium leading-none">Email</label>
+                    <input id="email" name="email" type="email" class=@input_cls placeholder=@email_placeholder required />
+                    @if let Some(error) = email_error {
+                        <p class="text-sm text-destructive" role="alert">@error</p>
+                    }
+                </div>
+
+                <div class="space-y-2">
+                    <label for="password" class="text-sm font-medium leading-none">Password</label>
+                    <input id="password" name="password" type="password" class=@input_cls placeholder="Create a password" required />
+                    @if let Some(error) = password_error {
+                        <p class="text-sm text-destructive" role="alert">@error</p>
+                    }
+                </div>
+
+                <label class="flex items-start gap-2 text-sm text-muted-foreground">
+                    <@checkbox::apply name=@terms_name checked=false />
+                    <span>I agree to the terms and privacy policy.</span>
+                </label>
+
+                <@button::apply variant=button::Variant::Primary size=button::Size::Default class="w-full">
+                    @submit_text
+                </@button::apply>
+            </form>
+        </@card::content>
+    </@card::base>
+}

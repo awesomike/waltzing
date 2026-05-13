@@ -1,0 +1,38 @@
+@*
+ * Stats grid block
+ * Responsive KPI cards for dashboards.
+ *@
+
+@import /components/card.wtz as card
+
+@struct Stat {
+    label: String,
+    value: String,
+    description: Option<String>,
+}
+
+@fn apply(
+    stats: Vec<Stat>,
+    columns: u32 = 4,
+    class: &str = "",
+) {
+    @let cols_cls = match columns {
+        1 => "sm:grid-cols-1",
+        2 => "sm:grid-cols-2",
+        3 => "sm:grid-cols-2 lg:grid-cols-3",
+        _ => "sm:grid-cols-2 lg:grid-cols-4",
+    }
+    @let grid_cls = cn(&["grid gap-4", cols_cls, class])
+
+    <section class=@grid_cls aria-label="Dashboard statistics">
+        @for stat in stats {
+            <@card::simple>
+                <p class="text-sm font-medium text-muted-foreground">@stat.label</p>
+                <p class="mt-2 text-2xl font-semibold tracking-tight">@stat.value</p>
+                @if let Some(desc) = &stat.description {
+                    <p class="mt-1 text-sm text-muted-foreground">@desc</p>
+                }
+            </@card::simple>
+        }
+    </section>
+}
