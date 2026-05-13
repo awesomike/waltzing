@@ -1,38 +1,39 @@
 //! Waltzing Language Extension for Zed
 //!
 //! This extension provides Language Server Protocol (LSP) support for Waltzing
-//! template files (.wtz) in the Zed editor.
+//! template files (.wtz) in the Zed editor, plus a Model Context Protocol
+//! (MCP) server that exposes Waltzing grammar/validation tools to Zed's
+//! Agent Panel.
 //!
-//! Resolution order for the `waltzing-lsp` binary:
+//! Both binaries (`waltzing-lsp`, `waltzing-mcp`) resolve in the same order:
 //!   1. User-configured path in Zed settings.
 //!   2. Existing install on PATH (cargo/.local/system/homebrew).
 //!   3. Auto-downloaded from the project's GitHub releases.
 
 use std::fs;
 use zed_extension_api::{
-    self as zed, Architecture, Command, DownloadedFileType, GithubReleaseOptions,
-    LanguageServerId, LanguageServerInstallationStatus, Os, Result, Worktree, current_platform,
-    download_file, latest_github_release, make_file_executable,
+    self as zed, Architecture, Command, ContextServerId, DownloadedFileType,
+    GithubReleaseOptions, LanguageServerId, LanguageServerInstallationStatus, Os, Project, Result,
+    Worktree, current_platform, download_file, latest_github_release, make_file_executable,
     set_language_server_installation_status, settings::LspSettings,
 };
 
-/// GitHub repository hosting `waltzing-lsp` release binaries.
+/// GitHub repository hosting release binaries.
 const REPO: &str = "awesomike/waltzing";
 
-/// Bare name of the LSP binary on disk.
-const BINARY_NAME: &str = "waltzing-lsp";
+const LSP_BINARY: &str = "waltzing-lsp";
+const MCP_BINARY: &str = "waltzing-mcp";
 
-/// The Waltzing extension for Zed
+/// The Waltzing extension for Zed.
 struct WaltzingExtension {
-    /// Cached path to the language server binary
-    cached_binary_path: Option<String>,
+    cached_lsp_path: Option<String>,
+    cached_mcp_path: Option<String>,
 }
 
 impl WaltzingExtension {
-    /// Try to find a pre-existing `waltzing-lsp` binary on disk
-    /// (cargo install / local bin / system / Homebrew).
-    fn find_lsp_binary_on_path(&self) -> Option<String> {
-        if let Some(ref path) = self.cached_binary_path {
+    /// Search common install locations for `binary_name`.
+    fn find_binary_on_path(binary_name: &str, cached: &Option<String>) -> Option<String> {
+        if let Some(path) = cached {
             if fs::metadata(path).is_ok() {
                 return Some(path.clone());
             }
@@ -40,11 +41,11 @@ impl WaltzingExtension {
 
         let home = std::env::var("HOME").ok()?;
         let candidates = [
-            format!("{}/.cargo/bin/{}", home, BINARY_NAME),
-            format!("{}/.local/bin/{}", home, BINARY_NAME),
-            format!("/usr/local/bin/{}", BINARY_NAME),
-            format!("/usr/bin/{}", BINARY_NAME),
-            format!("/opt/homebrew/bin/{}", BINARY_NAME),
+            format!("{}/.cargo/bin/{}", home, binary_name),
+            format!("{}/.local/bin/{}", home, binary_name),
+            format!("/usr/local/bin/{}", binary_name),
+            format!("/usr/bin/{}", binary_name),
+            format!("/opt/homebrew/bin/{}", binary_name),
         ];
 
         candidates.into_iter().find(|p| fs::metadata(p).is_ok())
@@ -52,38 +53,40 @@ impl WaltzingExtension {
 
     /// Asset name on a release that matches the current host.
     /// Matches the naming used by `scripts/build-release.sh`:
-    ///   waltzing-lsp-{darwin|linux}-{aarch64|x86_64}
-    fn asset_name_for_current_platform() -> Result<String> {
+    ///   {binary}-{darwin|linux}-{aarch64|x86_64}
+    fn asset_name_for_current_platform(binary_name: &str) -> Result<String> {
         let (os, arch) = current_platform();
         let os_str = match os {
             Os::Mac => "darwin",
             Os::Linux => "linux",
             Os::Windows => {
-                return Err("waltzing-lsp does not yet ship a Windows binary; \
-                    install from source with `cargo install --path lsp` \
-                    in the waltzing repository."
-                    .into());
+                return Err(format!(
+                    "{} does not yet ship a Windows binary; install from source with \
+                     `cargo install --path lsp` (or `--path mcp`) in the waltzing repository.",
+                    binary_name,
+                ));
             }
         };
         let arch_str = match arch {
             Architecture::Aarch64 => "aarch64",
             Architecture::X8664 => "x86_64",
             Architecture::X86 => {
-                return Err("32-bit x86 is not supported by waltzing-lsp.".into());
+                return Err(format!("32-bit x86 is not supported by {}.", binary_name));
             }
         };
-        Ok(format!("{}-{}-{}", BINARY_NAME, os_str, arch_str))
+        Ok(format!("{}-{}-{}", binary_name, os_str, arch_str))
     }
 
-    /// Download the platform-appropriate `waltzing-lsp` from the latest GitHub
-    /// release and return the path to the binary in the extension work dir.
-    fn download_lsp(&mut self, language_server_id: &LanguageServerId) -> Result<String> {
-        let asset_name = Self::asset_name_for_current_platform()?;
+    /// Download the platform-appropriate binary from the latest GitHub release.
+    /// `progress` is invoked with installation-status updates; for binaries that
+    /// don't have a Zed status channel (e.g. context servers) it can be a no-op.
+    fn download_binary(
+        binary_name: &str,
+        mut progress: impl FnMut(&LanguageServerInstallationStatus),
+    ) -> Result<String> {
+        let asset_name = Self::asset_name_for_current_platform(binary_name)?;
 
-        set_language_server_installation_status(
-            language_server_id,
-            &LanguageServerInstallationStatus::CheckingForUpdate,
-        );
+        progress(&LanguageServerInstallationStatus::CheckingForUpdate);
 
         let release = latest_github_release(
             REPO,
@@ -104,18 +107,15 @@ impl WaltzingExtension {
                 )
             })?;
 
-        let version_dir = format!("{}-{}", BINARY_NAME, release.version);
-        let binary_path = format!("{}/{}", version_dir, BINARY_NAME);
+        let version_dir = format!("{}-{}", binary_name, release.version);
+        let binary_path = format!("{}/{}", version_dir, binary_name);
 
         let already_present = fs::metadata(&binary_path)
             .map(|m| m.is_file())
             .unwrap_or(false);
 
         if !already_present {
-            set_language_server_installation_status(
-                language_server_id,
-                &LanguageServerInstallationStatus::Downloading,
-            );
+            progress(&LanguageServerInstallationStatus::Downloading);
 
             fs::create_dir_all(&version_dir)
                 .map_err(|e| format!("Failed to create directory '{}': {}", version_dir, e))?;
@@ -127,13 +127,12 @@ impl WaltzingExtension {
             )?;
             make_file_executable(&binary_path)?;
 
-            // Clean up previously-downloaded versions to avoid disk creep.
+            // Clean up previously-downloaded versions of this binary.
+            let prefix = format!("{}-", binary_name);
             if let Ok(entries) = fs::read_dir(".") {
                 for entry in entries.flatten() {
                     if let Some(name) = entry.file_name().to_str() {
-                        let is_old_install =
-                            name.starts_with(&format!("{}-", BINARY_NAME)) && name != version_dir;
-                        if is_old_install {
+                        if name.starts_with(&prefix) && name != version_dir {
                             let _ = fs::remove_dir_all(entry.path());
                         }
                     }
@@ -148,7 +147,8 @@ impl WaltzingExtension {
 impl zed::Extension for WaltzingExtension {
     fn new() -> Self {
         WaltzingExtension {
-            cached_binary_path: None,
+            cached_lsp_path: None,
+            cached_mcp_path: None,
         }
     }
 
@@ -173,18 +173,48 @@ impl zed::Extension for WaltzingExtension {
 
         let command = if let Some(path) = settings_binary_path {
             path
-        } else if let Some(path) = self.find_lsp_binary_on_path() {
-            self.cached_binary_path = Some(path.clone());
+        } else if let Some(path) =
+            Self::find_binary_on_path(LSP_BINARY, &self.cached_lsp_path)
+        {
+            self.cached_lsp_path = Some(path.clone());
             path
         } else {
-            let path = self.download_lsp(language_server_id)?;
-            self.cached_binary_path = Some(path.clone());
+            let id = language_server_id.clone();
+            let path = Self::download_binary(LSP_BINARY, |status| {
+                set_language_server_installation_status(&id, status);
+            })?;
+            self.cached_lsp_path = Some(path.clone());
             path
         };
 
         Ok(Command {
             command,
             args,
+            env: vec![],
+        })
+    }
+
+    fn context_server_command(
+        &mut self,
+        _context_server_id: &ContextServerId,
+        _project: &Project,
+    ) -> Result<Command> {
+        // MCP servers don't have a settings.binary surface like LSPs do, so we
+        // only support the local-install fallback and the auto-download path.
+        let command = if let Some(path) =
+            Self::find_binary_on_path(MCP_BINARY, &self.cached_mcp_path)
+        {
+            self.cached_mcp_path = Some(path.clone());
+            path
+        } else {
+            let path = Self::download_binary(MCP_BINARY, |_| {})?;
+            self.cached_mcp_path = Some(path.clone());
+            path
+        };
+
+        Ok(Command {
+            command,
+            args: vec![],
             env: vec![],
         })
     }

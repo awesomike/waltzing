@@ -1,6 +1,6 @@
 id = "waltzing"
 name = "Waltzing"
-version = "0.1.3"
+version = "0.1.4"
 schema_version = 1
 authors = ["Michael <michael@nandie.com>"]
 description = "Waltzing template language support for Zed - type-safe Rust templates inspired by Scala's Twirl"
@@ -9,6 +9,8 @@ repository = "https://github.com/awesomike/waltzing"
 [language_servers.waltzing-lsp]
 name = "Waltzing LSP"
 languages = ["Waltzing"]
+
+[context_servers.waltzing-mcp]
 
 [grammars.waltzing]
 repository = "https://github.com/awesomike/waltzing"
