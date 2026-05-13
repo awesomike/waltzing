@@ -70,30 +70,30 @@
 
 @* Shorthand for small spinner *@
 @fn sm(color: Color = Color::Default, label: &str = "", class: &str = "") {
-    <@apply size=Size::Sm color=@color label=@label class=@class />
+    <@apply size=@Size::Sm color=@color label=@label class=@class />
 }
 
 @* Shorthand for default spinner *@
 @fn default(color: Color = Color::Default, label: &str = "", class: &str = "") {
-    <@apply size=Size::Default color=@color label=@label class=@class />
+    <@apply size=@Size::Default color=@color label=@label class=@class />
 }
 
 @* Shorthand for large spinner *@
 @fn lg(color: Color = Color::Default, label: &str = "", class: &str = "") {
-    <@apply size=Size::Lg color=@color label=@label class=@class />
+    <@apply size=@Size::Lg color=@color label=@label class=@class />
 }
 
 @* Shorthand for primary colored spinner *@
 @fn primary(size: Size = Size::Default, label: &str = "", class: &str = "") {
-    <@apply size=@size color=Color::Primary label=@label class=@class />
+    <@apply size=@size color=@Color::Primary label=@label class=@class />
 }
 
 @* Shorthand for secondary colored spinner *@
 @fn secondary(size: Size = Size::Default, label: &str = "", class: &str = "") {
-    <@apply size=@size color=Color::Secondary label=@label class=@class />
+    <@apply size=@size color=@Color::Secondary label=@label class=@class />
 }
 
 @* Shorthand for muted colored spinner *@
 @fn muted(size: Size = Size::Default, label: &str = "", class: &str = "") {
-    <@apply size=@size color=Color::Muted label=@label class=@class />
+    <@apply size=@size color=@Color::Muted label=@label class=@class />
 }

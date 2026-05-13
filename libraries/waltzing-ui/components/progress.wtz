@@ -43,7 +43,8 @@
         aria-valuemax=@max
         class=@cn(classes)
     >
-        <div class=@indicator style="width: @(clamped)%"></div>
+        @let progress_style = format("width: {}%", clamped)
+        <div class=@indicator style=@progress_style></div>
     </div>
 }
 

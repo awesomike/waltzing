@@ -1,144 +1,355 @@
 @*
- * MinMax Editor Component
- * A collapsible range input that shows a single value when min equals max,
- * and expands to show separate min/max inputs for range editing.
+ * MinMax Input Component
+ * A collapsible range input inside one shared border container.
+ * Collapsed: [value ... | unit▼]  — click ... to expand to range
+ * Expanded:  [min - max | unit▼]  — auto-collapses when min == max
  *
  * Usage:
- *   @import ui/components/minmax-editor.wtz as minmax
+ *   @import ui/components/minmax-input.wtz as minmax_input
  *
- *   // Basic form input
- *   <@minmax::apply
- *       name="reps"
- *       min_value=Some(8.0)
- *       max_value=Some(12.0)
- *       step=1.0
- *       min_allowed=Some(1.0)
- *   />
- *
- *   // With label
- *   <@minmax::labeled
- *       label="Repetitions"
- *       name="reps"
- *       min_value=Some(8.0)
- *       max_value=Some(12.0)
- *       step=1.0
- *   />
- *
- *   // Alpine.js reactive input
- *   <@minmax::input
+ *   // Basic integer input
+ *   <@minmax_input::input
  *       label="Sets"
  *       model_min="data.sets_min"
  *       model_max="data.sets_max"
- *       step=1.0
  *   />
+ *
+ *   // Decimal input
+ *   <@minmax_input::input
+ *       label="Protein (g)"
+ *       number_type=minmax_input::NumberType::Decimal
+ *       model_min="data.protein_min"
+ *       model_max="data.protein_max"
+ *       step=0.1
+ *   />
+ *
+ *   // With unit dropdown
+ *   <@minmax_input::input
+ *       label="Weight"
+ *       model_min="data.weight_min"
+ *       model_max="data.weight_max"
+ *       model_unit="data.weight_unit"
+ *       unit_preset="weight"
+ *       step=0.5
+ *   />
+ *
+ *   // With static suffix
+ *   <@minmax_input::input
+ *       label="Calories"
+ *       model_min="data.cal_min"
+ *       model_max="data.cal_max"
+ *       suffix="kcal"
+ *   />
+ *
+ *   // Form submission with unit
+ *   <@minmax_input::form_input
+ *       label="Height"
+ *       name_min="height_min"
+ *       name_max="height_max"
+ *       value_min=Some(170)
+ *       value_max=Some(180)
+ *       unit_name="height_unit"
+ *       unit_value="cm"
+ *       unit_preset="height"
+ *   />
+ *
+ *   // Bare form input (no label)
+ *   <@minmax_input::apply
+ *       name="reps"
+ *       min_value=Some(8.0)
+ *       max_value=Some(12.0)
+ *       input_min=Some(1.0)
+ *   />
+ *
+ *   Unit presets: "height", "body_weight", "weight", "exercise_weight",
+ *   "distance", "time", "volume"
  *@
 
+@import /components/numeric-field.wtz as numeric_field
 
-@* Main form-compatible apply function *@
+@enum NumberType {
+    Integer,
+    Decimal,
+}
+
+
+@* Alpine.js reactive input with model binding.
+   Supports optional unit dropdown or static suffix on the right.
+   Collapsed: [value ... | unit▼]  — click ... to expand
+   Expanded:  [min - max | unit▼]  — auto-collapses when min == max *@
+@fn input(
+    label: &str,
+    model_min: &str,
+    model_max: &str,
+    number_type: NumberType = NumberType::Integer,
+    step: f64 = 0.0,
+    input_min: Option<f64> = None,
+    input_max: Option<f64> = None,
+    placeholder: &str = "—",
+    model_unit: &str = "",
+    unit_preset: &str = "",
+    suffix: &str = "",
+    class: &str = "",
+) {
+    @let resolved_step = if step > 0.0 { step } else { match number_type { NumberType::Integer => { 1.0 } NumberType::Decimal => { 0.01 } } }
+    @let step_str = if resolved_step == 1.0 { "1".to_string() } else { resolved_step.to_string() }
+    @let has_unit = (!unit_preset.is_empty() && !model_unit.is_empty())
+    @let has_suffix = !suffix.is_empty()
+    @let has_right = (has_unit || has_suffix)
+    @let min_str = input_min.map(|v| v.to_string())
+    @let max_str = input_max.map(|v| v.to_string())
+
+    @let input_cls = "flex-1 min-w-0 px-3 py-2 bg-transparent text-sm border-0 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+    @let cls = class
+
+    <div class=@cn(["space-y-2", cls])
+         x-data=@```json {
+            expanded: (@model_min !== null && @model_max !== null && @model_min !== @model_max)
+        } ```@>
+        <label class="text-sm font-medium leading-none">@label</label>
+
+        <div class="flex rounded-md border border-input shadow-sm"
+             @if has_unit { x-data="{ open: false }" x-on:click.outside="open = false" }>
+            @* Collapsed: single value input *@
+            <input x-show="!expanded" type="number"
+                   step=@step_str
+                   @if let Some(min) = &min_str { min=@min }
+                   @if let Some(max) = &max_str { max=@max }
+                   x-model.number=@model_min
+                   @input=@format("{model_max} = {model_min}")
+                   class=@cn([input_cls, "rounded-l-md"])
+                   placeholder=@placeholder />
+
+            @* Expanded: min input *@
+            <input x-show="expanded" x-ref="minInput" type="number"
+                   step=@step_str
+                   @if let Some(min) = &min_str { min=@min }
+                   @if let Some(max) = &max_str { max=@max }
+                   x-model.number=@model_min
+                   x-on:input=@format("if ({model_min} === {model_max}) expanded = false")
+                   class=@cn([input_cls, "rounded-l-md"])
+                   placeholder="Min" />
+
+            @* Expand trigger (collapsed) / separator (expanded) *@
+            <button x-show="!expanded" type="button"
+                    @click=@format("expanded = true; $nextTick(() => {{ if (!{model_min} && {model_min} !== 0) $refs.minInput.focus(); else $refs.maxInput.focus(); }})")
+                    class="inline-flex items-center px-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                    title="Expand to range">
+                <span class="text-xs tracking-widest">...</span>
+            </button>
+            <span x-show="expanded" class="inline-flex items-center px-1 text-muted-foreground text-sm select-none">-</span>
+
+            @* Expanded: max input *@
+            <input x-show="expanded" x-ref="maxInput" type="number"
+                   step=@step_str
+                   @if let Some(min) = &min_str { min=@min }
+                   @if let Some(max) = &max_str { max=@max }
+                   x-model.number=@model_max
+                   x-on:input=@format("if ({model_min} === {model_max}) expanded = false")
+                   class=@cn([input_cls, if has_right { "" } else { "rounded-r-md" }])
+                   placeholder="Max" />
+
+            @if has_suffix {
+                <span class="inline-flex items-center px-3 py-2 text-sm text-muted-foreground bg-muted border-l border-input rounded-r-md select-none">@suffix</span>
+            } else if has_unit {
+                <@numeric_field::unit_dropdown model=@model_unit preset=@unit_preset />
+            }
+        </div>
+    </div>
+}
+
+@* Form-compatible minmax input for standard form submission.
+   Supports optional unit dropdown or static suffix on the right.
+   Collapsed: [value ... | unit▼]  — click ... to expand
+   Expanded:  [min - max | unit▼]  — auto-collapses when min == max *@
+@fn form_input(
+    label: &str,
+    name_min: &str,
+    name_max: &str,
+    value_min: Option<i32> = None,
+    value_max: Option<i32> = None,
+    number_type: NumberType = NumberType::Integer,
+    step: f64 = 0.0,
+    input_min: Option<f64> = None,
+    input_max: Option<f64> = None,
+    placeholder: &str = "—",
+    unit_name: &str = "",
+    unit_value: &str = "",
+    unit_preset: &str = "",
+    suffix: &str = "",
+    class: &str = "",
+) {
+    @let resolved_step = if step > 0.0 { step } else { match number_type { NumberType::Integer => { 1.0 } NumberType::Decimal => { 0.01 } } }
+    @let step_str = if resolved_step == 1.0 { "1".to_string() } else { resolved_step.to_string() }
+    @let is_expanded = (value_min.is_some() && value_max.is_some() && value_min != value_max)
+    @let has_unit = (!unit_preset.is_empty() && !unit_name.is_empty())
+    @let has_suffix = !suffix.is_empty()
+    @let has_right = (has_unit || has_suffix)
+    @let min_attr = input_min.map(|v| v.to_string())
+    @let max_attr = input_max.map(|v| v.to_string())
+    @let min_init = value_min.map(|v| v as f64)
+    @let max_init = value_max.map(|v| v as f64)
+
+    @let input_cls = "flex-1 min-w-0 px-3 py-2 bg-transparent text-sm border-0 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+    @let cls = class
+
+    <div class=@cn(["space-y-2", cls])
+         x-data=@```json {
+            expanded: @is_expanded,
+            minVal: @min_init,
+            maxVal: @max_init,
+            @if has_unit {
+                unit: @unit_value,
+            }
+        } ```@>
+        <label class="text-sm font-medium leading-none">@label</label>
+
+        @* Hidden inputs for form submission *@
+        <input type="hidden" name=@name_min x-model="minVal" />
+        <input type="hidden" name=@name_max x-model="maxVal" />
+
+        <div class="flex rounded-md border border-input shadow-sm"
+             @if has_unit { x-data="{ open: false }" x-on:click.outside="open = false" }>
+            @* Collapsed: single value input *@
+            <input x-show="!expanded" type="number"
+                   step=@step_str
+                   @if let Some(min) = &min_attr { min=@min }
+                   @if let Some(max) = &max_attr { max=@max }
+                   x-model.number="minVal"
+                   @input="maxVal = minVal"
+                   class=@cn([input_cls, "rounded-l-md"])
+                   placeholder=@placeholder />
+
+            @* Expanded: min input *@
+            <input x-show="expanded" x-ref="minInput" type="number"
+                   step=@step_str
+                   @if let Some(min) = &min_attr { min=@min }
+                   @if let Some(max) = &max_attr { max=@max }
+                   x-model.number="minVal"
+                   x-on:input="if (minVal === maxVal) expanded = false"
+                   class=@cn([input_cls, "rounded-l-md"])
+                   placeholder="Min" />
+
+            @* Expand trigger (collapsed) / separator (expanded) *@
+            <button x-show="!expanded" type="button"
+                    @click="expanded = true; $nextTick(() => { if (!minVal && minVal !== 0) $refs.minInput.focus(); else $refs.maxInput.focus(); })"
+                    class="inline-flex items-center px-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                    title="Expand to range">
+                <span class="text-xs tracking-widest">...</span>
+            </button>
+            <span x-show="expanded" class="inline-flex items-center px-1 text-muted-foreground text-sm select-none">-</span>
+
+            @* Expanded: max input *@
+            <input x-show="expanded" x-ref="maxInput" type="number"
+                   step=@step_str
+                   @if let Some(min) = &min_attr { min=@min }
+                   @if let Some(max) = &max_attr { max=@max }
+                   x-model.number="maxVal"
+                   x-on:input="if (minVal === maxVal) expanded = false"
+                   class=@cn([input_cls, if has_right { "" } else { "rounded-r-md" }])
+                   placeholder="Max" />
+
+            @if has_suffix {
+                <span class="inline-flex items-center px-3 py-2 text-sm text-muted-foreground bg-muted border-l border-input rounded-r-md select-none">@suffix</span>
+            } else if has_unit {
+                <@numeric_field::unit_dropdown model="unit" preset=@unit_preset unit_name=@unit_name />
+            }
+        </div>
+    </div>
+}
+
+@* Bare form-compatible apply function (no label) *@
 @fn apply(
     name: &str,
     min_value: Option<f64> = None,
     max_value: Option<f64> = None,
-    min_allowed: Option<f64>,
-    max_allowed: Option<f64>,
-    step: f64,
+    number_type: NumberType = NumberType::Integer,
+    step: f64 = 0.0,
+    input_min: Option<f64> = None,
+    input_max: Option<f64> = None,
+    placeholder: &str = "—",
+    unit_name: &str = "",
+    unit_value: &str = "",
+    unit_preset: &str = "",
+    suffix: &str = "",
     class: &str = "",
 ) {
-    @let step_str = step.to_string()
-    @let min_attr = min_allowed.map(|v| v.to_string())
-    @let max_attr = max_allowed.map(|v| v.to_string())
+    @let resolved_step = if step > 0.0 { step } else { match number_type { NumberType::Integer => { 1.0 } NumberType::Decimal => { 0.01 } } }
+    @let step_str = if resolved_step == 1.0 { "1".to_string() } else { resolved_step.to_string() }
+    @let min_attr = input_min.map(|v| v.to_string())
+    @let max_attr = input_max.map(|v| v.to_string())
     @let is_expanded = (min_value.is_some() && max_value.is_some() && min_value != max_value)
     @let min_init = min_value.unwrap_or(0.0)
     @let max_init = max_value.unwrap_or(0.0)
     @let name_min = format("{}_min", name)
     @let name_max = format("{}_max", name)
+    @let has_unit = (!unit_preset.is_empty() && !unit_name.is_empty())
+    @let has_suffix = !suffix.is_empty()
+    @let has_right = (has_unit || has_suffix)
 
-    @let container_cls = "inline-flex items-center"
-    @let input_cls = "flex h-9 w-20 rounded-md border border-input bg-transparent px-3 py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-    @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-
+    @let input_cls = "flex-1 min-w-0 px-3 py-2 bg-transparent text-sm border-0 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
     @let cls = class
-    @let classes = [container_cls, cls]
 
-    <div
-        class=@cn(classes)
-        x-data=@```json {
+    <div class=@cn(["inline-flex items-center", cls])
+         x-data=@```json {
             expanded: @is_expanded,
             minVal: @min_init,
-            maxVal: @max_init,
-            validateRange() {
-                if (this.minVal !== null && this.maxVal !== null && this.minVal > this.maxVal) {
-                    this.maxVal = this.minVal;
-                }
-            }
-        } ```@
-    >
-        @* Collapsed: Single input *@
-        <div x-show="!expanded" class="flex items-center gap-2">
-            <input
-                type="number"
-                name=@name_min
-                step=@step_str
-                @if let Some(min) = &min_attr { min=@min }
-                @if let Some(max) = &max_attr { max=@max }
-                x-model.number="minVal"
-                @@input="maxVal = minVal"
-                class=@input_cls
-                placeholder="-"
-            />
-            @* Hidden max input synced with min when collapsed *@
-            <input type="hidden" name=@name_max x-model="maxVal" />
-            <button
-                type="button"
-                @@click="expanded = true"
-                class=@btn_cls
-                title="Expand to range"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                    <path d="m6 9 6 6 6-6"/>
-                </svg>
-            </button>
-        </div>
+            maxVal: @max_init
+        } ```@>
+        @* Hidden max input for form submission *@
+        <input type="hidden" name=@name_max x-model="maxVal" />
 
-        @* Expanded: Min to Max *@
-        <div x-show="expanded" class="flex items-center gap-2">
-            <input
-                type="number"
-                name=@name_min
-                step=@step_str
-                @if let Some(min) = &min_attr { min=@min }
-                @if let Some(max) = &max_attr { max=@max }
-                x-model.number="minVal"
-                @@blur="validateRange()"
-                class=@input_cls
-                placeholder="Min"
-                aria-label="Minimum value"
-            />
-            <span class="text-sm text-muted-foreground">to</span>
-            <input
-                type="number"
-                name=@name_max
-                step=@step_str
-                @if let Some(min) = &min_attr { min=@min }
-                @if let Some(max) = &max_attr { max=@max }
-                x-model.number="maxVal"
-                @@blur="validateRange()"
-                class=@input_cls
-                placeholder="Max"
-                aria-label="Maximum value"
-            />
-            <button
-                type="button"
-                @@click="if (minVal === maxVal || maxVal === null || maxVal === '') expanded = false"
-                :class="(minVal === maxVal || maxVal === null || maxVal === '') ? 'text-muted-foreground hover:text-foreground' : 'text-muted-foreground/30 cursor-not-allowed'"
-                :disabled="minVal !== maxVal && maxVal !== null && maxVal !== ''"
-                class=@btn_cls
-                title="Collapse to single value"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                    <path d="m18 15-6-6-6 6"/>
-                </svg>
+        <div class="flex rounded-md border border-input shadow-sm"
+             @if has_unit { x-data=@```json { open: false, unit: @unit_value } ```@ x-on:click.outside="open = false" }>
+            @* Collapsed: single value input *@
+            <input x-show="!expanded" type="number"
+                   name=@name_min
+                   step=@step_str
+                   @if let Some(min) = &min_attr { min=@min }
+                   @if let Some(max) = &max_attr { max=@max }
+                   x-model.number="minVal"
+                   @input="maxVal = minVal"
+                   class=@cn([input_cls, "rounded-l-md"])
+                   placeholder=@placeholder />
+
+            @* Expanded: min input *@
+            <input x-show="expanded" x-ref="minInput" type="number"
+                   name=@name_min
+                   step=@step_str
+                   @if let Some(min) = &min_attr { min=@min }
+                   @if let Some(max) = &max_attr { max=@max }
+                   x-model.number="minVal"
+                   x-on:input="if (minVal === maxVal) expanded = false"
+                   class=@cn([input_cls, "rounded-l-md"])
+                   placeholder="Min"
+                   aria-label="Minimum value" />
+
+            @* Expand trigger (collapsed) / separator (expanded) *@
+            <button x-show="!expanded" type="button"
+                    @click="expanded = true; $nextTick(() => { if (!minVal && minVal !== 0) $refs.minInput.focus(); else $refs.maxInput.focus(); })"
+                    class="inline-flex items-center px-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                    title="Expand to range">
+                <span class="text-xs tracking-widest">...</span>
             </button>
+            <span x-show="expanded" class="inline-flex items-center px-1 text-muted-foreground text-sm select-none">-</span>
+
+            @* Expanded: max input *@
+            <input x-show="expanded" x-ref="maxInput" type="number"
+                   name=@name_max
+                   step=@step_str
+                   @if let Some(min) = &min_attr { min=@min }
+                   @if let Some(max) = &max_attr { max=@max }
+                   x-model.number="maxVal"
+                   x-on:input="if (minVal === maxVal) expanded = false"
+                   class=@cn([input_cls, if has_right { "" } else { "rounded-r-md" }])
+                   placeholder="Max"
+                   aria-label="Maximum value" />
+
+            @if has_suffix {
+                <span class="inline-flex items-center px-3 py-2 text-sm text-muted-foreground bg-muted border-l border-input rounded-r-md select-none">@suffix</span>
+            } else if has_unit {
+                <@numeric_field::unit_dropdown model="unit" preset=@unit_preset unit_name=@unit_name />
+            }
         </div>
     </div>
 }
@@ -149,121 +360,34 @@
     name: &str,
     min_value: Option<f64> = None,
     max_value: Option<f64> = None,
-    min_allowed: Option<f64>,
-    max_allowed: Option<f64>,
-    step: f64,
+    number_type: NumberType = NumberType::Integer,
+    step: f64 = 0.0,
+    input_min: Option<f64> = None,
+    input_max: Option<f64> = None,
+    placeholder: &str = "—",
+    unit_name: &str = "",
+    unit_value: &str = "",
+    unit_preset: &str = "",
+    suffix: &str = "",
     class: &str = "",
 ) {
-    <div class="space-y-1.5">
+    @let cls = class
+    <div class=@cn(["space-y-2", cls])>
         <label class="text-sm font-medium leading-none">@label</label>
         <@apply
             name=@name
             min_value=@min_value
             max_value=@max_value
-            min_allowed=@min_allowed
-            max_allowed=@max_allowed
+            number_type=@number_type
             step=@step
-            class=@class
+            input_min=@input_min
+            input_max=@input_max
+            placeholder=@placeholder
+            unit_name=@unit_name
+            unit_value=@unit_value
+            unit_preset=@unit_preset
+            suffix=@suffix
         />
-    </div>
-}
-
-@* Alpine.js reactive input with model binding *@
-@fn input(
-    label: &str,
-    model_min: &str,
-    model_max: &str,
-    step: f64,
-    min_allowed: Option<f64>,
-    max_allowed: Option<f64>,
-    class: &str = "",
-) {
-    @let step_str = step.to_string()
-    @let min_attr = min_allowed.map(|v| v.to_string())
-    @let max_attr = max_allowed.map(|v| v.to_string())
-
-    @let container_cls = "space-y-1.5"
-    @let input_cls = "flex h-9 w-20 rounded-md border border-input bg-transparent px-3 py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-    @let btn_cls = "p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-
-    @let cls = class
-    @let classes = [container_cls, cls]
-
-    @let x_data_init = format("{{ expanded: ({} !== null && {} !== null && {} !== {}) }}", model_min, model_max, model_min, model_max)
-    @let input_handler = format("{} = {}", model_max, model_min)
-    @let blur_handler = format("if ({} > {}) {{ {} = {} }}", model_min, model_max, model_max, model_min)
-    @let collapse_handler = format("if ({} === {} || {} === null) expanded = false", model_min, model_max, model_max)
-    @let collapse_class = format("({} === {} || {} === null) ? 'text-muted-foreground hover:text-foreground' : 'text-muted-foreground/30 cursor-not-allowed'", model_min, model_max, model_max)
-    @let collapse_disabled = format("{} !== {} && {} !== null", model_min, model_max, model_max)
-
-    <div
-        class=@cn(classes)
-        x-data=@x_data_init
-    >
-        <label class="text-sm font-medium leading-none">@label</label>
-
-        @* Collapsed: Single input *@
-        <div x-show="!expanded" class="flex items-center gap-2">
-            <input
-                type="number"
-                step=@step_str
-                @if let Some(min) = &min_attr { min=@min }
-                @if let Some(max) = &max_attr { max=@max }
-                x-model.number=@model_min
-                @@input=@input_handler
-                class=@input_cls
-                placeholder="-"
-            />
-            <button
-                type="button"
-                @@click="expanded = true"
-                class=@btn_cls
-                title="Expand to range"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                    <path d="m6 9 6 6 6-6"/>
-                </svg>
-            </button>
-        </div>
-
-        @* Expanded: Min to Max *@
-        <div x-show="expanded" class="flex items-center gap-2">
-            <input
-                type="number"
-                step=@step_str
-                @if let Some(min) = &min_attr { min=@min }
-                @if let Some(max) = &max_attr { max=@max }
-                x-model.number=@model_min
-                @@blur=@blur_handler
-                class=@input_cls
-                placeholder="Min"
-                aria-label="Minimum value"
-            />
-            <span class="text-sm text-muted-foreground">to</span>
-            <input
-                type="number"
-                step=@step_str
-                @if let Some(min) = &min_attr { min=@min }
-                @if let Some(max) = &max_attr { max=@max }
-                x-model.number=@model_max
-                @@blur=@blur_handler
-                class=@input_cls
-                placeholder="Max"
-                aria-label="Maximum value"
-            />
-            <button
-                type="button"
-                @@click=@collapse_handler
-                :class=@collapse_class
-                :disabled=@collapse_disabled
-                class=@btn_cls
-                title="Collapse to single value"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                    <path d="m18 15-6-6-6 6"/>
-                </svg>
-            </button>
-        </div>
     </div>
 }
 
@@ -273,9 +397,5 @@
         name=@name
         min_value=@min_value
         max_value=@max_value
-        min_allowed=None
-        max_allowed=None
-        step=1.0
-       
     />
 }

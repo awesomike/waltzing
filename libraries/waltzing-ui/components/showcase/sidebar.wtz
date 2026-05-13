@@ -1,10 +1,8 @@
 @*
  * Showcase sidebar with collapsible sections
  * Includes library info, search, and navigation sections
+ * Note: cn, class_if, class_toggle are built-in waltzing helpers
  *@
-
-@import /lib/utils.wtz as utils
-@use utils::cn
 
 @struct NavItem {
     name: String,
@@ -25,13 +23,13 @@
     @let active_cls = if item.active { "bg-accent text-accent-foreground" } else { "text-muted-foreground hover:text-foreground hover:bg-accent/50" }
     @let cls = cn(&["block pl-8 pr-4 py-1.5 text-sm rounded-md transition-colors", active_cls])
     <a
-        href=@item.url
-        hx-get=@item.url
+        href=@&item.url
+        hx-get=@&item.url
         hx-target="#main-content"
         hx-push-url="true"
         class=@cls
     >
-        @item.name
+        @&item.name
     </a>
 }
 
@@ -63,8 +61,8 @@
                     </svg>
                 </button>
             </div>
-            <h1 class="text-lg font-semibold">@props.library_name</h1>
-            <p class="text-sm text-muted-foreground">v@props.library_version</p>
+            <h1 class="text-lg font-semibold">@&props.library_name</h1>
+            <p class="text-sm text-muted-foreground">v@&props.library_version</p>
         </div>
 
         @* Navigation sections *@

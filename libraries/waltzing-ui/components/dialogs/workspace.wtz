@@ -1,0 +1,158 @@
+@*
+ * Workspace — three-column shell with left / main / right slots.
+ *
+ * Companion to `dialogs/sheet`. A sheet is a *floating* overlay that
+ * sits above the page; a workspace panel is a *docked* sibling of
+ * main content that pushes / shrinks it instead.
+ *
+ * Use a workspace when:
+ *   • multiple inspectors / debuggers / detail panes need to be
+ *     visible simultaneously alongside the main canvas
+ *   • the side content is essential to the task (debugging surface,
+ *     IDE-style navigation), not transient
+ *   • you want predictable layout — content reflows, never occluded
+ *
+ * Use a `<@sheet>` instead when:
+ *   • the side content is transient (quick edit, hint, palette)
+ *   • main content should stay full-width
+ *   • the panel needs to overlay rather than push
+ *
+ * Usage:
+ *
+ *   <@workspace::shell
+ *       left=@() {
+ *           <@workspace::panel title="Inspector" open="leftOpen">
+ *               … inspector body …
+ *           </@workspace::panel>
+ *       }
+ *       main=@() {
+ *           <div class="p-8">main canvas</div>
+ *       }
+ *       right=@() {
+ *           <@workspace::panel title="Debugger" open="rightOpen">
+ *               … debugger body …
+ *           </@workspace::panel>
+ *       }/>
+ *
+ * The slot columns auto-collapse via `x-show` on each panel — when a
+ * panel hides, its slot's flex item collapses and main expands to
+ * fill the freed space. Three panels, two panels, one panel, none —
+ * all valid configurations.
+ *@
+
+@enum Width { Sm, Md, Lg, Xl }
+@enum Gap   { None, Sm, Md, Lg }
+
+@*
+ * `shell` — the outer layout container.
+ *
+ * Renders as a horizontal flexbox filling its parent. Side slots are
+ * `flex-none` (auto-width based on contents); main is `flex-1` with
+ * `min-w-0` so it shrinks rather than overflowing. Slots that hide
+ * their panel via x-show simply collapse out of the flow.
+ *
+ * The shell itself does no state management — each panel inside owns
+ * its own open boolean (typically declared in the parent page's
+ * x-data). This keeps the shell stateless and composable.
+ *@
+@fn shell(
+    main: @(),
+    left: Option<@()> = None,
+    right: Option<@()> = None,
+    full_height: bool = true,
+    gap: Gap = Gap::None,
+) {
+    @let height_cls = if full_height { "h-screen" } else { "h-full" }
+    @let gap_cls = match gap {
+        Gap::None => "",
+        Gap::Sm   => "gap-2",
+        Gap::Md   => "gap-4",
+        Gap::Lg   => "gap-6",
+    }
+    @let shell_cls = cn(&["flex w-full overflow-hidden", height_cls, gap_cls])
+    <div class=@shell_cls>
+        @if let Some(ref l) = left {
+            <div class="flex-none flex" data-workspace-slot="left">
+                @l()
+            </div>
+        }
+        <div class="flex-1 min-w-0 overflow-auto" data-workspace-slot="main">
+            @main()
+        </div>
+        @if let Some(ref r) = right {
+            <div class="flex-none flex" data-workspace-slot="right">
+                @r()
+            </div>
+        }
+    </div>
+}
+
+@*
+ * `panel` — docked panel that goes inside a workspace slot.
+ *
+ * Differs from `sheet.apply` in two ways:
+ *   • no `fixed` positioning — fills the parent slot, pushes neighbors
+ *   • no enter/leave transition on the panel itself; the slot's
+ *     x-show toggle drives the layout reflow, and a CSS transition
+ *     on width would fight against `flex-none + display:none`
+ *
+ * The panel still respects `x-show` for open/closed, so its parent
+ * slot will collapse when closed.
+ *@
+@fn panel(
+    open: &str,
+    title: &str,
+    width: Width = Width::Md,
+    on_close: &str = "",
+    body: @(),
+    actions: Option<@()> = None,
+) {
+    @let width_cls = match width {
+        Width::Sm => "w-64",
+        Width::Md => "w-80",
+        Width::Lg => "w-96",
+        Width::Xl => "w-[28rem]",
+    }
+
+    @let close_expr = if on_close.is_empty() {
+        format("{} = false", open)
+    } else {
+        on_close.to_string()
+    }
+
+    @* Multi-line array literals inside attribute values trip the
+       Waltzing parser — keep the cn() call in a @let. *@
+    @let panel_cls = cn(&[
+        "flex flex-col bg-background border-l border-border first:border-l-0 first:border-r",
+        width_cls,
+    ])
+
+    <div
+        x-show=@&open
+        class=@panel_cls
+        style="display: none;"
+        role="complementary"
+        aria-label=@title
+    >
+        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-border shrink-0">
+            <h2 class="text-sm font-medium truncate flex-1">@title</h2>
+            <div class="flex items-center gap-1">
+                @if let Some(ref a) = actions { @a() }
+                <button
+                    type="button"
+                    class="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-muted"
+                    x-on:click=@&close_expr
+                    aria-label="Close panel"
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto">
+            @body()
+        </div>
+    </div>
+}

@@ -15,7 +15,7 @@
  *     placeholder=Some("Enter description...")
  *     rows=Some(6)
  *    
- *     required=true
+ *     required=@true
  *    
  *    
  * />
@@ -27,11 +27,13 @@
     name: &str,
     value: Option<&str> = None,
     placeholder: Option<&str> = None,
-    rows: Option<u32>,
+    rows: Option<u32> = None,
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
     class: &str = "",
+    minlength: Option<u32> = None,
+    maxlength: Option<u32> = None,
 ) {
     @let base = "flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 
@@ -48,6 +50,8 @@
         @if disabled { disabled }
         @if required { required }
         @if error.is_some() { aria-invalid="true" }
+        @if let Some(n) = minlength { minlength=@n }
+        @if let Some(n) = maxlength { maxlength=@n }
     >@if let Some(v) = value { @v }</textarea>
 }
 
@@ -57,57 +61,64 @@
     name: &str,
     value: Option<&str> = None,
     placeholder: Option<&str> = None,
-    rows: Option<u32>,
+    rows: Option<u32> = None,
     disabled: bool = false,
     required: bool = false,
     error: Option<&str> = None,
     class: &str = "",
 ) {
+    @let val = value.unwrap_or("")
+    @let ph = placeholder.unwrap_or("")
+    @let err = error.unwrap_or("")
+    @let row_count = rows.unwrap_or(3)
+    @let has_rows = rows.is_some()
+
     <div class="space-y-2">
         <label for=@name class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>
-        <@apply
+        <textarea
             name=@name
-            value=@value
-            placeholder=@placeholder
-            rows=@rows
-            disabled=@disabled
-            required=@required
-            error=@error
-            class=@class
-        />
-        @if let Some(e) = error {
-            <p class="text-sm text-destructive">@e</p>
+            class=@cn(&["flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50", if !err.is_empty() { "border-destructive focus-visible:ring-destructive" } else { "" }, class])
+            @if has_rows { rows=@row_count }
+            @if !ph.is_empty() { placeholder=@ph }
+            @if disabled { disabled }
+            @if required { required }
+            @if !err.is_empty() { aria-invalid="true" }
+        >@if !val.is_empty() { @val }</textarea>
+        @if !err.is_empty() {
+            <p class="text-sm text-destructive">@err</p>
         }
     </div>
 }
 
 @* Simple textarea shorthand *@
 @fn simple(name: &str, value: Option<&str>, placeholder: Option<&str>) {
-    <@apply
-        name=@name
-        value=@value
-        placeholder=@placeholder
-        rows=None
-       
-       
-       
-       
-    />
+    @let val = value.unwrap_or("")
+    @let ph = placeholder.unwrap_or("")
+    @if !val.is_empty() && !ph.is_empty() {
+        <@apply name=@name value=@val placeholder=@ph />
+    } else if !val.is_empty() {
+        <@apply name=@name value=@val />
+    } else if !ph.is_empty() {
+        <@apply name=@name placeholder=@ph />
+    } else {
+        <@apply name=@name />
+    }
 }
 
 @* Textarea with specific row count *@
-@fn with_rows(name: &str, rows: u32, value: Option<&str>, placeholder: Option<&str>) {
-    <@apply
-        name=@name
-        value=@value
-        placeholder=@placeholder
-        rows=@Some(rows)
-       
-       
-       
-       
-    />
+@fn with_rows(name: &str, row_count: u32, value: Option<&str>, placeholder: Option<&str>) {
+    @let val = value.unwrap_or("")
+    @let ph = placeholder.unwrap_or("")
+    @if !val.is_empty() && !ph.is_empty() {
+        <@apply name=@name value=@val placeholder=@ph rows=@row_count />
+    } else if !val.is_empty() {
+        <@apply name=@name value=@val rows=@row_count />
+    } else if !ph.is_empty() {
+        <@apply name=@name placeholder=@ph rows=@row_count />
+    } else {
+        <@apply name=@name rows=@row_count />
+    }
 }

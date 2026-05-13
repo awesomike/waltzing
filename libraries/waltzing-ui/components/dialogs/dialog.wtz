@@ -1,0 +1,347 @@
+@*
+ * Dialog — modal panel with backdrop, focus trap, esc/backdrop close
+ * (waltzing-ui dialogs/dialog v2).
+ *
+ * Differs from the legacy `components/dialog.wtz`: parent owns the open
+ * state via an Alpine expression (no trigger callback). Three placements
+ * (top / center / right / left), responsive auto sizes, configurable
+ * footer with a sensible default (Cancel + Save).
+ *
+ * Usage (typical centered modal):
+ *
+ *   <button x-on:click="editOpen = true">Edit</button>
+ *   <@dialog::panel
+ *       open="editOpen"
+ *       title="Edit trigger"
+ *       on_close="editOpen = false"
+ *       on_primary="$refs.form.requestSubmit()">
+ *       … body content (scrollable) …
+ *   </@dialog::panel>
+ *
+ * Override the footer slot:
+ *
+ *   <@dialog::panel … footer=@() {
+ *       <span class="flex-1 text-xs text-muted-foreground">Saved 2m ago</span>
+ *       <button x-on:click="copy()">Copy</button>
+ *       <button x-on:click="del()" class="text-destructive">Delete</button>
+ *   }> … </@dialog::panel>
+ *
+ * Requires: @alpinejs/focus plugin (for `x-trap`).
+ *@
+
+@enum Placement { Top, Center, Right, Left }
+@enum Offset    { Auto, Sm, Md, Lg }
+@enum Width     { Auto, Sm, Md, Lg, Full }
+@enum Tone      { Default, Destructive }
+@enum ConfirmTone { Destructive, Primary }
+
+@fn panel(
+    open: &str,
+    title: &str,
+    title_binding: &str = "",
+    placement: Placement = Placement::Center,
+    offset: Offset = Offset::Auto,
+    width: Width = Width::Auto,
+    on_close: &str = "",
+    on_primary: &str = "",
+    primary_label: &str = "Save",
+    primary_tone: Tone = Tone::Default,
+    secondary_label: &str = "Cancel",
+    dismissable: bool = true,
+    backdrop: bool = true,
+    initial_focus: &str = "",
+    body: @(),
+    footer: Option<@()> = None,
+) {
+    @let offset_cls = match offset {
+        Offset::Auto => "top-2 md:top-6 lg:top-12 bottom-2 md:bottom-6 lg:bottom-12",
+        Offset::Sm   => "top-2 bottom-2",
+        Offset::Md   => "top-6 bottom-6",
+        Offset::Lg   => "top-12 bottom-12",
+    }
+
+    @* placement_cls fixes the horizontal extent + side anchoring.
+       Width prop only takes effect for `center` / `right` / `left`.
+       `top` is full-width by definition (the panel-width drawer). *@
+    @let placement_cls = match placement {
+        Placement::Top    => "left-0 right-0",
+        Placement::Center => match width {
+            Width::Auto => "left-1/2 -translate-x-1/2 w-full max-w-md md:max-w-2xl lg:max-w-4xl",
+            Width::Sm   => "left-1/2 -translate-x-1/2 w-full max-w-md",
+            Width::Md   => "left-1/2 -translate-x-1/2 w-full max-w-2xl",
+            Width::Lg   => "left-1/2 -translate-x-1/2 w-full max-w-4xl",
+            Width::Full => "left-4 right-4",
+        },
+        Placement::Right  => match width {
+            Width::Auto => "right-0 w-full md:w-96 lg:w-[28rem]",
+            Width::Sm   => "right-0 w-72",
+            Width::Md   => "right-0 w-96",
+            Width::Lg   => "right-0 w-[28rem]",
+            Width::Full => "right-0 left-0",
+        },
+        Placement::Left   => match width {
+            Width::Auto => "left-0 w-full md:w-96 lg:w-[28rem]",
+            Width::Sm   => "left-0 w-72",
+            Width::Md   => "left-0 w-96",
+            Width::Lg   => "left-0 w-[28rem]",
+            Width::Full => "left-0 right-0",
+        },
+    }
+
+    @* Below the `md` breakpoint every placement collapses to top
+       full-width — `center`/`right`/`left` lose their meaning at
+       phone widths. This rule layers on top of the placement
+       classes; Tailwind's mobile-first cascade does the work. *@
+    @let mobile_collapse = "max-md:!left-0 max-md:!right-0 max-md:!translate-x-0 max-md:!w-auto max-md:!max-w-none"
+
+    @* Compose the panel container's positioning + sizing. *@
+    @let panel_cls = cn(&[
+        "fixed z-50 flex flex-col bg-background border border-border shadow-xl rounded-lg overflow-hidden",
+        offset_cls,
+        placement_cls,
+        mobile_collapse,
+    ])
+
+    @* Slide-in transition picked from the placement so each side
+       animates from the right direction (`top` slides down from top,
+       `right` slides in from the right, etc.). *@
+    @let enter_from = match placement {
+        Placement::Top    => "opacity-0 -translate-y-4",
+        Placement::Center => "opacity-0 scale-95",
+        Placement::Right  => "opacity-0 translate-x-4",
+        Placement::Left   => "opacity-0 -translate-x-4",
+    }
+    @let enter_to = match placement {
+        Placement::Top    => "opacity-100 translate-y-0",
+        Placement::Center => "opacity-100 scale-100",
+        Placement::Right  => "opacity-100 translate-x-0",
+        Placement::Left   => "opacity-100 translate-x-0",
+    }
+
+    @* `on_close` defaults to assigning the `open` expression to false
+       (works for simple boolean state). Authors with structured state
+       (e.g. `modal === 'edit'`) pass an explicit on_close. *@
+    @let close_expr = if on_close.is_empty() {
+        format("{} = false", open)
+    } else {
+        on_close.to_string()
+    }
+    @let primary_expr = if on_primary.is_empty() {
+        close_expr.clone()
+    } else {
+        on_primary.to_string()
+    }
+
+    @* Backdrop dismiss + Esc only fire when dismissable. *@
+    @let backdrop_click = if dismissable { close_expr.as_str() } else { "" }
+    @let esc_handler = if dismissable { close_expr.as_str() } else { "" }
+
+    @let primary_tone_cls = match primary_tone {
+        Tone::Default     => "bg-primary text-primary-foreground hover:bg-primary/90",
+        Tone::Destructive => "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+    }
+    @let primary_btn_cls = cn(&[
+        "inline-flex items-center justify-center rounded-md text-sm font-medium px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        primary_tone_cls,
+    ])
+    @let secondary_btn_cls = "inline-flex items-center justify-center rounded-md border border-border bg-background text-sm font-medium px-4 py-2 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+
+    @* The `x-trap.inert.noscroll` directive comes from @alpinejs/focus.
+       `.inert` makes the rest of the page non-interactive while open;
+       `.noscroll` locks body scroll. Both behaviors are correct only
+       for modal dialogs; sheets (which coexist) deliberately omit them. *@
+    <template x-teleport="body">
+        <div
+            x-show=@&open
+            x-transition.opacity.duration.200ms
+            class="fixed inset-0 z-50"
+            style="display: none;"
+        >
+            @if backdrop {
+                <div
+                    class="absolute inset-0 bg-black/60"
+                    x-on:click=@&backdrop_click
+                    aria-hidden="true"
+                ></div>
+            }
+            <div
+                class=@panel_cls
+                x-show=@&open
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start=@&enter_from
+                x-transition:enter-end=@&enter_to
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start=@&enter_to
+                x-transition:leave-end=@&enter_from
+                x-trap.inert.noscroll=@&open
+                x-on:keydown.escape.window=@&esc_handler
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="dialog-title"
+                x-init=@&format("(() => {{ const sel = {:?}; if (!sel) return; $nextTick(() => {{ const el = $el.querySelector(sel); if (el) el.focus(); }}); }})()", initial_focus)
+            >
+                @* Header: title left, close button right.
+                   `title_binding`, when set, lets the title track an
+                   Alpine expression — the parent's reactive state
+                   overrides the static `@title` once Alpine mounts.
+                   The static `@title` still renders as the SSR
+                   fallback (visible pre-hydration / when JS is off). *@
+                <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-border">
+                    @if title_binding.is_empty() {
+                        <h2 id="dialog-title" class="text-sm font-medium truncate">@title</h2>
+                    } else {
+                        <h2 id="dialog-title" class="text-sm font-medium truncate" x-text=@&title_binding>@title</h2>
+                    }
+                    <button
+                        type="button"
+                        class="text-muted-foreground hover:text-foreground transition-colors"
+                        x-on:click=@&close_expr
+                        aria-label="Close"
+                    >
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                @* Body: scrollable. Footer + header stay pinned. *@
+                <div class="flex-1 overflow-y-auto p-4">
+                    @body()
+                </div>
+
+                @* Footer rules:
+                   • explicit `footer` callback → render that
+                   • no callback + both labels empty → no footer at all
+                     (form-driven dialogs that own their own buttons)
+                   • otherwise → default Cancel + Save row *@
+                @let has_default_footer = !primary_label.is_empty() || !secondary_label.is_empty()
+                @if let Some(ref f) = footer {
+                    <div class="flex flex-wrap items-center justify-end gap-2 px-4 py-3 border-t border-border bg-muted/20">
+                        @f()
+                    </div>
+                } else if has_default_footer {
+                    <div class="flex flex-wrap items-center justify-end gap-2 px-4 py-3 border-t border-border bg-muted/20">
+                        @if !secondary_label.is_empty() {
+                            <button type="button"
+                                    class=@&secondary_btn_cls
+                                    x-on:click=@&close_expr>@secondary_label</button>
+                        }
+                        @if !primary_label.is_empty() {
+                            <button type="button"
+                                    class=@&primary_btn_cls
+                                    x-on:click=@&primary_expr>@primary_label</button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </template>
+}
+
+@*
+ * Confirm — small modal with title + message + Cancel/Confirm buttons.
+ *
+ * Built on top of `panel` but tuned for the "are you sure?" pattern:
+ *   • narrow width (max-w-md) so it doesn't dominate the screen
+ *   • role="alertdialog" for screen readers
+ *   • destructive tone by default (most confirms gate dangerous actions)
+ *
+ * Usage:
+ *
+ *   <div x-data="{ deleteOpen: false }">
+ *       <button x-on:click="deleteOpen = true">Delete</button>
+ *       <@dialog::confirm
+ *           open="deleteOpen"
+ *           title="Delete workflow"
+ *           message="This cannot be undone."
+ *           confirm_label="Delete"
+ *           on_confirm="$refs.deleteForm.submit()"/>
+ *       <form x-ref="deleteForm" method="post" action="/workflows/123/delete"></form>
+ *   </div>
+ *
+ * For server-driven confirms (e.g. HTMX delete via gh form submit), pass
+ * the form action via `on_confirm` or render an action callback instead.
+ *@
+@fn confirm(
+    open: &str,
+    title: &str,
+    message: &str,
+    confirm_label: &str = "Confirm",
+    cancel_label: &str = "Cancel",
+    tone: ConfirmTone = ConfirmTone::Destructive,
+    on_confirm: &str = "",
+    on_close: &str = "",
+    action: Option<@()> = None,
+) {
+    @let close_expr = if on_close.is_empty() {
+        format("{} = false", open)
+    } else {
+        on_close.to_string()
+    }
+    @let confirm_expr = if on_confirm.is_empty() {
+        close_expr.clone()
+    } else {
+        format("{}; {}", on_confirm, close_expr)
+    }
+
+    @let confirm_tone_cls = match tone {
+        ConfirmTone::Destructive => "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        ConfirmTone::Primary     => "bg-primary text-primary-foreground hover:bg-primary/90",
+    }
+    @let confirm_btn_cls = cn(&[
+        "inline-flex items-center justify-center rounded-md text-sm font-medium px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        confirm_tone_cls,
+    ])
+    @let cancel_btn_cls = "inline-flex items-center justify-center rounded-md border border-border bg-background text-sm font-medium px-4 py-2 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+
+    <template x-teleport="body">
+        <div
+            x-show=@&open
+            x-transition.opacity.duration.200ms
+            class="fixed inset-0 z-50"
+            style="display: none;"
+        >
+            <div class="absolute inset-0 bg-black/60"
+                 x-on:click=@&close_expr
+                 aria-hidden="true"></div>
+            <div
+                x-show=@&open
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                x-trap.inert.noscroll=@&open
+                x-on:keydown.escape.window=@&close_expr
+                class="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 bg-background border border-border rounded-lg shadow-xl overflow-hidden"
+                role="alertdialog"
+                aria-modal="true"
+                aria-labelledby="confirm-title"
+                aria-describedby="confirm-message"
+            >
+                <div class="px-6 pt-5 pb-4">
+                    <h2 id="confirm-title" class="text-base font-semibold mb-2">@title</h2>
+                    <p id="confirm-message" class="text-sm text-muted-foreground">@message</p>
+                </div>
+                <div class="flex flex-wrap items-center justify-end gap-2 px-4 py-3 border-t border-border bg-muted/20">
+                    <button type="button"
+                            class=@&cancel_btn_cls
+                            x-on:click=@&close_expr>@cancel_label</button>
+                    @* `action` callback wins when supplied — it lets the
+                       caller render its own form-submitting button (the
+                       legacy dialog::confirm pattern). Otherwise we
+                       render a styled button that fires `on_confirm`
+                       then closes. *@
+                    @if let Some(ref a) = action {
+                        <div x-on:click=@&close_expr>@a()</div>
+                    } else {
+                        <button type="button"
+                                class=@&confirm_btn_cls
+                                x-on:click=@&confirm_expr>@confirm_label</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </template>
+}

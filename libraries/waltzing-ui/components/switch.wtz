@@ -6,10 +6,12 @@
  * @import components/switch.wtz as switch
  *
  * <@switch::apply name="notifications" checked=true />
- * <@switch::labeled label="Enable notifications" name="notifications" checked=false description=None />
+ * <@switch::labeled label="Enable notifications" name="notifications" checked=false description=@None />
  * <@switch::simple name="dark_mode" />
  * <@switch::on name="feature" />
  *@
+
+@use waltzing::escape::attr
 
 @fn apply(
     name: &str,
@@ -30,7 +32,9 @@
     @let checked_val = if checked { "true" } else { "false" }
     @let data_state_val = if checked { "checked" } else { "unchecked" }
     @let extra_class = class
-    @let track_classes = cn([track_base, track_state, extra_class])
+    @let track_classes = cn(&[track_base, track_state, extra_class])
+    @let name_esc = attr(name)
+    @let click_handler = format("on = !on; $dispatch('input', {{ name: '{}', value: on }})", name_esc)
 
     <button
         type="button"
@@ -42,12 +46,12 @@
         data-state=@data_state_val
         @if disabled { disabled aria-disabled="true" }
         x-data=@```json { on: @checked } ```@
-        x-on:click="on = !on; $dispatch('input', { name: '@name', value: on })"
+        x-on:click=@click_handler
         :aria-checked="on.toString()"
         :data-state="on ? 'checked' : 'unchecked'"
         :class="on ? 'bg-primary' : 'bg-input'"
     >
-        @let thumb_classes = cn([thumb_base, thumb_state])
+        @let thumb_classes = cn(&[thumb_base, thumb_state])
         <span
             class=@thumb_classes
             :class="on ? 'translate-x-4' : 'translate-x-0'"
@@ -66,7 +70,7 @@
 ) {
     @let label_base = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
     @let disabled_cls = if disabled { "cursor-not-allowed opacity-70" } else { "" }
-    @let label_classes = cn([label_base, disabled_cls])
+    @let label_classes = cn(&[label_base, &disabled_cls])
 
     <div class="flex items-center justify-between space-x-4">
         <div class="space-y-0.5">
@@ -90,7 +94,7 @@
 @fn with_label(label: &str, name: &str, checked: bool, disabled: bool) {
     @let label_base = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
     @let disabled_cls = if disabled { "cursor-not-allowed opacity-70" } else { "" }
-    @let label_classes = cn([label_base, disabled_cls])
+    @let label_classes = cn(&[label_base, &disabled_cls])
 
     <div class="flex items-center space-x-2">
         <@apply name=@name checked=@checked disabled=@disabled />

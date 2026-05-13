@@ -14,6 +14,7 @@
  * <@radio::apply name="theme" options=@options selected=Some("light") />
  *@
 
+@use waltzing::escape::attr
 
 @struct RadioOption {
     value: String,
@@ -31,11 +32,15 @@
 ) {
     @let sel = selected.unwrap_or("")
     @let group_base = "grid gap-2"
+    @let classes = [group_base, class]
+    @let name_esc = attr(name)
+    @let sel_esc = attr(sel)
+    @let x_data = format("{{ radioName: '{}', radioSelected: '{}' }}", name_esc, sel_esc)
 
     <div
         role="radiogroup"
-        class="@cn(&[@group_base, @class])"
-        x-data="{ radioName: '@name', radioSelected: '@sel' }"
+        class=@cn(classes)
+        x-data=@x_data
     >
         @if options.is_empty() {
             @content()
@@ -45,6 +50,8 @@
                 @let item_id = format("{}_{}", name, opt.value)
                 @let radio_base = "aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                @let radio_cls = cn(&[radio_base, "peer col-start-1 row-start-1"])
+                @let indicator_cls = cn(&["col-start-1 row-start-1 h-2 w-2 rounded-full bg-primary peer-checked:block", if is_checked { "block" } else { "hidden" }])
 
                 <div class="flex items-start space-x-2">
                     <div class="grid place-items-center">
@@ -52,22 +59,22 @@
                             type="radio"
                             id=@item_id
                             name=@name
-                            value=@opt.value
-                            class="@radio_base peer col-start-1 row-start-1"
+                            value=@&opt.value
+                            class=@radio_cls
                             @if is_checked { checked }
                             @if opt.disabled { disabled }
                         />
-                        <div class="col-start-1 row-start-1 h-2 w-2 rounded-full bg-primary @if is_checked { block } else { hidden } peer-checked:block"></div>
+                        <div class=@indicator_cls></div>
                     </div>
                     @if opt.description.is_some() {
                         <div class="grid gap-1.5 leading-none">
-                            <label for=@item_id class=@label_cls>@opt.label</label>
+                            <label for=@item_id class=@label_cls>@&opt.label</label>
                             @if let Some(desc) = &opt.description {
                                 <p class="text-sm text-muted-foreground">@desc</p>
                             }
                         </div>
                     } else {
-                        <label for=@item_id class=@label_cls>@opt.label</label>
+                        <label for=@item_id class=@label_cls>@&opt.label</label>
                     }
                 </div>
             }
@@ -84,11 +91,15 @@
 ) {
     @let sel = selected.unwrap_or("")
     @let group_base = "flex flex-wrap gap-4"
+    @let classes = [group_base, class]
+    @let name_esc = attr(name)
+    @let sel_esc = attr(sel)
+    @let x_data = format("{{ radioName: '{}', radioSelected: '{}' }}", name_esc, sel_esc)
 
     <div
         role="radiogroup"
-        class="@cn(&[@group_base, @class])"
-        x-data="{ radioName: '@name', radioSelected: '@sel' }"
+        class=@cn(classes)
+        x-data=@x_data
     >
         @if options.is_empty() {
             @content()
@@ -98,6 +109,8 @@
                 @let item_id = format("{}_{}", name, opt.value)
                 @let radio_base = "aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                @let radio_cls = cn(&[radio_base, "peer col-start-1 row-start-1"])
+                @let indicator_cls = cn(&["col-start-1 row-start-1 h-2 w-2 rounded-full bg-primary peer-checked:block", if is_checked { "block" } else { "hidden" }])
 
                 <div class="flex items-center space-x-2">
                     <div class="grid place-items-center">
@@ -105,14 +118,14 @@
                             type="radio"
                             id=@item_id
                             name=@name
-                            value=@opt.value
-                            class="@radio_base peer col-start-1 row-start-1"
+                            value=@&opt.value
+                            class=@radio_cls
                             @if is_checked { checked }
                             @if opt.disabled { disabled }
                         />
-                        <div class="col-start-1 row-start-1 h-2 w-2 rounded-full bg-primary @if is_checked { block } else { hidden } peer-checked:block"></div>
+                        <div class=@indicator_cls></div>
                     </div>
-                    <label for=@item_id class=@label_cls>@opt.label</label>
+                    <label for=@item_id class=@label_cls>@&opt.label</label>
                 </div>
             }
         }
@@ -127,23 +140,27 @@
 ) {
     @let radio_base = "aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let label_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+    @let radio_cls = cn(&[radio_base, "peer col-start-1 row-start-1"])
+    @let value_esc = attr(value)
+    @let id_expr = format("radioName + '_{}'", value_esc)
+    @let checked_expr = format("radioSelected === '{}'", value_esc)
 
     <div class="flex items-start space-x-2">
         <div class="grid place-items-center">
             <input
                 type="radio"
-                :id="radioName + '_@value'"
+                :id=@id_expr
                 :name="radioName"
                 value=@value
-                class="@radio_base peer col-start-1 row-start-1"
-                :checked="radioSelected === '@value'"
+                class=@radio_cls
+                :checked=@checked_expr
                 @if disabled { disabled }
             />
             <div class="col-start-1 row-start-1 h-2 w-2 rounded-full bg-primary hidden peer-checked:block"></div>
         </div>
         @if description.is_some() {
             <div class="grid gap-1.5 leading-none">
-                <label :for="radioName + '_@value'" class=@label_cls>
+                <label :for=@id_expr class=@label_cls>
                     @content()
                 </label>
                 @if let Some(desc) = description {
@@ -151,7 +168,7 @@
                 }
             </div>
         } else {
-            <label :for="radioName + '_@value'" class=@label_cls>
+            <label :for=@id_expr class=@label_cls>
                 @content()
             </label>
         }
@@ -168,14 +185,22 @@
     class: &str = "",
     content: @(),
 ) {
-    <fieldset class="space-y-3 @if error.is_some() { [&_input]:border-destructive }">
+    @let sel = selected.unwrap_or("")
+    @let error_cls = if error.is_some() { "[&_input]:border-destructive" } else { "" }
+    <fieldset class=@cn(&["space-y-3", error_cls])>
         <legend class="text-sm font-medium leading-none">
             @label
             @if required { <span class="text-destructive ml-0.5">*</span> }
         </legend>
-        <@apply name=@name options=@options selected=@selected class=@class>
-            @content()
-        </@apply>
+        @if !sel.is_empty() {
+            <@apply name=@name options=@options selected=@sel class=@class>
+                @content()
+            </@apply>
+        } else {
+            <@apply name=@name options=@options class=@class>
+                @content()
+            </@apply>
+        }
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>
         }

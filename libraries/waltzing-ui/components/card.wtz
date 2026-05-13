@@ -1,31 +1,29 @@
 @*
  * Card component
  * A container with optional header and footer slots
+ *
+ * Preferred usage: composition pattern with card::base
+ *   <@card::base>
+ *       <@card::header>
+ *           <@card::title>Title</@>
+ *           <@card::description>Desc</@>
+ *       </@>
+ *       <@card::content>
+ *           Content here
+ *       </@>
+ *       <@card::footer>
+ *           Footer here
+ *       </@>
+ *   </@>
  *@
 
 
-@fn apply(
-    header: Option<@()>,
-    footer: Option<@()>,
-    class: &str = "",
-    content: @(),
-) {
+@* Base card wrapper for composition - no internal padding *@
+@fn base(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["rounded-xl border bg-card text-card-foreground shadow", extra]
-    <div class="@cn(classes)">
-        @if let Some(h) = header {
-            <div class="flex flex-col space-y-1.5 p-6">
-                @h()
-            </div>
-        }
-        <div class="p-6 pt-0">
-            @content()
-        </div>
-        @if let Some(f) = footer {
-            <div class="flex items-center p-6 pt-0">
-                @f()
-            </div>
-        }
+    <div class=@cn(classes)>
+        @content()
     </div>
 }
 
@@ -33,7 +31,7 @@
 @fn simple(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["rounded-xl border bg-card text-card-foreground shadow p-6", extra]
-    <div class="@cn(classes)">
+    <div class=@cn(classes)>
         @content()
     </div>
 }
@@ -42,7 +40,7 @@
 @fn header(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["flex flex-col space-y-1.5 p-6", extra]
-    <div class="@cn(classes)">
+    <div class=@cn(classes)>
         @content()
     </div>
 }
@@ -51,7 +49,7 @@
 @fn title(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["font-semibold leading-none tracking-tight", extra]
-    <h3 class="@cn(classes)">
+    <h3 class=@cn(classes)>
         @content()
     </h3>
 }
@@ -60,17 +58,17 @@
 @fn description(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["text-sm text-muted-foreground", extra]
-    <p class="@cn(classes)">
+    <p class=@cn(classes)>
         @content()
     </p>
 }
 
 @* Card content area *@
-@fn content(class: &str = "", content: @()) {
+@fn content(class: &str = "", children: @()) {
     @let extra = class
     @let classes = ["p-6 pt-0", extra]
-    <div class="@cn(classes)">
-        @content()
+    <div class=@cn(classes)>
+        @children()
     </div>
 }
 
@@ -78,7 +76,34 @@
 @fn footer(class: &str = "", content: @()) {
     @let extra = class
     @let classes = ["flex items-center p-6 pt-0", extra]
-    <div class="@cn(classes)">
+    <div class=@cn(classes)>
         @content()
+    </div>
+}
+
+@* Convenience function for card with header/footer slots *@
+@* Note: Uses Option<@()> which may cause codegen issues. Prefer using card::base with composition. *@
+@fn apply(
+    header: Option<@()> = None,
+    footer: Option<@()> = None,
+    class: &str = "",
+    content: @()
+) {
+    @let extra = class
+    @let classes = ["rounded-xl border bg-card text-card-foreground shadow", extra]
+    <div class=@cn(classes)>
+        @if let Some(ref h) = header {
+            <div class="flex flex-col space-y-1.5 p-6">
+                @h()
+            </div>
+        }
+        <div class="p-6 pt-0">
+            @content()
+        </div>
+        @if let Some(ref f) = footer {
+            <div class="flex items-center p-6 pt-0">
+                @f()
+            </div>
+        }
     </div>
 }

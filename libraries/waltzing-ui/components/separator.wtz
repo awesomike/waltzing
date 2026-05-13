@@ -49,10 +49,10 @@
 
 @* Horizontal separator (default) *@
 @fn horizontal(class: &str = "") {
-    <@apply orientation=Orientation::Horizontal class=@class />
+    <@apply orientation=@Orientation::Horizontal class=@class />
 }
 
 @* Vertical separator *@
 @fn vertical(class: &str = "") {
-    <@apply orientation=Orientation::Vertical class=@class />
+    <@apply orientation=@Orientation::Vertical class=@class />
 }

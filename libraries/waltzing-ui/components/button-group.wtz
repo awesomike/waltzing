@@ -71,11 +71,13 @@
         Orientation::Horizontal => "horizontal",
         Orientation::Vertical => "vertical",
     }
+    @let classes = [group_base, orientation_cls, class]
+    @let x_data_value = format("{{ variant: '{}', size: '{}', orientation: '{}' }}", variant_str, size_str, orientation_str)
 
     <div
         role="group"
-        class="@cn(&[@group_base, @orientation_cls, @class])"
-        x-data="{ variant: '@variant_str', size: '@size_str', orientation: '@orientation_str' }"
+        class=@cn(classes)
+        x-data=@x_data_value
     >
         @content()
     </div>
@@ -95,10 +97,9 @@
     @* Vertical: first rounded-t, last rounded-b, middle flat, negative margin for border overlap *@
     @let vertical_rounding = "first:rounded-t-md last:rounded-b-md [&:not(:first-child):not(:last-child)]:rounded-none first:rounded-b-none last:rounded-t-none [&:not(:first-child)]:-mt-px"
 
-    <button
-        type="button"
-        class="@cn(&[@base, @class])"
-        :class="{
+    @let classes = [base, class]
+
+    @let class_binding = format("{{
             'h-8 px-3 text-xs': size === 'sm',
             'h-9 px-4 py-2': size === 'default',
             'h-10 px-8': size === 'lg',
@@ -106,9 +107,13 @@
             'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80': variant === 'secondary',
             'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground': variant === 'outline',
             'hover:bg-accent hover:text-accent-foreground': variant === 'ghost',
-            '@horizontal_rounding': orientation === 'horizontal',
-            '@vertical_rounding': orientation === 'vertical'
-        }"
+            '{}': orientation === 'horizontal',
+            '{}': orientation === 'vertical'
+        }}", horizontal_rounding, vertical_rounding)
+    <button
+        type="button"
+        class=@cn(classes)
+        :class=@class_binding
         @if disabled { disabled aria-disabled="true" }
     >
         @content()
@@ -122,7 +127,7 @@
     class: &str = "",
     content: @(),
 ) {
-    <@apply variant=@variant size=@size orientation=Orientation::Horizontal class=@class>
+    <@apply variant=@variant size=@size orientation=@Orientation::Horizontal class=@class>
         @content()
     </@apply>
 }
@@ -134,7 +139,7 @@
     class: &str = "",
     content: @(),
 ) {
-    <@apply variant=@variant size=@size orientation=Orientation::Vertical class=@class>
+    <@apply variant=@variant size=@size orientation=@Orientation::Vertical class=@class>
         @content()
     </@apply>
 }
@@ -145,7 +150,7 @@
     class: &str = "",
     content: @(),
 ) {
-    <@apply variant=Variant::Outline size=@size class=@class>
+    <@apply variant=@Variant::Outline size=@size class=@class>
         @content()
     </@apply>
 }
@@ -156,7 +161,7 @@
     class: &str = "",
     content: @(),
 ) {
-    <@apply variant=Variant::Secondary size=@size class=@class>
+    <@apply variant=@Variant::Secondary size=@size class=@class>
         @content()
     </@apply>
 }

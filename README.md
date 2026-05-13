@@ -1,93 +1,55 @@
-# Waltzing Editor Support
+# Waltzing Runtime
 
-This repository contains editor integrations and tooling for [Waltzing](https://waltzing.awesomike.com), a compile-time template engine for Rust.
+This repository is the companion workspace for Waltzing template tooling. It
+currently contains a showcase server, generated library metadata, editor
+extension assets, and the `waltzing-ui` template library.
 
 ## Contents
 
-- **tree-sitter/** - Tree-sitter grammar for Waltzing template syntax
-- **extensions/** - Editor extensions
-  - **extensions/zed/** - Zed editor extension with LSP support
+- `libraries/waltzing-ui` - shadcn-inspired Waltzing component library.
+- `src/main.rs` - Axum showcase server for browsing components and examples.
+- `build.rs` - discovers template libraries, validates manifests, and compiles
+  them with the Waltzing CLI.
+- `src/generated` - generated library metadata used by the showcase.
+- `extensions` - editor extension work in progress.
+- `releases` - release artifacts and packaging work in progress.
 
-## Tree-sitter Grammar
+## Building
 
-The Tree-sitter grammar provides syntax highlighting for `.wtz` files. It can be used with any editor that supports Tree-sitter.
-
-### Neovim Setup
-
-Add to your `init.lua` or nvim-treesitter config:
-
-```lua
-local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-parser_config.waltzing = {
-    install_info = {
-        url = "https://github.com/awesomike/waltzing",
-        files = { "src/parser.c" },
-        branch = "main",
-        location = "tree-sitter",
-    },
-    filetype = "waltzing",
-}
-
-vim.filetype.add({
-    extension = {
-        wtz = "waltzing",
-    },
-})
-```
-
-Then install with `:TSInstall waltzing`
-
-### Building from Source
+Install or build a recent `waltzing` CLI, then run:
 
 ```bash
-cd tree-sitter
-npm install
-npx tree-sitter generate
-npx tree-sitter build-wasm
+cargo test --locked
 ```
 
-## Zed Extension
-
-The Zed extension provides:
-- Syntax highlighting via Tree-sitter grammar
-- LSP support via `waltzing-lsp`
-- File association for `.wtz` files
-
-### Installation
-
-1. Open Zed
-2. Open Extensions (Cmd+Shift+X on macOS)
-3. Search for "Waltzing"
-4. Click Install
-
-### Manual Installation
+The build script searches `PATH`, then `~/.local/bin`. To force a specific
+compiler, set `WALTZING_BIN`:
 
 ```bash
-git clone https://github.com/awesomike/waltzing
-cd waltzing/extensions/zed
-zed --install-extension .
+WALTZING_BIN=/path/to/waltzing cargo test --locked
 ```
 
-## Language Server (LSP)
+Template compilation is a hard build gate. Missing manifest paths, unknown
+manifest dependencies, or Waltzing parse errors fail the build.
 
-The Waltzing Language Server provides IDE features across all editors that support LSP:
-- Real-time diagnostics
-- Go to definition
-- Hover information
-- Auto-completion
-- Document symbols
-
-### Installation
+## Running the Showcase
 
 ```bash
-curl -fsSL https://waltzing.awesomike.com/install | bash -s -- --binary lsp
+cargo run --locked
 ```
 
-## Documentation
+The showcase serves the component browser and static assets through Axum.
 
-- [Editor Setup Guide](https://waltzing.awesomike.com/docs/editors)
-- [Main Documentation](https://waltzing.awesomike.com/docs)
-- [Getting Started](https://waltzing.awesomike.com/docs/getting-started)
+## Waltzing UI
+
+See `libraries/waltzing-ui/README.md` for component usage, security boundaries,
+and production setup notes.
+
+## Issue Tracking
+
+This project uses `bd` (beads). Run `bd prime` for current workflow context.
+If the beads database is not present in a fresh checkout, run `bd onboard` for
+setup instructions.
 
 ## License
 

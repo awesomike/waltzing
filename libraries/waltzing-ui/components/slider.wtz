@@ -22,6 +22,8 @@
  *@
 
 
+@use waltzing::escape::attr
+
 @* Main slider with single handle *@
 @fn apply(
     name: &str,
@@ -44,10 +46,11 @@
     @let extra_class = class
     @let container_classes = [container_base, disabled_cls, extra_class]
 
+    @let x_init_value = format("$watch('value', v => {{ percentage = ((v - min) / (max - min)) * 100; $dispatch('input', {{ name: '{}', value: v }}) }})", name)
     <div
         class=@cn(container_classes)
         x-data=@```json { value: @value, min: @min, max: @max, step: @step, percentage: @clamped } ```@
-        x-init="$watch('value', v => { percentage = ((v - min) / (max - min)) * 100; $dispatch('input', { name: '@name', value: v }) })"
+        x-init=@x_init_value
     >
         @* Hidden input for form submission *@
         <input type="hidden" name=@name :value="value" />
@@ -152,30 +155,36 @@
     @let thumb = "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none"
     @let extra_class = class
     @let container_classes = [container_base, disabled_cls, extra_class]
+    @let name_esc = attr(name)
+    @let x_data = format(r#"{{
+        minValue: {},
+        maxValue: {},
+        min: {},
+        max: {},
+        step: {},
+        pctMin: {},
+        pctMax: {},
+        updatePercentages() {{
+            this.pctMin = ((this.minValue - this.min) / (this.max - this.min)) * 100;
+            this.pctMax = ((this.maxValue - this.min) / (this.max - this.min)) * 100;
+        }},
+        dispatchValues() {{
+            $dispatch('input', {{ name: '{}', valueMin: this.minValue, valueMax: this.maxValue }});
+        }}
+    }}"#, value_min, value_max, min, max, step, pct_min, pct_max, name_esc)
+    @let input_name_min = format("{}_min", name)
+    @let input_name_max = format("{}_max", name)
+    @let aria_label_min = format("{} minimum", name)
+    @let aria_label_max = format("{} maximum", name)
 
     <div
         class=@cn(container_classes)
-        x-data=@```json {
-            minValue: @value_min,
-            maxValue: @value_max,
-            min: @min,
-            max: @max,
-            step: @step,
-            pctMin: @pct_min,
-            pctMax: @pct_max,
-            updatePercentages() {
-                this.pctMin = ((this.minValue - this.min) / (this.max - this.min)) * 100;
-                this.pctMax = ((this.maxValue - this.min) / (this.max - this.min)) * 100;
-            },
-            dispatchValues() {
-                $dispatch('input', { name: '@name', valueMin: this.minValue, valueMax: this.maxValue });
-            }
-        } ```@
+        x-data=@x_data
         x-init="$watch('minValue', () => { updatePercentages(); dispatchValues(); }); $watch('maxValue', () => { updatePercentages(); dispatchValues(); })"
     >
         @* Hidden inputs for form submission *@
-        <input type="hidden" name="@(name)_min" :value="minValue" />
-        <input type="hidden" name="@(name)_max" :value="maxValue" />
+        <input type="hidden" name=@input_name_min :value="minValue" />
+        <input type="hidden" name=@input_name_max :value="maxValue" />
 
         @* Track container *@
         <div class=@track>
@@ -199,7 +208,7 @@
                 aria-valuenow=@value_min
                 aria-valuemin=@min
                 aria-valuemax=@max
-                aria-label="@name minimum"
+                aria-label=@aria_label_min
                 :aria-valuenow="minValue"
                 @if disabled { disabled aria-disabled="true" }
                 @if !disabled {
@@ -224,7 +233,7 @@
                 aria-valuenow=@value_max
                 aria-valuemin=@min
                 aria-valuemax=@max
-                aria-label="@name maximum"
+                aria-label=@aria_label_max
                 :aria-valuenow="maxValue"
                 @if disabled { disabled aria-disabled="true" }
                 @if !disabled {

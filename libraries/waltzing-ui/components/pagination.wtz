@@ -47,10 +47,10 @@
 @* Pagination content wrapper (ul) *@
 @fn content(
     class: &str = "",
-    content: @(),
+    children: @(),
 ) {
     <ul class=@cn(&["flex flex-row items-center gap-1", class])>
-        @content()
+        @children()
     </ul>
 }
 
@@ -72,8 +72,8 @@
     content: @(),
 ) {
     @let base = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 w-9"
-    @let active_cls = class_if(is_active, "border border-input bg-background shadow-sm pointer-events-none")
-    @let inactive_cls = class_if(!is_active, "hover:bg-accent hover:text-accent-foreground")
+    @let active_cls = if is_active { "border border-input bg-background shadow-sm pointer-events-none" } else { "" }
+    @let inactive_cls = if !is_active { "hover:bg-accent hover:text-accent-foreground" } else { "" }
 
     <@item>
         <a
@@ -255,13 +255,13 @@
                 <@prev_disabled />
             }
             @if !is_first {
-                <@prev_enabled href=&prev_href />
+                <@prev_enabled href=@&prev_href />
             }
 
             @* First page (always show if not in range) *@
             @if start > 1 {
                 @let first_href = { href_template.replace("{page}", "1") }
-                <@link href=&first_href is_active=false>1</@link>
+                <@link href=@&first_href is_active=false>1</@link>
             }
 
             @* Left ellipsis *@
@@ -273,7 +273,7 @@
             @for page in start..=end {
                 @let page_href = { href_template.replace("{page}", &page.to_string()) }
                 @let is_current = (page == current)
-                <@link href=&page_href is_active=@is_current>
+                <@link href=@&page_href is_active=@is_current>
                     @page
                 </@link>
             }
@@ -286,7 +286,7 @@
             @* Last page (always show if not in range) *@
             @if end < total {
                 @let last_href = { href_template.replace("{page}", &total.to_string()) }
-                <@link href=&last_href is_active=false>@total</@link>
+                <@link href=@&last_href is_active=false>@total</@link>
             }
 
             @* Next button *@
@@ -294,7 +294,7 @@
                 <@next_disabled />
             }
             @if !is_last {
-                <@next_enabled href=&next_href />
+                <@next_enabled href=@&next_href />
             }
         </@content>
     </@root>

@@ -47,22 +47,22 @@
         Align::End => "end",
     }
 
-    @let extra_cls = class
+    @let popover_cls = cn(&["fixed z-[9999] w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", class])
 
-    <div class="inline-block" x-data="{
+    @let x_data = format(r#"{{
         open: false,
-        pos: { x: 0, y: 0 },
+        pos: {{ x: 0, y: 0 }},
         flipTop: false,
-        side: '@side_type',
-        align: '@align_type',
-        updatePos() {
+        side: '{}',
+        align: '{}',
+        updatePos() {{
             const trigger = this.$refs.trigger;
             if (!trigger) return;
             const rect = trigger.getBoundingClientRect();
             const popoverHeight = 200;
             const popoverWidth = 288;
             const isVertical = this.side === 'top' || this.side === 'bottom';
-            if (isVertical) {
+            if (isVertical) {{
                 const spaceBelow = window.innerHeight - rect.bottom;
                 const spaceAbove = rect.top;
                 this.flipTop = (this.side === 'top') || (spaceBelow < popoverHeight && spaceAbove > spaceBelow);
@@ -70,22 +70,24 @@
                 if (this.align === 'start') this.pos.x = rect.left;
                 else if (this.align === 'center') this.pos.x = rect.left + rect.width / 2;
                 else this.pos.x = rect.right;
-            } else {
+            }} else {{
                 this.pos.y = rect.top + rect.height / 2;
                 this.pos.x = this.side === 'right' ? rect.right : rect.left;
-            }
-        },
-        onScroll() { if (this.open) this.updatePos(); },
-        init() {
+            }}
+        }},
+        onScroll() {{ if (this.open) this.updatePos(); }},
+        init() {{
             this._scrollHandler = () => this.onScroll();
             window.addEventListener('scroll', this._scrollHandler, true);
             window.addEventListener('resize', this._scrollHandler);
-        },
-        destroy() {
+        }},
+        destroy() {{
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
-        }
-    }" x-init="init()" @destroy="destroy()">
+        }}
+    }}"#, side_type, align_type)
+
+    <div class="inline-block" x-data=@x_data x-init="init()" @destroy="destroy()">
         <div x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())" aria-haspopup="true" :aria-expanded="open">
             @trigger()
         </div>
@@ -102,7 +104,7 @@
                 x-transition:leave-end="opacity-0 scale-95"
                 @click.outside="open = false"
                 @keydown.escape.window="open = false"
-                class="fixed z-[9999] w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none @extra_cls"
+                class=@popover_cls
                 :style="(side === 'left' || side === 'right')
                     ? `left: ${side === 'right' ? pos.x + 8 : 'auto'}px; right: ${side === 'left' ? (window.innerWidth - pos.x + 8) : 'auto'}px; top: ${pos.y}px; transform: translateY(-50%);`
                     : `left: ${align === 'end' ? 'auto' : pos.x + 'px'}; right: ${align === 'end' ? (window.innerWidth - pos.x) + 'px' : 'auto'}; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}; ${align === 'center' ? 'transform: translateX(-50%)' : ''}`"
@@ -136,20 +138,20 @@
         Align::End => "end",
     }
 
-    @let extra_cls = class
+    @let popover_cls = cn(&["fixed z-[9999] w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", class])
 
-    <div class="inline-block" x-data="{
-        pos: { x: 0, y: 0 },
+    @let x_data = format(r#"{{
+        pos: {{ x: 0, y: 0 }},
         flipTop: false,
-        side: '@side_type',
-        align: '@align_type',
-        updatePos() {
+        side: '{}',
+        align: '{}',
+        updatePos() {{
             const trigger = this.$refs.trigger;
             if (!trigger) return;
             const rect = trigger.getBoundingClientRect();
             const popoverHeight = 200;
             const isVertical = this.side === 'top' || this.side === 'bottom';
-            if (isVertical) {
+            if (isVertical) {{
                 const spaceBelow = window.innerHeight - rect.bottom;
                 const spaceAbove = rect.top;
                 this.flipTop = (this.side === 'top') || (spaceBelow < popoverHeight && spaceAbove > spaceBelow);
@@ -157,23 +159,28 @@
                 if (this.align === 'start') this.pos.x = rect.left;
                 else if (this.align === 'center') this.pos.x = rect.left + rect.width / 2;
                 else this.pos.x = rect.right;
-            } else {
+            }} else {{
                 this.pos.y = rect.top + rect.height / 2;
                 this.pos.x = this.side === 'right' ? rect.right : rect.left;
-            }
-        },
-        onScroll() { if (@open_var) this.updatePos(); },
-        init() {
+            }}
+        }},
+        onScroll() {{ if ({}) this.updatePos(); }},
+        init() {{
             this._scrollHandler = () => this.onScroll();
             window.addEventListener('scroll', this._scrollHandler, true);
             window.addEventListener('resize', this._scrollHandler);
-        },
-        destroy() {
+        }},
+        destroy() {{
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
-        }
-    }" x-init="init()" @destroy="destroy()">
-        <div x-ref="trigger" @click="@open_var = !@open_var; $nextTick(() => updatePos())" aria-haspopup="true" :aria-expanded=@open_var>
+        }}
+    }}"#, side_type, align_type, open_var)
+
+    @let toggle_expr = format("{} = !{}; $nextTick(() => updatePos())", open_var, open_var)
+    @let close_expr = format("{} = false", open_var)
+
+    <div class="inline-block" x-data=@x_data x-init="init()" @destroy="destroy()">
+        <div x-ref="trigger" @click=@toggle_expr aria-haspopup="true" :aria-expanded=@open_var>
             @trigger()
         </div>
 
@@ -187,9 +194,9 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                @click.outside="@open_var = false"
-                @keydown.escape.window="@open_var = false"
-                class="fixed z-[9999] w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none @extra_cls"
+                @click.outside=@close_expr
+                @keydown.escape.window=@close_expr
+                class=@popover_cls
                 :style="(side === 'left' || side === 'right')
                     ? `left: ${side === 'right' ? pos.x + 8 : 'auto'}px; right: ${side === 'left' ? (window.innerWidth - pos.x + 8) : 'auto'}px; top: ${pos.y}px; transform: translateY(-50%);`
                     : `left: ${align === 'end' ? 'auto' : pos.x + 'px'}; right: ${align === 'end' ? (window.innerWidth - pos.x) + 'px' : 'auto'}; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}; ${align === 'center' ? 'transform: translateX(-50%)' : ''}`"

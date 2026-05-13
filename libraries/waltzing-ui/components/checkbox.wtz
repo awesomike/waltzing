@@ -10,15 +10,15 @@
  * <@checkbox::labeled
  *     label="Accept terms and conditions"
  *     name="terms"
- *     checked=false
+ *     checked=@false
  *    
- *     description=None
+ *     description=@None
  * />
  *
  * <@checkbox::labeled
  *     label="Marketing emails"
  *     name="marketing"
- *     checked=true
+ *     checked=@true
  *    
  *     description=Some("Receive emails about new products and features")
  * />
@@ -31,44 +31,50 @@
     disabled: bool = false,
     class: &str = "",
 ) {
-    @let base = "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-
-    @let checked_cls = if checked { "bg-primary text-primary-foreground" } else { "" }
-
-    @let data_state = if checked { "checked" } else { "unchecked" }
-
+    @* The visible square is a sibling of the sr-only `<input>`,
+       controlled by Tailwind's `peer-checked:` modifier so it reacts
+       to client-side state changes (the previous version was a bare
+       `<div>` that never updated). Wrapping in a `<label for=name>`
+       makes clicking the square toggle the input — the unwrapped
+       `<div>` had no click semantics, which broke the form for users
+       who expect to click the box. *@
     @let extra_class = class
-    @let classes = [base, checked_cls, extra_class]
+    @let box_classes = ["peer-checked:bg-primary peer-checked:border-primary",
+        "h-4 w-4 shrink-0 rounded-sm border border-primary",
+        "peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+        "inline-flex items-center justify-center cursor-pointer",
+        extra_class]
 
-    <div class="relative inline-flex items-center justify-center">
+    <label for=@name class="relative inline-flex items-center justify-center cursor-pointer">
         <input
             type="checkbox"
             name=@name
             id=@name
             class="sr-only peer"
-            data-state=@data_state
             @if checked { checked }
             @if disabled { disabled }
         />
-        <div
-            class=@cn(classes)
-            data-state=@data_state
+        <span class=@cn(&box_classes)>
+        </span>
+        @* SVG checkmark — sibling of the input (NOT inside the span)
+           so Tailwind's sibling-only `peer-checked:` modifier applies.
+           Hidden by default, shown when input is :checked. The
+           `peer-checked:block` utility (already compiled into the
+           pod's static CSS) gives us `display: block` on toggle.
+           Positioned absolutely on top of the visual box;
+           pointer-events:none so clicks fall through. *@
+        <svg
+            class="hidden peer-checked:block absolute h-3 w-3 text-primary-foreground pointer-events-none"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
         >
-            @if checked {
-                <svg
-                    class="h-3 w-3 text-current"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-            }
-        </div>
-    </div>
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+    </label>
 }
 
 @* Checkbox with label and optional description *@
@@ -88,7 +94,7 @@
             name=@name
             checked=@checked
             disabled=@disabled
-            class=@checkbox_cls
+            class=@checkbox_cls.unwrap_or("")
         />
         <div class="grid gap-1.5 leading-none">
             <label for=@name class=@label_cls>@label</label>
@@ -104,9 +110,9 @@
     <@labeled
         label=@label
         name=@name
-        checked=false
+        checked=@false
        
-        description=None
+        description=@None
     />
 }
 
@@ -115,8 +121,8 @@
     <@labeled
         label=@label
         name=@name
-        checked=true
+        checked=@true
        
-        description=None
+        description=@None
     />
 }

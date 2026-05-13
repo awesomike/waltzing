@@ -13,22 +13,22 @@
  *         label=Some("Email")
  *         description=Some("We'll never share your email.")
  *         error=email_error
- *         required=true
+ *         required=@true
  *        
  *     >
  *         <@input::apply
- *             input_type=input::InputType::Email
+ *             input_type=@input::InputType::Email
  *             name="email"
  *            
- *             placeholder=Some("you@example.com")
+ *             placeholder=Some(@"you@example.com")
  *            
- *             required=true
+ *             required=@true
  *             error=email_error
  *            
  *         />
  *     </@form::field>
  *
- *     <@form::actions align=None>
+ *     <@form::actions align=@None>
  *         <@button::primary>Submit</@button::primary>
  *     </@form::actions>
  * </@form::apply>
@@ -174,7 +174,7 @@
     <@apply
         action=@Some(action)
         method=@Some(method)
-        enctype=None
+        enctype=@None
        
     >
         @content()

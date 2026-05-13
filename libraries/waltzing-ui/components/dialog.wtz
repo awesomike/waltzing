@@ -75,11 +75,112 @@
                     </div>
 
                     @* Footer *@
-                    @if let Some(f) = footer {
+                    @if let Some(ref f) = footer {
                         <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
                             @f()
                         </div>
                     }
+                </div>
+            </div>
+        </template>
+    </div>
+}
+
+@enum Variant {
+    Default,
+    Destructive,
+}
+
+@* Confirm dialog - opens a confirmation dialog before performing an action *@
+@fn confirm(
+    title: &str,
+    message: &str,
+    confirm_text: &str = "Confirm",
+    cancel_text: &str = "Cancel",
+    variant: Variant = Variant::Destructive,
+    trigger: @(),
+    on_confirm: Option<&str> = None,
+    action: Option<@()> = None,
+) {
+    @let confirm_base = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 px-4 py-2"
+    @let confirm_variant_cls = match variant {
+        Variant::Destructive => "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        Variant::Default => "bg-primary text-primary-foreground hover:bg-primary/90",
+    }
+    @let confirm_classes_vec = [confirm_base, confirm_variant_cls]
+    @let confirm_classes = &confirm_classes_vec
+    @let confirm_click_expr = match &on_confirm {
+        Some(handler) => format("{}; open = false", handler),
+        None => "open = false".to_string(),
+    }
+
+    <div x-data="{ open: false }">
+        @* Trigger *@
+        <div @click="open = true">
+            @trigger()
+        </div>
+
+        @* Dialog *@
+        <template x-teleport="body">
+            <div
+                x-show="open"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-50"
+                style="display: none;"
+            >
+                @* Backdrop *@
+                <div
+                    class="fixed inset-0 bg-black/80"
+                    @click="open = false"
+                    aria-hidden="true"
+                ></div>
+
+                @* Content *@
+                <div
+                    class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-md translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg"
+                    x-trap.inert.noscroll="open"
+                    @keydown.escape.window="open = false"
+                    role="alertdialog"
+                    aria-modal="true"
+                    aria-labelledby="confirm-title"
+                    aria-describedby="confirm-description"
+                >
+                    @* Header *@
+                    <div class="flex flex-col space-y-2 text-center sm:text-left">
+                        <h2 id="confirm-title" class="text-lg font-semibold">@title</h2>
+                        <p id="confirm-description" class="text-sm text-muted-foreground">@message</p>
+                    </div>
+
+                    @* Footer *@
+                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-4">
+                        <button
+                            type="button"
+                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-2 sm:mt-0"
+                            @click="open = false"
+                        >
+                            @cancel_text
+                        </button>
+                        @if let Some(ref action_cb) = action {
+                            @* Use action callback (legacy pattern) *@
+                            <div @click="open = false">
+                                @action_cb()
+                            </div>
+                        } else {
+                            @* Use on_confirm JS handler with styled button *@
+                            <button
+                                type="button"
+                                class=@cn(confirm_classes)
+                                @click=@confirm_click_expr
+                            >
+                                @confirm_text
+                            </button>
+                        }
+                    </div>
                 </div>
             </div>
         </template>
@@ -94,6 +195,7 @@
     content: @(),
     footer: Option<@()>,
 ) {
+    @let close_expr = format("{} = false", open_var)
     <template x-teleport="body">
         <div
             x-show=@open_var
@@ -108,20 +210,20 @@
         >
             <div
                 class="fixed inset-0 bg-black/80"
-                @click="@open_var = false"
+                @click=@close_expr
                 aria-hidden="true"
             ></div>
 
             <div
                 class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg"
                 x-trap.inert.noscroll=@open_var
-                @keydown.escape.window="@open_var = false"
+                @keydown.escape.window=@close_expr
                 role="dialog"
                 aria-modal="true"
             >
                 <button
                     class="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100"
-                    @click="@open_var = false"
+                    @click=@close_expr
                     aria-label="Close"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
@@ -139,7 +241,7 @@
 
                 <div class="py-4">@content()</div>
 
-                @if let Some(f) = footer {
+                @if let Some(ref f) = footer {
                     <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
                         @f()
                     </div>

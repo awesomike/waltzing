@@ -17,17 +17,15 @@
     trigger: @(),
     content: @(),
 ) {
-    @let align_type = match align {
-        Align::Start => "start",
-        Align::Center => "center",
-        Align::End => "end",
-    }
+    @let is_end = matches(align, Align::End)
+    @let is_center = matches(align, Align::Center)
 
-    <div class="inline-block text-left" x-data="{
+    <div class="inline-block text-left" x-data=@```json {
         open: false,
-        pos: { x: 0, y: 0, width: 0 },
+        pos: { x: 0, y: 0, width: 0, rightEdge: 0 },
         flipTop: false,
-        align: '@align_type',
+        isEnd: @is_end,
+        isCenter: @is_center,
         updatePos() {
             const trigger = this.$refs.trigger;
             if (!trigger) return;
@@ -37,12 +35,13 @@
             const spaceAbove = rect.top;
             this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
             this.pos.width = rect.width;
-            if (this.align === 'start') {
-                this.pos.x = rect.left;
-            } else if (this.align === 'center') {
+            this.pos.rightEdge = window.innerWidth - rect.right;
+            if (this.isEnd) {
+                this.pos.x = rect.right;
+            } else if (this.isCenter) {
                 this.pos.x = rect.left + rect.width / 2;
             } else {
-                this.pos.x = rect.right;
+                this.pos.x = rect.left;
             }
             this.pos.y = this.flipTop ? rect.top : rect.bottom;
         },
@@ -56,7 +55,7 @@
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
         }
-    }" x-init="init()" @destroy="destroy()">
+    } ```@ x-init="init()" @destroy="destroy()">
         @* Trigger *@
         <div x-ref="trigger" @click="open = !open; $nextTick(() => updatePos())">
             @trigger()
@@ -75,8 +74,8 @@
                 x-transition:leave-end="opacity-0 scale-95"
                 @click.away="open = false"
                 @keydown.escape.window="open = false"
-                class="fixed z-[9999] min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-                :style="`left: ${align === 'end' ? 'auto' : pos.x + 'px'}; right: ${align === 'end' ? (window.innerWidth - pos.x) + 'px' : 'auto'}; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}; ${align === 'center' ? 'transform: translateX(-50%)' : ''}`"
+                class="fixed z-[9999] min-w-[8rem] max-w-[calc(100vw-32px)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                :style="`left: ${isEnd ? 'auto' : pos.x + 'px'}; right: ${isEnd ? Math.max(8, pos.rightEdge) + 'px' : 'auto'}; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}; ${isCenter ? 'transform: translateX(-50%)' : ''}`"
                 role="menu"
             >
                 @content()
@@ -92,7 +91,8 @@
     content: @(),
 ) {
     @let extra_class = class
-    @let classes = ["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", class_if(disabled, "pointer-events-none opacity-50"), extra_class]
+    @let disabled_class = class_if(disabled, "pointer-events-none opacity-50")
+    @let classes = ["relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground", &disabled_class, extra_class]
     <button
         class=@cn(classes)
         role="menuitem"

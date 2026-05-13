@@ -16,7 +16,7 @@
  *
  * <@sheet::right
  *     title="Menu"
- *     description=None
+ *     description=@None
  *     trigger=@{ <button>Open Menu</button> }
  *     content=@{ <nav>Navigation items</nav> }
  * />
@@ -33,7 +33,7 @@
 @fn apply(
     side: Side,
     title: &str,
-    description: Option<&str>,
+    description: Option<&str> = None,
     trigger: @(),
     content: @(),
     class: &str = "",
@@ -142,10 +142,12 @@
     open_var: &str,
     side: Side,
     title: &str,
-    description: Option<&str>,
+    description: Option<&str> = None,
     content: @(),
     class: &str = "",
 ) {
+    @let close_expr = format("{} = false", open_var)
+
     @let position_cls = match side {
         Side::Top => { "inset-x-0 top-0 border-b" }
         Side::Right => { "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm" }
@@ -185,7 +187,7 @@
         >
             <div
                 class="fixed inset-0 bg-black/80"
-                @click="@open_var = false"
+                @click=@close_expr
                 aria-hidden="true"
             ></div>
 
@@ -199,13 +201,13 @@
                 x-transition:leave-end=@enter_start_cls
                 class=@cn(sheet_cls)
                 x-trap.inert.noscroll=@open_var
-                @keydown.escape.window="@open_var = false"
+                @keydown.escape.window=@close_expr
                 role="dialog"
                 aria-modal="true"
             >
                 <button
                     class="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100"
-                    @click="@open_var = false"
+                    @click=@close_expr
                     aria-label="Close"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
@@ -230,67 +232,59 @@
 @* Shorthand for right sheet *@
 @fn right(
     title: &str,
-    description: Option<&str>,
+    description: Option<&str> = None,
     trigger: @(),
     content: @(),
 ) {
-    <@apply
-        side=Side::Right
-        title=@title
-        description=@description
-        trigger=@trigger
-        content=@content
-       
-    />
+    @let desc = description.unwrap_or("")
+    @if !desc.is_empty() {
+        <@apply side=@Side::Right title=@title description=@desc trigger=@trigger content=@content />
+    } else {
+        <@apply side=@Side::Right title=@title trigger=@trigger content=@content />
+    }
 }
 
 @* Shorthand for left sheet *@
 @fn left(
     title: &str,
-    description: Option<&str>,
+    description: Option<&str> = None,
     trigger: @(),
     content: @(),
 ) {
-    <@apply
-        side=Side::Left
-        title=@title
-        description=@description
-        trigger=@trigger
-        content=@content
-       
-    />
+    @let desc = description.unwrap_or("")
+    @if !desc.is_empty() {
+        <@apply side=@Side::Left title=@title description=@desc trigger=@trigger content=@content />
+    } else {
+        <@apply side=@Side::Left title=@title trigger=@trigger content=@content />
+    }
 }
 
 @* Shorthand for top sheet *@
 @fn top(
     title: &str,
-    description: Option<&str>,
+    description: Option<&str> = None,
     trigger: @(),
     content: @(),
 ) {
-    <@apply
-        side=Side::Top
-        title=@title
-        description=@description
-        trigger=@trigger
-        content=@content
-       
-    />
+    @let desc = description.unwrap_or("")
+    @if !desc.is_empty() {
+        <@apply side=@Side::Top title=@title description=@desc trigger=@trigger content=@content />
+    } else {
+        <@apply side=@Side::Top title=@title trigger=@trigger content=@content />
+    }
 }
 
 @* Shorthand for bottom sheet *@
 @fn bottom(
     title: &str,
-    description: Option<&str>,
+    description: Option<&str> = None,
     trigger: @(),
     content: @(),
 ) {
-    <@apply
-        side=Side::Bottom
-        title=@title
-        description=@description
-        trigger=@trigger
-        content=@content
-       
-    />
+    @let desc = description.unwrap_or("")
+    @if !desc.is_empty() {
+        <@apply side=@Side::Bottom title=@title description=@desc trigger=@trigger content=@content />
+    } else {
+        <@apply side=@Side::Bottom title=@title trigger=@trigger content=@content />
+    }
 }

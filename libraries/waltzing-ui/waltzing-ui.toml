@@ -1,6 +1,6 @@
 [library]
 name = "waltzing-ui"
-version = "0.1.0"
+version = "0.2.0"
 description = "A shadcn-inspired component library for Waltzing"
 repository = "https://github.com/awesomike/waltzing-runtime"
 license = "MIT"
@@ -13,7 +13,6 @@ plugins = ["@alpinejs/focus", "@alpinejs/collapse"]
 
 [components]
 accordion = { path = "components/accordion.wtz", deps = ["lib/utils"] }
-ajax-select = { path = "components/ajax-select.wtz", deps = ["lib/utils"] }
 alert = { path = "components/alert.wtz", deps = ["lib/utils"] }
 alert-dialog = { path = "components/alert-dialog.wtz", deps = ["dialog", "button", "lib/utils"] }
 aspect-ratio = { path = "components/aspect-ratio.wtz", deps = ["lib/utils"] }
@@ -22,62 +21,44 @@ badge = { path = "components/badge.wtz", deps = ["lib/utils"] }
 breadcrumb = { path = "components/breadcrumb.wtz", deps = ["lib/utils"] }
 button = { path = "components/button.wtz", deps = ["lib/utils"] }
 button-group = { path = "components/button-group.wtz", deps = ["button", "lib/utils"] }
-calendar = { path = "components/calendar.wtz", deps = ["button", "lib/utils"] }
 card = { path = "components/card.wtz", deps = ["lib/utils"] }
 carousel = { path = "components/carousel.wtz", deps = ["button", "lib/utils"] }
-chart = { path = "components/chart.wtz", deps = ["lib/utils"] }
 checkbox = { path = "components/checkbox.wtz", deps = ["lib/utils"] }
 collapsible = { path = "components/collapsible.wtz", deps = ["lib/utils"] }
-combobox = { path = "components/combobox.wtz", deps = ["popover", "lib/utils"] }
 command = { path = "components/command.wtz", deps = ["lib/utils"] }
-command-palette = { path = "components/command-palette.wtz", deps = ["dialog", "command", "lib/utils"] }
 context-menu = { path = "components/context-menu.wtz", deps = ["lib/utils"] }
-data-table = { path = "components/data-table.wtz", deps = ["table", "lib/utils"] }
-date-picker = { path = "components/date-picker.wtz", deps = ["popover", "calendar", "button", "lib/utils"] }
-datetime-picker = { path = "components/datetime-picker.wtz", deps = ["date-picker", "time-picker", "lib/utils"] }
+date-picker = { path = "components/date-picker.wtz", deps = ["popover", "button", "lib/utils"] }
 dialog = { path = "components/dialog.wtz", deps = ["button", "lib/utils"] }
+dialogs-dialog = { path = "components/dialogs/dialog.wtz", deps = ["lib/utils"] }
+dialogs-sheet = { path = "components/dialogs/sheet.wtz", deps = ["lib/utils"] }
+dialogs-workspace = { path = "components/dialogs/workspace.wtz", deps = ["lib/utils"] }
 drawer = { path = "components/drawer.wtz", deps = ["lib/utils"] }
 dropdown = { path = "components/dropdown.wtz", deps = ["lib/utils"] }
-duration-input = { path = "components/duration-input.wtz", deps = ["input", "lib/utils"] }
-empty = { path = "components/empty.wtz", deps = ["lib/utils"] }
 field = { path = "components/field.wtz", deps = ["label", "lib/utils"] }
 file-upload = { path = "components/file-upload.wtz", deps = ["button", "lib/utils"] }
-flash-messages = { path = "components/flash-messages.wtz", deps = ["alert", "lib/utils"] }
 form = { path = "components/form.wtz", deps = ["lib/utils"] }
-formatted-number = { path = "components/formatted-number.wtz", deps = ["lib/utils"] }
 hover-card = { path = "components/hover-card.wtz", deps = ["lib/utils"] }
 input = { path = "components/input.wtz", deps = ["lib/utils"] }
-input-group = { path = "components/input-group.wtz", deps = ["input", "lib/utils"] }
-input-otp = { path = "components/input-otp.wtz", deps = ["input", "lib/utils"] }
-item = { path = "components/item.wtz", deps = ["lib/utils"] }
 kbd = { path = "components/kbd.wtz", deps = ["lib/utils"] }
 label = { path = "components/label.wtz", deps = ["lib/utils"] }
-menubar = { path = "components/menubar.wtz", deps = ["lib/utils"] }
-minmax-editor = { path = "components/minmax-editor.wtz", deps = ["input", "lib/utils"] }
-native-select = { path = "components/native-select.wtz", deps = ["lib/utils"] }
-navigation-menu = { path = "components/navigation-menu.wtz", deps = ["lib/utils"] }
-numeric-input = { path = "components/numeric-input.wtz", deps = ["input", "lib/utils"] }
+minmax-input = { path = "components/minmax-input.wtz", deps = ["numeric-field", "lib/utils"] }
+multi-select = { path = "components/multi-select.wtz", deps = ["lib/utils"] }
+numeric-field = { path = "components/numeric-field.wtz", deps = ["lib/utils"] }
 pagination = { path = "components/pagination.wtz", deps = ["button", "lib/utils"] }
-password-input = { path = "components/password-input.wtz", deps = ["input", "button", "lib/utils"] }
 popover = { path = "components/popover.wtz", deps = ["lib/utils"] }
 progress = { path = "components/progress.wtz", deps = ["lib/utils"] }
 radio-group = { path = "components/radio-group.wtz", deps = ["lib/utils"] }
-resizable = { path = "components/resizable.wtz", deps = ["lib/utils"] }
 scroll-area = { path = "components/scroll-area.wtz", deps = ["lib/utils"] }
-searchable-select = { path = "components/searchable-select.wtz", deps = ["popover", "lib/utils"] }
 select = { path = "components/select.wtz", deps = ["lib/utils"] }
 separator = { path = "components/separator.wtz", deps = ["lib/utils"] }
 sheet = { path = "components/sheet.wtz", deps = ["lib/utils"] }
 skeleton = { path = "components/skeleton.wtz", deps = ["lib/utils"] }
 slider = { path = "components/slider.wtz", deps = ["lib/utils"] }
-sonner = { path = "components/sonner.wtz", deps = ["lib/utils"] }
 spinner = { path = "components/spinner.wtz", deps = ["lib/utils"] }
 switch = { path = "components/switch.wtz", deps = ["lib/utils"] }
 table = { path = "components/table.wtz", deps = ["lib/utils"] }
 tabs = { path = "components/tabs.wtz", deps = ["lib/utils"] }
 textarea = { path = "components/textarea.wtz", deps = ["lib/utils"] }
-theme-switcher = { path = "components/theme-switcher.wtz", deps = ["lib/utils"] }
-time-picker = { path = "components/time-picker.wtz", deps = ["input", "lib/utils"] }
 toast = { path = "components/toast.wtz", deps = ["lib/utils"] }
 toggle = { path = "components/toggle.wtz", deps = ["lib/utils"] }
 toggle-group = { path = "components/toggle-group.wtz", deps = ["toggle", "lib/utils"] }
@@ -89,34 +70,8 @@ validation-errors = { path = "components/validation-errors.wtz", deps = ["lib/ut
 showcase-sidebar = { path = "components/showcase/sidebar.wtz", deps = ["lib/utils"] }
 
 [layouts]
-auth = { path = "layouts/auth.wtz", deps = ["base"] }
 base = { path = "layouts/base.wtz", deps = [] }
 dashboard = { path = "layouts/dashboard.wtz", deps = ["base"] }
-marketing = { path = "layouts/marketing.wtz", deps = ["base"] }
-settings = { path = "layouts/settings.wtz", deps = ["base"] }
 sidebar = { path = "layouts/sidebar.wtz", deps = ["base"] }
 
 [blocks]
-contact-form = { path = "blocks/forms/contact.wtz", deps = ["button", "input", "textarea", "label"] }
-profile-form = { path = "blocks/forms/profile.wtz", deps = ["avatar", "button", "card", "field", "form", "input", "input-group", "separator", "textarea"] }
-confirm-dialog = { path = "blocks/dialogs/confirm.wtz", deps = ["dialog", "button"] }
-delete-dialog = { path = "blocks/dialogs/delete.wtz", deps = ["dialog"] }
-share-dialog = { path = "blocks/dialogs/share.wtz", deps = ["dialog", "button", "input"] }
-login-01 = { path = "blocks/auth/login-01.wtz", deps = ["card", "input", "button", "field"] }
-login-02 = { path = "blocks/auth/login-02.wtz", deps = ["input", "button", "field"] }
-login-03 = { path = "blocks/auth/login-03.wtz", deps = ["card", "input", "button", "field", "checkbox", "separator"] }
-login-04 = { path = "blocks/auth/login-04.wtz", deps = ["card", "input", "button", "field"] }
-login-05 = { path = "blocks/auth/login-05.wtz", deps = ["card", "input", "button", "field"] }
-login = { path = "blocks/auth/login.wtz", deps = ["card", "input", "button", "field", "checkbox", "separator"] }
-signup = { path = "blocks/auth/signup.wtz", deps = ["card", "input", "button", "field", "checkbox", "separator"] }
-signup-01 = { path = "blocks/auth/signup-01.wtz", deps = ["card", "input", "button", "field"] }
-otp-01 = { path = "blocks/auth/otp-01.wtz", deps = ["card", "input-otp", "button", "field"] }
-dashboard-01 = { path = "blocks/dashboard/dashboard-01.wtz", deps = ["base", "card", "table", "button", "dropdown", "input"] }
-sidebar-01 = { path = "blocks/sidebar/sidebar-01.wtz", deps = ["lib/utils"] }
-sidebar-02 = { path = "blocks/sidebar/sidebar-02.wtz", deps = ["lib/utils"] }
-sidebar-03 = { path = "blocks/sidebar/sidebar-03.wtz", deps = ["lib/utils"] }
-sidebar-07 = { path = "blocks/sidebar/sidebar-07.wtz", deps = ["lib/utils"] }
-sidebar-11 = { path = "blocks/sidebar/sidebar-11.wtz", deps = ["lib/utils"] }
-sidebar-12 = { path = "blocks/sidebar/sidebar-12.wtz", deps = ["lib/utils", "calendar"] }
-sidebar-15 = { path = "blocks/sidebar/sidebar-15.wtz", deps = ["lib/utils"] }
-calendar-01 = { path = "blocks/calendar/calendar-01.wtz", deps = ["button", "card"] }

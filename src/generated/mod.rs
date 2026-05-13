@@ -18,13 +18,13 @@ pub const LIBRARIES: &[Library] = &[
     Library {
         id: "waltzing-ui",
         name: "waltzing-ui",
-        version: "0.1.0",
+        version: "0.2.0",
         description: "A shadcn-inspired component library for Waltzing",
-        component_count: 79,
+        component_count: 57,
     },
 ];
 
 /// Path to compiled templates (set by build.rs)
-pub const TEMPLATES_DIR: &str = "/Users/michael/awesomike/waltzing-runtime/target/debug/build/waltzing-showcase-48a663a65cdb5335/out/templates";
+pub const TEMPLATES_DIR: &str = concat!(env!("OUT_DIR"), "/templates");
 
 pub mod waltzing_ui;

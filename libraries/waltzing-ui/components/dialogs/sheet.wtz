@@ -1,0 +1,182 @@
+@*
+ * Sheet — non-blocking side panel that coexists with other sheets/dialogs.
+ *
+ * Unlike `dialogs/dialog`, a sheet:
+ *   • does not render a backdrop
+ *   • does not trap focus or lock body scroll
+ *   • lets the user keep interacting with the page underneath
+ *   • can persist its open/closed state in the URL hash
+ *
+ * Designed to be used in pairs/trios (e.g. a left inspector + right
+ * debugger + main canvas, all visible together) for debugging surfaces
+ * and detail panes.
+ *
+ * Pair with `<@workspace>` if you want the main content area to push /
+ * shrink when sheets open. Standalone, a sheet floats over content as
+ * a fixed-position panel.
+ *
+ * Usage:
+ *
+ *   <button x-on:click="inspectorOpen = true">Inspector</button>
+ *
+ *   <@sheet::apply
+ *       open="inspectorOpen"
+ *       placement=Placement::Right
+ *       title="Inspector"
+ *       hash_key="inspector"
+ *       on_close="inspectorOpen = false">
+ *       … inspector body …
+ *   </@sheet::apply>
+ *
+ * If `hash_key` is set, the sheet:
+ *   • reads `#…&inspector=1&…` on init and sets open accordingly
+ *   • writes/removes the key when open changes
+ * Multiple sheets coexist via separate keys (e.g. `#inspector=1&debug=1`).
+ *@
+
+@enum Placement { Left, Right, Center }
+@enum Width     { Auto, Sm, Md, Lg, Xl }
+@enum Elevation { Flat, Raised }
+
+@fn apply(
+    open: &str,
+    title: &str,
+    placement: Placement = Placement::Right,
+    width: Width = Width::Auto,
+    elevation: Elevation = Elevation::Raised,
+    on_close: &str = "",
+    hash_key: &str = "",
+    body: @(),
+    actions: Option<@()> = None,
+) {
+    @* Width resolves per placement. Center sheets are unusual (think
+       command palette, image preview) — wider defaults than side
+       sheets, but they remain non-modal. *@
+    @let width_cls = match placement {
+        Placement::Center => match width {
+            Width::Auto => "w-full max-w-md md:max-w-lg lg:max-w-xl",
+            Width::Sm   => "w-72",
+            Width::Md   => "w-full max-w-md",
+            Width::Lg   => "w-full max-w-xl",
+            Width::Xl   => "w-full max-w-3xl",
+        },
+        _ => match width {
+            Width::Auto => "w-full md:w-80 lg:w-96",
+            Width::Sm   => "w-72",
+            Width::Md   => "w-80",
+            Width::Lg   => "w-96",
+            Width::Xl   => "w-[32rem]",
+        },
+    }
+
+    @let anchor_cls = match placement {
+        Placement::Left   => "fixed left-0 top-0 bottom-0",
+        Placement::Right  => "fixed right-0 top-0 bottom-0",
+        Placement::Center => "fixed left-1/2 -translate-x-1/2 top-12 bottom-12",
+    }
+
+    @let border_cls = match placement {
+        Placement::Left   => "border-r",
+        Placement::Right  => "border-l",
+        Placement::Center => "border rounded-lg",
+    }
+
+    @let shadow_cls = match elevation {
+        Elevation::Flat   => "",
+        Elevation::Raised => "shadow-lg",
+    }
+
+    @* Sheets sit below dialogs (z-40 vs z-50) so a modal dialog can
+       still pop above an open sheet. Multiple sheets share z-40 —
+       coexistability matters more than strict stacking. *@
+    @let sheet_cls = cn(&[
+        "z-40 flex flex-col bg-background border-border",
+        anchor_cls,
+        width_cls,
+        border_cls,
+        shadow_cls,
+    ])
+
+    @let enter_from = match placement {
+        Placement::Left   => "opacity-0 -translate-x-4",
+        Placement::Right  => "opacity-0 translate-x-4",
+        Placement::Center => "opacity-0 scale-95",
+    }
+    @let enter_to = match placement {
+        Placement::Center => "opacity-100 scale-100",
+        _ => "opacity-100 translate-x-0",
+    }
+
+    @let close_expr = if on_close.is_empty() {
+        format("{} = false", open)
+    } else {
+        on_close.to_string()
+    }
+
+    @* Hash persistence: parent owns `open`, we just write into the
+       hash on change and read once on init. Built as an x-effect so
+       the binding stays live (e.g. a button elsewhere flips `open`
+       and the URL updates). Skipped entirely when hash_key is empty.
+
+       Built via string concat rather than multi-line format!() —
+       embedded JS braces confuse the Waltzing parser. *@
+    @let hash_init = if hash_key.is_empty() {
+        String::new()
+    } else {
+        "(() => { const k='".to_string()
+            + hash_key
+            + "'; const p=new URLSearchParams(location.hash.slice(1)); if (p.get(k)==='1') { "
+            + open
+            + " = true; } })()"
+    }
+    @let hash_effect = if hash_key.is_empty() {
+        String::new()
+    } else {
+        "(() => { const k='".to_string()
+            + hash_key
+            + "'; const p=new URLSearchParams(location.hash.slice(1)); if ("
+            + open
+            + ") p.set(k,'1'); else p.delete(k); const s=p.toString(); history.replaceState(null,'',s ? '#'+s : location.pathname+location.search); })()"
+    }
+
+    <div
+        x-show=@&open
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start=@&enter_from
+        x-transition:enter-end=@&enter_to
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start=@&enter_to
+        x-transition:leave-end=@&enter_from
+        class=@sheet_cls
+        style="display: none;"
+        role="complementary"
+        aria-label=@title
+        @if !hash_init.is_empty() { x-init=@&hash_init }
+        @if !hash_effect.is_empty() { x-effect=@&hash_effect }
+    >
+        @* Header — actions slot lets callers add buttons next to close. *@
+        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-border shrink-0">
+            <h2 class="text-sm font-medium truncate flex-1">@title</h2>
+            <div class="flex items-center gap-1">
+                @if let Some(ref a) = actions { @a() }
+                <button
+                    type="button"
+                    class="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-muted"
+                    x-on:click=@&close_expr
+                    aria-label="Close panel"
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        @* Body — scrollable, no built-in footer (sheets typically don't
+           need a Cancel/Save row; their state lives in the URL or
+           streams continuously like a debugger feed). *@
+        <div class="flex-1 overflow-y-auto p-4">
+            @body()
+        </div>
+    </div>
+}

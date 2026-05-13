@@ -58,21 +58,44 @@
 
 @* Shorthand for primary button *@
 @fn primary(content: @()) {
-    <@apply variant=Variant::Primary size=Size::Default>
+    <@apply variant=@Variant::Primary size=@Size::Default>
         @content()
     </@apply>
 }
 
 @* Shorthand for secondary button *@
 @fn secondary(content: @()) {
-    <@apply variant=Variant::Secondary size=Size::Default>
+    <@apply variant=@Variant::Secondary size=@Size::Default>
         @content()
     </@apply>
 }
 
 @* Shorthand for outline button *@
 @fn outline(content: @()) {
-    <@apply variant=Variant::Outline size=Size::Default>
+    <@apply variant=@Variant::Outline size=@Size::Default>
         @content()
     </@apply>
+}
+
+@* Returns button classes for use on custom elements (e.g., with htmx or alpine attributes) *@
+@fn classes(variant: Variant, size: Size) : String = {
+    let base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
+
+    let variant_cls = match variant {
+        Variant::Primary => "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        Variant::Secondary => "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        Variant::Outline => "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+        Variant::Ghost => "hover:bg-accent hover:text-accent-foreground",
+        Variant::Destructive => "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        Variant::Link => "text-primary underline-offset-4 hover:underline",
+    };
+
+    let size_cls = match size {
+        Size::Sm => "h-8 rounded-md px-3 text-xs",
+        Size::Default => "h-9 px-4 py-2",
+        Size::Lg => "h-10 rounded-md px-8",
+        Size::Icon => "h-9 w-9",
+    };
+
+    base.to_string() + " " + variant_cls + " " + size_cls
 }

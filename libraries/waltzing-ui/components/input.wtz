@@ -23,6 +23,12 @@
     required: bool = false,
     error: Option<&str> = None,
     class: &str = "",
+    pattern: Option<&str> = None,
+    min: Option<&str> = None,
+    max: Option<&str> = None,
+    minlength: Option<u32> = None,
+    maxlength: Option<u32> = None,
+    step: Option<&str> = None,
 ) {
     @let type_str = match input_type {
         InputType::Text => { "text" }
@@ -50,6 +56,12 @@
         @if disabled { disabled }
         @if required { required }
         @if error.is_some() { aria-invalid="true" }
+        @if let Some(p) = pattern { pattern=@p }
+        @if let Some(m) = min { min=@m }
+        @if let Some(m) = max { max=@m }
+        @if let Some(n) = minlength { minlength=@n }
+        @if let Some(n) = maxlength { maxlength=@n }
+        @if let Some(s) = step { step=@s }
     />
 }
 
@@ -65,20 +77,34 @@
     error: Option<&str> = None,
     class: &str = "",
 ) {
+    @let type_str = match input_type {
+        InputType::Text => { "text" }
+        InputType::Email => { "email" }
+        InputType::Password => { "password" }
+        InputType::Number => { "number" }
+        InputType::Tel => { "tel" }
+        InputType::Url => { "url" }
+        InputType::Search => { "search" }
+    }
+
+    @let base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    @let error_cls = if error.is_some() { "border-destructive focus-visible:ring-destructive" } else { "" }
+    @let classes = [base, error_cls, class]
+
     <div class="space-y-2">
         <label for=@name class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>
-        <@apply
-            input_type=@input_type
+        <input
+            type=@type_str
             name=@name
-            value=@value
-            placeholder=@placeholder
-            disabled=@disabled
-            required=@required
-            error=@error
-            class=@class
+            class=@cn(classes)
+            @if let Some(v) = value { value=@v }
+            @if let Some(p) = placeholder { placeholder=@p }
+            @if disabled { disabled }
+            @if required { required }
+            @if error.is_some() { aria-invalid="true" }
         />
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>
@@ -88,42 +114,35 @@
 
 @* Shorthand for text input *@
 @fn text(name: &str, value: Option<&str>, placeholder: Option<&str>) {
-    <@apply
-        input_type=InputType::Text
+    @let base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    <input
+        type="text"
         name=@name
-        value=@value
-        placeholder=@placeholder
-       
-       
-       
-       
+        class=@base
+        @if let Some(v) = value { value=@v }
+        @if let Some(p) = placeholder { placeholder=@p }
     />
 }
 
 @* Shorthand for email input *@
 @fn email(name: &str, value: Option<&str>, placeholder: Option<&str>) {
-    <@apply
-        input_type=InputType::Email
+    @let base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    <input
+        type="email"
         name=@name
-        value=@value
-        placeholder=@placeholder
-       
-       
-       
-       
+        class=@base
+        @if let Some(v) = value { value=@v }
+        @if let Some(p) = placeholder { placeholder=@p }
     />
 }
 
 @* Shorthand for password input *@
 @fn password(name: &str, placeholder: Option<&str>) {
-    <@apply
-        input_type=InputType::Password
+    @let base = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    <input
+        type="password"
         name=@name
-       
-        placeholder=@placeholder
-       
-       
-       
-       
+        class=@base
+        @if let Some(p) = placeholder { placeholder=@p }
     />
 }

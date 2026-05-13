@@ -31,9 +31,10 @@
 ) {
     @let base = "relative w-full"
 
+    @let style_value = format("aspect-ratio: {};", ratio)
     <div
         class=@cn(&[base, class])
-        style="aspect-ratio: @ratio;"
+        style=@style_value
     >
         <div class="absolute inset-0">
             @content()

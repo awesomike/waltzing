@@ -1,28 +1,11 @@
 @*
  * Utility functions for waltzing-ui components
- * Inspired by shadcn/ui's cn() utility
+ *
+ * Note: cn, class_if, and class_toggle are built-in waltzing helpers
+ * that accept both &str and String via AsRef<str>. No need to redefine them.
+ *
+ * Built-in helpers available:
+ *   @cn(&["base-class", conditional_class, "always-class"])
+ *   @class_if(is_active, "active")
+ *   @class_toggle(is_open, "open", "closed")
  *@
-
-@*
- * Concatenate class names, filtering out empty strings
- * Usage: @cn(["base-class", conditional_class, "always-class"])
- *@
-@fn cn(classes: Vec<&str>) {
-    @(classes.iter().filter(|s| !s.is_empty()).copied().collect::<Vec<_>>().join(" "))
-}
-
-@*
- * Conditionally include a class
- * Usage: @class_if(is_active, "active")
- *@
-@fn class_if(condition: bool, class: &str) {
-    @(if condition { class } else { "" })
-}
-
-@*
- * Choose between two classes based on condition
- * Usage: @class_toggle(is_open, "open", "closed")
- *@
-@fn class_toggle(condition: bool, if_true: &str, if_false: &str) {
-    @(if condition { if_true } else { if_false })
-}

@@ -15,6 +15,7 @@
  * <@toggle_group::single name="align" items=@items selected=@Some("left") />
  *@
 
+@use waltzing::escape::attr
 
 @* Item struct for data-driven usage *@
 @struct ToggleItem {
@@ -60,19 +61,31 @@
         Size::Default => "default",
         Size::Lg => "lg",
     }
+    @let classes = [group_base, variant_cls, class]
+    @let sel_esc = attr(sel)
+    @let name_esc = attr(name)
+    @let variant_esc = attr(variant_str)
+    @let size_esc = attr(size_str)
+    @let x_data = format("{{ selected: '{}', toggleName: '{}', variant: '{}', size: '{}', mode: 'single' }}", sel_esc, name_esc, variant_esc, size_esc)
 
     <div
         role="group"
-        class="@cn(&[@group_base, @variant_cls, @class])"
-        x-data="{ selected: '@sel', toggleName: '@name', variant: '@variant_str', size: '@size_str', mode: 'single' }"
+        class=@cn(classes)
+        x-data=@x_data
     >
         @if items.is_empty() {
             @content()
         } else {
-            @for it in items {
-                <@item value=@it.value icon=@it.icon.as_deref() disabled=@it.disabled>
-                    @it.label
-                </@item>
+            @for it in &items {
+                @if let Some(ic) = &it.icon {
+                    <@item value=@&it.value icon=@ic.as_str() disabled=@it.disabled>
+                        @&it.label
+                    </@item>
+                } else {
+                    <@item value=@&it.value disabled=@it.disabled>
+                        @&it.label
+                    </@item>
+                }
             }
         }
         <input type="hidden" name=@name :value="selected || ''" />
@@ -94,7 +107,6 @@
         Variant::Default => "bg-transparent",
         Variant::Outline => "border border-input",
     }
-    @let selected_json = format("[{}]", selected.iter().map(|s| format("'{}'", s)).collect::<Vec<String>>().join(", "))
     @let variant_str = match variant {
         Variant::Default => "default",
         Variant::Outline => "outline",
@@ -104,19 +116,32 @@
         Size::Default => "default",
         Size::Lg => "lg",
     }
+    @let classes = [group_base, variant_cls, class]
 
     <div
         role="group"
-        class="@cn(&[@group_base, @variant_cls, @class])"
-        x-data="{ selected: @selected_json, toggleName: '@name', variant: '@variant_str', size: '@size_str', mode: 'multiple' }"
+        class=@cn(classes)
+        x-data=@```json {
+            selected: @selected,
+            toggleName: @name,
+            variant: @variant_str,
+            size: @size_str,
+            mode: "multiple"
+        } ```@
     >
         @if items.is_empty() {
             @content()
         } else {
-            @for it in items {
-                <@item value=@it.value icon=@it.icon.as_deref() disabled=@it.disabled>
-                    @it.label
-                </@item>
+            @for it in &items {
+                @if let Some(ic) = &it.icon {
+                    <@item value=@&it.value icon=@ic.as_str() disabled=@it.disabled>
+                        @&it.label
+                    </@item>
+                } else {
+                    <@item value=@&it.value disabled=@it.disabled>
+                        @&it.label
+                    </@item>
+                }
             }
         }
         <input type="hidden" name=@name :value="JSON.stringify(selected)" />
@@ -131,32 +156,38 @@
     content: @(),
 ) {
     @let base = "inline-flex items-center justify-center text-sm font-medium transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+    @let btn_cls = cn(&[base, "first:rounded-l-md last:rounded-r-md [&:not(:first-child):not(:last-child)]:rounded-none"])
+    @let value_esc = attr(value)
+    @let class_expr = format(r#"{{
+        'h-8 px-2.5 min-w-8': size === 'sm',
+        'h-9 px-3 min-w-9': size === 'default',
+        'h-10 px-3 min-w-10': size === 'lg',
+        'bg-accent text-accent-foreground': mode === 'single' ? selected === '{}' : selected.includes('{}'),
+        'bg-transparent': mode === 'single' ? selected !== '{}' : !selected.includes('{}')
+    }}"#, value_esc, value_esc, value_esc, value_esc)
+    @let aria_pressed = format("mode === 'single' ? (selected === '{}' ? 'true' : 'false') : (selected.includes('{}') ? 'true' : 'false')", value_esc, value_esc)
+    @let data_state = format("mode === 'single' ? (selected === '{}' ? 'on' : 'off') : (selected.includes('{}') ? 'on' : 'off')", value_esc, value_esc)
+    @let click_handler = format(r#"
+        if (mode === 'single') {{
+            selected = '{}';
+        }} else {{
+            selected.includes('{}')
+                ? selected = selected.filter(v => v !== '{}')
+                : selected.push('{}');
+        }}
+        $dispatch('change', {{ name: toggleName, value: selected }});
+    "#, value_esc, value_esc, value_esc, value_esc)
 
     <button
         type="button"
         data-value=@value
-        class="@base first:rounded-l-md last:rounded-r-md [&:not(:first-child):not(:last-child)]:rounded-none"
-        :class="{
-            'h-8 px-2.5 min-w-8': size === 'sm',
-            'h-9 px-3 min-w-9': size === 'default',
-            'h-10 px-3 min-w-10': size === 'lg',
-            'bg-accent text-accent-foreground': mode === 'single' ? selected === '@value' : selected.includes('@value'),
-            'bg-transparent': mode === 'single' ? selected !== '@value' : !selected.includes('@value')
-        }"
+        class=@btn_cls
+        :class=@class_expr
         :role="mode === 'single' ? 'radio' : 'checkbox'"
-        :aria-pressed="mode === 'single' ? (selected === '@value' ? 'true' : 'false') : (selected.includes('@value') ? 'true' : 'false')"
-        :data-state="mode === 'single' ? (selected === '@value' ? 'on' : 'off') : (selected.includes('@value') ? 'on' : 'off')"
+        :aria-pressed=@aria_pressed
+        :data-state=@data_state
         @if disabled { disabled aria-disabled="true" }
-        x-on:click="
-            if (mode === 'single') {
-                selected = '@value';
-            } else {
-                selected.includes('@value')
-                    ? selected = selected.filter(v => v !== '@value')
-                    : selected.push('@value');
-            }
-            $dispatch('change', { name: toggleName, value: selected });
-        "
+        x-on:click=@click_handler
     >
         @if let Some(ic) = icon {
             <span class="mr-2">@ic</span>
@@ -172,9 +203,16 @@
     class: &str = "",
     content: @(),
 ) {
-    <@single name=@name selected=@selected class=@class>
-        @content()
-    </@single>
+    @let sel = selected.unwrap_or("")
+    @if !sel.is_empty() {
+        <@single name=@name selected=@sel class=@class>
+            @content()
+        </@single>
+    } else {
+        <@single name=@name class=@class>
+            @content()
+        </@single>
+    }
 }
 
 @* Convenience: simple multiple with defaults - pass empty vec for no selection *@
@@ -196,9 +234,16 @@
     class: &str = "",
     content: @(),
 ) {
-    <@single name=@name selected=@selected variant=Variant::Outline class=@class>
-        @content()
-    </@single>
+    @let sel = selected.unwrap_or("")
+    @if !sel.is_empty() {
+        <@single name=@name selected=@sel variant=@Variant::Outline class=@class>
+            @content()
+        </@single>
+    } else {
+        <@single name=@name variant=@Variant::Outline class=@class>
+            @content()
+        </@single>
+    }
 }
 
 @* Convenience: outline multiple *@
@@ -208,7 +253,7 @@
     class: &str = "",
     content: @(),
 ) {
-    <@multiple name=@name selected=@selected variant=Variant::Outline class=@class>
+    <@multiple name=@name selected=@selected variant=@Variant::Outline class=@class>
         @content()
     </@multiple>
 }

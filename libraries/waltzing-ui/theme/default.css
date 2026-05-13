@@ -1,73 +1,14 @@
 /**
- * waltzing-ui default theme
- * CSS variables for light and dark mode
+ * waltzing-ui theme utilities
+ *
+ * Maps CSS variable-based semantic tokens to utility classes used by
+ * waltzing-ui components (layouts, dashboard, auth, sidebar, settings, etc.).
+ *
+ * Color values come from the project's globals.css (:root / .dark).
+ * This file bridges the CSS variable theme with Tailwind-style class names.
  */
 
-:root {
-  /* Light mode colors */
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-
-  --radius: 0.5rem;
-}
-
-.dark {
-  /* Dark mode colors */
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
-}
-
-/* Base styles */
+/* ====== Base ====== */
 * {
   border-color: hsl(var(--border));
 }
@@ -78,53 +19,120 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
-/* Utility classes for CSS variables */
+/* ====== Background ====== */
 .bg-background { background-color: hsl(var(--background)); }
+.bg-background\/95 { background-color: hsl(var(--background) / 0.95); }
 .bg-foreground { background-color: hsl(var(--foreground)); }
 .bg-card { background-color: hsl(var(--card)); }
+.bg-popover { background-color: hsl(var(--popover)); }
 .bg-primary { background-color: hsl(var(--primary)); }
+.bg-primary\/10 { background-color: hsl(var(--primary) / 0.1); }
+.bg-primary\/20 { background-color: hsl(var(--primary) / 0.2); }
 .bg-primary\/90 { background-color: hsl(var(--primary) / 0.9); }
 .bg-secondary { background-color: hsl(var(--secondary)); }
 .bg-secondary\/80 { background-color: hsl(var(--secondary) / 0.8); }
 .bg-muted { background-color: hsl(var(--muted)); }
+.bg-muted\/40 { background-color: hsl(var(--muted) / 0.4); }
 .bg-muted\/50 { background-color: hsl(var(--muted) / 0.5); }
 .bg-accent { background-color: hsl(var(--accent)); }
 .bg-destructive { background-color: hsl(var(--destructive)); }
+.bg-destructive\/5 { background-color: hsl(var(--destructive) / 0.05); }
 .bg-destructive\/90 { background-color: hsl(var(--destructive) / 0.9); }
-.bg-popover { background-color: hsl(var(--popover)); }
+.bg-border { background-color: hsl(var(--border)); }
 
+/* Sidebar */
+.bg-sidebar { background-color: hsl(var(--sidebar-background)); }
+.bg-sidebar-accent { background-color: hsl(var(--sidebar-accent)); }
+.bg-sidebar-border { background-color: hsl(var(--sidebar-border)); }
+
+/* ====== Text ====== */
 .text-foreground { color: hsl(var(--foreground)); }
 .text-card-foreground { color: hsl(var(--card-foreground)); }
+.text-popover-foreground { color: hsl(var(--popover-foreground)); }
 .text-primary { color: hsl(var(--primary)); }
 .text-primary-foreground { color: hsl(var(--primary-foreground)); }
 .text-secondary-foreground { color: hsl(var(--secondary-foreground)); }
 .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+.text-muted-foreground\/50 { color: hsl(var(--muted-foreground) / 0.5); }
+.text-muted-foreground\/70 { color: hsl(var(--muted-foreground) / 0.7); }
 .text-accent-foreground { color: hsl(var(--accent-foreground)); }
 .text-destructive { color: hsl(var(--destructive)); }
 .text-destructive-foreground { color: hsl(var(--destructive-foreground)); }
-.text-popover-foreground { color: hsl(var(--popover-foreground)); }
 
+/* Sidebar */
+.text-sidebar-foreground { color: hsl(var(--sidebar-foreground)); }
+.text-sidebar-primary { color: hsl(var(--sidebar-primary)); }
+.text-sidebar-primary-foreground { color: hsl(var(--sidebar-primary-foreground)); }
+.text-sidebar-accent-foreground { color: hsl(var(--sidebar-accent-foreground)); }
+
+/* ====== Border ====== */
+.border-border { border-color: hsl(var(--border)); }
+.border-border\/50 { border-color: hsl(var(--border) / 0.5); }
 .border-input { border-color: hsl(var(--input)); }
+.border-primary { border-color: hsl(var(--primary)); }
+.border-primary\/50 { border-color: hsl(var(--primary) / 0.5); }
+.border-muted { border-color: hsl(var(--muted)); }
 .border-destructive { border-color: hsl(var(--destructive)); }
+.border-destructive\/50 { border-color: hsl(var(--destructive) / 0.5); }
+.border-background { border-color: hsl(var(--background)); }
 
+/* Sidebar */
+.border-sidebar-border { border-color: hsl(var(--sidebar-border)); }
+
+/* ====== Ring ====== */
 .ring-ring { --tw-ring-color: hsl(var(--ring)); }
+.ring-border { --tw-ring-color: hsl(var(--border)); }
+.ring-destructive { --tw-ring-color: hsl(var(--destructive)); }
 .ring-offset-background { --tw-ring-offset-color: hsl(var(--background)); }
 
-/* Focus ring */
-.focus-visible\:ring-ring:focus-visible {
-  --tw-ring-color: hsl(var(--ring));
-}
+/* ====== Hover states ====== */
+.hover\:bg-accent:hover { background-color: hsl(var(--accent)); }
+.hover\:bg-muted:hover { background-color: hsl(var(--muted)); }
+.hover\:bg-muted\/50:hover { background-color: hsl(var(--muted) / 0.5); }
+.hover\:bg-primary:hover { background-color: hsl(var(--primary)); }
+.hover\:bg-primary\/80:hover { background-color: hsl(var(--primary) / 0.8); }
+.hover\:bg-primary\/90:hover { background-color: hsl(var(--primary) / 0.9); }
+.hover\:bg-secondary:hover { background-color: hsl(var(--secondary)); }
+.hover\:bg-secondary\/80:hover { background-color: hsl(var(--secondary) / 0.8); }
+.hover\:bg-sidebar-accent:hover { background-color: hsl(var(--sidebar-accent)); }
+.hover\:bg-destructive\/80:hover { background-color: hsl(var(--destructive) / 0.8); }
+.hover\:bg-destructive\/90:hover { background-color: hsl(var(--destructive) / 0.9); }
+.hover\:text-accent-foreground:hover { color: hsl(var(--accent-foreground)); }
+.hover\:text-foreground:hover { color: hsl(var(--foreground)); }
+.hover\:text-foreground\/80:hover { color: hsl(var(--foreground) / 0.8); }
+.hover\:text-muted-foreground:hover { color: hsl(var(--muted-foreground)); }
+.hover\:text-primary:hover { color: hsl(var(--primary)); }
+.hover\:text-primary-foreground:hover { color: hsl(var(--primary-foreground)); }
+.hover\:text-sidebar-accent-foreground:hover { color: hsl(var(--sidebar-accent-foreground)); }
+.hover\:border-accent:hover { border-color: hsl(var(--accent)); }
+.hover\:border-border:hover { border-color: hsl(var(--border)); }
 
-/* Progress bar indeterminate animation */
+/* ====== Focus states ====== */
+.focus\:bg-accent:focus { background-color: hsl(var(--accent)); }
+.focus\:bg-primary:focus { background-color: hsl(var(--primary)); }
+.focus\:text-accent-foreground:focus { color: hsl(var(--accent-foreground)); }
+.focus\:text-primary-foreground:focus { color: hsl(var(--primary-foreground)); }
+.focus-visible\:ring-ring:focus-visible { --tw-ring-color: hsl(var(--ring)); }
+.focus-visible\:ring-sidebar-ring:focus-visible { --tw-ring-color: hsl(var(--sidebar-ring)); }
+.focus-visible\:ring-offset-background:focus-visible { --tw-ring-offset-color: hsl(var(--background)); }
+
+/* ====== Data attribute states ====== */
+.data-\[state\=selected\]\:bg-muted[data-state="selected"] { background-color: hsl(var(--muted)); }
+.data-\[state\=active\]\:bg-background[data-state="active"] { background-color: hsl(var(--background)); }
+.data-\[state\=active\]\:text-foreground[data-state="active"] { color: hsl(var(--foreground)); }
+
+/* ====== Even child ====== */
+.even\:bg-muted:nth-child(2n) { background-color: hsl(var(--muted)); }
+
+/* ====== Progress bar ====== */
 @keyframes progress-indeterminate {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(400%);
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
 }
 
 .animate-progress-indeterminate {
   animation: progress-indeterminate 1.5s ease-in-out infinite;
 }
+
+/* ====== Alpine.js cloak ====== */
+[x-cloak] { display: none !important; }

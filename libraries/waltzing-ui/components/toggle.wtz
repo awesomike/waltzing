@@ -5,12 +5,13 @@
  * Usage:
  *   @import ui/components/toggle.wtz as toggle
  *
- *   <@toggle::apply name="bold" pressed=false variant=toggle::Variant::Default size=toggle::Size::Default>B</@toggle::apply>
+ *   <@toggle::apply name="bold" pressed=false variant=@toggle::Variant::Default size=@toggle::Size::Default>B</@toggle::apply>
  *   <@toggle::simple name="italic">I</@toggle::simple>
  *   <@toggle::outline name="underline" pressed=true>U</@toggle::outline>
  *   <@toggle::icon name="star">★</@toggle::icon>
  *@
 
+@use waltzing::escape::attr
 
 @enum Variant {
     Default,
@@ -50,6 +51,8 @@
 
     @let extra_class = class
     @let classes = [base, variant_cls, size_cls, extra_class]
+    @let name_esc = attr(name)
+    @let click_handler = format("pressed = !pressed; $dispatch('input', {{ name: '{}', value: pressed }})", name_esc)
 
     <button
         type="button"
@@ -61,7 +64,7 @@
         data-state=@data_state_val
         @if disabled { disabled aria-disabled="true" }
         x-data=@```json { pressed: @pressed } ```@
-        x-on:click="pressed = !pressed; $dispatch('input', { name: '@name', value: pressed })"
+        x-on:click=@click_handler
         :aria-pressed="pressed.toString()"
         :data-state="pressed ? 'on' : 'off'"
         :class="pressed ? 'bg-accent text-accent-foreground' : ''"
@@ -75,10 +78,10 @@
 @fn simple(name: &str, content: @()) {
     <@apply
         name=@name
-        pressed=false
+        pressed=@false
        
-        variant=Variant::Default
-        size=Size::Default
+        variant=@Variant::Default
+        size=@Size::Default
        
     >
         @content()
@@ -91,8 +94,8 @@
         name=@name
         pressed=@pressed
        
-        variant=Variant::Outline
-        size=Size::Default
+        variant=@Variant::Outline
+        size=@Size::Default
        
     >
         @content()
@@ -101,13 +104,13 @@
 
 @* Toggle sized for icons *@
 @fn icon(name: &str, content: @()) {
-    @let icon_class = Some("h-9 w-9 p-0")
+    @let icon_class = "h-9 w-9 p-0"
     <@apply
         name=@name
-        pressed=false
-       
-        variant=Variant::Default
-        size=Size::Default
+        pressed=@false
+
+        variant=@Variant::Default
+        size=@Size::Default
         class=@icon_class
     >
         @content()
@@ -119,9 +122,9 @@
     <@apply
         name=@name
         pressed=@pressed
-        disabled=true
-        variant=Variant::Default
-        size=Size::Default
+        disabled=@true
+        variant=@Variant::Default
+        size=@Size::Default
        
     >
         @content()
@@ -132,10 +135,10 @@
 @fn sm(name: &str, content: @()) {
     <@apply
         name=@name
-        pressed=false
+        pressed=@false
        
-        variant=Variant::Default
-        size=Size::Sm
+        variant=@Variant::Default
+        size=@Size::Sm
        
     >
         @content()
@@ -146,10 +149,10 @@
 @fn lg(name: &str, content: @()) {
     <@apply
         name=@name
-        pressed=false
+        pressed=@false
        
-        variant=Variant::Default
-        size=Size::Lg
+        variant=@Variant::Default
+        size=@Size::Lg
        
     >
         @content()

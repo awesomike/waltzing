@@ -7,14 +7,14 @@
  *   @import components/tooltip.wtz as tooltip
  *
  *   <@tooltip::apply
- *       side=tooltip::Side::Top
+ *       side=@tooltip::Side::Top
  *       text="This is helpful information"
  *       trigger=@{ <button>Hover me</button> }
  *   />
  *
  *   Or with rich content:
  *   <@tooltip::rich
- *       side=tooltip::Side::Bottom
+ *       side=@tooltip::Side::Bottom
  *       trigger=@{ <span>Info</span> }
  *       content=@{ <strong>Bold</strong> tooltip content }
  *   />
@@ -39,7 +39,7 @@
     text: &str = "",
     trigger: @() = @{},
 ) {
-    <@rich side=@side align=Align::Center trigger=@trigger>
+    <@rich side=@side align=@Align::Center trigger=@trigger>
         @text
     </@rich>
 }
@@ -51,25 +51,25 @@
     trigger: @() = @{},
     content: @() = @{},
 ) {
-    @let side_type = match side {
+    @let _side_type = match side {
         Side::Top => "top",
         Side::Bottom => "bottom",
         Side::Left => "left",
         Side::Right => "right",
     }
 
-    @let align_type = match align {
+    @let _align_type = match align {
         Align::Start => "start",
         Align::Center => "center",
         Align::End => "end",
     }
 
-    <div class="inline-block" x-data="{
+    <div class="inline-block" x-data=@```json {
         show: false,
         pos: { x: 0, y: 0 },
-        flipTop: '@side_type' === 'top',
-        side: '@side_type',
-        align: '@align_type',
+        flipTop: @_side_type === 'top',
+        side: @_side_type,
+        align: @_align_type,
         updatePos() {
             const trigger = this.$refs.trigger;
             if (!trigger) return;
@@ -99,13 +99,13 @@
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
         }
-    }" x-init="init()" @destroy="destroy()">
+    } ```@ x-init="init()" @@destroy="destroy()">
         <div
             x-ref="trigger"
-            @mouseenter="show = true; $nextTick(() => updatePos())"
-            @mouseleave="show = false"
-            @focus="show = true; $nextTick(() => updatePos())"
-            @blur="show = false"
+            @@mouseenter="show = true; $nextTick(() => updatePos())"
+            @@mouseleave="show = false"
+            @@focus="show = true; $nextTick(() => updatePos())"
+            @@blur="show = false"
             aria-describedby="tooltip"
         >
             @trigger()
@@ -138,7 +138,7 @@
 @fn delayed(
     side: Side = Side::Top,
     text: &str = "",
-    delay_ms: u32 = 300,
+    delay_ms: u32 = 300u32,
     trigger: @() = @{},
 ) {
     @let side_cls = {
@@ -163,12 +163,14 @@
 
     @let arrow_cls = cn(&["absolute w-0 h-0 border-4", arrow_side_cls])
 
+    @let mouseenter_handler = format("timeout = setTimeout(() => show = true, {})", delay_ms)
+    @let focus_handler = format("timeout = setTimeout(() => show = true, {})", delay_ms)
     <div class="relative inline-block" x-data="{ show: false, timeout: null }">
         <div
-            @mouseenter="timeout = setTimeout(() => show = true, @delay_ms)"
-            @mouseleave="clearTimeout(timeout); show = false"
-            @focus="timeout = setTimeout(() => show = true, @delay_ms)"
-            @blur="clearTimeout(timeout); show = false"
+            @@mouseenter=@mouseenter_handler
+            @@mouseleave="clearTimeout(timeout); show = false"
+            @@focus=@focus_handler
+            @@blur="clearTimeout(timeout); show = false"
             aria-describedby="tooltip"
         >
             @trigger()
@@ -195,20 +197,20 @@
 
 @* Shorthand for top tooltip *@
 @fn top(text: &str = "", trigger: @() = @{}) {
-    <@apply side=Side::Top text=@text trigger=@trigger />
+    <@apply side=@Side::Top text=@text trigger=@trigger />
 }
 
 @* Shorthand for bottom tooltip *@
 @fn bottom(text: &str = "", trigger: @() = @{}) {
-    <@apply side=Side::Bottom text=@text trigger=@trigger />
+    <@apply side=@Side::Bottom text=@text trigger=@trigger />
 }
 
 @* Shorthand for left tooltip *@
 @fn left(text: &str = "", trigger: @() = @{}) {
-    <@apply side=Side::Left text=@text trigger=@trigger />
+    <@apply side=@Side::Left text=@text trigger=@trigger />
 }
 
 @* Shorthand for right tooltip *@
 @fn right(text: &str = "", trigger: @() = @{}) {
-    <@apply side=Side::Right text=@text trigger=@trigger />
+    <@apply side=@Side::Right text=@text trigger=@trigger />
 }

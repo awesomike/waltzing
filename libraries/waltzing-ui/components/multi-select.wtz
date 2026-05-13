@@ -1,0 +1,364 @@
+@*
+ * Multi-select component
+ * A collapsible searchable checkbox panel with Alpine.js.
+ * Shows selected items as removable pills; expands to show search + options on click.
+ *
+ * Usage:
+ *
+ * 1. Data-driven:
+ * <@multi_select::apply name="model_codes" options=@options
+ *     search_placeholder=@Some("Search models...") />
+ *
+ * 2. Declarative (with children):
+ * <@multi_select::apply name="model_codes" search_placeholder=@Some("Search...")>
+ *     <@multi_select::option value="gpt-4" selected=true>GPT-4</@multi_select::option>
+ *     <@multi_select::option value="claude" logo_url=@Some("/img/claude.png")>Claude</@multi_select::option>
+ * </@multi_select::apply>
+ *@
+
+@use waltzing::escape::attr
+
+@struct MultiSelectOption {
+    value: String,
+    label: String,
+    selected: bool,
+    logo_url: Option<String>,
+    group: Option<String>,
+}
+
+@fn apply(
+    name: &str,
+    options: Vec<MultiSelectOption> = Vec::new(),
+    search_placeholder: Option<&str> = None,
+    placeholder: Option<&str> = None,
+    empty_message: Option<&str> = None,
+    class: &str = "",
+    max_height: &str = "max-h-64",
+    content: @() = @() {},
+) {
+    @let name_esc = attr(name)
+    @let search_ph = attr(search_placeholder.unwrap_or("Search..."))
+    @let placeholder_label = placeholder.unwrap_or("Select items...")
+    @let empty_msg = empty_message.unwrap_or("No options available")
+
+    @let initial_selected = {
+        let vals: Vec<&str> = options.iter().filter(|o| o.selected).map(|o| o.value.as_str()).collect();
+        vals.join(",")
+    }
+    @let initial_esc = attr(&initial_selected)
+
+    @let x_data = format(r#"{{
+        open: false,
+        search: '',
+        activeGroup: '',
+        groups: [],
+        selectedSet: new Set(),
+        _labelMap: {{}},
+        _hiddenInput: null,
+        _optionsContainer: null,
+        _observer: null,
+        init() {{
+            this._hiddenInput = this.$el.querySelector('input[type="hidden"][name="{}"]');
+            this._optionsContainer = this.$refs.optionsContainer;
+            var initial = '{}';
+            if (initial) initial.split(',').forEach(function(v) {{ if (v) this.selectedSet.add(v) }}.bind(this));
+            this.collectAndSync();
+            if (this._optionsContainer) {{
+                this._observer = new MutationObserver(function() {{ this.collectAndSync() }}.bind(this));
+                this._observer.observe(this._optionsContainer, {{ childList: true, subtree: true }});
+            }}
+        }},
+        destroy() {{
+            if (this._observer) this._observer.disconnect();
+        }},
+        collectAndSync() {{
+            this.$nextTick(function() {{
+                var container = this._optionsContainer;
+                if (!container) return;
+                var existing = new Set(this.selectedSet);
+                var available = new Set();
+                var groupSet = new Set();
+                var labels = {{}};
+                container.querySelectorAll('[data-value]').forEach(function(el) {{
+                    var v = el.dataset.value;
+                    available.add(v);
+                    labels[v] = el.dataset.label || el.textContent.trim();
+                    if (el.dataset.group) groupSet.add(el.dataset.group);
+                    if (el.dataset.selected === 'true' && !existing.has(v)) {{
+                        this.selectedSet.add(v);
+                    }}
+                }}.bind(this));
+                this.selectedSet = new Set(Array.from(this.selectedSet).filter(function(v) {{ return available.has(v) }}));
+                this._labelMap = labels;
+                this.groups = Array.from(groupSet).sort();
+                this.syncHiddenInput();
+            }}.bind(this));
+        }},
+        toggle(value) {{
+            if (this.selectedSet.has(value)) {{
+                this.selectedSet.delete(value);
+            }} else {{
+                this.selectedSet.add(value);
+            }}
+            this.selectedSet = new Set(this.selectedSet);
+            this.syncHiddenInput();
+        }},
+        isSelected(value) {{
+            return this.selectedSet.has(value);
+        }},
+        syncHiddenInput() {{
+            if (!this._hiddenInput) return;
+            this._hiddenInput.value = Array.from(this.selectedSet).join(',');
+            this._hiddenInput.dispatchEvent(new Event('change', {{ bubbles: true }}));
+        }},
+        matchesSearch(label) {{
+            if (!this.search) return true;
+            return label.toLowerCase().indexOf(this.search.toLowerCase()) !== -1;
+        }},
+        matchesGroup(group) {{
+            if (!this.activeGroup) return true;
+            return group === this.activeGroup;
+        }},
+        setGroup(g) {{
+            this.activeGroup = this.activeGroup === g ? '' : g;
+        }},
+        get selectedCount() {{
+            return this.selectedSet.size;
+        }},
+        get selectedItems() {{
+            var m = this._labelMap;
+            return Array.from(this.selectedSet).map(function(v) {{ return {{ value: v, label: m[v] || v }} }});
+        }},
+        clearAll() {{
+            this.selectedSet = new Set();
+            this.syncHiddenInput();
+        }},
+        // Select every option currently visible — i.e. matching the
+        // active search + group filters. Bulk-selecting OUTSIDE the
+        // visible set would be surprising (the user can't see what
+        // they're picking up); restricting to visible makes "Select
+        // all" a refinable batch action: type a filter, hit Select
+        // all, and only the filtered subset gets added.
+        selectAllVisible() {{
+            if (!this._optionsContainer) return;
+            var self = this;
+            this._optionsContainer.querySelectorAll('[data-value]').forEach(function(el) {{
+                var label = el.dataset.label || el.textContent.trim();
+                var group = el.dataset.group || '';
+                if (self.matchesSearch(label) && self.matchesGroup(group)) {{
+                    self.selectedSet.add(el.dataset.value);
+                }}
+            }});
+            this.selectedSet = new Set(this.selectedSet);
+            this.syncHiddenInput();
+        }},
+        closePanel() {{
+            this.open = false;
+            this.search = '';
+        }},
+        openPanel() {{
+            this.open = true;
+            this.$nextTick(function() {{
+                var input = this.$el.querySelector('input[type="text"]');
+                if (input) input.focus();
+            }}.bind(this));
+        }}
+    }}"#, name_esc, initial_esc)
+
+    <div class=@cn(&["relative", class]) x-data=@x_data @destroy="destroy()">
+        @* Hidden input for form submission *@
+        <input type="hidden" name=@name value=@&initial_selected />
+
+        <div class="rounded-md border bg-background">
+            @* Collapsed (display) state. Shows the current selection as
+               pills with per-pill ✕ to deselect inline. A clear-all ✕
+               sits to the left of a chevron-down that opens the picker.
+               Clicking anywhere on the row that isn't a pill ✕ or the
+               clear-all button opens the picker — matches the typical
+               dropdown affordance. Pills' click handlers use
+               `.stop.prevent` so deselecting doesn't bubble into the
+               opener. *@
+            <div x-show="!open"
+                 x-on:click="openPanel()"
+                 role="button"
+                 tabindex="0"
+                 x-on:keydown.enter.prevent="openPanel()"
+                 x-on:keydown.space.prevent="openPanel()"
+                 class="flex items-center gap-2 px-3 py-2 min-h-[2.25rem] cursor-pointer hover:bg-muted/30 transition-colors">
+                @* Pills / placeholder. Pills are tag-shaped; each carries
+                   a per-pill ✕ button that calls `toggle(value)` to
+                   deselect. `.stop` on the click event keeps the
+                   container's `openPanel()` from firing simultaneously. *@
+                <div class="flex flex-wrap gap-1 items-center flex-1 min-w-0">
+                    <template x-for="item in selectedItems" :key="item.value">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-md bg-primary/10 text-foreground border border-primary/20">
+                            <span x-text="item.label" class="truncate max-w-[12rem]"></span>
+                            <button type="button"
+                                    x-on:click.stop.prevent="toggle(item.value)"
+                                    class="text-muted-foreground hover:text-foreground transition-colors"
+                                    aria-label="Remove">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                                </svg>
+                            </button>
+                        </span>
+                    </template>
+                    @* Placeholder, visible only when no selections. The
+                       label is a static template literal, not an Alpine
+                       expression — using `x-text` here would try to
+                       evaluate "Select items..." as JS and choke. *@
+                    <span x-show="selectedCount === 0"
+                          class="text-sm text-muted-foreground">@placeholder_label</span>
+                </div>
+                @* Clear-all ✕ — only when at least one item is selected.
+                   `.stop` to avoid re-opening the picker. *@
+                <button type="button"
+                        x-show="selectedCount > 0"
+                        x-on:click.stop.prevent="clearAll()"
+                        class="shrink-0 text-muted-foreground hover:text-foreground transition-colors p-1"
+                        aria-label="Clear all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                    </svg>
+                </button>
+                @* Chevron-down — affordance for "this is a dropdown." *@
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 opacity-50">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </div>
+
+            @* Expanded state: search + group chips + options + footer.
+               Click-outside still closes (covers loose-mouse dismissal)
+               but the footer's Done button is the primary "I'm done"
+               affordance so users don't have to find a stray click
+               target. Escape also closes via keydown.escape. *@
+            <div x-show="open" x-cloak
+                 x-on:click.outside="closePanel()"
+                 x-on:keydown.escape.window="if (open) closePanel()">
+                @* Search bar — no inline close button anymore; the
+                   footer's Done is the explicit dismiss. *@
+                <div class="flex items-center border-b px-3 py-2 ">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4 shrink-0 opacity-50">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                    <input
+                        type="text"
+                        x-model="search"
+                        class="flex h-9 w-full bg-transparent py-2 rounded text-sm outline-none placeholder:text-muted-foreground"
+                        placeholder=@search_ph
+                    />
+                    @* Quick search-clear button — only visible when the
+                       user has typed something. Distinct from the
+                       footer's "Clear all" (that one drops selections,
+                       this one drops the filter). *@
+                    <button type="button"
+                        x-show="search"
+                        x-on:click="search = ''"
+                        class="ml-2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                        aria-label="Clear search">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                @* Group filter chips *@
+                <div x-show="groups.length > 1" x-cloak class="flex flex-wrap gap-1 border-b px-3 py-2">
+                    <button type="button" x-on:click="setGroup('')"
+                        x-bind:class="!activeGroup ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors">All</button>
+                    <template x-for="g in groups" x-bind:key="g">
+                        <button type="button" x-on:click="setGroup(g)"
+                            x-bind:class="activeGroup === g ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'"
+                            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors"
+                            x-text="g"></button>
+                    </template>
+                </div>
+
+                @* Options container *@
+                <div x-ref="optionsContainer" class=@cn(&["overflow-y-auto p-1", max_height])>
+                    @if options.is_empty() {
+                        @content()
+                    } else {
+                        @for opt in &options {
+                            <@option value=@&opt.value selected=@opt.selected logo_url=@opt.logo_url.as_deref() group=@opt.group.as_deref()>
+                                @&opt.label
+                            </@option>
+                        }
+                    }
+                    <p x-show="!$refs.optionsContainer?.querySelector('[data-value]')"
+                        class="text-sm text-muted-foreground p-2">@empty_msg</p>
+                </div>
+
+                @* Footer action bar — explicit Select all / Clear all /
+                   Done so the user doesn't have to find an empty area
+                   to click outside. Selection-count text on the left
+                   acts as a live status indicator. Buttons stay
+                   text-only and small so they don't dominate the
+                   picker UI. *@
+                <div class="flex items-center justify-between border-t px-3 py-2 gap-2">
+                    <span class="text-xs text-muted-foreground"
+                          x-text="selectedCount + ' selected'"></span>
+                    <div class="flex items-center gap-1">
+                        <button type="button"
+                            x-on:click="selectAllVisible()"
+                            class="text-xs px-2 py-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                            Select all
+                        </button>
+                        <button type="button"
+                            x-on:click="clearAll()"
+                            x-bind:disabled="selectedCount === 0"
+                            class="text-xs px-2 py-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+                            Clear all
+                        </button>
+                        <button type="button"
+                            x-on:click="closePanel()"
+                            class="text-xs px-3 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                            Done
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* Individual multi-select option *@
+@fn option(
+    value: &str,
+    selected: bool = false,
+    logo_url: Option<&str> = None,
+    group: Option<&str> = None,
+    content: @() = @() {},
+) {
+    @let value_esc = attr(value)
+    @let toggle_expr = format("toggle('{}')", value_esc)
+    @let selected_expr = format("isSelected('{}')", value_esc)
+    @let visible_expr = "matchesSearch($el.dataset.label || $el.textContent.trim()) && matchesGroup($el.dataset.group || '')"
+    @let row_class_expr = format("{} ? 'bg-accent/50' : 'hover:bg-muted/50'", selected_expr)
+    @let check_class_expr = format("{} ? 'bg-primary border-primary' : 'bg-background'", selected_expr)
+
+    <label
+        data-value=@value
+        data-label
+        @if let Some(g) = group { data-group=@g }
+        @if selected { data-selected="true" }
+        x-init="if (!$el.dataset.label) $el.dataset.label = $el.textContent.trim()"
+        x-show=@visible_expr
+        x-bind:class=@row_class_expr
+        class="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 text-sm transition-colors"
+        x-on:click.prevent=@toggle_expr
+    >
+        <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-primary"
+            x-bind:class=@check_class_expr>
+            <svg x-show=@selected_expr x-cloak xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-primary-foreground">
+                <path d="M20 6 9 17l-5-5"/>
+            </svg>
+        </span>
+        @if let Some(logo) = logo_url {
+            <img src=@logo alt="" class="h-4 w-4 rounded object-contain dark:invert" />
+        }
+        <span class="flex-1">@content()</span>
+    </label>
+}

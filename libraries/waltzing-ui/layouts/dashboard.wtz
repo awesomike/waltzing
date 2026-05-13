@@ -12,7 +12,7 @@
  *     nav_groups=nav_groups
  *     header_left=Some(@() { <@breadcrumb /> })
  *     header_right=Some(@() { <@user_menu /> })
- *     footer=None
+ *     footer=@None
  *     content=@() { <div>Main content</div> }
  * />
  *@
@@ -47,7 +47,7 @@
     footer: Option<@()>,
     content: @(),
 ) {
-    <@base::apply title=@title description=None head=None>
+    <@base::apply title=@title description=@None head=@None>
         <div
             x-data="{
                 sidebarOpen: true,
@@ -132,17 +132,17 @@
                                     <ul class="space-y-1">
                                         @for item in &group.items {
                                             <li>
-                                                @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
+                                                @let active_cls = if item.active { "bg-accent text-accent-foreground" } else { "" }
                                                 @let link_classes = ["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                                 <a
-                                                    href=@item.href
+                                                    href=@&item.href
                                                     class=@cn(link_classes)
                                                     @click="mobileMenuOpen = false"
                                                 >
                                                     @if let Some(icon) = &item.icon {
                                                         <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
                                                     }
-                                                    <span>@item.label</span>
+                                                    <span>@&item.label</span>
                                                 </a>
                                             </li>
                                         }
@@ -189,7 +189,7 @@
                             <ul class="space-y-1">
                                 @for item in &group.items {
                                     <li>
-                                        @let active_cls = class_if(item.active, "bg-accent text-accent-foreground")
+                                        @let active_cls = if item.active { "bg-accent text-accent-foreground" } else { "" }
                                         @let collapsed_classes = ["flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
                                         @let expanded_classes = ["flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground", active_cls]
 
@@ -197,30 +197,30 @@
                                         <a
                                             x-show="sidebarOpen"
                                             x-cloak
-                                            href=@item.href
+                                            href=@&item.href
                                             class=@cn(expanded_classes)
-                                            title=@item.label
+                                            title=@&item.label
                                         >
                                             @if let Some(icon) = &item.icon {
                                                 <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
                                             }
-                                            <span>@item.label</span>
+                                            <span>@&item.label</span>
                                         </a>
 
                                         @* Collapsed view (icon only) *@
                                         <a
                                             x-show="!sidebarOpen"
                                             x-cloak
-                                            href=@item.href
+                                            href=@&item.href
                                             class=@cn(collapsed_classes)
-                                            title=@item.label
+                                            title=@&item.label
                                         >
                                             @if let Some(icon) = &item.icon {
                                                 <span class="h-5 w-5 flex-shrink-0">@safe(icon)</span>
                                             } else {
                                                 @* Show first letter if no icon *@
                                                 <span class="h-5 w-5 flex items-center justify-center text-xs font-medium">
-                                                    @(item.label.chars().next().unwrap_or(' '))
+                                                    @(item.label.chars().next().unwrap_or(' ').to_string())
                                                 </span>
                                             }
                                         </a>
@@ -276,7 +276,7 @@
                         </button>
 
                         @* Header left content (e.g., breadcrumbs, search) *@
-                        @if let Some(left) = header_left {
+                        @if let Some(ref left) = header_left {
                             <div class="hidden md:block">
                                 @left()
                             </div>
@@ -284,7 +284,7 @@
                     </div>
 
                     @* Header right content (e.g., user menu, notifications) *@
-                    @if let Some(right) = header_right {
+                    @if let Some(ref right) = header_right {
                         <div class="flex items-center gap-2">
                             @right()
                         </div>
@@ -297,7 +297,7 @@
                 </main>
 
                 @* Optional footer *@
-                @if let Some(f) = footer {
+                @if let Some(ref f) = footer {
                     <footer class="border-t bg-card px-4 py-3 md:px-6">
                         @f()
                     </footer>
@@ -328,7 +328,7 @@
                     @if let Some(src) = &user.avatar_src {
                         <img
                             src=@src
-                            alt=@user.name
+                            alt=@&user.name
                             class="aspect-square h-full w-full object-cover"
                             x-data="{ failed: false }"
                             x-on:error="failed = true"
@@ -339,15 +339,15 @@
                             x-show="failed"
                             x-cloak
                         >
-                            @user.avatar_fallback
+                            @&user.avatar_fallback
                         </span>
                     } else {
                         <span class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
-                            @user.avatar_fallback
+                            @&user.avatar_fallback
                         </span>
                     }
                 </span>
-                <span class="hidden text-sm font-medium md:inline-block">@user.name</span>
+                <span class="hidden text-sm font-medium md:inline-block">@&user.name</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-muted-foreground">
                     <path d="m6 9 6 6 6-6"/>
                 </svg>
@@ -370,7 +370,7 @@
             >
                 @* User info *@
                 <div class="px-2 py-1.5">
-                    <p class="text-sm font-medium">@user.name</p>
+                    <p class="text-sm font-medium">@&user.name</p>
                     @if let Some(email) = &user.email {
                         <p class="text-xs text-muted-foreground">@email</p>
                     }
@@ -426,9 +426,9 @@
         title=@title
         brand=@brand
         nav_groups=@nav_groups
-        header_left=None
-        header_right=None
-        footer=None
+        header_left=@None
+        header_right=@None
+        footer=@None
         content=@content
     />
 }
@@ -446,7 +446,7 @@
         title=@title
         brand=@brand
         nav_groups=@nav_groups
-        header_left=None
+        header_left=@None
         header_right=@Some(header)
         footer=@footer
         content=@content

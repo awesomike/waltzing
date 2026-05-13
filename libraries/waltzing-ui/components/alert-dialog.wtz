@@ -12,7 +12,7 @@
  *     description="This action cannot be undone."
  *     cancel_label="Cancel"
  *     confirm_label="Delete"
- *     destructive=true
+ *     destructive=@true
  *     on_confirm=Some("deleteItem()")
  * >
  *     <button>Delete Item</button>
@@ -34,6 +34,10 @@
     @let confirm_variant = if destructive { "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90" } else { "bg-primary text-primary-foreground shadow hover:bg-primary/90" }
     @let confirm_classes_vec = [confirm_base, confirm_variant]
     @let confirm_classes = &confirm_classes_vec
+    @let confirm_click_expr = match on_confirm {
+        Some(handler) => format("{}; open = false", handler),
+        None => "open = false".to_string(),
+    }
 
     <div x-data="{ open: false }">
         @* Trigger *@
@@ -90,12 +94,7 @@
                         </button>
                         <button
                             class=@cn(confirm_classes)
-                            @if let Some(handler) = on_confirm {
-                                @click="@handler; open = false"
-                            }
-                            @if on_confirm.is_none() {
-                                @click="open = false"
-                            }
+                            @click=@confirm_click_expr
                         >
                             @confirm_label
                         </button>
@@ -116,6 +115,12 @@
     destructive: bool,
     on_confirm: Option<&str>,
 ) {
+    @let close_expr = format("{} = false", open_var)
+    @let confirm_click_expr = match on_confirm {
+        Some(handler) => format("{}; {} = false", handler, open_var),
+        None => close_expr.clone(),
+    }
+
     @let confirm_base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-9 px-4 py-2"
     @let confirm_variant = if destructive { "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90" } else { "bg-primary text-primary-foreground shadow hover:bg-primary/90" }
     @let confirm_classes_vec = [confirm_base, confirm_variant]
@@ -141,7 +146,7 @@
             <div
                 class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg"
                 x-trap.inert.noscroll=@open_var
-                @keydown.escape.window="@open_var = false"
+                @keydown.escape.window=@close_expr
                 role="alertdialog"
                 aria-modal="true"
             >
@@ -153,18 +158,13 @@
                 <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
                     <button
                         class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 mt-2 sm:mt-0"
-                        @click="@open_var = false"
+                        @click=@close_expr
                     >
                         @cancel_label
                     </button>
                     <button
                         class=@cn(confirm_classes)
-                        @if let Some(handler) = on_confirm {
-                            @click="@handler; @open_var = false"
-                        }
-                        @if on_confirm.is_none() {
-                            @click="@open_var = false"
-                        }
+                        @click=@confirm_click_expr
                     >
                         @confirm_label
                     </button>

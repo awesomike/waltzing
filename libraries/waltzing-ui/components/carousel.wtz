@@ -60,7 +60,7 @@
     show_buttons: bool = true,
     show_dots: bool = true,
     auto_play: bool = false,
-    interval: u32 = 4000,
+    interval: u32 = 4000u32,
     loop_slides: bool = true,
     class: &str = "",
     content: @(),
@@ -268,12 +268,12 @@
     content: @(),
 ) {
     <@apply
-        orientation=Orientation::Horizontal
-        show_buttons=true
-        show_dots=false
-        auto_play=false
+        orientation=@Orientation::Horizontal
+        show_buttons=@true
+        show_dots=@false
+        auto_play=@false
         interval=4000
-        loop_slides=true
+        loop_slides=@true
         class=@class
         content=@content
     />
@@ -281,17 +281,17 @@
 
 @* Auto-playing carousel *@
 @fn autoplay(
-    interval: u32 = 4000,
+    interval: u32 = 4000u32,
     class: &str = "",
     content: @(),
 ) {
     <@apply
-        orientation=Orientation::Horizontal
-        show_buttons=true
-        show_dots=true
-        auto_play=true
+        orientation=@Orientation::Horizontal
+        show_buttons=@true
+        show_dots=@true
+        auto_play=@true
         interval=@interval
-        loop_slides=true
+        loop_slides=@true
         class=@class
         content=@content
     />
@@ -301,7 +301,7 @@
 @fn thumbnail(
     src: &str,
     alt: &str,
-    index: u32 = 0,
+    index: u32 = 0u32,
     class: &str = "",
 ) {
     <button

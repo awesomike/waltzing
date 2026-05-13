@@ -39,20 +39,20 @@
 @fn apply(
     side: Side = Side::Bottom,
     align: Align = Align::Center,
-    open_delay_ms: u32 = 500,
-    close_delay_ms: u32 = 300,
+    open_delay_ms: u32 = 500u32,
+    close_delay_ms: u32 = 300u32,
     class: &str = "",
     trigger: @() = @{},
     content: @() = @{},
 ) {
-    @let side_type = match side {
+    @let _side_type = match side {
         Side::Top => "top",
         Side::Bottom => "bottom",
         Side::Left => "left",
         Side::Right => "right",
     }
 
-    @let align_type = match align {
+    @let _align_type = match align {
         Align::Start => "start",
         Align::Center => "center",
         Align::End => "end",
@@ -60,12 +60,19 @@
 
     @let extra_cls = class
 
-    <div class="inline-block" x-data="{
+    @let mouseenter_handler = format("clearTimeout(closeTimeout); openTimeout = setTimeout(() => {{ open = true; $nextTick(() => updatePos()); }}, {})", open_delay_ms)
+    @let mouseleave_handler = format("clearTimeout(openTimeout); closeTimeout = setTimeout(() => open = false, {})", close_delay_ms)
+    @let focus_handler = format("clearTimeout(closeTimeout); openTimeout = setTimeout(() => {{ open = true; $nextTick(() => updatePos()); }}, {})", open_delay_ms)
+    @let blur_handler = format("clearTimeout(openTimeout); closeTimeout = setTimeout(() => open = false, {})", close_delay_ms)
+    @let content_mouseleave = format("closeTimeout = setTimeout(() => open = false, {})", close_delay_ms)
+    @let card_cls = cn(&["fixed z-[9999] w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none", extra_cls])
+
+    <div class="inline-block" x-data=@```json {
         open: false,
         pos: { x: 0, y: 0 },
-        flipTop: '@side_type' === 'top',
-        side: '@side_type',
-        align: '@align_type',
+        flipTop: @_side_type === 'top',
+        side: @_side_type,
+        align: @_align_type,
         openTimeout: null,
         closeTimeout: null,
         updatePos() {
@@ -97,13 +104,13 @@
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
         }
-    }" x-init="init()" @destroy="destroy()">
+    } ```@ x-init="init()" @@destroy="destroy()">
         <div
             x-ref="trigger"
-            @mouseenter="clearTimeout(closeTimeout); openTimeout = setTimeout(() => { open = true; $nextTick(() => updatePos()); }, @open_delay_ms)"
-            @mouseleave="clearTimeout(openTimeout); closeTimeout = setTimeout(() => open = false, @close_delay_ms)"
-            @focus="clearTimeout(closeTimeout); openTimeout = setTimeout(() => { open = true; $nextTick(() => updatePos()); }, @open_delay_ms)"
-            @blur="clearTimeout(openTimeout); closeTimeout = setTimeout(() => open = false, @close_delay_ms)"
+            @@mouseenter=@mouseenter_handler
+            @@mouseleave=@mouseleave_handler
+            @@focus=@focus_handler
+            @@blur=@blur_handler
         >
             @trigger()
         </div>
@@ -118,9 +125,9 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                @mouseenter="clearTimeout(closeTimeout)"
-                @mouseleave="closeTimeout = setTimeout(() => open = false, @close_delay_ms)"
-                class="fixed z-[9999] w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none @extra_cls"
+                @@mouseenter="clearTimeout(closeTimeout)"
+                @@mouseleave=@content_mouseleave
+                class=@card_cls
                 :style="(side === 'left' || side === 'right')
                     ? `left: ${side === 'right' ? pos.x + 8 : 'auto'}px; right: ${side === 'left' ? (window.innerWidth - pos.x + 8) : 'auto'}px; top: ${pos.y}px; transform: translateY(-50%);`
                     : `left: ${align === 'end' ? 'auto' : pos.x + 'px'}; right: ${align === 'end' ? (window.innerWidth - pos.x) + 'px' : 'auto'}; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}; ${align === 'center' ? 'transform: translateX(-50%)' : ''}`"

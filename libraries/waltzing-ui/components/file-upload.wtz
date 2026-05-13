@@ -9,12 +9,12 @@
  *   <@file_upload::create
  *       name="document"
  *       label=Some("Upload Document")
- *       accept=None
- *       multiple=false
+ *       accept=@None
+ *       multiple=@false
  *      
  *      
- *       dropzone_text=None
- *       dropzone_hint=None
+ *       dropzone_text=@None
+ *       dropzone_hint=@None
  *      
  *   />
  *
@@ -23,8 +23,8 @@
  *       name="photos"
  *       label=Some("Upload Photos")
  *       accept=Some("image/*")
- *       multiple=true
- *       required=true
+ *       multiple=@true
+ *       required=@true
  *      
  *       dropzone_text=Some("Drop images here")
  *       dropzone_hint=Some("PNG, JPG, GIF up to 10MB")
@@ -36,13 +36,13 @@
  *       name="avatar"
  *       label=Some("Profile Picture")
  *       accept=Some("image/*")
- *       multiple=false
+ *       multiple=@false
  *      
  *      
  *       current_file=Some("profile.jpg")
  *       current_url=Some("/uploads/profile.jpg")
- *       dropzone_text=None
- *       dropzone_hint=None
+ *       dropzone_text=@None
+ *       dropzone_hint=@None
  *      
  *   />
  **@
@@ -249,55 +249,11 @@
             </label>
         }
 
+        @let editing_initial = if has_current { "false" } else { "true" }
+        @let x_data_value = format("{{ editing: {}, files: [], dragging: false, formatSize(bytes) {{ const units = ['B', 'KB', 'MB', 'GB', 'TB']; let size = bytes; let unitIndex = 0; while (size >= 1024 && unitIndex < units.length - 1) {{ size /= 1024; unitIndex++; }} return size.toFixed(1) + ' ' + units[unitIndex]; }}, handleFiles(event) {{ const input = event.target || this.$refs.fileInput; this.files = Array.from(input.files).map(file => ({{ name: file.name, type: file.type || 'unknown', size: this.formatSize(file.size), lastModified: new Date(file.lastModified).toLocaleDateString(), isImage: file.type.startsWith('image/'), preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null }})); }}, clearFiles() {{ this.files.forEach(f => {{ if (f.preview) URL.revokeObjectURL(f.preview); }}); this.files = []; if (this.$refs.fileInput) this.$refs.fileInput.value = ''; }}, removeFile(index) {{ if (this.files[index].preview) URL.revokeObjectURL(this.files[index].preview); this.files.splice(index, 1); const dt = new DataTransfer(); const input = this.$refs.fileInput; Array.from(input.files).forEach((file, i) => {{ if (i !== index) dt.items.add(file); }}); input.files = dt.files; }}, startEditing() {{ this.editing = true; this.files = []; }}, cancelEditing() {{ this.editing = false; this.clearFiles(); }} }}", editing_initial)
         <div
             class="w-full"
-            x-data="{
-                editing: @if has_current { false } else { true },
-                files: [],
-                dragging: false,
-                formatSize(bytes) {
-                    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-                    let size = bytes;
-                    let unitIndex = 0;
-                    while (size >= 1024 && unitIndex < units.length - 1) {
-                        size /= 1024;
-                        unitIndex++;
-                    }
-                    return size.toFixed(1) + ' ' + units[unitIndex];
-                },
-                handleFiles(event) {
-                    const input = event.target || this.$refs.fileInput;
-                    this.files = Array.from(input.files).map(file => ({
-                        name: file.name,
-                        type: file.type || 'unknown',
-                        size: this.formatSize(file.size),
-                        lastModified: new Date(file.lastModified).toLocaleDateString(),
-                        isImage: file.type.startsWith('image/'),
-                        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
-                    }));
-                },
-                clearFiles() {
-                    this.files.forEach(f => { if (f.preview) URL.revokeObjectURL(f.preview); });
-                    this.files = [];
-                    if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-                },
-                removeFile(index) {
-                    if (this.files[index].preview) URL.revokeObjectURL(this.files[index].preview);
-                    this.files.splice(index, 1);
-                    const dt = new DataTransfer();
-                    const input = this.$refs.fileInput;
-                    Array.from(input.files).forEach((file, i) => { if (i !== index) dt.items.add(file); });
-                    input.files = dt.files;
-                },
-                startEditing() {
-                    this.editing = true;
-                    this.files = [];
-                },
-                cancelEditing() {
-                    this.editing = false;
-                    this.clearFiles();
-                }
-            }"
+            x-data=@x_data_value
         >
             @* Current file display *@
             @if has_current {

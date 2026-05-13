@@ -9,7 +9,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::env;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 // Path separator differs between platforms
@@ -58,6 +58,18 @@ struct DiscoveredLibrary {
 
 /// Find the waltzing binary in PATH or ~/.local/bin
 fn find_waltzing_binary() -> Option<PathBuf> {
+    if let Ok(explicit) = env::var("WALTZING_BIN") {
+        let path = PathBuf::from(explicit);
+        if path.exists() {
+            return Some(path);
+        }
+
+        panic!(
+            "WALTZING_BIN is set to {}, but that file does not exist",
+            path.display()
+        );
+    }
+
     // Check if waltzing is on the PATH
     let path_var = env::var("PATH").ok()?;
     let waltzing_path = path_var
@@ -71,9 +83,7 @@ fn find_waltzing_binary() -> Option<PathBuf> {
     }
 
     // Fall back to ~/.local/bin/waltzing
-    let home_dir = env::var("HOME")
-        .or_else(|_| env::var("USERPROFILE"))
-        .ok()?;
+    let home_dir = env::var("HOME").or_else(|_| env::var("USERPROFILE")).ok()?;
 
     let local_bin_path = PathBuf::from(home_dir)
         .join(".local")
@@ -119,8 +129,7 @@ fn discover_libraries() -> Vec<DiscoveredLibrary> {
             continue;
         };
 
-        let manifest_content =
-            fs::read_to_string(&manifest_path).expect("Failed to read manifest");
+        let manifest_content = fs::read_to_string(&manifest_path).expect("Failed to read manifest");
 
         match toml::from_str::<LibraryManifest>(&manifest_content) {
             Ok(manifest) => {
@@ -138,6 +147,67 @@ fn discover_libraries() -> Vec<DiscoveredLibrary> {
     }
 
     libraries
+}
+
+fn validate_library_manifest(library: &DiscoveredLibrary) {
+    let lib_dir = PathBuf::from("libraries").join(&library.dir_name);
+    let mut names = std::collections::HashSet::from(["lib/utils".to_string()]);
+
+    names.extend(library.manifest.components.keys().cloned());
+    names.extend(library.manifest.layouts.keys().cloned());
+    names.extend(library.manifest.blocks.keys().cloned());
+
+    validate_entries(
+        &library.manifest.library.name,
+        &lib_dir,
+        "component",
+        &library.manifest.components,
+        &names,
+    );
+    validate_entries(
+        &library.manifest.library.name,
+        &lib_dir,
+        "layout",
+        &library.manifest.layouts,
+        &names,
+    );
+    validate_entries(
+        &library.manifest.library.name,
+        &lib_dir,
+        "block",
+        &library.manifest.blocks,
+        &names,
+    );
+}
+
+fn validate_entries(
+    library_name: &str,
+    lib_dir: &Path,
+    kind: &str,
+    entries: &HashMap<String, ComponentEntry>,
+    known_names: &std::collections::HashSet<String>,
+) {
+    for (name, entry) in entries {
+        let path = lib_dir.join(&entry.path);
+        if !path.exists() {
+            panic!(
+                "{} {} '{}' points at missing template {}",
+                library_name,
+                kind,
+                name,
+                path.display()
+            );
+        }
+
+        for dep in &entry.deps {
+            if !known_names.contains(dep) && !dep.starts_with("lib/") {
+                panic!(
+                    "{} {} '{}' depends on unknown entry '{}'",
+                    library_name, kind, name, dep
+                );
+            }
+        }
+    }
 }
 
 fn compile_library(library: &DiscoveredLibrary, waltzing_bin: &PathBuf, out_dir: &str) -> bool {
@@ -195,7 +265,7 @@ fn compile_library(library: &DiscoveredLibrary, waltzing_bin: &PathBuf, out_dir:
     success
 }
 
-fn generate_libraries_module(libraries: &[DiscoveredLibrary], out_dir: &str) {
+fn generate_libraries_module(libraries: &[DiscoveredLibrary], _out_dir: &str) {
     let gen_dir = PathBuf::from("src/generated");
     fs::create_dir_all(&gen_dir).expect("Failed to create src/generated");
 
@@ -218,7 +288,8 @@ fn generate_libraries_module(libraries: &[DiscoveredLibrary], out_dir: &str) {
     code.push_str("pub const LIBRARIES: &[Library] = &[\n");
 
     for lib in libraries {
-        let component_count = lib.manifest.components.len() + lib.manifest.layouts.len();
+        let component_count =
+            lib.manifest.components.len() + lib.manifest.layouts.len() + lib.manifest.blocks.len();
         code.push_str(&format!(
             "    Library {{\n        id: \"{}\",\n        name: \"{}\",\n        version: \"{}\",\n        description: \"{}\",\n        component_count: {},\n    }},\n",
             lib.dir_name,
@@ -231,14 +302,12 @@ fn generate_libraries_module(libraries: &[DiscoveredLibrary], out_dir: &str) {
 
     code.push_str("];\n\n");
 
-    // Include compiled templates from OUT_DIR
-    code.push_str(&format!(
-        "/// Path to compiled templates (set by build.rs)\n"
-    ));
-    code.push_str(&format!(
-        "pub const TEMPLATES_DIR: &str = \"{}\";\n\n",
-        out_dir.replace("\\", "\\\\")
-    ));
+    // Include compiled templates from OUT_DIR without baking machine-local paths
+    // into the tracked generated source.
+    code.push_str("/// Path to compiled templates (set by build.rs)\n");
+    code.push_str(
+        "pub const TEMPLATES_DIR: &str = concat!(env!(\"OUT_DIR\"), \"/templates\");\n\n",
+    );
 
     // Generate submodule info for each library
     for lib in libraries {
@@ -306,6 +375,9 @@ fn main() {
     let templates_out = format!("{}/templates", out_dir);
 
     let libraries = discover_libraries();
+    for library in &libraries {
+        validate_library_manifest(library);
+    }
 
     println!("cargo:warning=Discovered {} libraries", libraries.len());
 
@@ -329,8 +401,8 @@ fn main() {
             }
 
             if failed > 0 {
-                println!(
-                    "cargo:warning=Compiled {}/{} libraries ({} had errors)",
+                panic!(
+                    "compiled {}/{} libraries; {} failed. Fix template parse errors before building.",
                     compiled,
                     libraries.len(),
                     failed
@@ -338,8 +410,9 @@ fn main() {
             }
         }
         None => {
-            println!("cargo:warning=waltzing binary not found in PATH or ~/.local/bin");
-            println!("cargo:warning=Skipping template compilation - install waltzing to enable");
+            panic!(
+                "waltzing binary not found in PATH or ~/.local/bin; set WALTZING_BIN to a compiler binary"
+            );
         }
     }
 

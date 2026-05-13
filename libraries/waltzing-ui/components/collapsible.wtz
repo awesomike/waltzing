@@ -8,7 +8,7 @@
  * @import components/collapsible.wtz as collapsible
  *
  * <@collapsible
- *     open=false
+ *     open=@false
  *     trigger=@{ <span>Toggle content</span> }
  *     content=@{ <p>This content can be shown or hidden.</p> }
  * />

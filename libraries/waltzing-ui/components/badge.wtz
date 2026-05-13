@@ -54,28 +54,28 @@
 
 @* Shorthand for default badge *@
 @fn default(class: &str = "", content: @()) {
-    <@apply variant=Variant::Default class=@class>
+    <@apply variant=@Variant::Default class=@class>
         @content()
     </@apply>
 }
 
 @* Shorthand for secondary badge *@
 @fn secondary(class: &str = "", content: @()) {
-    <@apply variant=Variant::Secondary class=@class>
+    <@apply variant=@Variant::Secondary class=@class>
         @content()
     </@apply>
 }
 
 @* Shorthand for outline badge *@
 @fn outline(class: &str = "", content: @()) {
-    <@apply variant=Variant::Outline class=@class>
+    <@apply variant=@Variant::Outline class=@class>
         @content()
     </@apply>
 }
 
 @* Shorthand for destructive badge *@
 @fn destructive(class: &str = "", content: @()) {
-    <@apply variant=Variant::Destructive class=@class>
+    <@apply variant=@Variant::Destructive class=@class>
         @content()
     </@apply>
 }

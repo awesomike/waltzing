@@ -14,7 +14,7 @@
  *     src=Some("/user.jpg")
  *     alt="John Doe"
  *     fallback="JD"
- *     size=avatar::Size::Lg
+ *     size=@avatar::Size::Lg
  *     class="ring-2 ring-primary"
  * />
  *@
@@ -49,10 +49,10 @@
     }
 
     @let container_classes = [base, size_cls, cls]
-    @let container_cls = cn(@container_classes)
+    @let container_cls = cn(container_classes)
     @let fallback_base = "flex h-full w-full items-center justify-center rounded-full bg-muted"
     @let fallback_classes = [fallback_base, fallback_text_size]
-    @let fallback_cls = cn(@fallback_classes)
+    @let fallback_cls = cn(fallback_classes)
 
     <span class=@container_cls>
         @if let Some(image_src) = src {
@@ -81,20 +81,20 @@
 
 @* Shorthand for default avatar with image *@
 @fn image(src: &str, alt: &str, fallback: &str) {
-    <@apply src=@Some(src) alt=@alt fallback=@fallback size=Size::Default />
+    <@apply src=@Some(src) alt=@alt fallback=@fallback size=@Size::Default />
 }
 
 @* Shorthand for avatar with only fallback (no image) *@
 @fn fallback(initials: &str) {
-    <@apply src=None alt=@initials fallback=@initials size=Size::Default />
+    <@apply src=@None alt=@initials fallback=@initials size=@Size::Default />
 }
 
 @* Small avatar with image *@
 @fn sm(src: &str, alt: &str, fallback: &str) {
-    <@apply src=@Some(src) alt=@alt fallback=@fallback size=Size::Sm />
+    <@apply src=@Some(src) alt=@alt fallback=@fallback size=@Size::Sm />
 }
 
 @* Large avatar with image *@
 @fn lg(src: &str, alt: &str, fallback: &str) {
-    <@apply src=@Some(src) alt=@alt fallback=@fallback size=Size::Lg />
+    <@apply src=@Some(src) alt=@alt fallback=@fallback size=@Size::Lg />
 }

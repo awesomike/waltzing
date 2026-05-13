@@ -132,17 +132,22 @@
     separator_text: Option<&str> = None,
     class: &str = "",
 ) {
+    @let sep = separator_text.unwrap_or("")
     <@root class=@class>
         <@list>
-            @for (i, item) in items.iter().enumerate() {
+            @for (i, crumb) in items.iter().enumerate() {
                 @if i > 0 {
-                    <@separator text=@separator_text />
+                    @if !sep.is_empty() {
+                        <@separator text=@sep />
+                    } else {
+                        <@separator />
+                    }
                 }
                 <@item>
-                    @if let Some(ref href) = item.href {
-                        <@link href=@href>@item.label</@link>
+                    @if let Some(ref href) = crumb.href {
+                        <@link href=@href>@&crumb.label</@link>
                     } else {
-                        <@page>@item.label</@page>
+                        <@page>@&crumb.label</@page>
                     }
                 </@item>
             }

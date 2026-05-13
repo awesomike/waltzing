@@ -16,6 +16,8 @@
  *@
 
 
+@use waltzing::escape::attr
+
 @* Option struct for data-driven usage *@
 @struct SelectOption {
     value: String,
@@ -24,6 +26,15 @@
 }
 
 @* Select container - use with children or options vec *@
+@*
+ * `alpine_model`: Alpine expression for two-way binding (e.g.
+ * `"selectedStep.config.wait_subtype"`). When set, the component's
+ * internal `selected` is wired via `x-modelable` to the named
+ * expression — external mutations flow in and selections flow out,
+ * with `selectedLabel` resolved automatically from the matching
+ * option. The `selected=@Some(...)` Rust prop is ignored in this
+ * mode; the live value drives initial display.
+ *@
 @fn apply(
     name: &str,
     options: Vec<SelectOption> = Vec::new(),
@@ -31,61 +42,157 @@
     placeholder: Option<&str> = None,
     disabled: bool = false,
     required: bool = false,
+    searchable: bool = false,
+    search_placeholder: Option<&str> = None,
     error: Option<&str> = None,
     class: &str = "",
-    content: @(),
+    teleport: &str = "body",
+    alpine_model: Option<&str> = None,
+    content: @() = @() {},
 ) {
     @let base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
     @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
     @let trigger_classes = [base, error_cls, class]
-    @let trigger_cls = cn(@trigger_classes)
+    @let trigger_cls = cn(trigger_classes)
 
-    @let sel = selected.unwrap_or("")
-    @let ph = placeholder.unwrap_or("Select...")
+    @let sel = attr(selected.unwrap_or(""))
+    @let ph = attr(placeholder.unwrap_or("Select..."))
+    @let search_ph = attr(search_placeholder.unwrap_or("Search..."))
+    @let name_esc = attr(name)
+
+    @let x_data = format(r#"{{
+        open: false,
+        flipTop: false,
+        pos: {{ x: 0, y: 0, width: 0 }},
+        selected: '{}',
+        selectedLabel: '',
+        selectName: '{}',
+        searchable: {},
+        search: '',
+        highlightedIndex: -1,
+        allOptions: [],
+        _hiddenInput: null,
+        init() {{
+            this._hiddenInput = this.$el.querySelector('input[type="hidden"]');
+            if (this._hiddenInput && this.selected) {{
+                this._hiddenInput.value = this.selected;
+            }}
+            this._scrollHandler = () => {{ if (this.open) this.updatePos(); }};
+            window.addEventListener('scroll', this._scrollHandler, true);
+            window.addEventListener('resize', this._scrollHandler);
+            // Keep selectedLabel in sync when `selected` mutates outside
+            // of `selectOption` — e.g. via x-modelable two-way binding
+            // wired by `alpine_model`. Without this, an external model
+            // change updates the hidden input but leaves the trigger
+            // label stale.
+            this.$watch('selected', v => {{
+                this.$nextTick(() => {{
+                    const el = this.$refs.options?.querySelector(`[data-value='${{v}}']`);
+                    this.selectedLabel = el ? (el.dataset.label || el.textContent.trim()) : '';
+                }});
+            }});
+            this.$nextTick(() => {{
+                const initial = this.$refs.options?.querySelector(`[data-value='${{this.selected}}']`);
+                if (initial) this.selectedLabel = initial.dataset.label || initial.textContent.trim();
+            }});
+        }},
+        destroy() {{
+            window.removeEventListener('scroll', this._scrollHandler, true);
+            window.removeEventListener('resize', this._scrollHandler);
+        }},
+        updatePos() {{
+            const trigger = this.$refs.trigger;
+            if (!trigger) return;
+            const rect = trigger.getBoundingClientRect();
+            const dropdownHeight = 240;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+            this.pos.x = rect.left;
+            this.pos.y = this.flipTop ? rect.top : rect.bottom;
+            this.pos.width = rect.width;
+        }},
+        openDropdown() {{
+            this.open = true;
+            this.search = '';
+            this.highlightedIndex = -1;
+            this.$nextTick(() => {{
+                this.updatePos();
+                this.collectOptions();
+                if (this.searchable && this.$refs.searchInput) {{
+                    this.$refs.searchInput.focus();
+                }}
+            }});
+        }},
+        collectOptions() {{
+            const container = this.$refs.options;
+            if (!container) return;
+            this.allOptions = Array.from(container.querySelectorAll('[data-value]')).map(el => ({{
+                value: el.dataset.value,
+                label: el.dataset.label || el.textContent.trim(),
+                disabled: el.dataset.disabled === 'true'
+            }}));
+        }},
+        get filteredOptions() {{
+            if (!this.search) return this.allOptions;
+            const q = this.search.toLowerCase();
+            return this.allOptions.filter(opt => opt.label.toLowerCase().includes(q));
+        }},
+        isVisible(value) {{
+            if (!this.search) return true;
+            const opt = this.allOptions.find(o => o.value === value);
+            return opt ? opt.label.toLowerCase().includes(this.search.toLowerCase()) : true;
+        }},
+        highlightNext() {{
+            const visible = this.filteredOptions.filter(o => !o.disabled);
+            if (visible.length === 0) return;
+            this.highlightedIndex = (this.highlightedIndex + 1) % visible.length;
+        }},
+        highlightPrev() {{
+            const visible = this.filteredOptions.filter(o => !o.disabled);
+            if (visible.length === 0) return;
+            this.highlightedIndex = this.highlightedIndex <= 0 ? visible.length - 1 : this.highlightedIndex - 1;
+        }},
+        selectHighlighted() {{
+            const visible = this.filteredOptions.filter(o => !o.disabled);
+            if (visible.length === 0) return;
+            const idx = this.highlightedIndex < 0 ? 0 : this.highlightedIndex;
+            if (visible[idx]) {{
+                this.selectOption(visible[idx].value, visible[idx].label);
+            }}
+        }},
+        isHighlighted(value) {{
+            if (this.highlightedIndex < 0) return false;
+            const visible = this.filteredOptions.filter(o => !o.disabled);
+            return visible[this.highlightedIndex]?.value === value;
+        }},
+        selectOption(value, label) {{
+            this.selected = value;
+            this.selectedLabel = label;
+            this.open = false;
+            this.search = '';
+            this.highlightedIndex = -1;
+            if (this._hiddenInput) {{
+                this._hiddenInput.value = value;
+                this._hiddenInput.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            }}
+        }}
+    }}"#, sel, name_esc, searchable)
+
+    @let x_text_expr = format("selectedLabel || '{}'", ph)
 
     <div
         class="relative w-full"
-        x-data="{
-            open: false,
-            flipTop: false,
-            pos: { x: 0, y: 0, width: 0 },
-            selected: '@sel',
-            selectedLabel: '',
-            selectName: '@name',
-            init() {
-                const initial = this.$refs.options?.querySelector(`[data-value='${this.selected}']`);
-                if (initial) this.selectedLabel = initial.dataset.label || initial.textContent.trim();
-                this._scrollHandler = () => { if (this.open) this.updatePos(); };
-                window.addEventListener('scroll', this._scrollHandler, true);
-                window.addEventListener('resize', this._scrollHandler);
-            },
-            destroy() {
-                window.removeEventListener('scroll', this._scrollHandler, true);
-                window.removeEventListener('resize', this._scrollHandler);
-            },
-            updatePos() {
-                const trigger = this.$refs.trigger;
-                if (!trigger) return;
-                const rect = trigger.getBoundingClientRect();
-                const dropdownHeight = 240;
-                const spaceBelow = window.innerHeight - rect.bottom;
-                const spaceAbove = rect.top;
-                this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
-                this.pos.x = rect.left;
-                this.pos.y = this.flipTop ? rect.top : rect.bottom;
-                this.pos.width = rect.width;
-            },
-            selectOption(value, label) {
-                this.selected = value;
-                this.selectedLabel = label;
-                this.open = false;
-                this.$refs.hiddenInput.value = value;
-                this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        }"
+        x-data=@x_data
         x-init="init()"
         @destroy="destroy()"
-        @keydown.escape="open = false"
+        @keydown.escape="open = false; search = ''"
+        @* Two-way Alpine binding (Alpine x-modelable + x-model). Used by
+           callers that want the component's `selected` synced with a
+           parent-scope expression like `selectedStep.config.wait_subtype`.
+           Skipped when alpine_model is not provided. *@
+        @if alpine_model.is_some() { x-modelable="selected" }
+        @if let Some(am) = alpine_model { x-model=@am }
     >
         @* Hidden input for form submission *@
         <input
@@ -101,20 +208,20 @@
             type="button"
             x-ref="trigger"
             class=@trigger_cls
-            @click="open = !open; if(open) $nextTick(() => updatePos())"
+            @click="openDropdown()"
             @if disabled { disabled }
             @if error.is_some() { aria-invalid="true" }
             aria-haspopup="listbox"
             :aria-expanded="open"
         >
-            <span x-text="selectedLabel || '@ph'" :class="!selectedLabel && 'text-muted-foreground'"></span>
+            <span x-text=@x_text_expr :class="!selectedLabel && 'text-muted-foreground'"></span>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 opacity-50 transition-transform" :class="open && 'rotate-180'">
                 <path d="m6 9 6 6 6-6"/>
             </svg>
         </button>
 
-        @* Dropdown (teleported to body) *@
-        <template x-teleport="body">
+        @* Dropdown (teleported - use teleport param to override, e.g. for dialogs) *@
+        <template x-teleport=@teleport>
             <div
                 x-show="open"
                 x-cloak
@@ -125,20 +232,42 @@
                 x-transition:leave="transition ease-in duration-75"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                @click.outside="open = false"
-                class="fixed z-[9999] max-h-60 overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                @click.outside="open = false; search = ''"
+                @keydown.down.prevent="highlightNext()"
+                @keydown.up.prevent="highlightPrev()"
+                @keydown.enter.prevent="selectHighlighted()"
+                class="fixed z-[9999] max-h-60 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
                 :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`"
                 role="listbox"
             >
-                @if options.is_empty() {
-                    @content()
-                } else {
-                    @for opt in options {
-                        <@option value=@opt.value disabled=@opt.disabled>
-                            @opt.label
-                        </@option>
-                    }
+                @* Search input for searchable selects *@
+                @if searchable {
+                    <div class="flex items-center border-b px-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4 shrink-0 opacity-50">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.3-4.3"></path>
+                        </svg>
+                        <input
+                            x-ref="searchInput"
+                            x-model="search"
+                            @input="highlightedIndex = -1"
+                            class="flex h-9 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
+                            placeholder=@search_ph
+                            type="text"
+                        />
+                    </div>
                 }
+                <div class="max-h-52 overflow-auto p-1">
+                    @if options.is_empty() {
+                        @content()
+                    } else {
+                        @for opt in &options {
+                            <@option value=@&opt.value disabled=@opt.disabled searchable=@searchable>
+                                @&opt.label
+                            </@option>
+                        }
+                    }
+                </div>
             </div>
         </template>
     </div>
@@ -147,21 +276,35 @@
 @* Individual select option - must be used inside a group *@
 @fn option(
     value: &str,
+    label: Option<&str> = None,
     disabled: bool = false,
-    content: @(),
+    searchable: bool = true,
+    content: @() = @() {},
 ) {
     @let option_base = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors"
+    @let value_esc = attr(value)
+    @let x_show_expr = format("isVisible('{}')", value_esc)
+    @let class_expr = format("(selected === '{}' || isHighlighted('{}')) ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'", value_esc, value_esc)
+    @let click_expr = format("selectOption('{}', label)", value_esc)
+    @let aria_sel_expr = format("selected === '{}'", value_esc)
+    @let svg_class_expr = format("selected === '{}' ? 'opacity-100' : 'opacity-0'", value_esc)
 
     <div
         data-value=@value
-        data-label
-        x-data="{ get label() { return this.$el.textContent.trim(); } }"
-        x-init="$el.dataset.label = label"
-        class="@option_base @if disabled { pointer-events-none opacity-50 }"
-        :class="selected === '@value' ? 'bg-accent text-accent-foreground' : 'hover:bg-accent hover:text-accent-foreground'"
-        @click="@if !disabled { selectOption('@value', label) }"
+        @if let Some(lbl) = label {
+            data-label=@lbl
+        } else {
+            data-label
+        }
+        @if disabled { data-disabled="true" }
+        x-data="{ get label() { return (this.$el.dataset.label && this.$el.dataset.label.length > 0) ? this.$el.dataset.label : this.$el.textContent.trim(); } }"
+        x-init="if (!$el.dataset.label || $el.dataset.label.length === 0) $el.dataset.label = label"
+        class=@cn(option_base, if disabled { "pointer-events-none opacity-50" } else { "" })
+        @if searchable { x-show=@x_show_expr }
+        :class=@class_expr
+        @if !disabled { @click=@click_expr }
         role="option"
-        :aria-selected="selected === '@value'"
+        :aria-selected=@aria_sel_expr
         @if disabled { aria-disabled="true" }
     >
         <svg
@@ -175,7 +318,7 @@
             stroke-linecap="round"
             stroke-linejoin="round"
             class="mr-2 h-4 w-4"
-            :class="selected === '@value' ? 'opacity-100' : 'opacity-0'"
+            :class=@svg_class_expr
         >
             <path d="M20 6 9 17l-5-5"/>
         </svg>
@@ -183,7 +326,9 @@
     </div>
 }
 
-@* Select with label *@
+@* Select with label.
+ *
+ * `alpine_model` — see `apply` for two-way Alpine binding semantics. *@
 @fn labeled(
     label: &str,
     name: &str,
@@ -192,27 +337,233 @@
     placeholder: Option<&str> = None,
     disabled: bool = false,
     required: bool = false,
+    searchable: bool = false,
+    search_placeholder: Option<&str> = None,
     error: Option<&str> = None,
     class: &str = "",
-    content: @(),
+    teleport: &str = "body",
+    alpine_model: Option<&str> = None,
+    content: @() = @() {},
 ) {
+    @let base = "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    @let error_cls = if error.is_some() { "border-destructive focus:ring-destructive" } else { "" }
+    @let trigger_classes = [base, error_cls, class]
+    @let trigger_cls = cn(trigger_classes)
+
+    @let sel = attr(selected.unwrap_or(""))
+    @let ph = attr(placeholder.unwrap_or("Select..."))
+    @let search_ph = attr(search_placeholder.unwrap_or("Search..."))
+    @let name_esc = attr(name)
+
+    @let x_data = format(r#"{{
+        open: false,
+        flipTop: false,
+        pos: {{ x: 0, y: 0, width: 0 }},
+        selected: '{}',
+        selectedLabel: '',
+        selectName: '{}',
+        searchable: {},
+        search: '',
+        highlightedIndex: -1,
+        allOptions: [],
+        _hiddenInput: null,
+        init() {{
+            this._hiddenInput = this.$el.querySelector('input[type="hidden"]');
+            if (this._hiddenInput && this.selected) {{
+                this._hiddenInput.value = this.selected;
+            }}
+            this._scrollHandler = () => {{ if (this.open) this.updatePos(); }};
+            window.addEventListener('scroll', this._scrollHandler, true);
+            window.addEventListener('resize', this._scrollHandler);
+            // Keep selectedLabel in sync when `selected` mutates outside
+            // of `selectOption` — e.g. via x-modelable two-way binding
+            // wired by `alpine_model`. Without this, an external model
+            // change updates the hidden input but leaves the trigger
+            // label stale.
+            this.$watch('selected', v => {{
+                this.$nextTick(() => {{
+                    const el = this.$refs.options?.querySelector(`[data-value='${{v}}']`);
+                    this.selectedLabel = el ? (el.dataset.label || el.textContent.trim()) : '';
+                }});
+            }});
+            this.$nextTick(() => {{
+                const initial = this.$refs.options?.querySelector(`[data-value='${{this.selected}}']`);
+                if (initial) this.selectedLabel = initial.dataset.label || initial.textContent.trim();
+            }});
+        }},
+        destroy() {{
+            window.removeEventListener('scroll', this._scrollHandler, true);
+            window.removeEventListener('resize', this._scrollHandler);
+        }},
+        updatePos() {{
+            const trigger = this.$refs.trigger;
+            if (!trigger) return;
+            const rect = trigger.getBoundingClientRect();
+            const dropdownHeight = 240;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+            this.pos.x = rect.left;
+            this.pos.y = this.flipTop ? rect.top : rect.bottom;
+            this.pos.width = rect.width;
+        }},
+        openDropdown() {{
+            this.open = true;
+            this.search = '';
+            this.highlightedIndex = -1;
+            this.$nextTick(() => {{
+                this.updatePos();
+                this.collectOptions();
+                if (this.searchable && this.$refs.searchInput) {{
+                    this.$refs.searchInput.focus();
+                }}
+            }});
+        }},
+        collectOptions() {{
+            const container = this.$refs.options;
+            if (!container) return;
+            this.allOptions = Array.from(container.querySelectorAll('[data-value]')).map(el => ({{
+                value: el.dataset.value,
+                label: el.dataset.label || el.textContent.trim(),
+                disabled: el.dataset.disabled === 'true'
+            }}));
+        }},
+        get filteredOptions() {{
+            if (!this.search) return this.allOptions;
+            const q = this.search.toLowerCase();
+            return this.allOptions.filter(opt => opt.label.toLowerCase().includes(q));
+        }},
+        isVisible(value) {{
+            if (!this.search) return true;
+            const opt = this.allOptions.find(o => o.value === value);
+            return opt ? opt.label.toLowerCase().includes(this.search.toLowerCase()) : true;
+        }},
+        highlightNext() {{
+            const visible = this.filteredOptions.filter(o => !o.disabled);
+            if (visible.length === 0) return;
+            this.highlightedIndex = (this.highlightedIndex + 1) % visible.length;
+        }},
+        highlightPrev() {{
+            const visible = this.filteredOptions.filter(o => !o.disabled);
+            if (visible.length === 0) return;
+            this.highlightedIndex = this.highlightedIndex <= 0 ? visible.length - 1 : this.highlightedIndex - 1;
+        }},
+        selectHighlighted() {{
+            const visible = this.filteredOptions.filter(o => !o.disabled);
+            if (visible.length === 0) return;
+            const idx = this.highlightedIndex < 0 ? 0 : this.highlightedIndex;
+            if (visible[idx]) {{
+                this.selectOption(visible[idx].value, visible[idx].label);
+            }}
+        }},
+        isHighlighted(value) {{
+            if (this.highlightedIndex < 0) return false;
+            const visible = this.filteredOptions.filter(o => !o.disabled);
+            return visible[this.highlightedIndex]?.value === value;
+        }},
+        selectOption(value, label) {{
+            this.selected = value;
+            this.selectedLabel = label;
+            this.open = false;
+            this.search = '';
+            this.highlightedIndex = -1;
+            if (this._hiddenInput) {{
+                this._hiddenInput.value = value;
+                this._hiddenInput.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            }}
+        }}
+    }}"#, sel, name_esc, searchable)
+
+    @let x_text_expr = format("selectedLabel || '{}'", ph)
+
     <div class="space-y-2">
         <label class="text-sm font-medium leading-none">
             @label
             @if required { <span class="text-destructive">*</span> }
         </label>
-        <@apply
-            name=@name
-            options=@options
-            selected=@selected
-            placeholder=@placeholder
-            disabled=@disabled
-            required=@required
-            error=@error
-            class=@class
+        <div
+            class="relative w-full"
+            x-data=@x_data
+            x-init="init()"
+            @destroy="destroy()"
+            @keydown.escape="open = false; search = ''"
+            @if alpine_model.is_some() { x-modelable="selected" }
+            @if let Some(am) = alpine_model { x-model=@am }
         >
-            @content()
-        </@apply>
+            <input
+                type="hidden"
+                name=@name
+                x-ref="hiddenInput"
+                :value="selected"
+                @if required { required }
+            />
+
+            <button
+                type="button"
+                x-ref="trigger"
+                class=@trigger_cls
+                @click="openDropdown()"
+                @if disabled { disabled }
+                @if error.is_some() { aria-invalid="true" }
+                aria-haspopup="listbox"
+                :aria-expanded="open"
+            >
+                <span x-text=@x_text_expr :class="!selectedLabel && 'text-muted-foreground'"></span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 opacity-50 transition-transform" :class="open && 'rotate-180'">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </button>
+
+            <template x-teleport=@teleport>
+                <div
+                    x-show="open"
+                    x-cloak
+                    x-ref="options"
+                    x-transition:enter="transition ease-out duration-100"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    @click.outside="open = false; search = ''"
+                    @keydown.down.prevent="highlightNext()"
+                    @keydown.up.prevent="highlightPrev()"
+                    @keydown.enter.prevent="selectHighlighted()"
+                    class="fixed z-[9999] max-h-60 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
+                    :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`"
+                    role="listbox"
+                >
+                    @* Search input for searchable selects *@
+                    @if searchable {
+                        <div class="flex items-center border-b px-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4 shrink-0 opacity-50">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                            <input
+                                x-ref="searchInput"
+                                x-model="search"
+                                @input="highlightedIndex = -1"
+                                class="flex h-9 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
+                                placeholder=@search_ph
+                                type="text"
+                            />
+                        </div>
+                    }
+                    <div class="max-h-52 overflow-auto p-1">
+                        @if options.is_empty() {
+                            @content()
+                        } else {
+                            @for opt in &options {
+                                <@option value=@&opt.value disabled=@opt.disabled searchable=@searchable>
+                                    @&opt.label
+                                </@option>
+                            }
+                        }
+                    </div>
+                </div>
+            </template>
+        </div>
         @if let Some(e) = error {
             <p class="text-sm text-destructive">@e</p>
         }

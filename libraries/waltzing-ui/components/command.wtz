@@ -13,6 +13,7 @@
  *   command::dialog with trigger and content slots
  **@
 
+@use waltzing::escape::attr
 
 @struct CommandItem {
     id: String,
@@ -28,7 +29,6 @@
 
 @** Main command container with composition support **@
 @fn apply(
-    placeholder: Option<&str> = None,
     class: &str = "",
     content: @() = @{},
 ) {
@@ -153,11 +153,15 @@
     disabled: bool = false,
     class: &str = "",
 ) {
+    @let disabled_cls = if disabled { "pointer-events-none opacity-50" } else { "" }
     @let item_cls = cn(&[
         "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground",
-        class_if(disabled, "pointer-events-none opacity-50"),
+        disabled_cls,
         class
     ])
+    @let label_esc = attr(label)
+    @let init_expr = format("index = items.length; registerItem($el.dataset.id || '{}', '{}')", label_esc, label_esc)
+    @let selected_expr = format("selectedIndex === index && search ? filteredItems.some(i => i.label === '{}') : selectedIndex === index", label_esc)
 
     <div
         class=@item_cls
@@ -165,8 +169,8 @@
         tabindex="-1"
         @if disabled { aria-disabled="true" }
         x-data="{ index: -1 }"
-        x-init="index = items.length; registerItem($el.dataset.id || '@label', '@label')"
-        :data-selected="selectedIndex === index && search ? filteredItems.some(i => i.label === '@label') : selectedIndex === index"
+        x-init=@init_expr
+        :data-selected=@selected_expr
         data-id=@label
         @@click="selectedIndex = index; selectItem()"
         @@mouseenter="selectedIndex = index"

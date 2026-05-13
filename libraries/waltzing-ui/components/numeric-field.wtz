@@ -1,0 +1,332 @@
+@*
+ * Numeric Field Component
+ * A numeric input with optional static suffix or changeable unit dropdown.
+ * Uses shared border container pattern for aligned borders.
+ *
+ * Usage:
+ *   @import ui/components/numeric-field.wtz as numeric_field
+ *
+ *   // Basic input
+ *   <@numeric_field::create label="Count" name="count" value=10.0 />
+ *
+ *   // With static suffix
+ *   <@numeric_field::create_with_suffix
+ *       label="Age"
+ *       name="age"
+ *       value=30.0
+ *       suffix="Years"
+ *   />
+ *
+ *   // With changeable unit dropdown
+ *   <@numeric_field::create_with_unit
+ *       label="Height"
+ *       name="height_cm"
+ *       value=175.0
+ *       unit_name="height_unit"
+ *       unit_value="cm"
+ *       unit_preset="height"
+ *   />
+ *
+ *   // Inline with unit (Alpine.js binding, inside existing x-data)
+ *   <@numeric_field::inline_with_unit
+ *       bind_value="displayHeight"
+ *       on_input="updateHeight($event.target.value)"
+ *       unit_model="heightUnit"
+ *       unit_name="reference_height_unit"
+ *       unit_preset="height"
+ *   />
+ *
+ *   // Inline with static suffix
+ *   <@numeric_field::inline_with_suffix
+ *       name="age"
+ *       value=30.0
+ *       suffix="Years"
+ *   />
+ *
+ *   Unit presets: "height" (cm/in), "body_weight" (kg/lb),
+ *   "weight" (kg/lb/g/oz/mg/mcg), "exercise_weight" (kg/lb/%1RM/BW),
+ *   "distance" (km/m/mi/yd/ft/in/cm/mm), "time" (sec/min/hr/ms),
+ *   "volume" (L/mL/fl oz/cup/gal/pt)
+ *@
+
+
+@* Single dropdown option button (helper) *@
+@fn unit_opt(value: &str, label: &str, model: &str) {
+    <button type="button"
+            x-on:click=@format("{} = '{}'; open = false", model, value)
+            class="block w-full px-3 py-1.5 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+            x-bind:class=@format("{} === '{}' && 'font-semibold'", model, value)>
+        @label
+    </button>
+}
+
+@* Render dropdown options for a unit preset (helper) *@
+@fn preset_options(preset: &str, model: &str) {
+    @if preset == "height" {
+        <@unit_opt value="cm" label="cm" model=@model />
+        <@unit_opt value="in" label="in" model=@model />
+    } else if preset == "body_weight" {
+        <@unit_opt value="kg" label="kg" model=@model />
+        <@unit_opt value="lb" label="lb" model=@model />
+    } else if preset == "weight" {
+        <@unit_opt value="kg" label="kg" model=@model />
+        <@unit_opt value="lb" label="lb" model=@model />
+        <@unit_opt value="g" label="g" model=@model />
+        <@unit_opt value="oz" label="oz" model=@model />
+        <@unit_opt value="mg" label="mg" model=@model />
+        <@unit_opt value="mcg" label="mcg" model=@model />
+    } else if preset == "exercise_weight" {
+        <@unit_opt value="kg" label="kg" model=@model />
+        <@unit_opt value="lb" label="lb" model=@model />
+        <@unit_opt value="pct-1rm" label="% of 1RM" model=@model />
+        <@unit_opt value="bw" label="Bodyweight" model=@model />
+    } else if preset == "distance" {
+        <@unit_opt value="km" label="km" model=@model />
+        <@unit_opt value="m" label="m" model=@model />
+        <@unit_opt value="mi" label="mi" model=@model />
+        <@unit_opt value="yd" label="yd" model=@model />
+        <@unit_opt value="ft" label="ft" model=@model />
+        <@unit_opt value="in" label="in" model=@model />
+        <@unit_opt value="cm" label="cm" model=@model />
+        <@unit_opt value="mm" label="mm" model=@model />
+    } else if preset == "time" {
+        <@unit_opt value="sec" label="sec" model=@model />
+        <@unit_opt value="min" label="min" model=@model />
+        <@unit_opt value="hr" label="hr" model=@model />
+        <@unit_opt value="ms" label="ms" model=@model />
+    } else if preset == "volume" {
+        <@unit_opt value="l" label="L" model=@model />
+        <@unit_opt value="ml" label="mL" model=@model />
+        <@unit_opt value="fl-oz" label="fl oz" model=@model />
+        <@unit_opt value="cup" label="cup" model=@model />
+        <@unit_opt value="gal" label="gal" model=@model />
+        <@unit_opt value="pt" label="pt" model=@model />
+    }
+}
+
+@* Unit dropdown button with chevron and options menu (helper) *@
+@fn unit_dropdown(model: &str, preset: &str, unit_name: &str = "") {
+    @if !unit_name.is_empty() {
+        <input type="hidden" name=@unit_name x-bind:value=@model />
+    }
+    <div class="relative">
+        <button type="button" x-on:click="open = !open"
+                class="inline-flex items-center gap-1 h-full px-3 bg-muted text-sm text-muted-foreground hover:text-foreground border-l border-input rounded-r-md cursor-pointer transition-colors">
+            <span x-text=@model></span>
+            <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+            </svg>
+        </button>
+        <div x-show="open" x-transition
+             class="absolute right-0 top-full mt-1 z-10 bg-popover text-popover-foreground border border-input rounded-md shadow-md py-1 min-w-[3rem]">
+            <@preset_options preset=@preset model=@model />
+        </div>
+    </div>
+}
+
+@* Basic numeric input for form submission *@
+@fn create(
+    label: &str,
+    name: &str,
+    value: f64,
+    min: f64 = 0.0,
+    max: f64 = 999999.0,
+    step: f64 = 1.0,
+    placeholder: &str = "",
+    required: bool = false,
+    class: &str = "",
+) {
+    @let step_str = if step == 1.0 { "1".to_string() } else { step.to_string() }
+    @let cls = class
+
+    <div class=@cn(["space-y-2", cls])>
+        <label for=@name class="text-sm font-medium leading-none">
+            @label
+            @if required {
+                <span class="text-destructive">*</span>
+            }
+        </label>
+        <input type="number"
+               id=@name
+               name=@name
+               value=@value
+               min=@min.to_string()
+               max=@max.to_string()
+               step=@step_str
+               @if !placeholder.is_empty() { placeholder=@placeholder }
+               class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+               @if required { required }
+        />
+    </div>
+}
+
+@* Numeric input with static suffix badge (e.g., "Years", "bpm") *@
+@fn create_with_suffix(
+    label: &str,
+    name: &str,
+    value: f64,
+    suffix: &str,
+    min: f64 = 0.0,
+    max: f64 = 999999.0,
+    step: f64 = 1.0,
+    placeholder: &str = "",
+    required: bool = false,
+    class: &str = "",
+) {
+    @let step_str = if step == 1.0 { "1".to_string() } else { step.to_string() }
+    @let cls = class
+
+    <div class=@cn(["space-y-2", cls])>
+        <label for=@name class="text-sm font-medium leading-none">
+            @label
+            @if required {
+                <span class="text-destructive">*</span>
+            }
+        </label>
+        <div class="flex rounded-md border border-input shadow-sm">
+            <input type="number"
+                   id=@name
+                   name=@name
+                   value=@value
+                   min=@min.to_string()
+                   max=@max.to_string()
+                   step=@step_str
+                   @if !placeholder.is_empty() { placeholder=@placeholder }
+                   class="w-full px-3 py-2 bg-transparent text-sm rounded-l-md border-0 focus:outline-none focus:ring-1 focus:ring-ring"
+                   @if required { required }
+            />
+            <span class="inline-flex items-center px-3 py-2 bg-muted text-sm text-muted-foreground border-l border-input rounded-r-md select-none">@suffix</span>
+        </div>
+    </div>
+}
+
+@* Numeric input with changeable unit dropdown.
+   Presets: "height", "body_weight", "weight", "exercise_weight", "distance", "time", "volume" *@
+@fn create_with_unit(
+    label: &str,
+    name: &str,
+    value: f64,
+    unit_name: &str,
+    unit_value: &str,
+    unit_preset: &str,
+    min: f64 = 0.0,
+    max: f64 = 999999.0,
+    step: f64 = 1.0,
+    placeholder: &str = "",
+    required: bool = false,
+    class: &str = "",
+) {
+    @let step_str = if step == 1.0 { "1".to_string() } else { step.to_string() }
+    @let cls = class
+
+    <div class=@cn(["space-y-2", cls])>
+        <label for=@name class="text-sm font-medium leading-none">
+            @label
+            @if required {
+                <span class="text-destructive">*</span>
+            }
+        </label>
+        <div class="flex rounded-md border border-input shadow-sm"
+             x-data=@```json { unit: @unit_value, open: false } ```@
+             x-on:click.outside="open = false">
+            <input type="number"
+                   id=@name
+                   name=@name
+                   value=@value
+                   min=@min.to_string()
+                   max=@max.to_string()
+                   step=@step_str
+                   @if !placeholder.is_empty() { placeholder=@placeholder }
+                   class="w-full px-3 py-2 bg-transparent text-sm rounded-l-md border-0 focus:outline-none focus:ring-1 focus:ring-ring"
+                   @if required { required }
+            />
+            <@unit_dropdown model="unit" preset=@unit_preset unit_name=@unit_name />
+        </div>
+    </div>
+}
+
+@* Inline numeric input for Alpine.js x-model binding (no label, no form submission) *@
+@fn inline(
+    model: &str,
+    min: f64 = 0.0,
+    max: f64 = 999999.0,
+    step: f64 = 1.0,
+    placeholder: &str = "",
+    class: &str = "",
+) {
+    @let step_str = if step == 1.0 { "1".to_string() } else { step.to_string() }
+    @let cls = class
+
+    <input type="number"
+           x-model.number=@model
+           min=@min.to_string()
+           max=@max.to_string()
+           step=@step_str
+           @if !placeholder.is_empty() { placeholder=@placeholder }
+           class=@cn(["flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50", cls])
+    />
+}
+
+@* Inline numeric with static suffix (no label, for grids/tables) *@
+@fn inline_with_suffix(
+    name: &str,
+    value: f64,
+    suffix: &str,
+    min: f64 = 0.0,
+    max: f64 = 999999.0,
+    step: f64 = 1.0,
+    placeholder: &str = "",
+    class: &str = "",
+) {
+    @let step_str = if step == 1.0 { "1".to_string() } else { step.to_string() }
+    @let cls = class
+
+    <div class=@cn(["flex rounded-md border border-input shadow-sm", cls])>
+        <input type="number"
+               name=@name
+               value=@value
+               min=@min.to_string()
+               max=@max.to_string()
+               step=@step_str
+               @if !placeholder.is_empty() { placeholder=@placeholder }
+               class="w-full px-3 py-2 bg-transparent text-sm rounded-l-md border-0 focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+        <span class="inline-flex items-center px-3 py-2 bg-muted text-sm text-muted-foreground border-l border-input rounded-r-md select-none">@suffix</span>
+    </div>
+}
+
+@* Inline numeric with changeable unit dropdown (Alpine.js binding, for use inside existing x-data).
+   bind_value: Alpine expression for x-bind:value (e.g., "displayHeight")
+   on_input: Alpine expression for x-on:input (e.g., "updateHeight($event.target.value)")
+   unit_model: Alpine model name for the unit in parent scope (e.g., "heightUnit")
+   unit_name: form field name for hidden input (e.g., "reference_height_unit")
+   unit_preset: preset key (e.g., "height") *@
+@fn inline_with_unit(
+    bind_value: &str,
+    on_input: &str,
+    unit_model: &str,
+    unit_name: &str,
+    unit_preset: &str,
+    min: f64 = 0.0,
+    max: f64 = 999999.0,
+    step: f64 = 1.0,
+    placeholder: &str = "",
+    class: &str = "",
+) {
+    @let step_str = if step == 1.0 { "1".to_string() } else { step.to_string() }
+    @let cls = class
+
+    <div class=@cn(["flex rounded-md border border-input shadow-sm", cls])
+         x-data="{ open: false }" x-on:click.outside="open = false">
+        <input type="number"
+               x-bind:value=@bind_value
+               x-on:input=@on_input
+               min=@min.to_string()
+               max=@max.to_string()
+               step=@step_str
+               @if !placeholder.is_empty() { placeholder=@placeholder }
+               class="w-full px-3 py-2 bg-transparent text-sm rounded-l-md border-0 focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+        <@unit_dropdown model=@unit_model preset=@unit_preset unit_name=@unit_name />
+    </div>
+}

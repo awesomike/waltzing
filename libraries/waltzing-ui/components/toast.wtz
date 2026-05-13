@@ -150,6 +150,7 @@
     @let toast_cls = cn(cls_parts)
 
     @let duration_ms = duration.unwrap_or(5000)
+    @let x_init_value = format("setTimeout(() => show = false, {})", duration_ms)
 
     <div
         class=@toast_cls
@@ -157,7 +158,7 @@
         aria-live="assertive"
         x-data="{ show: true }"
         x-show="show"
-        x-init="setTimeout(() => show = false, @duration_ms)"
+        x-init=@x_init_value
         x-transition:enter="transform ease-out duration-300"
         x-transition:enter-start="translate-x-full opacity-0"
         x-transition:enter-end="translate-x-0 opacity-100"
@@ -217,22 +218,46 @@
 
 @* Shorthand for default toast *@
 @fn default(title: &str, description: Option<&str> = None, duration: Option<u32> = None) {
-    <@apply variant=Variant::Default title=@title description=@description duration=@duration />
+    @let desc = description.unwrap_or("")
+    @let dur = duration.unwrap_or(5000)
+    @if !desc.is_empty() {
+        <@apply variant=@Variant::Default title=@title description=@desc duration=@dur />
+    } else {
+        <@apply variant=@Variant::Default title=@title duration=@dur />
+    }
 }
 
 @* Shorthand for success toast *@
 @fn success(title: &str, description: Option<&str> = None, duration: Option<u32> = None) {
-    <@apply variant=Variant::Success title=@title description=@description duration=@duration />
+    @let desc = description.unwrap_or("")
+    @let dur = duration.unwrap_or(5000)
+    @if !desc.is_empty() {
+        <@apply variant=@Variant::Success title=@title description=@desc duration=@dur />
+    } else {
+        <@apply variant=@Variant::Success title=@title duration=@dur />
+    }
 }
 
 @* Shorthand for error toast *@
 @fn error(title: &str, description: Option<&str> = None, duration: Option<u32> = None) {
-    <@apply variant=Variant::Error title=@title description=@description duration=@duration />
+    @let desc = description.unwrap_or("")
+    @let dur = duration.unwrap_or(5000)
+    @if !desc.is_empty() {
+        <@apply variant=@Variant::Error title=@title description=@desc duration=@dur />
+    } else {
+        <@apply variant=@Variant::Error title=@title duration=@dur />
+    }
 }
 
 @* Shorthand for warning toast *@
 @fn warning(title: &str, description: Option<&str> = None, duration: Option<u32> = None) {
-    <@apply variant=Variant::Warning title=@title description=@description duration=@duration />
+    @let desc = description.unwrap_or("")
+    @let dur = duration.unwrap_or(5000)
+    @if !desc.is_empty() {
+        <@apply variant=@Variant::Warning title=@title description=@desc duration=@dur />
+    } else {
+        <@apply variant=@Variant::Warning title=@title duration=@dur />
+    }
 }
 
 @* Helper to trigger a toast from Alpine.js *@

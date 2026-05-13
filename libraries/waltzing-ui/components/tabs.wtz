@@ -3,6 +3,7 @@
  * Tabbed interface with Alpine.js state management
  *@
 
+@use waltzing::escape::attr
 
 @struct Tab {
     id: String,
@@ -16,30 +17,38 @@
     class: &str = "",
 ) {
     @let cls = class
+    @let default_tab_esc = attr(default_tab)
+    @let x_data = format("{{ activeTab: '{}' }}", default_tab_esc)
     <div
-        x-data=@```json { activeTab: "@default_tab" } ```@
+        x-data=@x_data
         class=@cls
     >
         @* Tab list *@
         <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground" role="tablist">
-            @for tab in tabs {
+            @for tab in &tabs {
+                @let tab_id_esc = attr(&tab.id)
+                @let aria_sel = format("activeTab === '{}'", tab_id_esc)
+                @let click_expr = format("activeTab = '{}'", tab_id_esc)
+                @let class_expr = format("activeTab === '{}' ? 'bg-background text-foreground shadow' : ''", tab_id_esc)
                 <button
                     type="button"
                     role="tab"
-                    :aria-selected="activeTab === '@tab.id'"
-                    @click="activeTab = '@tab.id'"
-                    :class="activeTab === '@tab.id' ? 'bg-background text-foreground shadow' : ''"
+                    :aria-selected=@aria_sel
+                    @click=@click_expr
+                    :class=@class_expr
                     class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                 >
-                    @tab.label
+                    @&tab.label
                 </button>
             }
         </div>
 
         @* Tab panels *@
-        @for tab in tabs {
+        @for tab in &tabs {
+            @let tab_id_esc = attr(&tab.id)
+            @let show_expr = format("activeTab === '{}'", tab_id_esc)
             <div
-                x-show="activeTab === '@tab.id'"
+                x-show=@show_expr
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
@@ -69,32 +78,40 @@
     class: &str = "",
 ) {
     @let cls = class
-    @let classes = cn(&["flex gap-4", @cls])
+    @let classes = cn(&["flex gap-4", cls])
+    @let default_tab_esc = attr(default_tab)
+    @let x_data = format("{{ activeTab: '{}' }}", default_tab_esc)
     <div
-        x-data=@```json { activeTab: "@default_tab" } ```@
+        x-data=@x_data
         class=@classes
     >
         @* Vertical tab list *@
         <div class="flex flex-col space-y-1" role="tablist">
-            @for tab in tabs {
+            @for tab in &tabs {
+                @let tab_id_esc = attr(&tab.id)
+                @let aria_sel = format("activeTab === '{}'", tab_id_esc)
+                @let click_expr = format("activeTab = '{}'", tab_id_esc)
+                @let class_expr = format("activeTab === '{}' ? 'bg-muted' : ''", tab_id_esc)
                 <button
                     type="button"
                     role="tab"
-                    :aria-selected="activeTab === '@tab.id'"
-                    @click="activeTab = '@tab.id'"
-                    :class="activeTab === '@tab.id' ? 'bg-muted' : ''"
+                    :aria-selected=@aria_sel
+                    @click=@click_expr
+                    :class=@class_expr
                     class="inline-flex items-center whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium ring-offset-background transition-all hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                    @tab.label
+                    @&tab.label
                 </button>
             }
         </div>
 
         @* Tab panels *@
         <div class="flex-1">
-            @for tab in tabs {
+            @for tab in &tabs {
+                @let tab_id_esc = attr(&tab.id)
+                @let show_expr = format("activeTab === '{}'", tab_id_esc)
                 <div
-                    x-show="activeTab === '@tab.id'"
+                    x-show=@show_expr
                     x-transition
                     role="tabpanel"
                 >

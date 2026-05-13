@@ -75,7 +75,7 @@
     class: &str = "",
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-    @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
+    @let disabled_cls = if disabled { "pointer-events-none opacity-50" } else { "" }
     @let cls = cn(&[base, disabled_cls, class])
     <button
         class=@cls
@@ -97,7 +97,7 @@
     content: @() = @{},
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-    @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
+    @let disabled_cls = if disabled { "pointer-events-none opacity-50" } else { "" }
     @let cls = cn(&[base, disabled_cls, class])
     <button
         class=@cls
@@ -179,7 +179,7 @@
     class: &str = "",
 ) {
     @let base = "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground"
-    @let disabled_cls = class_if(disabled, "pointer-events-none opacity-50")
+    @let disabled_cls = if disabled { "pointer-events-none opacity-50" } else { "" }
     @let cls = cn(&[base, disabled_cls, class])
     <button
         class=@cls

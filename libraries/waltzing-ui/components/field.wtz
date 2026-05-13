@@ -8,14 +8,14 @@
  *
  * <@field::apply label="Email" description=Some("We'll never share your email") required=true error=@None>
  *     <@input::apply
- *         input_type=input::InputType::Email
+ *         input_type=@input::InputType::Email
  *         name="email"
- *         placeholder=Some("you@example.com")
+ *         placeholder=Some(@"you@example.com")
  *     />
  * </@field::apply>
  *
  * <@field::apply label="Username" required=false>
- *     <@input::text name="username" value=None placeholder=Some("Enter username") />
+ *     <@input::text name="username" value=@None placeholder=Some("Enter username") />
  * </@field::apply>
  *
  * <@field::apply label="Password" error=Some("Password is required") required=true>
