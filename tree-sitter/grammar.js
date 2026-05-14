@@ -36,7 +36,7 @@
 //
 // `src/parser.c`, `src/grammar.json`, and `src/node-types.json` are generated
 // from this file with tree-sitter-cli v0.25.10. Regeneration is expected to
-// complete quickly on local hardware (last checked: 0.60s, <90 MB RSS).
+// complete quickly on local hardware (last checked: 0.30s, <90 MB RSS).
 //
 // The previous grammar shape made `tree-sitter generate` explore an enormous
 // LR/error-recovery state space. The important constraints that keep regen
@@ -44,11 +44,14 @@
 //   • All template-content bodies go through `_template_nodes`.
 //   • HTML void elements are explicit; ordinary `<tag>` starts a full element.
 //   • Function tags require `/>` for self-closing form.
-//   • Rust expressions are intentionally opaque (`rust_expression`) except for
-//     literals, paths, inferred enum variants, template blocks, and render
-//     closures. The Waltzing compiler validates Rust expression semantics.
+//   • The bare `rust_expression` token stays at `prec(-1)` — it is a low-
+//     priority fallback that every keyword, path, literal, and operator must
+//     outrank. Bumping it to prec 0/1 makes it win greedily and blew the
+//     corpus error count to ~1440. Richer Rust syntax is modeled with
+//     *rules* built from existing tokens (`path_expression`, `binary_
+//     expression`, `match_expression`, …), never by widening that token.
 //   • Multi-depth template comments/raw blocks are not modeled as 22 token
-//     variants; the common one-delimiter forms are tokenized for editor use.
+//     variants; the 1–3 delimiter forms are tokenized for editor use.
 //
 // If any of those constraints are relaxed, run `tree-sitter generate` before
 // committing and watch memory/time. A return to multi-GB RSS means the grammar
@@ -57,13 +60,12 @@
 // REAL-WORLD COVERAGE: this grammar still produces ERROR nodes on real
 // templates — `npm run corpus-check` parses the sibling `cli/` +
 // `libraries/waltzing-ui/` `.wtz` trees and guards the error count against
-// regressions (current budget: 887 ERROR/MISSING nodes across 65 files, 5
-// fully clean). Known gaps the budget covers: `match`/`if` used as Rust
-// *expressions* (e.g. `@let cls = match v { … }`), method-call parens in a
-// bare `rust_expression` (`x.is_some()`), and a `path_pattern` vs `rust_path`
-// lexer-token collision. Closing these needs careful, measure-driven work
-// (run corpus-check after every change) — a naive `rust_expression` rework
-// regressed the count to 1324 even though it regenerated cleanly.
+// regressions (current budget: 89 ERROR/MISSING nodes across 65 files, 44
+// fully clean — down from 887/5). Remaining gaps the budget covers: the bare
+// `<` HTML-vs-comparison ambiguity (`@if a < b`), the embedded `<style>` CSS
+// and `<script>` JS sub-grammars, and Rust block expressions whose interior
+// generics (`Vec<&str>`) hit the deliberate `<` exclusion. Closing these
+// needs careful, measure-driven work — run corpus-check after every change.
 
 module.exports = grammar({
   name: "waltzing",
@@ -74,6 +76,10 @@ module.exports = grammar({
     // `|x|` — could be closure that returns `|x|` (no return type) or that's
     // about to declare a `-> T` return type. cli 0.25 needs both parses.
     [$.closure_type],
+    // `expr as Path` — `Path` could still take `<T>` (generic_type) or stop
+    // (path_type). Exposed by `cast_expression` putting a `rust_type` after
+    // `as`; resolved with a GLR split.
+    [$.generic_type, $.path_type],
   ],
 
   rules: {
@@ -192,6 +198,7 @@ module.exports = grammar({
     template_node: ($) =>
       choice(
         $.html_element,
+        $.doctype,
         $.function_tag,
         $.template_control_flow,
         $.template_expression,
@@ -201,6 +208,10 @@ module.exports = grammar({
         $.escape_at,
         $.text_content,
       ),
+
+    // HTML doctype declaration, e.g. `<!DOCTYPE html>`. The `<![a-zA-Z]`
+    // prefix never collides with `<!--` HTML comments.
+    doctype: ($) => token(/<![a-zA-Z][^>]*>/),
 
     // HTML elements
     // Note: attribute_or_control allows @if/@for in attribute position
@@ -322,6 +333,7 @@ module.exports = grammar({
       choice(
         token(prec(2, /@[a-zA-Z_][a-zA-Z0-9_]*!/)),  // Macro calls: @format!
         seq("@", $.expression_path),  // Regular expressions: @foo.bar
+        seq("@", "&", $.expression_path),  // Borrowed: @&user.display_name
       ),
 
     complex_expression: ($) => seq("@", "(", $.expression, ")"),
@@ -531,8 +543,13 @@ module.exports = grammar({
         $.tuple_variant_pattern,
         $.tuple_pattern,
         $.struct_pattern,
-        $.path_pattern,
         $.literal,
+        // A bare `rust_path` covers both single-segment bindings (`v`) and
+        // unit-variant / path patterns (`None`, `Color::Red`). The lexer
+        // produces a `rust_path` token for a lone identifier in pattern
+        // position, so `identifier_pattern` (which wants an `identifier`
+        // token) is only reachable via a `ref` / `mut` prefix — keep both.
+        $.rust_path,
         $.identifier_pattern,
       ),
 
@@ -551,17 +568,6 @@ module.exports = grammar({
     // (e.g. `Some(ref h)`, `Some(mut x)`).
     identifier_pattern: ($) =>
       seq(optional(choice("ref", "mut")), $.identifier),
-
-    // Unit enum-variant / path pattern, e.g. `Variant::Default`, `Size::Sm`.
-    // Token requires at least one `::` so it never collides with a bare
-    // `identifier_pattern`.
-    path_pattern: ($) =>
-      token(
-        seq(
-          /[a-zA-Z_][a-zA-Z0-9_]*/,
-          repeat1(seq("::", /[a-zA-Z_][a-zA-Z0-9_]*/)),
-        ),
-      ),
 
     struct_pattern: ($) =>
       seq(
@@ -606,12 +612,148 @@ module.exports = grammar({
         $.inferred_enum_call,
         $.inferred_enum_struct,
         $.inferred_enum_path,
+        $.array_literal,
+        $.reference_expression,
+        $.unary_expression,
+        $.binary_expression,
+        $.cast_expression,
+        $.paren_expression,
+        $.closure_expression,
+        $.path_expression,
+        $.match_expression,
+        $.if_expression,
+        $.out_ref,
+        $.target_ref,
         $.rust_path,
         $.rust_expression,
       ),
 
     rust_expression: ($) =>
-      token(prec(-1, /[^{}<@,;)\]\s][^{}<@,;)\]]*/)),
+      token(prec(-1, /[^{}<@(\[,;)\]\s][^{}<@(\[,;)\]]*/)),
+
+    // `match` / `if` used as Rust *expressions* (e.g. `@let cls = match v { … }`
+    // or `@cn([base, if cond { "a" } else { "b" }])`). Distinct from the
+    // `@match` / `@if` template control flow: no `@`, and the arm / branch
+    // bodies are opaque Rust blocks (`rust_block`), not template content.
+    match_expression: ($) =>
+      prec(
+        2,
+        seq("match", $.expression, "{", repeat($.match_expression_arm), "}"),
+      ),
+
+    match_expression_arm: ($) =>
+      seq(
+        $.pattern,
+        optional(seq("if", $.expression)),
+        "=>",
+        choice($.rust_block, $.expression),
+        optional(","),
+      ),
+
+    if_expression: ($) =>
+      prec.right(
+        2,
+        seq(
+          "if",
+          optional(seq("let", $.pattern, "=")),
+          $.expression,
+          $.rust_block,
+          optional(seq("else", choice($.if_expression, $.rust_block))),
+        ),
+      ),
+
+    // Opaque braced Rust — the body of a `match` / `if` expression arm. Spans
+    // balanced `{}` `()` `[]`; recursion is bounded since each level needs a
+    // literal opening delimiter. Not template content — no `<…>` markup here.
+    rust_block: ($) => seq("{", repeat($._rust_token), "}"),
+
+    _rust_token: ($) =>
+      choice(
+        $.rust_expression,
+        $.literal,
+        $.rust_block,
+        seq("(", repeat($._rust_token), ")"),
+        seq("[", repeat($._rust_token), "]"),
+        ",",
+        ";",
+      ),
+
+    // Array / slice literal in expression position, e.g. the `["a", cls]` in
+    // `@cn(["a", cls])`. The `[` / `]` are literal tokens so recursion is
+    // bounded; the bare `rust_expression` token can't span the interior `,`
+    // so this rule is needed for multi-element arrays. A `&[…]` slice ref is
+    // `reference_expression` wrapping this.
+    array_literal: ($) =>
+      seq("[", optional($.argument_list), "]"),
+
+    // `&expr` borrow in expression position, e.g. the RHS of
+    // `@if let Some(v) = &min_str`. The leading `&` is otherwise a bare token
+    // (from `array_literal` / attribute refs) that shadows `rust_expression`.
+    reference_expression: ($) =>
+      prec(2, seq("&", $.primary_expression)),
+
+    // `!expr` / `-expr` unary prefix, e.g. `@if !unit_name.is_empty()`.
+    unary_expression: ($) =>
+      prec(3, seq(choice("!", "-"), $.primary_expression)),
+
+    // Parenthesised expression, e.g. `(selected == Some(v))` — the `(` / `)`
+    // are literal tokens, so recursion is bounded.
+    paren_expression: ($) =>
+      seq("(", $.expression, ")"),
+
+    // Rust closure value, e.g. `|v| v.to_string()` in `input.map(|v| …)`.
+    // Distinct from `closure_type` (a type in parameter position) and
+    // `render_closure` (`@(…)`). A bare `|` here can't be confused with the
+    // `||` binary operator since that is a single two-char token.
+    closure_expression: ($) =>
+      prec(
+        1,
+        seq(
+          "|",
+          optional(seq($.simple_pattern, repeat(seq(",", $.simple_pattern)))),
+          "|",
+          $.expression,
+        ),
+      ),
+
+    // Binary operator expression, e.g. `step > 0.0`, `a == b && c`. Operands
+    // are `primary_expression` (not the full `expression`) to keep the LR
+    // table tractable. Bare `<` is deliberately excluded — it's ambiguous
+    // with HTML tag openers — so `a < b` comparisons stay unparsed.
+    binary_expression: ($) =>
+      prec.left(
+        1,
+        seq($.primary_expression, $.binary_operator, $.primary_expression),
+      ),
+
+    binary_operator: ($) =>
+      choice(
+        "==", "!=", ">=", "<=", ">", "&&", "||",
+        "+", "-", "*", "/", "%",
+      ),
+
+    // `expr as Type` cast, e.g. `value_min.map(|v| v as f64)`.
+    cast_expression: ($) =>
+      prec.left(1, seq($.primary_expression, "as", $.rust_type)),
+
+    // Method / field / index chains off a path, e.g. `data.is_some()` or
+    // `value.map(...)`. Built from `rust_path` tokens (not the opaque
+    // `rust_expression`) so `rust_path` can't truncate the chain at the first
+    // `.`. `repeat1` + `token.immediate` keep a lone `foo` a plain `rust_path`.
+    path_expression: ($) =>
+      prec(
+        2,
+        seq(
+          $.rust_path,
+          repeat1(
+            choice(
+              seq(token.immediate("."), $.rust_path),
+              seq(token.immediate("("), optional($.argument_list), ")"),
+              seq(token.immediate("["), optional($.argument_list), "]"),
+            ),
+          ),
+        ),
+      ),
 
     // Template block - explicit template content in expression position
     // Use @{ ... } to create template content as an expression
@@ -635,6 +777,7 @@ module.exports = grammar({
     // Literals
     literal: ($) =>
       choice(
+        $.raw_string,
         $.string_literal,
         $.char_literal,
         $.number_literal,
@@ -643,6 +786,18 @@ module.exports = grammar({
 
     string_literal: ($) =>
       seq('"', repeat(choice(/[^"\\]/, $.escape_sequence)), '"'),
+
+    // Rust raw string: `r"…"`, `r#"…"#`, `r##"…"##`. Tokenised so embedded
+    // `"` / `{` / `@` don't terminate it. One- and two-hash forms cover the
+    // corpus; deeper nesting is rare enough to leave unhandled.
+    raw_string: ($) =>
+      token(
+        choice(
+          /r"[^"]*"/,
+          /r#"([^"]|"[^#])*"#/,
+          /r##"([^#]|#[^#]|"#?[^#])*"##/,
+        ),
+      ),
 
     char_literal: ($) => seq("'", choice(/[^'\\]/, $.escape_sequence), "'"),
 
@@ -689,7 +844,10 @@ module.exports = grammar({
       ),
 
     closure_param: ($) =>
-      seq(optional(seq($.identifier, ":")), $.rust_type),
+      // The name may lex as `rust_path` (the `identifier` / `rust_path` token
+      // collision): in closure-param position both a bare name and a path
+      // type are valid, so accept either for the name.
+      seq(optional(seq(choice($.identifier, $.rust_path), ":")), $.rust_type),
 
     // Compiler-injected render callback type - generates impl Fn(T1, T2, ..., &mut _WtzTarget)
     // Full syntax: @render(T1, T2, ...)
@@ -751,13 +909,18 @@ module.exports = grammar({
     // Comments
     comment: ($) => choice($.template_comment, $.html_comment),
 
-    // Template comments: @* ... *@.
+    // Template comments: @* ... *@, @** ... **@, @*** ... ***@.
     //
-    // The compiler supports arbitrary delimiter depth (`@** ... **@`, etc.),
-    // but modeling each depth as a separate token made error-recovery table
-    // construction explode. Keep the common editor token here; deeper comments
-    // still parse as ordinary text/error recovery until a scanner is added.
-    template_comment: ($) => $.template_comment_1,
+    // The compiler supports arbitrary delimiter depth, but each depth is a
+    // separate token; wiring up too many at once bloats the error-recovery
+    // tables. The 1–3 asterisk forms cover real-world templates — deeper
+    // comments fall back to text/error recovery until a scanner is added.
+    template_comment: ($) =>
+      choice(
+        $.template_comment_1,
+        $.template_comment_2,
+        $.template_comment_3,
+      ),
     template_comment_1: ($) => /@\*([^*]|\*[^@])*\*@/,
     template_comment_2: ($) => /@\*\*([^*]|\*[^*]|\*\*[^@])*\*\*@/,
     template_comment_3: ($) => /@\*\*\*([^*]|\*[^*]|\*\*[^*]|\*\*\*[^@])*\*\*\*@/,

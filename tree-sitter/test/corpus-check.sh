@@ -13,10 +13,13 @@
 # History:
 #   922  — true baseline, before any 2026-05 grammar fixes
 #   887  — after path/ref-mut/@if-let-attr/embedded-attr-value fixes (4b34663)
+#    89  — after the expression-grammar overhaul: rust_path patterns,
+#          path/reference/unary/binary/cast/closure/match/if expressions,
+#          array/raw-string literals, doctype, @**/@*** comments, @out args
 set -euo pipefail
 
 # Current accepted ceiling. Lower this whenever the grammar improves.
-ERROR_BUDGET=887
+ERROR_BUDGET=89
 
 cd "$(dirname "$0")/.."
 TS="npx tree-sitter"
