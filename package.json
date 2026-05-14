@@ -1,0 +1,25 @@
+{
+  "name": "waltzing-showcase-browser-tests",
+  "version": "0.1.0",
+  "private": true,
+  "description": "This repository is the companion workspace for Waltzing template tooling. It currently contains a showcase server, generated library metadata, editor extension assets, and the `waltzing-ui` template library.",
+  "scripts": {
+    "test:browser": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awesomike/waltzing.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/awesomike/waltzing/issues"
+  },
+  "homepage": "https://github.com/awesomike/waltzing#readme",
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@playwright/test": "^1.60.0"
+  }
+}

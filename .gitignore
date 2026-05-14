@@ -1,4 +1,5 @@
 tree-sitter/node_modules/
+node_modules/
 extensions/zed/target/
 .DS_Store
 
@@ -11,3 +12,7 @@ extensions/zed/target/
 
 # Dev-install grammar clone (Zed pulls grammar source here at install time)
 extensions/zed/grammars/waltzing/
+
+# Browser test artifacts
+/test-results/
+/playwright-report/

@@ -32,7 +32,10 @@ async fn main() {
     let app = Router::new()
         .route("/", get(index))
         .route("/library/{id}", get(library_showcase))
-        .route("/library/{id}/component/{component}", get(component_showcase))
+        .route(
+            "/library/{id}/component/{component}",
+            get(component_showcase),
+        )
         .route("/library/{id}/layout/{layout}", get(layout_showcase))
         .route("/library/{id}/block/{block}", get(block_showcase))
         .nest_service("/static", ServeDir::new("static"));
@@ -1237,7 +1240,8 @@ fn get_layout_description(layout: &str) -> &'static str {
 
 fn get_layout_preview(layout: &str) -> &'static str {
     match layout {
-        "base" => r##"
+        "base" => {
+            r##"
             <div class="h-[500px] flex flex-col">
                 <!-- Simulated browser chrome -->
                 <div class="bg-muted/50 border-b px-4 py-2 flex items-center gap-2">
@@ -1266,8 +1270,10 @@ fn get_layout_preview(layout: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "auth" => r##"
+        "##
+        }
+        "auth" => {
+            r##"
             <div class="flex h-[500px]">
                 <!-- Brand side -->
                 <div class="hidden md:flex md:w-1/2 bg-muted p-10 flex-col">
@@ -1305,8 +1311,10 @@ fn get_layout_preview(layout: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "dashboard" => r##"
+        "##
+        }
+        "dashboard" => {
+            r##"
             <div x-data="{ sidebarOpen: true }" class="flex h-[500px]">
                 <!-- Sidebar -->
                 <aside :class="sidebarOpen ? 'w-64' : 'w-16'" class="border-r bg-card flex flex-col transition-all duration-300">
@@ -1363,8 +1371,10 @@ fn get_layout_preview(layout: &str) -> &'static str {
                     </main>
                 </div>
             </div>
-        "##,
-        "marketing" => r##"
+        "##
+        }
+        "marketing" => {
+            r##"
             <div class="flex flex-col h-[500px]">
                 <!-- Header -->
                 <header class="border-b">
@@ -1402,8 +1412,10 @@ fn get_layout_preview(layout: &str) -> &'static str {
                     <p class="text-center text-sm text-muted-foreground">© 2024 Acme Inc. All rights reserved.</p>
                 </footer>
             </div>
-        "##,
-        "settings" => r##"
+        "##
+        }
+        "settings" => {
+            r##"
             <div class="flex h-[500px]">
                 <!-- Settings sidebar -->
                 <aside class="w-56 border-r p-4">
@@ -1450,8 +1462,10 @@ fn get_layout_preview(layout: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "sidebar" => r##"
+        "##
+        }
+        "sidebar" => {
+            r##"
             <div class="flex h-[500px]">
                 <!-- Sidebar navigation -->
                 <aside class="w-64 border-r bg-card flex flex-col">
@@ -1488,8 +1502,10 @@ fn get_layout_preview(layout: &str) -> &'static str {
                     </article>
                 </div>
             </div>
-        "##,
-        _ => r##"
+        "##
+        }
+        _ => {
+            r##"
             <div class="p-8 flex flex-col items-center justify-center h-full min-h-[300px] text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted-foreground mb-4">
                     <rect width="18" height="18" x="3" y="3" rx="2"/>
@@ -1499,19 +1515,23 @@ fn get_layout_preview(layout: &str) -> &'static str {
                 <h4 class="text-lg font-medium mb-2">Layout Preview</h4>
                 <p class="text-sm text-muted-foreground">Preview not available for this layout.</p>
             </div>
-        "##,
+        "##
+        }
     }
 }
 
 fn get_layout_usage(layout: &str) -> &'static str {
     match layout {
-        "base" => r#"@import /layouts/base.wtz as base
+        "base" => {
+            r#"@import /layouts/base.wtz as base
 
 <@base::apply title="My Page">
     <h1>Welcome</h1>
     <p>Your content here...</p>
-</@>"#,
-        "auth" => r#"@import /layouts/auth.wtz as auth
+</@>"#
+        }
+        "auth" => {
+            r#"@import /layouts/auth.wtz as auth
 
 <@auth::apply title="Login">
     <@auth::card>
@@ -1519,8 +1539,10 @@ fn get_layout_usage(layout: &str) -> &'static str {
             <!-- Login form fields -->
         </form>
     </@>
-</@>"#,
-        "dashboard" => r#"@import /layouts/dashboard.wtz as dashboard
+</@>"#
+        }
+        "dashboard" => {
+            r#"@import /layouts/dashboard.wtz as dashboard
 
 <@dashboard::apply
     title="Dashboard"
@@ -1530,8 +1552,10 @@ fn get_layout_usage(layout: &str) -> &'static str {
     <div class="grid gap-4">
         <!-- Dashboard content -->
     </div>
-</@>"#,
-        "marketing" => r#"@import /layouts/marketing.wtz as marketing
+</@>"#
+        }
+        "marketing" => {
+            r#"@import /layouts/marketing.wtz as marketing
 
 <@marketing::apply title="Welcome">
     <@marketing::hero
@@ -1539,16 +1563,20 @@ fn get_layout_usage(layout: &str) -> &'static str {
         description="Get started with our platform"
     />
     <@marketing::features />
-</@>"#,
-        "settings" => r#"@import /layouts/settings.wtz as settings
+</@>"#
+        }
+        "settings" => {
+            r#"@import /layouts/settings.wtz as settings
 
 <@settings::apply
     title="Settings"
     active_section="profile"
 >
     <!-- Settings content for active section -->
-</@>"#,
-        "sidebar" => r#"@import /layouts/sidebar.wtz as sidebar
+</@>"#
+        }
+        "sidebar" => {
+            r#"@import /layouts/sidebar.wtz as sidebar
 
 @let nav_items = vec![
     sidebar::NavItem { label: "Home", href: "/", active: true },
@@ -1559,29 +1587,39 @@ fn get_layout_usage(layout: &str) -> &'static str {
     <article>
         <!-- Page content -->
     </article>
-</@>"#,
-        _ => r#"@import /layouts/LAYOUT_NAME.wtz as layout
+</@>"#
+        }
+        _ => {
+            r#"@import /layouts/LAYOUT_NAME.wtz as layout
 
 <@layout::apply title="Page Title">
     <!-- Your content here -->
-</@>"#,
+</@>"#
+        }
     }
 }
 
 fn get_block_category_and_file(block: &str) -> (&'static str, String) {
     match block {
         "login" => ("auth", "login".to_string()),
-        "login-01" | "login-02" | "login-03" | "login-04" | "login-05" => ("auth", block.to_string()),
+        "login-01" | "login-02" | "login-03" | "login-04" | "login-05" => {
+            ("auth", block.to_string())
+        }
         "signup" => ("auth", "signup".to_string()),
         "signup-01" => ("auth", block.to_string()),
+        "login-card" => ("auth", "login-card".to_string()),
+        "signup-card" => ("auth", "signup-card".to_string()),
         "otp-01" => ("auth", block.to_string()),
         "confirm-dialog" => ("dialogs", "confirm".to_string()),
         "delete-dialog" => ("dialogs", "delete".to_string()),
         "share-dialog" => ("dialogs", "share".to_string()),
         "contact-form" => ("forms", "contact".to_string()),
+        "contact-card" => ("forms", "contact-card".to_string()),
         "profile-form" => ("forms", "profile".to_string()),
-        "sidebar-01" | "sidebar-02" | "sidebar-03" | "sidebar-07" | "sidebar-11" | "sidebar-12" | "sidebar-15" => ("sidebar", block.to_string()),
+        "sidebar-01" | "sidebar-02" | "sidebar-03" | "sidebar-07" | "sidebar-11" | "sidebar-12"
+        | "sidebar-15" => ("sidebar", block.to_string()),
         "dashboard-01" => ("dashboard", block.to_string()),
+        "stats-grid" => ("dashboard", "stats-grid".to_string()),
         "calendar-01" => ("calendar", block.to_string()),
         _ => ("", block.to_string()),
     }
@@ -1625,7 +1663,7 @@ fn generate_block_detail(block: &str) -> String {
             <section>
                 <h3 class="text-lg font-semibold mb-4">Preview</h3>
                 <div class="rounded-lg border border-border overflow-hidden">
-                    <div class="p-8 bg-card/50 flex items-center justify-center min-h-[300px]">
+                    <div id="block-preview" class="p-8 bg-card/50 flex items-center justify-center min-h-[300px]">
                         {preview}
                     </div>
                 </div>
@@ -1670,6 +1708,10 @@ fn get_block_description(block: &str) -> &'static str {
             "A complete login form block with email/password fields, remember me option, and forgot password link. Ready to integrate with your authentication backend.",
         "signup" | "signup-01" =>
             "A signup form block with name, email, password fields, and terms acceptance. Includes validation states and social signup options.",
+        "login-card" =>
+            "An accessible email/password sign-in card with validation message slots.",
+        "signup-card" =>
+            "An accessible registration card with required fields and a terms checkbox.",
         "otp-01" =>
             "One-time password verification block with a 6-digit code input. Perfect for two-factor authentication flows.",
         "sidebar-01" | "sidebar-02" | "sidebar-03" =>
@@ -1684,6 +1726,8 @@ fn get_block_description(block: &str) -> &'static str {
             "A settings sidebar with categorized navigation and notification badges.",
         "dashboard-01" =>
             "A complete dashboard block with stats cards, recent activity table, and quick actions.",
+        "stats-grid" =>
+            "A responsive dashboard KPI card grid.",
         "calendar-01" =>
             "A full calendar block with month view, event display, and navigation controls.",
         "confirm-dialog" =>
@@ -1694,6 +1738,8 @@ fn get_block_description(block: &str) -> &'static str {
             "A share dialog with link copying, email sharing, and permission settings.",
         "contact-form" =>
             "A contact form block with name, email, subject, and message fields.",
+        "contact-card" =>
+            "A labeled contact form card with validation message slots.",
         "profile-form" =>
             "A profile settings form with avatar upload, personal info, and social links.",
         _ => "A pre-built UI block ready to use in your application.",
@@ -1702,7 +1748,109 @@ fn get_block_description(block: &str) -> &'static str {
 
 fn get_block_preview(block: &str) -> &'static str {
     match block {
-        "login" | "login-01" => r##"
+        "login-card" => {
+            r##"
+            <form action="/login" method="post" class="w-full max-w-sm rounded-xl border bg-card p-6 shadow-sm space-y-4">
+                <div class="text-center space-y-1">
+                    <h3 class="text-xl font-semibold">Sign in</h3>
+                    <p class="text-sm text-muted-foreground">Use your email and password to continue.</p>
+                </div>
+                <div class="space-y-2">
+                    <label for="preview-login-email" class="text-sm font-medium">Email</label>
+                    <input id="preview-login-email" name="email" type="email" placeholder="you@example.com" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                </div>
+                <div class="space-y-2">
+                    <label for="preview-login-password" class="text-sm font-medium">Password</label>
+                    <input id="preview-login-password" name="password" type="password" placeholder="Password" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                </div>
+                <label class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <input name="remember" type="checkbox" class="h-4 w-4 rounded border-input">
+                    Remember this device
+                </label>
+                <button type="submit" class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Sign in</button>
+            </form>
+        "##
+        }
+        "signup-card" => {
+            r##"
+            <form action="/signup" method="post" class="w-full max-w-sm rounded-xl border bg-card p-6 shadow-sm space-y-4">
+                <div class="text-center space-y-1">
+                    <h3 class="text-xl font-semibold">Create account</h3>
+                    <p class="text-sm text-muted-foreground">Enter your details to get started.</p>
+                </div>
+                <div class="space-y-2">
+                    <label for="preview-signup-name" class="text-sm font-medium">Name</label>
+                    <input id="preview-signup-name" name="name" type="text" placeholder="Jane Doe" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                </div>
+                <div class="space-y-2">
+                    <label for="preview-signup-email" class="text-sm font-medium">Email</label>
+                    <input id="preview-signup-email" name="email" type="email" placeholder="you@example.com" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                </div>
+                <div class="space-y-2">
+                    <label for="preview-signup-password" class="text-sm font-medium">Password</label>
+                    <input id="preview-signup-password" name="password" type="password" placeholder="Create a password" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                </div>
+                <label class="flex items-start gap-2 text-sm text-muted-foreground">
+                    <input name="terms" type="checkbox" required class="mt-0.5 h-4 w-4 rounded border-input">
+                    <span>I agree to the terms and privacy policy.</span>
+                </label>
+                <button type="submit" class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Create account</button>
+            </form>
+        "##
+        }
+        "contact-card" => {
+            r##"
+            <form action="/contact" method="post" class="w-full max-w-md rounded-xl border bg-card p-6 shadow-sm space-y-4">
+                <div class="space-y-1">
+                    <h3 class="text-xl font-semibold">Contact us</h3>
+                    <p class="text-sm text-muted-foreground">Send a message and we will get back to you.</p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="space-y-2">
+                        <label for="preview-contact-name" class="text-sm font-medium">Name</label>
+                        <input id="preview-contact-name" name="name" type="text" placeholder="Jane Doe" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                    </div>
+                    <div class="space-y-2">
+                        <label for="preview-contact-email" class="text-sm font-medium">Email</label>
+                        <input id="preview-contact-email" name="email" type="email" placeholder="you@example.com" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label for="preview-contact-message" class="text-sm font-medium">Message</label>
+                    <textarea id="preview-contact-message" name="message" rows="5" placeholder="How can we help?" required class="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"></textarea>
+                </div>
+                <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Send message</button>
+            </form>
+        "##
+        }
+        "stats-grid" => {
+            r##"
+            <section aria-label="Dashboard statistics" class="grid w-full max-w-3xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <article class="rounded-lg border bg-card p-4">
+                    <p class="text-sm font-medium text-muted-foreground">Total Users</p>
+                    <p class="mt-2 text-2xl font-semibold tracking-tight">2,543</p>
+                    <p class="mt-1 text-sm text-muted-foreground">+12.5% from last month</p>
+                </article>
+                <article class="rounded-lg border bg-card p-4">
+                    <p class="text-sm font-medium text-muted-foreground">Revenue</p>
+                    <p class="mt-2 text-2xl font-semibold tracking-tight">$45.2k</p>
+                    <p class="mt-1 text-sm text-muted-foreground">+8.2% from last month</p>
+                </article>
+                <article class="rounded-lg border bg-card p-4">
+                    <p class="text-sm font-medium text-muted-foreground">Active Now</p>
+                    <p class="mt-2 text-2xl font-semibold tracking-tight">573</p>
+                    <p class="mt-1 text-sm text-muted-foreground">+201 today</p>
+                </article>
+                <article class="rounded-lg border bg-card p-4">
+                    <p class="text-sm font-medium text-muted-foreground">Conversion</p>
+                    <p class="mt-2 text-2xl font-semibold tracking-tight">6.8%</p>
+                    <p class="mt-1 text-sm text-muted-foreground">+1.4% from last week</p>
+                </article>
+            </section>
+        "##
+        }
+        "login" | "login-01" => {
+            r##"
             <div class="w-full max-w-sm">
                 <div class="rounded-xl border bg-card p-6 shadow-sm">
                     <div class="mb-6 text-center">
@@ -1724,8 +1872,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "login-02" => r##"
+        "##
+        }
+        "login-02" => {
+            r##"
             <div class="w-full max-w-sm">
                 <div class="rounded-xl border bg-card p-6 shadow-sm">
                     <div class="mb-6 text-center">
@@ -1753,8 +1903,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "login-03" => r##"
+        "##
+        }
+        "login-03" => {
+            r##"
             <div class="w-full max-w-4xl flex rounded-xl border bg-card shadow-sm overflow-hidden">
                 <div class="flex-1 bg-primary/5 p-8 hidden md:flex flex-col justify-center">
                     <div class="mb-8">
@@ -1775,8 +1927,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "login-04" => r##"
+        "##
+        }
+        "login-04" => {
+            r##"
             <div class="w-full max-w-sm">
                 <div class="rounded-xl border bg-card p-6 shadow-sm">
                     <div class="mb-6">
@@ -1800,8 +1954,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "login-05" => r##"
+        "##
+        }
+        "login-05" => {
+            r##"
             <div class="w-full max-w-sm">
                 <div class="text-center mb-8">
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto mb-4">
@@ -1820,8 +1976,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </button>
                 </div>
             </div>
-        "##,
-        "signup" | "signup-01" => r##"
+        "##
+        }
+        "signup" | "signup-01" => {
+            r##"
             <div class="w-full max-w-sm">
                 <div class="rounded-xl border bg-card p-6 shadow-sm">
                     <div class="mb-6 text-center">
@@ -1847,8 +2005,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "otp-01" => r##"
+        "##
+        }
+        "otp-01" => {
+            r##"
             <div class="w-full max-w-sm">
                 <div class="rounded-xl border bg-card p-6 shadow-sm">
                     <div class="mb-6 text-center">
@@ -1872,8 +2032,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "dashboard-01" => r##"
+        "##
+        }
+        "dashboard-01" => {
+            r##"
             <div class="w-full max-w-2xl">
                 <div class="grid grid-cols-3 gap-4 mb-6">
                     <div class="rounded-lg border bg-card p-4">
@@ -1914,8 +2076,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "sidebar-01" | "sidebar-02" | "sidebar-03" => r##"
+        "##
+        }
+        "sidebar-01" | "sidebar-02" | "sidebar-03" => {
+            r##"
             <div class="w-64 h-[400px] rounded-lg border bg-card overflow-hidden">
                 <div class="p-4 border-b">
                     <div class="flex items-center gap-2">
@@ -1930,8 +2094,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg><span class="text-sm">Settings</span></a>
                 </nav>
             </div>
-        "##,
-        "sidebar-07" => r##"
+        "##
+        }
+        "sidebar-07" => {
+            r##"
             <div class="w-64 h-[400px] rounded-lg border bg-card overflow-hidden flex flex-col">
                 <div class="p-4 border-b">
                     <div class="flex items-center gap-3">
@@ -1951,8 +2117,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     <button class="flex items-center gap-3 px-3 py-2 w-full rounded-md hover:bg-muted text-muted-foreground"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg><span class="text-sm">Log out</span></button>
                 </div>
             </div>
-        "##,
-        "sidebar-11" => r##"
+        "##
+        }
+        "sidebar-11" => {
+            r##"
             <div class="w-64 h-[400px] rounded-lg border bg-card overflow-hidden flex flex-col">
                 <div class="p-4 border-b">
                     <div class="relative"><svg class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="search" placeholder="Search files..." class="w-full h-9 pl-8 pr-3 rounded-md border border-input bg-transparent text-sm"></div>
@@ -1967,8 +2135,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "sidebar-12" => r##"
+        "##
+        }
+        "sidebar-12" => {
+            r##"
             <div class="w-72 h-[400px] rounded-lg border bg-card overflow-hidden flex flex-col">
                 <div class="p-4 border-b">
                     <div class="flex items-center justify-between mb-4">
@@ -1991,8 +2161,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "sidebar-15" => r##"
+        "##
+        }
+        "sidebar-15" => {
+            r##"
             <div class="w-64 h-[400px] rounded-lg border bg-card overflow-hidden flex flex-col">
                 <div class="p-4 border-b"><h3 class="font-semibold">Settings</h3></div>
                 <nav class="flex-1 p-2 space-y-1">
@@ -2002,8 +2174,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     <a href="#" class="flex items-center justify-between px-3 py-2 rounded-md hover:bg-muted text-muted-foreground"><span class="flex items-center gap-3"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg><span class="text-sm">Billing</span></span></a>
                 </nav>
             </div>
-        "##,
-        "confirm-dialog" => r##"
+        "##
+        }
+        "confirm-dialog" => {
+            r##"
             <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
                 <div class="mb-4">
                     <h3 class="text-lg font-semibold">Confirm Action</h3>
@@ -2014,8 +2188,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Confirm</button>
                 </div>
             </div>
-        "##,
-        "delete-dialog" => r##"
+        "##
+        }
+        "delete-dialog" => {
+            r##"
             <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
                 <div class="flex items-start gap-4 mb-4">
                     <div class="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
@@ -2031,8 +2207,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow hover:bg-destructive/90">Delete</button>
                 </div>
             </div>
-        "##,
-        "share-dialog" => r##"
+        "##
+        }
+        "share-dialog" => {
+            r##"
             <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
                 <div class="mb-4">
                     <h3 class="text-lg font-semibold">Share</h3>
@@ -2049,8 +2227,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "##,
-        "contact-form" => r##"
+        "##
+        }
+        "contact-form" => {
+            r##"
             <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm">
                 <div class="mb-6">
                     <h3 class="text-xl font-semibold">Contact Us</h3>
@@ -2067,8 +2247,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Send Message</button>
                 </div>
             </div>
-        "##,
-        "profile-form" => r##"
+        "##
+        }
+        "profile-form" => {
+            r##"
             <div class="w-full max-w-md rounded-lg border bg-card p-6 shadow-sm">
                 <div class="mb-6">
                     <h3 class="text-xl font-semibold">Profile</h3>
@@ -2090,8 +2272,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     <button class="inline-flex items-center justify-center w-full rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90">Save Changes</button>
                 </div>
             </div>
-        "##,
-        "calendar-01" => r##"
+        "##
+        }
+        "calendar-01" => {
+            r##"
             <div class="w-full max-w-3xl rounded-lg border bg-card shadow-sm overflow-hidden">
                 <div class="p-4 border-b flex items-center justify-between">
                     <div class="flex items-center gap-2">
@@ -2127,8 +2311,10 @@ fn get_block_preview(block: &str) -> &'static str {
                     <div class="h-24 p-2 border-b">13</div>
                 </div>
             </div>
-        "##,
-        _ => r##"
+        "##
+        }
+        _ => {
+            r##"
             <div class="text-center p-8">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted-foreground mx-auto mb-4">
                     <rect width="7" height="7" x="3" y="3" rx="1"/>
@@ -2139,62 +2325,100 @@ fn get_block_preview(block: &str) -> &'static str {
                 <h4 class="text-lg font-medium mb-2">Block Preview</h4>
                 <p class="text-sm text-muted-foreground">Interactive preview for this block.</p>
             </div>
-        "##,
+        "##
+        }
     }
 }
 
 fn get_block_usage(block: &str) -> &'static str {
     match block {
-        "login" | "login-01" => r#"@import /blocks/auth/login-01.wtz as login
+        "login-card" => {
+            r#"@import /blocks/auth/login-card.wtz as login
+
+<@login::apply action="/login" />"#
+        }
+        "signup-card" => {
+            r#"@import /blocks/auth/signup-card.wtz as signup
+
+<@signup::apply action="/signup" />"#
+        }
+        "contact-card" => {
+            r#"@import /blocks/forms/contact-card.wtz as contact
+
+<@contact::apply action="/contact" />"#
+        }
+        "stats-grid" => {
+            r#"@import /blocks/dashboard/stats-grid.wtz as stats
+
+@let items = vec![
+    stats::Stat { label: "Users".into(), value: "2,543".into(), description: Some("+12%".into()) },
+]
+
+<@stats::apply stats=@items />"#
+        }
+        "login" | "login-01" => {
+            r#"@import /blocks/auth/login-01.wtz as login
 
 <@login::apply
     action="/api/login"
     method="post"
     forgot_password_url=Some("/forgot-password")
     signup_url=Some("/signup")
-/>"#,
-        "signup" | "signup-01" => r#"@import /blocks/auth/signup-01.wtz as signup
+/>"#
+        }
+        "signup" | "signup-01" => {
+            r#"@import /blocks/auth/signup-01.wtz as signup
 
 <@signup::apply
     action="/api/signup"
     method="post"
     login_url=Some("/login")
     terms_url=Some("/terms")
-/>"#,
-        "dashboard-01" => r#"@import /blocks/dashboard/dashboard-01.wtz as dashboard
+/>"#
+        }
+        "dashboard-01" => {
+            r#"@import /blocks/dashboard/dashboard-01.wtz as dashboard
 
 @let stats = vec![
     dashboard::Stat { label: "Users", value: "2,543", change: Some("+12%") },
     dashboard::Stat { label: "Revenue", value: "$45k", change: Some("+8%") },
 ]
 
-<@dashboard::apply stats=@stats />"#,
-        "sidebar-01" | "sidebar-02" | "sidebar-03" => r#"@import /blocks/sidebar/sidebar-01.wtz as sidebar
+<@dashboard::apply stats=@stats />"#
+        }
+        "sidebar-01" | "sidebar-02" | "sidebar-03" => {
+            r#"@import /blocks/sidebar/sidebar-01.wtz as sidebar
 
 @let items = vec![
     sidebar::NavItem { label: "Dashboard", href: "/", icon: Some("..."), active: true },
     sidebar::NavItem { label: "Settings", href: "/settings", icon: Some("..."), active: false },
 ]
 
-<@sidebar::apply nav_items=@items />"#,
-        "calendar-01" => r#"@import /blocks/calendar/calendar-01.wtz as calendar
+<@sidebar::apply nav_items=@items />"#
+        }
+        "calendar-01" => {
+            r#"@import /blocks/calendar/calendar-01.wtz as calendar
 
 @let events = vec![
     calendar::Event { date: "2024-03-15", title: "Meeting", color: None },
 ]
 
-<@calendar::apply events=@events />"#,
-        _ => r#"@import /blocks/CATEGORY/BLOCK_NAME.wtz as block
+<@calendar::apply events=@events />"#
+        }
+        _ => {
+            r#"@import /blocks/CATEGORY/BLOCK_NAME.wtz as block
 
 <@block::apply
     // ... block parameters
-/>"#,
+/>"#
+        }
     }
 }
 
 fn get_component_preview(component: &str) -> &'static str {
     match component {
-        "button" => r#"
+        "button" => {
+            r#"
             <div class="flex flex-wrap gap-4">
                 <button class="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-colors">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -2205,13 +2429,17 @@ fn get_component_preview(component: &str) -> &'static str {
                 <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 hover:bg-accent hover:text-accent-foreground transition-colors">Ghost</button>
                 <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 transition-colors">Destructive</button>
             </div>
-        "#,
+        "#
+        }
 
-        "input" => r#"
+        "input" => {
+            r#"
             <input type="text" placeholder="Enter text..." class="flex h-9 w-full max-w-xs rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-        "#,
+        "#
+        }
 
-        "card" => r#"
+        "card" => {
+            r#"
             <div class="rounded-xl border border-border bg-card text-card-foreground shadow w-full max-w-sm">
                 <div class="flex flex-col space-y-1.5 p-6">
                     <h3 class="font-semibold leading-none tracking-tight">Create project</h3>
@@ -2235,9 +2463,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <button class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-colors">Deploy</button>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "checkbox" => r#"
+        "checkbox" => {
+            r#"
             <div class="space-y-4">
                 <div x-data="{ checked: true }" class="flex items-center space-x-3">
                     <button type="button" @click="checked = !checked" :class="checked ? 'bg-primary border-primary' : 'border-input'" class="h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors flex items-center justify-center">
@@ -2252,27 +2482,33 @@ fn get_component_preview(component: &str) -> &'static str {
                     <label class="text-sm font-medium leading-none">Send me marketing emails</label>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "switch" => r#"
+        "switch" => {
+            r#"
             <div x-data="{ on: false }" class="flex items-center gap-2">
                 <button @click="on = !on" :class="on ? 'bg-primary' : 'bg-input'" class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors">
                     <span :class="on ? 'translate-x-5' : 'translate-x-1'" class="inline-block h-3 w-3 rounded-full bg-white transition-transform"></span>
                 </button>
                 <span class="text-sm">Enabled</span>
             </div>
-        "#,
+        "#
+        }
 
-        "badge" => r#"
+        "badge" => {
+            r#"
             <div class="flex flex-wrap gap-2">
                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-primary text-primary-foreground">Default</span>
                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">Secondary</span>
                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-destructive text-destructive-foreground">Destructive</span>
                 <span class="inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold">Outline</span>
             </div>
-        "#,
+        "#
+        }
 
-        "alert" => r#"
+        "alert" => {
+            r#"
             <div class="space-y-4 w-full max-w-md">
                 <div class="relative rounded-lg border border-border bg-background p-4 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg+div]:translate-y-[-3px] [&:has(svg)]:pl-11">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16h.01"/><path d="M12 8v4"/><circle cx="12" cy="12" r="10"/></svg>
@@ -2285,9 +2521,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <div class="text-sm opacity-90">Your session has expired. Please log in again.</div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "avatar" => r#"
+        "avatar" => {
+            r#"
             <div class="flex items-center gap-4">
                 <div class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
                     <img src="https://github.com/shadcn.png" alt="@shadcn" class="aspect-square h-full w-full object-cover">
@@ -2302,9 +2540,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <img src="https://github.com/vercel.png" alt="@vercel" class="aspect-square h-full w-full object-cover">
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "progress" => r#"
+        "progress" => {
+            r#"
             <div x-data="{ progress: 60 }" x-init="setInterval(() => { progress = progress >= 100 ? 0 : progress + 10 }, 800)" class="w-full max-w-xs space-y-4">
                 <div class="space-y-2">
                     <div class="flex justify-between text-sm">
@@ -2328,9 +2568,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     100% { transform: translateX(400%); }
                 }
             </style>
-        "#,
+        "#
+        }
 
-        "skeleton" => r#"
+        "skeleton" => {
+            r#"
             <div class="flex items-center space-x-4">
                 <div class="h-12 w-12 rounded-full bg-muted animate-pulse"></div>
                 <div class="space-y-2">
@@ -2338,9 +2580,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <div class="h-4 w-[150px] bg-muted animate-pulse rounded"></div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "separator" => r#"
+        "separator" => {
+            r#"
             <div class="w-full max-w-xs">
                 <div class="space-y-1">
                     <h4 class="text-sm font-medium">Radix Primitives</h4>
@@ -2355,20 +2599,26 @@ fn get_component_preview(component: &str) -> &'static str {
                     <div>Source</div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "label" => r#"
+        "label" => {
+            r#"
             <div class="grid w-full max-w-sm items-center gap-1.5">
                 <label class="text-sm font-medium leading-none">Email</label>
                 <input type="email" placeholder="Email" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
             </div>
-        "#,
+        "#
+        }
 
-        "textarea" => r#"
+        "textarea" => {
+            r#"
             <textarea placeholder="Type your message here." class="flex min-h-[60px] w-full max-w-sm rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"></textarea>
-        "#,
+        "#
+        }
 
-        "select" => r#"
+        "select" => {
+            r#"
             <div x-data="{
                 open: false,
                 selected: 'Select a fruit',
@@ -2409,9 +2659,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "tabs" => r#"
+        "tabs" => {
+            r#"
             <div x-data="{ tab: 'account' }" class="w-full max-w-md">
                 <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
                     <button @click="tab = 'account'" :class="tab === 'account' ? 'bg-background text-foreground shadow-sm' : ''" class="inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium transition-all">Account</button>
@@ -2422,9 +2674,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <div x-show="tab === 'password'" x-cloak class="text-sm">Password settings content</div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "accordion" => r#"
+        "accordion" => {
+            r#"
             <div x-data="{ open: null }" class="w-full max-w-md space-y-1">
                 <div class="border-b">
                     <button @click="open = open === 1 ? null : 1" class="flex w-full items-center justify-between py-4 text-sm font-medium transition-all hover:underline">
@@ -2441,9 +2695,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <div x-show="open === 2" x-collapse class="text-sm text-muted-foreground pb-4">Yes. It comes with default styles that match the other components.</div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "dialog" => r#"
+        "dialog" => {
+            r#"
             <div x-data="{ open: false }">
                 <button @click="open = true" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">Open Dialog</button>
                 <template x-teleport="body">
@@ -2460,9 +2716,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "dropdown" => r#"
+        "dropdown" => {
+            r#"
             <div x-data="{
                 open: false,
                 pos: { x: 0, y: 0 },
@@ -2504,9 +2762,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "popover" => r#"
+        "popover" => {
+            r#"
             <div x-data="{
                 open: false,
                 pos: { x: 0, y: 0 },
@@ -2555,9 +2815,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "tooltip" => r#"
+        "tooltip" => {
+            r#"
             <div x-data="{
                 show: false,
                 pos: { x: 0, y: 0 },
@@ -2576,16 +2838,20 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "slider" => r#"
+        "slider" => {
+            r#"
             <div x-data="{ value: 50 }" class="w-full max-w-xs">
                 <input type="range" x-model="value" class="w-full h-2 bg-primary/20 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full">
                 <div class="text-sm text-muted-foreground mt-2">Value: <span x-text="value"></span></div>
             </div>
-        "#,
+        "#
+        }
 
-        "radio-group" => r#"
+        "radio-group" => {
+            r#"
             <div x-data="{ selected: 'default' }" class="space-y-2">
                 <div class="flex items-center space-x-2">
                     <input type="radio" id="r1" name="size" value="default" x-model="selected" class="h-4 w-4">
@@ -2600,17 +2866,21 @@ fn get_component_preview(component: &str) -> &'static str {
                     <label for="r3" class="text-sm">Compact</label>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "toggle" => r#"
+        "toggle" => {
+            r#"
             <div x-data="{ pressed: false }">
                 <button @click="pressed = !pressed" :class="pressed ? 'bg-accent' : ''" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 border border-input hover:bg-accent hover:text-accent-foreground transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v6a6 6 0 0 0 12 0V4"/><line x1="4" x2="20" y1="20" y2="20"/></svg>
                 </button>
             </div>
-        "#,
+        "#
+        }
 
-        "table" => r#"
+        "table" => {
+            r#"
             <div class="w-full max-w-lg rounded-lg border bg-card">
                 <table class="w-full caption-bottom text-sm">
                     <thead class="[&_tr]:border-b">
@@ -2643,9 +2913,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </tbody>
                 </table>
             </div>
-        "#,
+        "#
+        }
 
-        "breadcrumb" => r##"
+        "breadcrumb" => {
+            r##"
             <nav class="flex">
                 <ol class="flex items-center gap-2 text-sm">
                     <li><a href="#" class="text-muted-foreground hover:text-foreground">Home</a></li>
@@ -2655,9 +2927,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <li class="text-foreground">Breadcrumb</li>
                 </ol>
             </nav>
-        "##,
+        "##
+        }
 
-        "form" => r#"
+        "form" => {
+            r#"
             <form class="w-full max-w-sm space-y-4">
                 <div class="space-y-2">
                     <label class="text-sm font-medium">Username</label>
@@ -2666,9 +2940,11 @@ fn get_component_preview(component: &str) -> &'static str {
                 </div>
                 <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">Submit</button>
             </form>
-        "#,
+        "#
+        }
 
-        "collapsible" => r#"
+        "collapsible" => {
+            r#"
             <div x-data="{ open: false }" class="w-full max-w-md">
                 <div class="flex items-center justify-between">
                     <h4 class="text-sm font-semibold">@peduarte starred 3 repositories</h4>
@@ -2682,9 +2958,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <div class="rounded-md border px-4 py-2 font-mono text-sm">@stitches/react</div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "combobox" => r#"
+        "combobox" => {
+            r#"
             <div x-data="{
                 open: false,
                 search: '',
@@ -2729,9 +3007,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "alert-dialog" => r#"
+        "alert-dialog" => {
+            r#"
             <div x-data="{ open: false }">
                 <button @click="open = true" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete Account</button>
                 <template x-teleport="body">
@@ -2748,26 +3028,32 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "ajax-select" => r#"
+        "ajax-select" => {
+            r#"
             <div x-data="{ open: false, search: '', loading: false, selected: '' }" class="relative w-[200px]">
                 <button @click="open = !open" class="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm">
                     <span x-text="selected || 'Search users...'"></span>
                     <svg class="h-4 w-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
             </div>
-        "#,
+        "#
+        }
 
-        "aspect-ratio" => r#"
+        "aspect-ratio" => {
+            r#"
             <div class="w-full max-w-[200px]">
                 <div class="relative" style="aspect-ratio: 16/9;">
                     <img src="https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=800&dpr=2&q=80" alt="Photo" class="h-full w-full rounded-md object-cover">
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "calendar" => r#"
+        "calendar" => {
+            r#"
             <div class="p-3 rounded-md border bg-card text-card-foreground">
                 <div class="flex items-center justify-between mb-4">
                     <button class="h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100">
@@ -2784,9 +3070,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">5</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">6</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">7</div><div class="h-8 w-8 flex items-center justify-center rounded-md bg-primary text-primary-foreground">8</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">9</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">10</div><div class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">11</div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "carousel" => r#"
+        "carousel" => {
+            r#"
             <div x-data="{ current: 0, total: 5 }" class="relative w-full max-w-sm">
                 <div class="overflow-hidden rounded-lg">
                     <div class="flex transition-transform duration-500 ease-out" :style="`transform: translateX(-${current * 100}%)`">
@@ -2834,9 +3122,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </template>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "command" => r#"
+        "command" => {
+            r#"
             <div class="w-full max-w-sm rounded-lg border shadow-md">
                 <div class="flex items-center border-b px-3">
                     <svg class="mr-2 h-4 w-4 shrink-0 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -2849,9 +3139,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <div class="px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer">Calculator</div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "context-menu" => r#"
+        "context-menu" => {
+            r#"
             <div x-data="{ open: false, pos: { x: 0, y: 0 } }" class="relative">
                 <div @contextmenu.prevent="pos = { x: $event.clientX, y: $event.clientY }; open = true" class="flex h-[150px] w-[300px] items-center justify-center rounded-lg border border-dashed border-border bg-muted/20 text-sm text-muted-foreground select-none cursor-context-menu transition-colors hover:bg-muted/40">
                     Right click here
@@ -2885,9 +3177,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "date-picker" => r#"
+        "date-picker" => {
+            r#"
             <div x-data="{
                 open: false,
                 value: '',
@@ -3101,9 +3395,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "datetime-picker" => r#"
+        "datetime-picker" => {
+            r#"
             <div x-data="{
                 dateOpen: false,
                 timeOpen: false,
@@ -3421,9 +3717,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </template>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "drawer" => r#"
+        "drawer" => {
+            r#"
             <div x-data="{ open: false }">
                 <button @click="open = true" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Open Drawer</button>
                 <template x-teleport="body">
@@ -3437,9 +3735,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "duration-input" => r#"
+        "duration-input" => {
+            r#"
             <div class="space-y-4">
                 <div x-data="{ hours: '02', minutes: '30', seconds: '00' }" class="flex items-center gap-1">
                     <div class="flex flex-col items-center">
@@ -3469,32 +3769,40 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "file-upload" => r#"
+        "file-upload" => {
+            r#"
             <div class="flex flex-col items-center justify-center w-full max-w-sm rounded-lg border-2 border-dashed border-input p-6 hover:bg-accent/50 cursor-pointer">
                 <svg class="h-10 w-10 text-muted-foreground mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
                 <p class="text-sm text-muted-foreground">Drag and drop or click to upload</p>
             </div>
-        "#,
+        "#
+        }
 
-        "flash-messages" => r#"
+        "flash-messages" => {
+            r#"
             <div class="w-full max-w-sm space-y-2">
                 <div class="flex items-center gap-2 rounded-lg border border-green-500/50 bg-green-50 dark:bg-green-950 p-3">
                     <svg class="h-4 w-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     <span class="text-sm text-green-900 dark:text-green-100">Changes saved successfully!</span>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "formatted-number" => r#"
+        "formatted-number" => {
+            r#"
             <div class="space-y-2 text-center">
                 <div class="text-2xl font-bold">$1,234.56</div>
                 <div class="text-sm text-muted-foreground">Formatted currency</div>
             </div>
-        "#,
+        "#
+        }
 
-        "hover-card" => r##"
+        "hover-card" => {
+            r##"
             <div x-data="{
                 open: false,
                 pos: { x: 0, y: 0 },
@@ -3520,9 +3828,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "##,
+        "##
+        }
 
-        "input-otp" => r#"
+        "input-otp" => {
+            r#"
             <div x-data="{
                 otp: ['', '', '', '', '', ''],
                 focusNext(index) {
@@ -3572,9 +3882,11 @@ fn get_component_preview(component: &str) -> &'static str {
                 <input x-ref="otp4" type="text" inputmode="numeric" maxlength="1" :value="otp[4]" @input="handleInput(4, $event)" @keydown="handleKeydown(4, $event)" class="w-12 h-12 text-center rounded-md border border-input bg-transparent text-xl font-semibold focus:border-primary focus:ring-1 focus:ring-primary">
                 <input x-ref="otp5" type="text" inputmode="numeric" maxlength="1" :value="otp[5]" @input="handleInput(5, $event)" @keydown="handleKeydown(5, $event)" class="w-12 h-12 text-center rounded-md border border-input bg-transparent text-xl font-semibold focus:border-primary focus:ring-1 focus:ring-primary">
             </div>
-        "#,
+        "#
+        }
 
-        "menubar" => r#"
+        "menubar" => {
+            r#"
             <div x-data="{ activeMenu: null }" class="flex h-10 items-center space-x-1 rounded-md border bg-background p-1">
                 <div class="relative">
                     <button @click="activeMenu = activeMenu === 'file' ? null : 'file'" @mouseenter="activeMenu && (activeMenu = 'file')" :class="activeMenu === 'file' ? 'bg-accent' : ''" class="px-3 py-1.5 text-sm font-medium rounded-sm hover:bg-accent transition-colors">File</button>
@@ -3617,28 +3929,26 @@ fn get_component_preview(component: &str) -> &'static str {
                 </div>
                 <button class="px-3 py-1.5 text-sm font-medium rounded-sm hover:bg-accent transition-colors">Help</button>
             </div>
-        "#,
+        "#
+        }
 
-        "minmax-editor" => r#"
-            <div x-data="{ expanded: false }" class="w-full max-w-xs">
-                <button @click="expanded = !expanded" class="flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm">
-                    <span>Price Range</span>
-                    <span class="text-muted-foreground">$10 - $100</span>
-                </button>
-                <div x-show="expanded" x-collapse class="mt-2 space-y-2 rounded-md border p-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm w-10">Min</span>
-                        <input type="number" value="10" class="flex-1 h-8 rounded-md border border-input bg-transparent px-2 text-sm">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm w-10">Max</span>
-                        <input type="number" value="100" class="flex-1 h-8 rounded-md border border-input bg-transparent px-2 text-sm">
-                    </div>
+        "minmax-input" => {
+            r#"
+            <div x-data="{ expanded: false, minVal: 10, maxVal: 100 }" class="w-full max-w-xs space-y-2">
+                <label class="text-sm font-medium leading-none">Price Range</label>
+                <div class="flex rounded-md border border-input shadow-sm">
+                    <input x-show="!expanded" type="number" x-model.number="minVal" @input="maxVal = minVal" class="flex-1 min-w-0 px-3 py-2 bg-transparent text-sm rounded-l-md border-0 focus:outline-none focus:ring-0" placeholder="—">
+                    <input x-show="expanded" type="number" x-model.number="minVal" x-on:input="if (minVal === maxVal) expanded = false" class="flex-1 min-w-0 px-3 py-2 bg-transparent text-sm rounded-l-md border-0 focus:outline-none focus:ring-0" placeholder="Min">
+                    <button x-show="!expanded" type="button" @click="expanded = true" class="inline-flex items-center px-1.5 text-muted-foreground hover:text-foreground cursor-pointer" title="Expand to range"><span class="text-xs tracking-widest">...</span></button>
+                    <span x-show="expanded" class="inline-flex items-center px-1 text-muted-foreground text-sm select-none">-</span>
+                    <input x-show="expanded" type="number" x-model.number="maxVal" x-on:input="if (minVal === maxVal) expanded = false" class="flex-1 min-w-0 px-3 py-2 bg-transparent text-sm border-0 focus:outline-none focus:ring-0 rounded-r-md" placeholder="Max">
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "navigation-menu" => r##"
+        "navigation-menu" => {
+            r##"
             <nav x-data="{ activeNav: null, closeTimer: null }" class="relative flex items-center gap-1">
                 <div class="relative">
                     <button @mouseenter="clearTimeout(closeTimer); activeNav = 'getting-started'" @mouseleave="closeTimer = setTimeout(() => activeNav = null, 150)" class="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
@@ -3696,17 +4006,21 @@ fn get_component_preview(component: &str) -> &'static str {
                     Documentation
                 </a>
             </nav>
-        "##,
+        "##
+        }
 
-        "numeric-input" => r#"
+        "numeric-input" => {
+            r#"
             <div class="flex items-center">
                 <button class="h-9 w-9 rounded-l-md border border-r-0 hover:bg-accent">-</button>
                 <input type="number" value="5" class="h-9 w-16 border text-center bg-transparent text-sm">
                 <button class="h-9 w-9 rounded-r-md border border-l-0 hover:bg-accent">+</button>
             </div>
-        "#,
+        "#
+        }
 
-        "pagination" => r#"
+        "pagination" => {
+            r#"
             <nav class="flex items-center space-x-2">
                 <button class="h-9 px-3 rounded-md border text-sm hover:bg-accent flex items-center gap-1">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
@@ -3722,9 +4036,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
             </nav>
-        "#,
+        "#
+        }
 
-        "password-input" => r#"
+        "password-input" => {
+            r#"
             <div x-data="{ show: false, password: 'mypassword123' }" class="relative w-full max-w-xs">
                 <input :type="show ? 'text' : 'password'" x-model="password" placeholder="Enter password" class="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm pr-10 focus:outline-none focus:ring-1 focus:ring-primary">
                 <button type="button" @click="show = !show" class="absolute right-0 top-0 h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" :aria-label="show ? 'Hide password' : 'Show password'">
@@ -3733,9 +4049,11 @@ fn get_component_preview(component: &str) -> &'static str {
                 </button>
                 <p class="mt-2 text-xs text-muted-foreground">Click the eye icon to <span x-text="show ? 'hide' : 'show'"></span> password</p>
             </div>
-        "#,
+        "#
+        }
 
-        "resizable" => r#"
+        "resizable" => {
+            r#"
             <div class="flex h-[200px] w-full max-w-lg rounded-lg border overflow-hidden"
                 x-data="{
                     dragging: false,
@@ -3785,9 +4103,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     <span class="text-sm font-medium" x-text="Math.round(100 - leftWidth) + '%'"></span>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "scroll-area" => r#"
+        "scroll-area" => {
+            r#"
             <div class="h-[150px] w-[200px] rounded-md border overflow-hidden">
                 <div class="p-4 space-y-4 h-full overflow-y-auto">
                     <div class="text-sm">Item 1</div>
@@ -3800,18 +4120,22 @@ fn get_component_preview(component: &str) -> &'static str {
                     <div class="text-sm">Item 8</div>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "searchable-select" => r#"
+        "searchable-select" => {
+            r#"
             <div class="relative w-[200px]">
                 <div class="flex h-9 items-center rounded-md border border-input px-3">
                     <svg class="h-4 w-4 mr-2 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     <input type="text" placeholder="Search..." class="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground">
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "sheet" => r#"
+        "sheet" => {
+            r#"
             <div x-data="{ open: false }">
                 <button @click="open = true" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 border border-input hover:bg-accent">Open Sheet</button>
                 <template x-teleport="body">
@@ -3824,9 +4148,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "time-picker" => r#"
+        "time-picker" => {
+            r#"
             <div x-data="{
                 open: false,
                 hour: 9,
@@ -3937,9 +4263,11 @@ fn get_component_preview(component: &str) -> &'static str {
                     </div>
                 </template>
             </div>
-        "#,
+        "#
+        }
 
-        "toast" => r#"
+        "toast" => {
+            r#"
             <div class="flex flex-col items-center gap-4">
                 <div class="flex gap-2">
                     <button @click="$dispatch('toast', { title: 'Success!', description: 'Your changes have been saved.', variant: 'success', duration: 3000 })" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-green-600 text-white hover:bg-green-700">Success</button>
@@ -3959,17 +4287,21 @@ fn get_component_preview(component: &str) -> &'static str {
                     </template>
                 </div>
             </div>
-        "#,
+        "#
+        }
 
-        "toggle-group" => r#"
+        "toggle-group" => {
+            r#"
             <div class="inline-flex rounded-md border">
                 <button class="h-9 px-3 text-sm rounded-l-md bg-accent">Left</button>
                 <button class="h-9 px-3 text-sm border-l hover:bg-accent">Center</button>
                 <button class="h-9 px-3 text-sm border-l rounded-r-md hover:bg-accent">Right</button>
             </div>
-        "#,
+        "#
+        }
 
-        "validation-errors" => r#"
+        "validation-errors" => {
+            r#"
             <div class="w-full max-w-sm rounded-md border border-destructive/50 bg-destructive/10 p-4">
                 <div class="flex items-center gap-2 text-destructive mb-2">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -3980,7 +4312,8 @@ fn get_component_preview(component: &str) -> &'static str {
                     <li>Password must be at least 8 characters</li>
                 </ul>
             </div>
-        "#,
+        "#
+        }
 
         _ => r#"<div class="text-muted-foreground text-sm">Component preview</div>"#,
     }
@@ -4062,7 +4395,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@button size=button::Size::Lg&gt;Large&lt;/@button&gt;
 
 // Disabled
-&lt;@button disabled=true&gt;Disabled&lt;/@button&gt;"#.to_string(),
+&lt;@button disabled=true&gt;Disabled&lt;/@button&gt;"#
+            .to_string(),
 
         "input" => r#"@import components/input.wtz as input
 
@@ -4073,7 +4407,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@input name="password" type_attr="password" /&gt;
 
 // Disabled
-&lt;@input name="readonly" disabled=true /&gt;"#.to_string(),
+&lt;@input name="readonly" disabled=true /&gt;"#
+            .to_string(),
 
         "card" => r#"@import components/card.wtz as card
 
@@ -4088,7 +4423,8 @@ fn get_component_usage(component: &str) -> String {
     &lt;@card::footer&gt;
         &lt;@button&gt;Action&lt;/@button&gt;
     &lt;/@card::footer&gt;
-&lt;/@card&gt;"#.to_string(),
+&lt;/@card&gt;"#
+            .to_string(),
 
         "checkbox" => r#"@import components/checkbox.wtz as checkbox
 
@@ -4102,7 +4438,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;/div&gt;
 
 // Checked by default
-&lt;@checkbox name="newsletter" checked=true /&gt;"#.to_string(),
+&lt;@checkbox name="newsletter" checked=true /&gt;"#
+            .to_string(),
 
         "switch" => r#"@import components/switch.wtz as switch
 
@@ -4116,7 +4453,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;/div&gt;
 
 // Enabled by default
-&lt;@switch name="wifi" checked=true /&gt;"#.to_string(),
+&lt;@switch name="wifi" checked=true /&gt;"#
+            .to_string(),
 
         "badge" => r#"@import components/badge.wtz as badge
 
@@ -4126,7 +4464,8 @@ fn get_component_usage(component: &str) -> String {
 // Variants
 &lt;@badge variant=badge::Variant::Secondary&gt;Secondary&lt;/@badge&gt;
 &lt;@badge variant=badge::Variant::Destructive&gt;Error&lt;/@badge&gt;
-&lt;@badge variant=badge::Variant::Outline&gt;Outline&lt;/@badge&gt;"#.to_string(),
+&lt;@badge variant=badge::Variant::Outline&gt;Outline&lt;/@badge&gt;"#
+            .to_string(),
 
         "alert" => r#"@import components/alert.wtz as alert
 
@@ -4142,7 +4481,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@alert variant=alert::Variant::Destructive&gt;
     &lt;@alert::title&gt;Error&lt;/@alert::title&gt;
     &lt;@alert::description&gt;Something went wrong.&lt;/@alert::description&gt;
-&lt;/@alert&gt;"#.to_string(),
+&lt;/@alert&gt;"#
+            .to_string(),
 
         "avatar" => r#"@import components/avatar.wtz as avatar
 
@@ -4154,7 +4494,8 @@ fn get_component_usage(component: &str) -> String {
 
 // Different sizes
 &lt;@avatar src="..." size=avatar::Size::Sm /&gt;
-&lt;@avatar src="..." size=avatar::Size::Lg /&gt;"#.to_string(),
+&lt;@avatar src="..." size=avatar::Size::Lg /&gt;"#
+            .to_string(),
 
         "progress" => r#"@import components/progress.wtz as progress
 
@@ -4165,7 +4506,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@progress value=30 max=50 /&gt;
 
 // Indeterminate (no value)
-&lt;@progress /&gt;"#.to_string(),
+&lt;@progress /&gt;"#
+            .to_string(),
 
         "skeleton" => r#"@import components/skeleton.wtz as skeleton
 
@@ -4179,7 +4521,8 @@ fn get_component_usage(component: &str) -> String {
         &lt;@skeleton class="h-4 w-[200px]" /&gt;
         &lt;@skeleton class="h-4 w-[150px]" /&gt;
     &lt;/div&gt;
-&lt;/div&gt;"#.to_string(),
+&lt;/div&gt;"#
+            .to_string(),
 
         "separator" => r#"@import components/separator.wtz as separator
 
@@ -4190,7 +4533,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@separator orientation=separator::Orientation::Vertical /&gt;
 
 // With custom class
-&lt;@separator class="my-4" /&gt;"#.to_string(),
+&lt;@separator class="my-4" /&gt;"#
+            .to_string(),
 
         "label" => r#"@import components/label.wtz as label
 
@@ -4199,7 +4543,8 @@ fn get_component_usage(component: &str) -> String {
 
 // Associated with input
 &lt;@label for_id="email"&gt;Email&lt;/@label&gt;
-&lt;@input id="email" name="email" /&gt;"#.to_string(),
+&lt;@input id="email" name="email" /&gt;"#
+            .to_string(),
 
         "textarea" => r#"@import components/textarea.wtz as textarea
 
@@ -4210,7 +4555,8 @@ fn get_component_usage(component: &str) -> String {
 /&gt;
 
 // With rows
-&lt;@textarea name="bio" rows=5 /&gt;"#.to_string(),
+&lt;@textarea name="bio" rows=5 /&gt;"#
+            .to_string(),
 
         "select" => r#"@import components/select.wtz as select
 
@@ -4218,7 +4564,8 @@ fn get_component_usage(component: &str) -> String {
     &lt;@select::item value="apple"&gt;Apple&lt;/@select::item&gt;
     &lt;@select::item value="banana"&gt;Banana&lt;/@select::item&gt;
     &lt;@select::item value="orange"&gt;Orange&lt;/@select::item&gt;
-&lt;/@select&gt;"#.to_string(),
+&lt;/@select&gt;"#
+            .to_string(),
 
         "tabs" => r#"@import components/tabs.wtz as tabs
 
@@ -4233,7 +4580,8 @@ fn get_component_usage(component: &str) -> String {
     &lt;@tabs::content value="password"&gt;
         Password settings here
     &lt;/@tabs::content&gt;
-&lt;/@tabs&gt;"#.to_string(),
+&lt;/@tabs&gt;"#
+            .to_string(),
 
         "accordion" => r#"@import components/accordion.wtz as accordion
 
@@ -4250,7 +4598,8 @@ fn get_component_usage(component: &str) -> String {
             Yes. It comes with default styles.
         &lt;/@accordion::content&gt;
     &lt;/@accordion::item&gt;
-&lt;/@accordion&gt;"#.to_string(),
+&lt;/@accordion&gt;"#
+            .to_string(),
 
         "dialog" => r#"@import components/dialog.wtz as dialog
 
@@ -4270,7 +4619,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;@button&gt;Save&lt;/@button&gt;
         &lt;/@dialog::footer&gt;
     &lt;/@dialog::content&gt;
-&lt;/@dialog&gt;"#.to_string(),
+&lt;/@dialog&gt;"#
+            .to_string(),
 
         "alert-dialog" => r#"@import components/alert_dialog.wtz as alert_dialog
 
@@ -4292,7 +4642,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;@alert_dialog::action&gt;Delete&lt;/@alert_dialog::action&gt;
         &lt;/@alert_dialog::footer&gt;
     &lt;/@alert_dialog::content&gt;
-&lt;/@alert_dialog&gt;"#.to_string(),
+&lt;/@alert_dialog&gt;"#
+            .to_string(),
 
         "dropdown" => r#"@import components/dropdown.wtz as dropdown
 
@@ -4308,7 +4659,8 @@ fn get_component_usage(component: &str) -> String {
         &lt;@dropdown::separator /&gt;
         &lt;@dropdown::item class="text-destructive"&gt;Log out&lt;/@dropdown::item&gt;
     &lt;/@dropdown::content&gt;
-&lt;/@dropdown&gt;"#.to_string(),
+&lt;/@dropdown&gt;"#
+            .to_string(),
 
         "popover" => r#"@import components/popover.wtz as popover
 
@@ -4324,7 +4676,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;/p&gt;
         &lt;/div&gt;
     &lt;/@popover::content&gt;
-&lt;/@popover&gt;"#.to_string(),
+&lt;/@popover&gt;"#
+            .to_string(),
 
         "tooltip" => r#"@import components/tooltip.wtz as tooltip
 
@@ -4335,7 +4688,8 @@ fn get_component_usage(component: &str) -> String {
     &lt;@tooltip::content&gt;
         Add to library
     &lt;/@tooltip::content&gt;
-&lt;/@tooltip&gt;"#.to_string(),
+&lt;/@tooltip&gt;"#
+            .to_string(),
 
         "slider" => r#"@import components/slider.wtz as slider
 
@@ -4346,7 +4700,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@slider name="price" min=0 max=1000 value=250 /&gt;
 
 // With step
-&lt;@slider name="rating" min=1 max=5 step=1 value=3 /&gt;"#.to_string(),
+&lt;@slider name="rating" min=1 max=5 step=1 value=3 /&gt;"#
+            .to_string(),
 
         "radio-group" => r#"@import components/radio_group.wtz as radio_group
 
@@ -4363,7 +4718,8 @@ fn get_component_usage(component: &str) -> String {
         &lt;@radio_group::item value="compact" id="r3" /&gt;
         &lt;@label for_id="r3"&gt;Compact&lt;/@&gt;
     &lt;/div&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "toggle" => r#"@import components/toggle.wtz as toggle
 
@@ -4376,7 +4732,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@toggle&gt;Bold&lt;/@&gt;
 
 // Pressed by default
-&lt;@toggle pressed=true&gt;On&lt;/@&gt;"#.to_string(),
+&lt;@toggle pressed=true&gt;On&lt;/@&gt;"#
+            .to_string(),
 
         "table" => r#"@import components/table.wtz as table
 
@@ -4399,7 +4756,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;/@&gt;
         }
     &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "breadcrumb" => r##"@import components/breadcrumb.wtz as breadcrumb
 
@@ -4417,7 +4775,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;@breadcrumb::page&gt;Breadcrumb&lt;/@&gt;
         &lt;/@&gt;
     &lt;/@&gt;
-&lt;/@&gt;"##.to_string(),
+&lt;/@&gt;"##
+            .to_string(),
 
         "form" => r#"@import components/form.wtz as form
 
@@ -4432,7 +4791,8 @@ fn get_component_usage(component: &str) -> String {
         &lt;/@&gt;
     &lt;/@&gt;
     &lt;@button type="submit"&gt;Submit&lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "collapsible" => r#"@import components/collapsible.wtz as collapsible
 
@@ -4451,7 +4811,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;div&gt;@stitches/react&lt;/div&gt;
         &lt;/div&gt;
     &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "combobox" => r#"@import components/combobox.wtz as combobox
 
@@ -4460,7 +4821,8 @@ fn get_component_usage(component: &str) -> String {
     &lt;@combobox::item value="svelte"&gt;SvelteKit&lt;/@&gt;
     &lt;@combobox::item value="nuxt"&gt;Nuxt&lt;/@&gt;
     &lt;@combobox::item value="remix"&gt;Remix&lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "ajax-select" => r#"@import components/ajax_select.wtz as ajax_select
 
@@ -4471,7 +4833,8 @@ fn get_component_usage(component: &str) -> String {
     url="/api/users/search"
     label_key="name"
     value_key="id"
-/&gt;"#.to_string(),
+/&gt;"#
+            .to_string(),
 
         "aspect-ratio" => r#"@import components/aspect_ratio.wtz as aspect_ratio
 
@@ -4483,7 +4846,8 @@ fn get_component_usage(component: &str) -> String {
 // Square
 &lt;@aspect_ratio ratio="1/1"&gt;
     &lt;img src="/avatar.jpg" /&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "calendar" => r#"@import components/calendar.wtz as calendar
 
@@ -4498,7 +4862,8 @@ fn get_component_usage(component: &str) -> String {
     name="booking"
     min_date=Some("2026-01-01")
     max_date=Some("2026-12-31")
-/&gt;"#.to_string(),
+/&gt;"#
+            .to_string(),
 
         "carousel" => r#"@import components/carousel.wtz as carousel
 
@@ -4513,7 +4878,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@carousel::autoplay interval=5000&gt;
     &lt;@carousel::item&gt;Slide 1&lt;/@&gt;
     &lt;@carousel::item&gt;Slide 2&lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "command" => r#"@import components/command.wtz as command
 
@@ -4525,7 +4891,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;@command::item&gt;Calculator&lt;/@&gt;
         &lt;/@&gt;
     &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "context-menu" => r#"@import components/context_menu.wtz as context_menu
 
@@ -4540,7 +4907,8 @@ fn get_component_usage(component: &str) -> String {
         &lt;@context_menu::item&gt;Copy&lt;/@&gt;
         &lt;@context_menu::item&gt;Paste&lt;/@&gt;
     &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "date-picker" => r#"@import components/date_picker.wtz as date_picker
 
@@ -4551,7 +4919,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@date_picker name="birthday" value=Some("2000-01-15") /&gt;
 
 // With format
-&lt;@date_picker name="date" format="DD/MM/YYYY" /&gt;"#.to_string(),
+&lt;@date_picker name="date" format="DD/MM/YYYY" /&gt;"#
+            .to_string(),
 
         "datetime-picker" => r#"@import components/datetime_picker.wtz as datetime_picker
 
@@ -4562,7 +4931,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@datetime_picker
     name="meeting"
     value=Some("2026-01-15T14:30")
-/&gt;"#.to_string(),
+/&gt;"#
+            .to_string(),
 
         "drawer" => r#"@import components/drawer.wtz as drawer
 
@@ -4576,7 +4946,8 @@ fn get_component_usage(component: &str) -> String {
     footer=Some(@{
         &lt;@button&gt;Save changes&lt;/@&gt;
     })
-/&gt;"#.to_string(),
+/&gt;"#
+            .to_string(),
 
         "duration-input" => r#"@import components/duration_input.wtz as duration_input
 
@@ -4591,7 +4962,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@duration_input
     name="delay"
     units=vec!["seconds", "minutes", "hours"]
-/&gt;"#.to_string(),
+/&gt;"#
+            .to_string(),
 
         "file-upload" => r#"@import components/file_upload.wtz as file_upload
 
@@ -4606,7 +4978,8 @@ fn get_component_usage(component: &str) -> String {
 /&gt;
 
 // Multiple files
-&lt;@file_upload name="files" multiple=true /&gt;"#.to_string(),
+&lt;@file_upload name="files" multiple=true /&gt;"#
+            .to_string(),
 
         "flash-messages" => r#"@import components/flash_messages.wtz as flash
 
@@ -4616,7 +4989,8 @@ fn get_component_usage(component: &str) -> String {
 // Show messages
 &lt;@flash::success message="Saved successfully!" /&gt;
 &lt;@flash::error message="Something went wrong." /&gt;
-&lt;@flash::warning message="Please review your input." /&gt;"#.to_string(),
+&lt;@flash::warning message="Please review your input." /&gt;"#
+            .to_string(),
 
         "formatted-number" => r#"@import components/formatted_number.wtz as formatted_number
 
@@ -4627,7 +5001,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@formatted_number value=0.85 style="percent" /&gt;
 
 // With locale
-&lt;@formatted_number value=1234567 locale="de-DE" /&gt;"#.to_string(),
+&lt;@formatted_number value=1234567 locale="de-DE" /&gt;"#
+            .to_string(),
 
         "hover-card" => r#"@import components/hover_card.wtz as hover_card
 
@@ -4642,7 +5017,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;/div&gt;
         &lt;/div&gt;
     }
-/&gt;"#.to_string(),
+/&gt;"#
+            .to_string(),
 
         "input-otp" => r#"@import components/input_otp.wtz as input_otp
 
@@ -4653,7 +5029,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@input_otp name="code" length=6 separator_after=3 /&gt;
 
 // 4-digit PIN
-&lt;@input_otp name="pin" length=4 /&gt;"#.to_string(),
+&lt;@input_otp name="pin" length=4 /&gt;"#
+            .to_string(),
 
         "menubar" => r#"@import components/menubar.wtz as menubar
 
@@ -4674,27 +5051,28 @@ fn get_component_usage(component: &str) -> String {
             &lt;@menubar::item&gt;Redo&lt;/@&gt;
         &lt;/@&gt;
     &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
-        "minmax-editor" => r#"@import components/minmax_editor.wtz as minmax_editor
+        "minmax-input" => r#"@import components/minmax_input.wtz as minmax_input
 
-// Price range editor
-&lt;@minmax_editor
-    name="price"
-    label="Price Range"
-    min_value=0
-    max_value=100
-    prefix="$"
+// Alpine.js reactive input
+&lt;@minmax_input::input
+    label="Sets"
+    model_min="data.sets_min"
+    model_max="data.sets_max"
 /&gt;
 
-// With step
-&lt;@minmax_editor
-    name="quantity"
-    label="Quantity"
-    min_value=1
-    max_value=1000
-    step=10
-/&gt;"#.to_string(),
+// Form submission with suffix
+&lt;@minmax_input::form_input
+    label="Calories"
+    name_min="calorie_min"
+    name_max="calorie_max"
+    value_min=@Some(1800)
+    value_max=@Some(2200)
+    suffix="kcal"
+/&gt;"#
+            .to_string(),
 
         "navigation-menu" => r#"@import components/navigation_menu.wtz as nav
 
@@ -4713,7 +5091,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;/@&gt;
         &lt;/@&gt;
     &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "numeric-input" => r#"@import components/numeric_input.wtz as numeric_input
 
@@ -4721,7 +5100,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@numeric_input name="quantity" value=1 min=0 max=100 /&gt;
 
 // With step
-&lt;@numeric_input name="price" value=10 step=0.5 /&gt;"#.to_string(),
+&lt;@numeric_input name="price" value=10 step=0.5 /&gt;"#
+            .to_string(),
 
         "pagination" => r#"@import components/pagination.wtz as pagination
 
@@ -4739,7 +5119,8 @@ fn get_component_usage(component: &str) -> String {
     total=5
     prev_url=Some("/posts?page=1")
     next_url=Some("/posts?page=3")
-/&gt;"#.to_string(),
+/&gt;"#
+            .to_string(),
 
         "password-input" => r#"@import components/password_input.wtz as password_input
 
@@ -4750,7 +5131,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@password_input
     name="new_password"
     show_strength=true
-/&gt;"#.to_string(),
+/&gt;"#
+            .to_string(),
 
         "resizable" => r#"@import components/resizable.wtz as resizable
 
@@ -4762,7 +5144,8 @@ fn get_component_usage(component: &str) -> String {
     &lt;@resizable::panel default_size=50&gt;
         Panel 2
     &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "scroll-area" => r#"@import components/scroll_area.wtz as scroll_area
 
@@ -4775,7 +5158,8 @@ fn get_component_usage(component: &str) -> String {
 // Horizontal scroll
 &lt;@scroll_area orientation="horizontal"&gt;
     &lt;div class="flex gap-4"&gt;...&lt;/div&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "searchable-select" => r#"@import components/searchable_select.wtz as searchable_select
 
@@ -4783,7 +5167,8 @@ fn get_component_usage(component: &str) -> String {
     &lt;@searchable_select::item value="us"&gt;United States&lt;/@&gt;
     &lt;@searchable_select::item value="uk"&gt;United Kingdom&lt;/@&gt;
     &lt;@searchable_select::item value="ca"&gt;Canada&lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "sheet" => r#"@import components/sheet.wtz as sheet
 
@@ -4803,7 +5188,8 @@ fn get_component_usage(component: &str) -> String {
             &lt;@button&gt;Save&lt;/@&gt;
         &lt;/@&gt;
     &lt;/@&gt;
-&lt;/@&gt;"#.to_string(),
+&lt;/@&gt;"#
+            .to_string(),
 
         "time-picker" => r#"@import components/time_picker.wtz as time_picker
 
@@ -4814,7 +5200,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@time_picker name="time" format="24h" /&gt;
 
 // With default value
-&lt;@time_picker name="meeting" value="14:30" /&gt;"#.to_string(),
+&lt;@time_picker name="meeting" value="14:30" /&gt;"#
+            .to_string(),
 
         "toast" => r#"@import components/toast.wtz as toast
 
@@ -4830,7 +5217,8 @@ fn get_component_usage(component: &str) -> String {
 
 // Or use shorthand functions
 &lt;@toast::success title="Saved!" description=Some("Changes applied.") /&gt;
-&lt;@toast::error title="Error" description=Some("Something went wrong.") /&gt;"#.to_string(),
+&lt;@toast::error title="Error" description=Some("Something went wrong.") /&gt;"#
+            .to_string(),
 
         "toggle-group" => r#"@import components/toggle_group.wtz as toggle_group
 
@@ -4844,7 +5232,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@toggle_group::single name="align" items=&items selected=Some("left") /&gt;
 
 // Multiple selection
-&lt;@toggle_group::multiple name="format" items=&items selected=vec!["left"] /&gt;"#.to_string(),
+&lt;@toggle_group::multiple name="format" items=&items selected=vec!["left"] /&gt;"#
+            .to_string(),
 
         "validation-errors" => r#"@import components/validation_errors.wtz as validation_errors
 
@@ -4855,7 +5244,8 @@ fn get_component_usage(component: &str) -> String {
 &lt;@validation_errors
     errors=@errors
     title="Please fix the following:"
-/&gt;"#.to_string(),
+/&gt;"#
+            .to_string(),
 
         _ => {
             let comp_name = component.replace('-', "_");

@@ -32,6 +32,25 @@ WALTZING_BIN=/path/to/waltzing cargo test --locked
 Template compilation is a hard build gate. Missing manifest paths, unknown
 manifest dependencies, or Waltzing parse errors fail the build.
 
+## Browser Regression Tests
+
+Install the browser-test dependencies once:
+
+```bash
+npm install
+npx playwright install chromium
+```
+
+Then run the browser and accessibility regression suite:
+
+```bash
+npm run test:browser
+```
+
+The Playwright suite starts the Axum showcase, visits the `waltzing-ui` library
+and stable block routes in desktop and mobile Chromium, and runs axe checks
+against rendered block previews.
+
 ## Running the Showcase
 
 ```bash
