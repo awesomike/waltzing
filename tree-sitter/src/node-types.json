@@ -165,6 +165,10 @@
           "named": true
         },
         {
+          "type": "comment",
+          "named": true
+        },
+        {
           "type": "html_attribute",
           "named": true
         }
@@ -200,6 +204,14 @@
         },
         {
           "type": "expression",
+          "named": true
+        },
+        {
+          "type": "if_expression",
+          "named": true
+        },
+        {
+          "type": "match_expression",
           "named": true
         },
         {
@@ -239,7 +251,17 @@
   {
     "type": "binary_operator",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "lt_operator",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "boolean_attribute",
@@ -573,6 +595,11 @@
     }
   },
   {
+    "type": "escape_at",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "expression",
     "named": true,
     "fields": {},
@@ -751,6 +778,14 @@
         },
         {
           "type": "parameter_list",
+          "named": true
+        },
+        {
+          "type": "rust_block",
+          "named": true
+        },
+        {
+          "type": "rust_type",
           "named": true
         }
       ]
@@ -1013,6 +1048,10 @@
           "named": true
         },
         {
+          "type": "rust_type",
+          "named": true
+        },
+        {
           "type": "simple_pattern",
           "named": true
         }
@@ -1106,10 +1145,6 @@
         },
         {
           "type": "pattern",
-          "named": true
-        },
-        {
-          "type": "rust_block",
           "named": true
         }
       ]
@@ -1269,6 +1304,10 @@
         {
           "type": "rust_path",
           "named": true
+        },
+        {
+          "type": "string_literal",
+          "named": true
         }
       ]
     }
@@ -1392,6 +1431,10 @@
           "named": true
         },
         {
+          "type": "rust_block",
+          "named": true
+        },
+        {
           "type": "rust_expression",
           "named": true
         },
@@ -1425,6 +1468,29 @@
       "types": [
         {
           "type": "raw_block_1",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "raw_text_element",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "attribute_or_control",
+          "named": true
+        },
+        {
+          "type": "raw_text",
+          "named": true
+        },
+        {
+          "type": "tag_name",
           "named": true
         }
       ]
@@ -1981,6 +2047,10 @@
           "named": true
         },
         {
+          "type": "raw_text_element",
+          "named": true
+        },
+        {
           "type": "template_control_flow",
           "named": true
         },
@@ -2158,6 +2228,10 @@
     "named": false
   },
   {
+    "type": "..=",
+    "named": false
+  },
+  {
     "type": "/",
     "named": false
   },
@@ -2211,6 +2285,10 @@
   },
   {
     "type": "@",
+    "named": false
+  },
+  {
+    "type": "@@",
     "named": false
   },
   {
@@ -2284,10 +2362,6 @@
   {
     "type": "enum",
     "named": false
-  },
-  {
-    "type": "escape_at",
-    "named": true
   },
   {
     "type": "escape_sequence",
@@ -2394,6 +2468,10 @@
     "named": false
   },
   {
+    "type": "lt_operator",
+    "named": true
+  },
+  {
     "type": "match",
     "named": false
   },
@@ -2415,6 +2493,10 @@
   },
   {
     "type": "raw_string",
+    "named": true
+  },
+  {
+    "type": "raw_text",
     "named": true
   },
   {

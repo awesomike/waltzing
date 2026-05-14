@@ -57,15 +57,19 @@
 // committing and watch memory/time. A return to multi-GB RSS means the grammar
 // has reintroduced exponential table construction.
 //
-// REAL-WORLD COVERAGE: this grammar still produces ERROR nodes on real
-// templates — `npm run corpus-check` parses the sibling `cli/` +
-// `libraries/waltzing-ui/` `.wtz` trees and guards the error count against
-// regressions (current budget: 89 ERROR/MISSING nodes across 65 files, 44
-// fully clean — down from 887/5). Remaining gaps the budget covers: the bare
-// `<` HTML-vs-comparison ambiguity (`@if a < b`), the embedded `<style>` CSS
-// and `<script>` JS sub-grammars, and Rust block expressions whose interior
-// generics (`Vec<&str>`) hit the deliberate `<` exclusion. Closing these
-// needs careful, measure-driven work — run corpus-check after every change.
+// REAL-WORLD COVERAGE: `npm run corpus-check` parses the sibling `cli/` +
+// `libraries/waltzing-ui/` `.wtz` trees and guards the ERROR-node count
+// against regressions (current budget: 10 nodes across 65 files, 61 fully
+// clean — down from 887/5). The remaining 10 are concentrated and hard:
+//   • `@expr` function-tag attribute values that contain a quoted string
+//     (`<@c x=@Some("a b")/>`): the `unquoted_value` token shadows the
+//     expression branch. Excluding `@`/`"` from it regresses ~110 other
+//     nodes, so it is left alone.
+//   • Embedded JS that is a Rust string built inside a block expression
+//     (string concat with `'…'` / `{` inside `"…"`), and JS regex literals
+//     (`/^\d+$/`) — both want a real JS sub-grammar / scanner.
+// Closing these needs careful, measure-driven work — run corpus-check after
+// every change; many naive widenings regress the count badly.
 
 module.exports = grammar({
   name: "waltzing",
@@ -114,7 +118,10 @@ module.exports = grammar({
     import_statement: ($) =>
       seq(seq("@", "import"), choice($.string_literal, $.import_path), optional(seq("as", $.identifier))),
 
-    import_path: ($) => /\/[^\s]+/,
+    // Template import path. Covers global (`//x`), alias-relative (`/x`),
+    // and bare sibling (`templates/base.wtz`) forms — the leading `/` is
+    // optional, so a non-quoted path need not start with it.
+    import_path: ($) => /[^\s"][^\s"]*/,
 
     // Struct definition
     struct_definition: ($) =>
@@ -172,7 +179,17 @@ module.exports = grammar({
 
     // Function definition
     function_definition: ($) =>
-      seq(seq("@", "fn"), $.identifier, $.parameter_list, $.content_block),
+      seq(
+        seq("@", "fn"),
+        $.identifier,
+        $.parameter_list,
+        // Either a template body, or `: ReturnType = { rust }` for a function
+        // that computes and returns a plain Rust value (e.g. class strings).
+        choice(
+          $.content_block,
+          seq(":", $.rust_type, "=", $.rust_block),
+        ),
+      ),
 
     parameter_list: ($) =>
       seq(
@@ -198,6 +215,7 @@ module.exports = grammar({
     template_node: ($) =>
       choice(
         $.html_element,
+        $.raw_text_element,
         $.doctype,
         $.function_tag,
         $.template_control_flow,
@@ -234,11 +252,35 @@ module.exports = grammar({
         ),
       ),
 
-    // Allow either HTML attributes or control flow (@if/@for) in attribute position
+    // `<style>` / `<script>` hold raw text (CSS / JS), not template content —
+    // their bodies must not be parsed as `_template_nodes` or every `{`, `}`,
+    // `;` inside the stylesheet errors. `raw_text_tag_name` outranks the
+    // generic `tag_name` token so these tags always take this branch.
+    raw_text_element: ($) =>
+      seq(
+        "<",
+        alias($.raw_text_tag_name, $.tag_name),
+        repeat($.attribute_or_control),
+        ">",
+        optional($.raw_text),
+        "</",
+        alias($.raw_text_tag_name, $.tag_name),
+        ">",
+      ),
+
+    raw_text_tag_name: ($) => token(prec(2, choice("style", "script"))),
+
+    // Anything up to the closing `</`. A `<` is fine as long as it is not the
+    // start of that closing tag.
+    raw_text: ($) => token(prec(-1, /([^<]|<[^/])+/)),
+
+    // Allow HTML attributes, control flow (@if/@for), or comments in
+    // attribute position — `@* … *@` is common between attributes.
     attribute_or_control: ($) =>
       choice(
         $.attribute_control_flow,
         $.html_attribute,
+        $.comment,
       ),
 
     // Control flow in attribute context - produces attributes conditionally
@@ -299,6 +341,9 @@ module.exports = grammar({
       choice(
         /[a-zA-Z_:][a-zA-Z0-9_:.-]*/,
         seq("@", /[a-zA-Z_][a-zA-Z0-9_:.-]*/),
+        // `@@click` — an escaped `@` attribute name (Alpine `@click` shorthand);
+        // a lone `@` would otherwise enter expression mode.
+        seq("@@", /[a-zA-Z_][a-zA-Z0-9_:.-]*/),
       ),
 
     attribute_value: ($) =>
@@ -308,6 +353,13 @@ module.exports = grammar({
         $.embedded_language,
         $.raw_block,
         seq("@", "{", $.expression, "}"),
+        // `@"…"` — literal string value: lets a `@` appear inside (a bare
+        // `@` would otherwise enter expression mode), e.g. `src=@"…/@x/…"`.
+        seq("@", $.string_literal),
+        // A bare `@if` / `@match` expression as the value, e.g.
+        // `x-show=@if cond { "a" } else { "b" }`.
+        seq("@", $.if_expression),
+        seq("@", $.match_expression),
       ),
 
     // Template expressions
@@ -433,7 +485,17 @@ module.exports = grammar({
     // parsing `@let` as `simple_expression` (= `@` + identifier `let`) and
     // leaving the `= 42` orphaned.
     let_statement: ($) =>
-      prec(3, seq(seq("@", "let"), $.simple_pattern, "=", $.expression, optional(";"))),
+      prec(
+        3,
+        seq(
+          seq("@", "let"),
+          $.simple_pattern,
+          optional(seq(":", $.rust_type)),
+          "=",
+          $.expression,
+          optional(";"),
+        ),
+      ),
 
     if_statement: ($) =>
       seq(
@@ -463,6 +525,8 @@ module.exports = grammar({
         $.simple_pattern,
         "in",
         $.expression,
+        // Range iterator, e.g. `@for i in 0..n` / `@for p in start..=end`.
+        optional(seq(choice("..", "..="), $.expression)),
         $.content_block,
       ),
 
@@ -534,7 +598,10 @@ module.exports = grammar({
     function_attribute_value: ($) =>
       choice($.string_literal, seq("@", $.expression_path), $.render_closure, $.unquoted_value),
 
-    unquoted_value: ($) => /[^\s>=\/]+/,
+    // An unquoted attribute value excludes `"` so a quoted value always
+    // lexes as `string_literal` — otherwise this token swallows the opening
+    // `"` and truncates `attr="a b c"` at the first space.
+    unquoted_value: ($) => /[^\s>=\/"]+/,
 
     // Patterns - full patterns used in match arms
     pattern: ($) =>
@@ -622,6 +689,7 @@ module.exports = grammar({
         $.path_expression,
         $.match_expression,
         $.if_expression,
+        $.rust_block,
         $.out_ref,
         $.target_ref,
         $.rust_path,
@@ -646,7 +714,9 @@ module.exports = grammar({
         $.pattern,
         optional(seq("if", $.expression)),
         "=>",
-        choice($.rust_block, $.expression),
+        // `expression` already reaches `rust_block` via `primary_expression`,
+        // so a braced arm body and a bare-expression arm body share one path.
+        $.expression,
         optional(","),
       ),
 
@@ -672,6 +742,11 @@ module.exports = grammar({
         $.rust_expression,
         $.literal,
         $.rust_block,
+        // Inside an opaque Rust block `<` is never an HTML tag opener — it's
+        // a comparison or a generic-args bracket (`Vec<&str>`). The bare
+        // `rust_expression` token excludes `<` for HTML safety, so admit it
+        // explicitly here.
+        "<",
         seq("(", repeat($._rust_token), ")"),
         seq("[", repeat($._rust_token), "]"),
         ",",
@@ -730,7 +805,13 @@ module.exports = grammar({
       choice(
         "==", "!=", ">=", "<=", ">", "&&", "||",
         "+", "-", "*", "/", "%",
+        // `<` only as a comparison when followed by whitespace — `<` directly
+        // before a name (`<div`) or `@` (`<@comp`) is always an HTML / function
+        // tag open, never a comparison, so this never shadows markup.
+        $.lt_operator,
       ),
+
+    lt_operator: ($) => token(seq("<", /[ \t]/)),
 
     // `expr as Type` cast, e.g. `value_min.map(|v| v as f64)`.
     cast_expression: ($) =>
@@ -744,7 +825,9 @@ module.exports = grammar({
       prec(
         2,
         seq(
-          $.rust_path,
+          // A string literal can also be the base of a method chain, e.g.
+          // `"…".to_string()` or `"open = false".replace(…)`.
+          choice($.rust_path, $.string_literal),
           repeat1(
             choice(
               seq(token.immediate("."), $.rust_path),
@@ -814,7 +897,9 @@ module.exports = grammar({
         /0b[01][01_]*(i8|i16|i32|i64|i128|isize|u8|u16|u32|u64|u128|usize)?/,
       ),
 
-    float_literal: ($) => /[0-9][0-9_]*\.[0-9_]*([eE][+-]?[0-9]+)?(f32|f64)?/,
+    // The fractional part requires at least one digit so a bare `0.` can't
+    // swallow the first dot of a `0..n` range literal.
+    float_literal: ($) => /[0-9][0-9_]*\.[0-9][0-9_]*([eE][+-]?[0-9]+)?(f32|f64)?/,
 
     boolean_literal: ($) => choice("true", "false"),
 

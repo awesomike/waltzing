@@ -16,10 +16,12 @@
 #    89  — after the expression-grammar overhaul: rust_path patterns,
 #          path/reference/unary/binary/cast/closure/match/if expressions,
 #          array/raw-string literals, doctype, @**/@*** comments, @out args
+#    10  — block expressions, <style>/<script> raw text, `<` (whitespace)
+#          comparison, for-loop ranges, @"" / @if attr values, fn rust bodies
 set -euo pipefail
 
 # Current accepted ceiling. Lower this whenever the grammar improves.
-ERROR_BUDGET=89
+ERROR_BUDGET=10
 
 cd "$(dirname "$0")/.."
 TS="npx tree-sitter"
