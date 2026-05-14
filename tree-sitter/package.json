@@ -24,7 +24,8 @@
   "scripts": {
     "build": "tree-sitter generate",
     "test": "tree-sitter test",
-    "parse": "tree-sitter parse"
+    "parse": "tree-sitter parse",
+    "corpus-check": "bash test/corpus-check.sh"
   },
   "tree-sitter": [
     {

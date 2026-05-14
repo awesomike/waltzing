@@ -53,6 +53,17 @@
 // If any of those constraints are relaxed, run `tree-sitter generate` before
 // committing and watch memory/time. A return to multi-GB RSS means the grammar
 // has reintroduced exponential table construction.
+//
+// REAL-WORLD COVERAGE: this grammar still produces ERROR nodes on real
+// templates — `npm run corpus-check` parses the sibling `cli/` +
+// `libraries/waltzing-ui/` `.wtz` trees and guards the error count against
+// regressions (current budget: 887 ERROR/MISSING nodes across 65 files, 5
+// fully clean). Known gaps the budget covers: `match`/`if` used as Rust
+// *expressions* (e.g. `@let cls = match v { … }`), method-call parens in a
+// bare `rust_expression` (`x.is_some()`), and a `path_pattern` vs `rust_path`
+// lexer-token collision. Closing these needs careful, measure-driven work
+// (run corpus-check after every change) — a naive `rust_expression` rework
+// regressed the count to 1324 even though it regenerated cleanly.
 
 module.exports = grammar({
   name: "waltzing",
