@@ -883,6 +883,31 @@
           ]
         },
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "let"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "pattern"
+                },
+                {
+                  "type": "STRING",
+                  "value": "="
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "SYMBOL",
           "name": "expression"
         },
@@ -1114,6 +1139,14 @@
         {
           "type": "SYMBOL",
           "name": "template_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "embedded_language"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "raw_block"
         },
         {
           "type": "SEQ",
@@ -2287,6 +2320,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "path_pattern"
+        },
+        {
+          "type": "SYMBOL",
           "name": "literal"
         },
         {
@@ -2321,8 +2358,62 @@
       "value": "_"
     },
     "identifier_pattern": {
-      "type": "SYMBOL",
-      "name": "identifier"
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "ref"
+                },
+                {
+                  "type": "STRING",
+                  "value": "mut"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "identifier"
+        }
+      ]
+    },
+    "path_pattern": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "PATTERN",
+            "value": "[a-zA-Z_][a-zA-Z0-9_]*"
+          },
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "::"
+                },
+                {
+                  "type": "PATTERN",
+                  "value": "[a-zA-Z_][a-zA-Z0-9_]*"
+                }
+              ]
+            }
+          }
+        ]
+      }
     },
     "struct_pattern": {
       "type": "SEQ",

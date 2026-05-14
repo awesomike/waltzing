@@ -109,6 +109,10 @@
         {
           "type": "expression",
           "named": true
+        },
+        {
+          "type": "pattern",
+          "named": true
         }
       ]
     }
@@ -176,7 +180,15 @@
       "required": true,
       "types": [
         {
+          "type": "embedded_language",
+          "named": true
+        },
+        {
           "type": "expression",
+          "named": true
+        },
+        {
+          "type": "raw_block",
           "named": true
         },
         {
@@ -1102,6 +1114,10 @@
         },
         {
           "type": "literal",
+          "named": true
+        },
+        {
+          "type": "path_pattern",
           "named": true
         },
         {
@@ -2053,8 +2069,16 @@
     "named": false
   },
   {
+    "type": "path_pattern",
+    "named": true
+  },
+  {
     "type": "raw_block_1",
     "named": true
+  },
+  {
+    "type": "ref",
+    "named": false
   },
   {
     "type": "render",

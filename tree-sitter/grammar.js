@@ -229,6 +229,7 @@ module.exports = grammar({
     attribute_if_statement: ($) =>
       seq(
         seq("@", "if"),
+        optional(seq("let", $.pattern, "=")),
         $.expression,
         "{",
         repeat($.attribute_or_control),
@@ -282,6 +283,8 @@ module.exports = grammar({
       choice(
         $.string_literal,
         $.template_expression,
+        $.embedded_language,
+        $.raw_block,
         seq("@", "{", $.expression, "}"),
       ),
 
@@ -517,6 +520,7 @@ module.exports = grammar({
         $.tuple_variant_pattern,
         $.tuple_pattern,
         $.struct_pattern,
+        $.path_pattern,
         $.literal,
         $.identifier_pattern,
       ),
@@ -532,7 +536,21 @@ module.exports = grammar({
 
     wildcard_pattern: ($) => "_",
 
-    identifier_pattern: ($) => $.identifier,
+    // Bare identifier binding, with optional `ref` / `mut` binding mode
+    // (e.g. `Some(ref h)`, `Some(mut x)`).
+    identifier_pattern: ($) =>
+      seq(optional(choice("ref", "mut")), $.identifier),
+
+    // Unit enum-variant / path pattern, e.g. `Variant::Default`, `Size::Sm`.
+    // Token requires at least one `::` so it never collides with a bare
+    // `identifier_pattern`.
+    path_pattern: ($) =>
+      token(
+        seq(
+          /[a-zA-Z_][a-zA-Z0-9_]*/,
+          repeat1(seq("::", /[a-zA-Z_][a-zA-Z0-9_]*/)),
+        ),
+      ),
 
     struct_pattern: ($) =>
       seq(
