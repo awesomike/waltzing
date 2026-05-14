@@ -1735,21 +1735,6 @@
     }
   },
   {
-    "type": "string_literal",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "escape_sequence",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "struct_definition",
     "named": true,
     "fields": {},
@@ -2172,10 +2157,6 @@
     "named": false
   },
   {
-    "type": "\"",
-    "named": false
-  },
-  {
     "type": "%",
     "named": false
   },
@@ -2237,6 +2218,10 @@
   },
   {
     "type": ":",
+    "named": false
+  },
+  {
+    "type": "::",
     "named": false
   },
   {
@@ -2518,6 +2503,10 @@
   {
     "type": "str",
     "named": false
+  },
+  {
+    "type": "string_literal",
+    "named": true
   },
   {
     "type": "struct",

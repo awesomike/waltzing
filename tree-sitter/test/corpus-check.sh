@@ -2,10 +2,9 @@
 # Real-world corpus regression guard for the Waltzing tree-sitter grammar.
 #
 # Parses every `.wtz` file in the sibling `cli/` and `libraries/waltzing-ui/`
-# trees and counts ERROR / MISSING nodes. The grammar is not yet error-free on
-# real templates; this guards against *regressions* — any grammar change that
-# pushes the total above ERROR_BUDGET fails the check. As the grammar improves,
-# lower ERROR_BUDGET to lock in the gains. The goal is 0.
+# trees and counts ERROR / MISSING nodes. The grammar parses the whole corpus
+# cleanly (budget 0); this guards against *regressions* — any grammar change
+# that introduces a single ERROR / MISSING node fails the check.
 #
 # Usage:  bash test/corpus-check.sh   (run from the tree-sitter/ directory)
 #         npm run corpus-check
@@ -18,10 +17,12 @@
 #          array/raw-string literals, doctype, @**/@*** comments, @out args
 #    10  — block expressions, <style>/<script> raw text, `<` (whitespace)
 #          comparison, for-loop ranges, @"" / @if attr values, fn rust bodies
+#     0  — :: in expression_path, tokenized string_literal, `"` excluded
+#          from rust_expression — entire corpus parses cleanly
 set -euo pipefail
 
-# Current accepted ceiling. Lower this whenever the grammar improves.
-ERROR_BUDGET=10
+# The grammar parses the whole corpus with zero errors — keep it that way.
+ERROR_BUDGET=0
 
 cd "$(dirname "$0")/.."
 TS="npx tree-sitter"

@@ -1798,6 +1798,19 @@
                 "members": [
                   {
                     "type": "STRING",
+                    "value": "::"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "identifier"
+                  }
+                ]
+              },
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
                     "value": "["
                   },
                   {
@@ -2534,6 +2547,18 @@
               "value": "@"
             },
             {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "&"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
               "type": "SYMBOL",
               "name": "expression_path"
             }
@@ -2551,7 +2576,7 @@
     },
     "unquoted_value": {
       "type": "PATTERN",
-      "value": "[^\\s>=\\/\"]+"
+      "value": "[^\\s>=\\/\"@][^\\s>=\\/\"]*"
     },
     "pattern": {
       "type": "CHOICE",
@@ -2936,7 +2961,7 @@
         "value": -1,
         "content": {
           "type": "PATTERN",
-          "value": "[^{}<@(\\[,;)\\]\\s][^{}<@(\\[,;)\\]]*"
+          "value": "[^{}<@(\"\\[,;)\\]\\s][^{}<@(\"\\[,;)\\]]*"
         }
       }
     },
@@ -3689,33 +3714,36 @@
       ]
     },
     "string_literal": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "\""
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "PATTERN",
-                "value": "[^\"\\\\]"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "escape_sequence"
-              }
-            ]
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "\""
+          },
+          {
+            "type": "REPEAT",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "PATTERN",
+                  "value": "[^\"\\\\]"
+                },
+                {
+                  "type": "PATTERN",
+                  "value": "\\\\[\\s\\S]"
+                }
+              ]
+            }
+          },
+          {
+            "type": "STRING",
+            "value": "\""
           }
-        },
-        {
-          "type": "STRING",
-          "value": "\""
-        }
-      ]
+        ]
+      }
     },
     "raw_string": {
       "type": "TOKEN",

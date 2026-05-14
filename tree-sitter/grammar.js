@@ -59,17 +59,17 @@
 //
 // REAL-WORLD COVERAGE: `npm run corpus-check` parses the sibling `cli/` +
 // `libraries/waltzing-ui/` `.wtz` trees and guards the ERROR-node count
-// against regressions (current budget: 10 nodes across 65 files, 61 fully
-// clean — down from 887/5). The remaining 10 are concentrated and hard:
-//   • `@expr` function-tag attribute values that contain a quoted string
-//     (`<@c x=@Some("a b")/>`): the `unquoted_value` token shadows the
-//     expression branch. Excluding `@`/`"` from it regresses ~110 other
-//     nodes, so it is left alone.
-//   • Embedded JS that is a Rust string built inside a block expression
-//     (string concat with `'…'` / `{` inside `"…"`), and JS regex literals
-//     (`/^\d+$/`) — both want a real JS sub-grammar / scanner.
-// Closing these needs careful, measure-driven work — run corpus-check after
-// every change; many naive widenings regress the count badly.
+// against regressions. It is currently at 0 — all 65 real templates parse
+// cleanly (down from 887 ERROR/MISSING nodes across 60 broken files). The
+// ERROR_BUDGET is locked at 0, so ANY regression fails the check.
+//
+// Two tokens are load-bearing for that clean state and easy to break:
+//   • `string_literal` is a single `token(…)`, not a char-by-char `seq`.
+//     This keeps interior `{ } ( ) ' ;` (common in embedded-JS strings)
+//     from being mistaken for structural tokens. Do not un-tokenize it.
+//   • `rust_expression` excludes `"` (as well as `{}<@()[],;`) so the
+//     opaque fallback can't swallow the opening quote of a following
+//     `string_literal`. Do not remove `"` from its exclusion set.
 
 module.exports = grammar({
   name: "waltzing",
@@ -461,6 +461,8 @@ module.exports = grammar({
         repeat(
           choice(
             seq(".", $.identifier),
+            // `::` path segment, e.g. `@Variant::Default`, `@module::func()`.
+            seq("::", $.identifier),
             seq("[", $.expression, "]"),
             seq("(", optional($.argument_list), ")"),
           ),
@@ -596,12 +598,17 @@ module.exports = grammar({
     boolean_attribute: ($) => $.identifier,
 
     function_attribute_value: ($) =>
-      choice($.string_literal, seq("@", $.expression_path), $.render_closure, $.unquoted_value),
+      choice(
+        $.string_literal,
+        seq("@", optional("&"), $.expression_path),
+        $.render_closure,
+        $.unquoted_value,
+      ),
 
     // An unquoted attribute value excludes `"` so a quoted value always
     // lexes as `string_literal` — otherwise this token swallows the opening
     // `"` and truncates `attr="a b c"` at the first space.
-    unquoted_value: ($) => /[^\s>=\/"]+/,
+    unquoted_value: ($) => /[^\s>=\/"@][^\s>=\/"]*/,
 
     // Patterns - full patterns used in match arms
     pattern: ($) =>
@@ -697,7 +704,9 @@ module.exports = grammar({
       ),
 
     rust_expression: ($) =>
-      token(prec(-1, /[^{}<@(\[,;)\]\s][^{}<@(\[,;)\]]*/)),
+      // `"` is excluded so this fallback token can't swallow the opening
+      // quote of a following `string_literal` (e.g. `… + o + ") …"`).
+      token(prec(-1, /[^{}<@("\[,;)\]\s][^{}<@("\[,;)\]]*/)),
 
     // `match` / `if` used as Rust *expressions* (e.g. `@let cls = match v { … }`
     // or `@cn([base, if cond { "a" } else { "b" }])`). Distinct from the
@@ -867,8 +876,12 @@ module.exports = grammar({
         $.boolean_literal,
       ),
 
+    // Tokenised (not a char-by-char `seq`): a `"…"` is lexed atomically, so
+    // interior `{ } ( ) ' ;` — common in embedded JS strings — can't be
+    // mistaken for `rust_block` / delimiter tokens, and whitespace inside is
+    // not consumed as `extras`.
     string_literal: ($) =>
-      seq('"', repeat(choice(/[^"\\]/, $.escape_sequence)), '"'),
+      token(seq('"', repeat(choice(/[^"\\]/, /\\[\s\S]/)), '"')),
 
     // Rust raw string: `r"…"`, `r#"…"#`, `r##"…"##`. Tokenised so embedded
     // `"` / `{` / `@` don't terminate it. One- and two-hash forms cover the
