@@ -63,6 +63,7 @@
     @let x_data = format(r#"{{
         open: false,
         flipTop: false,
+        maxHeight: 2000,
         pos: {{ x: 0, y: 0, width: 0 }},
         selected: '{}',
         selectedLabel: '',
@@ -99,15 +100,25 @@
         destroy() {{
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
+            if (this._ro) {{ this._ro.disconnect(); this._ro = null; }}
         }},
         updatePos() {{
             const trigger = this.$refs.trigger;
             if (!trigger) return;
             const rect = trigger.getBoundingClientRect();
-            const dropdownHeight = 240;
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const spaceAbove = rect.top;
-            this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+            const margin = 12;
+            const spaceBelow = window.innerHeight - rect.bottom - margin;
+            const spaceAbove = rect.top - margin;
+            // size to CONTENT first, cap (with scroll) only at the viewport edge,
+            // and flip above when there's more room. Re-fit on content changes.
+            const list = this.$refs.optlist;
+            if (!this._ro && list && window.ResizeObserver) {{ this._ro = new ResizeObserver(() => {{ if (this.open) this.updatePos(); }}); this._ro.observe(list); }}
+            const chrome = this.searchable ? 48 : 0;
+            const full = (list ? list.scrollHeight : 240) + chrome;
+            if (full <= spaceBelow) this.flipTop = false;
+            else if (full <= spaceAbove) this.flipTop = true;
+            else this.flipTop = spaceAbove > spaceBelow;
+            this.maxHeight = Math.max(120, (this.flipTop ? spaceAbove : spaceBelow) - chrome);
             this.pos.x = rect.left;
             this.pos.y = this.flipTop ? rect.top : rect.bottom;
             this.pos.width = rect.width;
@@ -236,7 +247,7 @@
                 @keydown.down.prevent="highlightNext()"
                 @keydown.up.prevent="highlightPrev()"
                 @keydown.enter.prevent="selectHighlighted()"
-                class="fixed z-[9999] max-h-60 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
+                class="fixed z-[9999] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
                 :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`"
                 role="listbox"
             >
@@ -257,7 +268,7 @@
                         />
                     </div>
                 }
-                <div class="max-h-52 overflow-auto p-1">
+                <div x-ref="optlist" class="overflow-auto p-1" :style="`max-height: ${maxHeight}px`">
                     @if options.is_empty() {
                         @content()
                     } else {
@@ -358,6 +369,7 @@
     @let x_data = format(r#"{{
         open: false,
         flipTop: false,
+        maxHeight: 2000,
         pos: {{ x: 0, y: 0, width: 0 }},
         selected: '{}',
         selectedLabel: '',
@@ -394,15 +406,25 @@
         destroy() {{
             window.removeEventListener('scroll', this._scrollHandler, true);
             window.removeEventListener('resize', this._scrollHandler);
+            if (this._ro) {{ this._ro.disconnect(); this._ro = null; }}
         }},
         updatePos() {{
             const trigger = this.$refs.trigger;
             if (!trigger) return;
             const rect = trigger.getBoundingClientRect();
-            const dropdownHeight = 240;
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const spaceAbove = rect.top;
-            this.flipTop = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+            const margin = 12;
+            const spaceBelow = window.innerHeight - rect.bottom - margin;
+            const spaceAbove = rect.top - margin;
+            // size to CONTENT first, cap (with scroll) only at the viewport edge,
+            // and flip above when there's more room. Re-fit on content changes.
+            const list = this.$refs.optlist;
+            if (!this._ro && list && window.ResizeObserver) {{ this._ro = new ResizeObserver(() => {{ if (this.open) this.updatePos(); }}); this._ro.observe(list); }}
+            const chrome = this.searchable ? 48 : 0;
+            const full = (list ? list.scrollHeight : 240) + chrome;
+            if (full <= spaceBelow) this.flipTop = false;
+            else if (full <= spaceAbove) this.flipTop = true;
+            else this.flipTop = spaceAbove > spaceBelow;
+            this.maxHeight = Math.max(120, (this.flipTop ? spaceAbove : spaceBelow) - chrome);
             this.pos.x = rect.left;
             this.pos.y = this.flipTop ? rect.top : rect.bottom;
             this.pos.width = rect.width;
@@ -529,7 +551,7 @@
                     @keydown.down.prevent="highlightNext()"
                     @keydown.up.prevent="highlightPrev()"
                     @keydown.enter.prevent="selectHighlighted()"
-                    class="fixed z-[9999] max-h-60 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
+                    class="fixed z-[9999] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
                     :style="`left: ${pos.x}px; width: ${pos.width}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 4) + 'px' : 'top: ' + (pos.y + 4) + 'px'}`"
                     role="listbox"
                 >
@@ -550,7 +572,7 @@
                             />
                         </div>
                     }
-                    <div class="max-h-52 overflow-auto p-1">
+                    <div x-ref="optlist" class="overflow-auto p-1" :style="`max-height: ${maxHeight}px`">
                         @if options.is_empty() {
                             @content()
                         } else {
