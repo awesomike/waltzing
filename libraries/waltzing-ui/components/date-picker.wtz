@@ -71,16 +71,37 @@
             clearable: true,
             pos: { x: 0, y: 0, width: 0 },
             flipTop: false,
+            maxHeight: 2000,
 
+            // Size the popover to its content FIRST and only cap (with scroll) at
+            // the viewport edge — never a fixed max. Re-runs on open, on window
+            // scroll/resize, and on the panel's own content-height changes (the
+            // ResizeObserver below), so it stays fitted/repositioned live.
             updatePos() {
                 const trigger = this.$refs.trigger;
                 if (!trigger) return;
                 const rect = trigger.getBoundingClientRect();
-                const calendarHeight = 380;
-                const spaceBelow = window.innerHeight - rect.bottom;
-                const spaceAbove = rect.top;
-                this.flipTop = spaceBelow < calendarHeight && spaceAbove > spaceBelow;
-                this.pos.x = rect.left;
+                const gap = 8, margin = 8, panelW = 320; // w-80
+                const spaceBelow = window.innerHeight - rect.bottom - gap - margin;
+                const spaceAbove = rect.top - gap - margin;
+                const panel = this.$refs.calendar || this.$refs.panel;
+                // re-fit when the panel's own content height changes — attach once
+                if (!this._ro && panel && window.ResizeObserver) {
+                    this._ro = new ResizeObserver(() => { if (this.open) this.updatePos(); });
+                    this._ro.observe(panel);
+                }
+                const contentH = panel ? panel.scrollHeight : 0;
+                // open below if it fits; else above if it fits; else the roomier side
+                if (contentH && spaceBelow >= contentH) {
+                    this.flipTop = false;
+                } else if (contentH && spaceAbove >= contentH) {
+                    this.flipTop = true;
+                } else {
+                    this.flipTop = spaceAbove > spaceBelow;
+                }
+                const avail = this.flipTop ? spaceAbove : spaceBelow;
+                this.maxHeight = Math.max(200, avail); // cap ONLY at the viewport room
+                this.pos.x = Math.max(margin, Math.min(rect.left, window.innerWidth - panelW - margin));
                 this.pos.y = this.flipTop ? rect.top : rect.bottom;
                 this.pos.width = rect.width;
             },
@@ -122,6 +143,7 @@
             destroy() {
                 window.removeEventListener('scroll', this._scrollHandler, true);
                 window.removeEventListener('resize', this._scrollHandler);
+                if (this._ro) { this._ro.disconnect(); this._ro = null; }
             },
 
             formatDisplayValue(date) {
@@ -420,8 +442,8 @@
                 x-transition:leave-end="opacity-0 scale-95"
                 @@click.outside="open = false"
                 @@keydown.escape.window="open = false"
-                class="fixed z-[9999] w-80 rounded-md border bg-popover text-popover-foreground shadow-md"
-                :style="`left: ${pos.x}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}`"
+                class="fixed z-[9999] w-80 overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md"
+                :style="`left: ${pos.x}px; max-height: ${maxHeight}px; ${flipTop ? 'bottom: ' + (window.innerHeight - pos.y + 8) + 'px' : 'top: ' + (pos.y + 8) + 'px'}`"
                 role="dialog"
                 aria-modal="true"
                 aria-label="Choose date"
